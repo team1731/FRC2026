@@ -1,14 +1,21 @@
 package frc.lib.frc1731.subsystem;
 
-import edu.wpi.first.wpilibj2.command.Command;
+import static edu.wpi.first.units.Units.*;
+
+import java.util.function.Consumer;
+
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj2.command.*;
+
 import frc.lib.frc1731.log.SmartLogger;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public abstract class BaseSubsystem extends SubsystemBase {
     private boolean enabled = false;
-    protected SmartLogger logger;
+    protected SmartLogger logger = null;
+
+    private SysIdRoutine sysIdRoutine = null;
 
     protected BaseSubsystem(boolean enabled) {
         this.enabled = enabled;
@@ -64,6 +71,62 @@ public abstract class BaseSubsystem extends SubsystemBase {
             return Commands.none();
         }
         return super.getDefaultCommand();
+    }
+
+    /**
+     * Sets the SysId routine for this subsystem
+     * @param rampRate The voltage ramp rate in volts per second (Default: 1 V/s)
+     * @param stepRate The voltage step rate in volts (Default: 7 V)
+     * @param timeout The timeout in seconds (Default: 10 s)
+     * @param outputConsumer The consumer that applies voltage to the motor being characterized
+     */
+    protected void initSysId(double rampRate, double stepRate, double timeout, Consumer<Voltage> outputConsumer) {
+        this.sysIdRoutine = new SysIdRoutine(
+            new SysIdRoutine.Config(Volts.of(rampRate).per(Second), Volts.of(stepRate), Seconds.of(timeout)), 
+            new SysIdRoutine.Mechanism(
+                outputConsumer,
+                log -> {}, this, getName()
+            )
+        );
+    }
+
+    /**
+     * Sets the SysId routine for this subsystem with default voltage and ramp parameters
+     * @param outputConsumer The consumer that applies voltage to the motor being characterized
+     */
+    protected void initSysId(Consumer<Voltage> outputConsumer) {
+        this.initSysId(1, 7, 10, outputConsumer);
+    }
+
+    /**
+     * Returns the applied SysId routine for this subsystem
+     */
+    public SysIdRoutine getSysIdRoutine() {
+        return sysIdRoutine;
+    }
+
+    /**
+     * Runs the dynamic motions for the sysid characterization tool
+     * @param forward Whether to run the routine in the forward or reverse direction
+     */
+    public Command dynamicSysIdCommand(boolean forward) {
+        return Commands.either(
+            sysIdRoutine.dynamic(forward ? SysIdRoutine.Direction.kForward : SysIdRoutine.Direction.kReverse),
+            Commands.none(),
+            () -> isEnabled()
+        ).withName("DynamicSysId");
+    }
+    
+    /**
+     * Runs the quasistatic motions for the sysid characterization tool
+     * @param forward Whether to run the routine in the forward or reverse direction
+     */
+    public Command quasistaticSysIdCommand(boolean forward) {
+        return Commands.either(
+            sysIdRoutine.quasistatic(forward ? SysIdRoutine.Direction.kForward : SysIdRoutine.Direction.kReverse),
+            Commands.none(),
+            () -> isEnabled()
+        ).withName("QuasistaticSysId");
     }
 
     @Override

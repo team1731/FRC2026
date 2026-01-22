@@ -68,6 +68,8 @@ public class SwerveSubsystem extends BaseSubsystem {
 
         configureAutoBuilder();
         drivetrain.registerTelemetry(telemetry::telemeterize);
+
+        
     }
 
     public void resetPose(Pose2d pose) {

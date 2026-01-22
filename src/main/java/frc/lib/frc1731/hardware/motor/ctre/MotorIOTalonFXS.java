@@ -1,4 +1,4 @@
-package frc.lib.frc1731.hardware;
+package frc.lib.frc1731.hardware.motor.ctre;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,7 +8,7 @@ import com.ctre.phoenix6.configs.*;
 import com.ctre.phoenix6.controls.*;
 import com.ctre.phoenix6.hardware.*;
 import com.ctre.phoenix6.signals.*;
-import com.ctre.phoenix6.sim.TalonFXSimState;
+import com.ctre.phoenix6.sim.TalonFXSSimState;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
@@ -18,11 +18,11 @@ import frc.lib.frc1731.PIDGains;
 import frc.lib.frc1731.hardware.motor.MotorIO;
 import frc.lib.frc1731.hardware.motor.PortConfig;
 
-public class MotorIOTalonFX extends MotorIO {
-    protected TalonFX motor;
-    private TalonFXConfiguration cfg = new TalonFXConfiguration();
-    private TalonFXConfigurator configurator;
-    private TalonFXSimState simState;
+public class MotorIOTalonFXS extends MotorIO {
+    protected TalonFXS motor;
+    private TalonFXSConfiguration cfg = new TalonFXSConfiguration();
+    private TalonFXSConfigurator configurator;
+    private TalonFXSSimState simState;
 
     private final DCMotorSim motorSim;
 
@@ -30,9 +30,9 @@ public class MotorIOTalonFX extends MotorIO {
 
     private List<PIDGains> pidGains = new ArrayList<>();
 
-    public MotorIOTalonFX(PortConfig config) {
+    public MotorIOTalonFXS(PortConfig config) {
         super(config);
-        this.motor = new TalonFX(config.kPort, config.kBus);
+        this.motor = new TalonFXS(config.kPort, config.kBus);
         this.configurator = motor.getConfigurator();
 
         // Set up configuration
@@ -58,19 +58,16 @@ public class MotorIOTalonFX extends MotorIO {
         applyConfigs();
     }
 
-    public TalonFX getMotor() {
+    public TalonFXS getMotor() {
         return this.motor;
     }
 
     @Override
-    public void follow(MotorIO master, boolean invertedFromMaster) {
-        this.motor.setControl(new Follower(((MotorIOTalonFX)master).motor.getDeviceID(), invertedFromMaster ? MotorAlignmentValue.Opposed : MotorAlignmentValue.Aligned));
+    public void follow(MotorIO master) {
+        this.motor.setControl(new Follower(((MotorIOTalonFX)master).motor.getDeviceID(), 
+        isInverted() != ((MotorIOTalonFX)master).isInverted() ? MotorAlignmentValue.Opposed : MotorAlignmentValue.Aligned));
     }
 
-    @Override
-    public void withFollower(MotorIO follower, boolean invertedFromMaster) {
-        follower.follow(this, invertedFromMaster);
-    }
 
     @Override
     public void withMotionProfile(double velocity, double acceleration) {
@@ -155,7 +152,6 @@ public class MotorIOTalonFX extends MotorIO {
         applyConfigs();
     }
 
-    @Override
     public void setNeutralMode(NeutralModeValue mode) {
         this.cfg.MotorOutput.NeutralMode = mode;
     }
@@ -219,7 +215,7 @@ public class MotorIOTalonFX extends MotorIO {
 
     @Override
     public boolean isInverted() {
-        return true;
+        return this.cfg.MotorOutput.Inverted == InvertedValue.CounterClockwise_Positive;
     }
 
     @Override
@@ -236,15 +232,11 @@ public class MotorIOTalonFX extends MotorIO {
         applyConfigs();
     }
 
-    public void withFeedbackConfigs(FeedbackConfigs configs) {
-        this.configurator.apply(configs);
-    }
-
     public void withMotionMagicConfigs(MotionMagicConfigs configs) {
         this.configurator.apply(configs);
     }
 
-    public TalonFXConfiguration getConfiguration() {
+    public TalonFXSConfiguration getConfiguration() {
         return this.cfg;
     }
 
