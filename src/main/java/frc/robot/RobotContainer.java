@@ -33,6 +33,7 @@ public class RobotContainer {
         // Drivetrain will execute this command periodically 
         // if no other command is active on the drivetrain
         swerve.setDefaultCommand(swerve.drive(xboxController, () -> true));
+        led.setDefaultCommand(led.setFireToTheRain());
     }
 
     private void configureNamedCommands() {
