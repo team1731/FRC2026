@@ -8,12 +8,14 @@ import frc.lib.frc1731.hardware.MotorIOTalonFX;
 import frc.lib.frc1731.hardware.motor.MotorIOTest;
 import frc.lib.frc1731.hardware.motor.PortConfig;
 import frc.robot.subsystems.drive.SwerveSubsystem;
+import frc.robot.subsystems.flywheel.FlywheelSubsystem;
 import frc.robot.subsystems.leds.LEDSubsystem;
 
 public class RobotContainer {
     /* Subsystems */
     protected static SwerveSubsystem swerve;
     protected static LEDSubsystem led;
+    protected static FlywheelSubsystem flywheel;
 
     /* Driver Buttons */
     private final CommandXboxController xboxController = new CommandXboxController(0);
@@ -36,6 +38,7 @@ public class RobotContainer {
     private void configureSubsystems() {
         swerve = new SwerveSubsystem(true);
         led = new LEDSubsystem(true);
+        flywheel = new FlywheelSubsystem(true);
 
         protoHood = new MotorIOTest(new PortConfig(30), MotorIOTalonFX.class)
             .setSoftLimits(30d, 0d);
@@ -49,7 +52,9 @@ public class RobotContainer {
 
         // Drivetrain will execute this command periodically 
         // if no other command is active on the drivetrain
-        swerve.setDefaultCommand(swerve.drive(xboxController, () -> true));
+        swerve.setDefaultCommand(swerve.driveCommand(xboxController, () -> true));
+        flywheel.setDefaultCommand(flywheel.stopCommand());
+
 
         protoHood.setDefaultCommand(protoHood.run(() -> {protoHood.setPercentOutput(xboxController.getLeftY() / 4d);}));
         protoTurret.setDefaultCommand(protoTurret.run(() -> {protoHood.setPercentOutput(xboxController.getRightX() / 4d);}));
@@ -71,7 +76,8 @@ public class RobotContainer {
             swerve.resetPose(resetPosition);
         }));
 
-        dShoot.whileTrue(protoFlywheel.setTuneablePercentOutput(0.8)).onFalse(protoFlywheel.setPercentOutput(0d));
+        // dShoot.whileTrue(protoFlywheel.setTuneablePercentOutput(0.8)).onFalse(protoFlywheel.setPercentOutput(0d));
+        dShoot.whileTrue(flywheel.setVelocityCommand(50));
     }
 
     /**

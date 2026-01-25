@@ -164,7 +164,7 @@ public class SwerveSubsystem extends BaseSubsystem {
         Robot.kFieldLayout.setSimulatedRobotPose(getCurrentPose());
     }
 
-    public Command drive(CommandXboxController m_xboxController, BooleanSupplier isFieldCentric) {
+    public Command driveCommand(CommandXboxController m_xboxController, BooleanSupplier isFieldCentric) {
         return run(() -> {
             Translation2d RotationCenter =  new Translation2d();
 

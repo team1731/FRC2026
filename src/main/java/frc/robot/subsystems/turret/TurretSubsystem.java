@@ -3,6 +3,7 @@ package frc.robot.subsystems.turret;
 import frc.lib.frc1731.Utils;
 import frc.lib.frc1731.hardware.MotorIOTalonFX;
 import frc.lib.frc1731.subsystem.BaseSubsystem;
+import frc.lib.frc1731.subsystem.converter.AngularSubsystemConverter;
 
 import static frc.robot.subsystems.turret.TurretConstants.*;
 
@@ -16,6 +17,7 @@ public class TurretSubsystem extends BaseSubsystem {
         super(enabled);
         if (!enabled) return;
 
+        this.withConverter(new AngularSubsystemConverter(kGearRatio));
         motor = new MotorIOTalonFX(kLeftPortConfigs);
         motor.withPIDGains(kPositionGains);
     }

@@ -6,6 +6,7 @@ import frc.lib.frc1731.PIDGains;
 import frc.lib.frc1731.hardware.MotorIOTalonFX;
 import frc.lib.frc1731.hardware.motor.PortConfig;
 import frc.lib.frc1731.subsystem.BaseSubsystem;
+import frc.lib.frc1731.subsystem.converter.AngularSubsystemConverter;
 import frc.robot.Robot;
 
 import static frc.robot.subsystems.hood.HoodConstants.*;
@@ -27,6 +28,8 @@ public class HoodSubsystem extends BaseSubsystem {
         Robot.IS_ENABLED.onTrue(new InstantCommand(() -> {
             motor.withPIDGains(positionGains);
         }));
+
+        this.withConverter(new AngularSubsystemConverter(kGearRatio));
     }
 
     @Override
@@ -44,7 +47,7 @@ public class HoodSubsystem extends BaseSubsystem {
         });
     }
 
-    public Command setHoodDegreesCommand(double degrees) {
+    public Command setDegreesCommand(double degrees) {
         return run(() -> {
             double rotations = (degrees - kStartDegrees) / 360d / kGearRatio;
             targetPosition = rotations;
