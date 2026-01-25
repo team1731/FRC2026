@@ -1,15 +1,12 @@
 package frc.robot;
 
 import edu.wpi.first.math.geometry.*;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.*;
-import frc.lib.frc1731.hardware.MotorIOTalonFX;
-import frc.lib.frc1731.hardware.motor.MotorIOTest;
-import frc.lib.frc1731.hardware.motor.PortConfig;
 import frc.robot.subsystems.drive.SwerveSubsystem;
 import frc.robot.subsystems.flywheel.FlywheelSubsystem;
 import frc.robot.subsystems.leds.LEDSubsystem;
+import frc.robot.subsystems.superstructure.Superstructure;
 
 public class RobotContainer {
     /* Subsystems */
@@ -17,12 +14,14 @@ public class RobotContainer {
     protected static LEDSubsystem led;
     protected static FlywheelSubsystem flywheel;
 
+    protected static Superstructure superstructure;
+
     /* Driver Buttons */
     private final CommandXboxController xboxController = new CommandXboxController(0);
     private final Trigger dResetSwerve = xboxController.povRight();
     private final Trigger dShoot = xboxController.rightTrigger();
 
-    private MotorIOTest protoHood, protoFlywheel, protoTurret;
+    // private MotorIOTest protoHood, protoFlywheel, protoTurret;
 
     /* Operator Buttons */
 
@@ -40,15 +39,17 @@ public class RobotContainer {
         led = new LEDSubsystem(true);
         flywheel = new FlywheelSubsystem(true);
 
-        protoHood = new MotorIOTest(new PortConfig(30), MotorIOTalonFX.class)
-            .setSoftLimits(30d, 0d);
+        superstructure = new Superstructure(swerve, flywheel, null, null);
 
-        protoFlywheel = new MotorIOTest(new PortConfig(31), MotorIOTalonFX.class);
+        // protoHood = new MotorIOTest(new PortConfig(30), MotorIOTalonFX.class)
+        //     .setSoftLimits(30d, 0d);
 
-        protoTurret = new MotorIOTest(new PortConfig(32), MotorIOTalonFX.class)
-            .setSoftLimits(10d, -10d);
+        // protoFlywheel = new MotorIOTest(new PortConfig(31), MotorIOTalonFX.class);
 
-        SmartDashboard.putNumber("Hood Angle Degrees", protoHood.getRotations() * 15d / 2432d * 360d + 20d);
+        // protoTurret = new MotorIOTest(new PortConfig(32), MotorIOTalonFX.class)
+        //     .setSoftLimits(10d, -10d);
+
+        // SmartDashboard.putNumber("Hood Angle Degrees", protoHood.getRotations() * 15d / 2432d * 360d + 20d);
 
         // Drivetrain will execute this command periodically 
         // if no other command is active on the drivetrain
@@ -56,8 +57,8 @@ public class RobotContainer {
         flywheel.setDefaultCommand(flywheel.stopCommand());
 
 
-        protoHood.setDefaultCommand(protoHood.run(() -> {protoHood.setPercentOutput(xboxController.getLeftY() / 4d);}));
-        protoTurret.setDefaultCommand(protoTurret.run(() -> {protoHood.setPercentOutput(xboxController.getRightX() / 4d);}));
+        // protoHood.setDefaultCommand(protoHood.run(() -> {protoHood.setPercentOutput(xboxController.getLeftY() / 4d);}));
+        // protoTurret.setDefaultCommand(protoTurret.run(() -> {protoHood.setPercentOutput(xboxController.getRightX() / 4d);}));
     }
 
     private void configureNamedCommands() {
@@ -78,6 +79,13 @@ public class RobotContainer {
 
         // dShoot.whileTrue(protoFlywheel.setTuneablePercentOutput(0.8)).onFalse(protoFlywheel.setPercentOutput(0d));
         dShoot.whileTrue(flywheel.setVelocityCommand(50));
+        xboxController.rightBumper().whileTrue(flywheel.tuneableShotCommand());
+
+        xboxController.y().whileTrue(flywheel.sysIdDynamicCommand(true));
+        xboxController.a().whileTrue(flywheel.sysIdDynamicCommand(false));
+
+        xboxController.x().whileTrue(flywheel.sysIdQuasistaticCommand(true));
+        xboxController.b().whileTrue(flywheel.sysIdQuasistaticCommand(false));
     }
 
     /**

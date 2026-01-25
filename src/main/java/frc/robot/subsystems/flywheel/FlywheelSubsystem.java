@@ -1,11 +1,13 @@
 package frc.robot.subsystems.flywheel;
 
-import edu.wpi.first.math.controller.*;
+import edu.wpi.first.units.measure.*;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
-import frc.lib.frc1678.sim.RollerSim;
+import edu.wpi.first.wpilibj2.command.*;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.lib.frc1731.Utils;
 import frc.lib.frc1731.hardware.MotorIOTalonFX;
+import frc.lib.frc1731.sim.SimpleVelocitySim;
 import frc.lib.frc1731.subsystem.BaseSubsystem;
 import frc.robot.Robot;
 
@@ -14,59 +16,101 @@ import static frc.robot.subsystems.flywheel.FlywheelConstants.*;
 
 public class FlywheelSubsystem extends BaseSubsystem {
     private MotorIOTalonFX motor;
-    private RollerSim sim = new RollerSim(kRollerSimConstants);
+    private SimpleVelocitySim sim = SimpleVelocitySim.buildKrakenX60Sim(1, kGearRatio, kFlywheelRadius, kFlywheelMass, kVelocityGains);
+    private double setpointVelocityRPS = 0.0;
 
-    private double setpointVelocity = 0.0;
-
-    private PIDController simPIDCtrl = kVelocityGains.toPIDController();
-    private SimpleMotorFeedforward simFF = new SimpleMotorFeedforward(kVelocityGains.kS, kVelocityGains.kV);
+    private SysIdRoutine routine = new SysIdRoutine(
+        new SysIdRoutine.Config(
+            null, 
+            Volts.of(4d), 
+            null
+        ), 
+        new SysIdRoutine.Mechanism(
+            volts -> setVoltage(volts), 
+            log -> {
+                // Record a frame for the flywheel motor.
+                log.motor("flywheel")
+                .voltage(Robot.isSimulation() ? sim.getAppliedVoltage() : Volts.of(motor.getAppliedVoltage()))
+                .angularPosition(Robot.isSimulation() ? sim.getPosition() : Rotations.of(motor.getRotations()))
+                .angularVelocity(Robot.isSimulation() ? sim.getVelocity() : RotationsPerSecond.of(motor.getVelocityRPS()));
+            },
+            this
+        )
+    );
 
     public FlywheelSubsystem(boolean enabled) {
         super(enabled);
         if (!enabled) return;
         motor = new MotorIOTalonFX(kLeftFlywheelConfig);
         motor.withPIDGains(kVelocityGains);
-        SmartDashboard.putNumber("FlywheelSetpoint", setpointVelocity);
+        SmartDashboard.putNumber("FlywheelSetpoint", setpointVelocityRPS);
     }
 
     @Override
     public void periodicTelemetry() {
-        logger.log("Current Velocity", motor.getVelocityRPS());
-        logger.log("Target Velocity", setpointVelocity);
-        logger.log("Sim Velocity", sim.getVelocity().in(RotationsPerSecond));
+        logger.log("Current Velocity RPS", getVelocityRPS());
+        logger.log("Target Velocity RPS", getTargetVelocityRPS());
+        logger.log("At Target Velocity", atTargetVelocity());
+        sim.periodic();
+    }
 
-        if (sim != null) sim.simulate();
+    public double getVelocityRPS() {
+        if (Robot.isSimulation()) return sim.getVelocity().in(RotationsPerSecond);
+        return motor.getVelocityRPS();
+    }
+
+    public double getTargetVelocityRPS() {
+        return setpointVelocityRPS;
     }
 
     public boolean atTargetVelocity() {
-        return Utils.isWithin(motor.getVelocityRPS(), setpointVelocity, kEpsilon);
+        return Utils.isWithin(getVelocityRPS(), getTargetVelocityRPS(), kEpsilon);
+    }
+
+    private void setVoltage(Voltage volts) {
+        motor.setVoltage(volts.in(Volts));
+        if (Robot.isSimulation()) sim.setVoltage(volts); 
     }
 
     public Command setVelocityCommand(double velocityRPS) {
         return run(() -> {
-            if (Robot.isReal()) {
-                setpointVelocity = velocityRPS;
-                motor.setVelocityRPS(velocityRPS);
-            } else if (sim != null){
-                double setpointVoltage = simPIDCtrl.calculate(sim.getVelocity().in(RotationsPerSecond), velocityRPS) + simFF.calculate(velocityRPS);
-                sim.setVoltage(Volts.of(setpointVoltage));
-                logger.log("SetpointVoltage", setpointVoltage);
-            }
+            this.setpointVelocityRPS = velocityRPS;
+            motor.setVelocityRPS(velocityRPS);
+            sim.setVelocity(RotationsPerSecond.of(velocityRPS));
         }).withName("SetVelocity");
     }
 
-    public Command shootCommand() {
+    public Command tuneableShotCommand() {
         return run(() -> {
-            setpointVelocity = SmartDashboard.getNumber("SetPointVelocity", setpointVelocity);
-            motor.setPercentOutput(setpointVelocity);
+            this.setpointVelocityRPS = SmartDashboard.getNumber("FlywheelSetpoint", setpointVelocityRPS);
+            motor.setVelocityRPS(setpointVelocityRPS);
+            sim.setVelocity(RotationsPerSecond.of(setpointVelocityRPS));
         }).withName("Shoot");
     }
 
+    public Command stallCommand() {
+        return this.setVelocityCommand(kStallVelocityRPS)
+        .withName("Stall");
+    }
+
     public Command stopCommand() {
-        return runOnce(() -> {
-            setpointVelocity = 0.0;
-            motor.setPercentOutput(0.0);
-            sim.setVoltage(Volts.zero());
-        }).withName("Stop");
+        return setVelocityCommand(0d)
+        .withName("Stop");
+    }
+
+    public Command sysIdDynamicCommand(boolean forward) {
+        return Commands.either(
+            routine.dynamic(Direction.kForward), 
+            routine.dynamic(Direction.kReverse), 
+            () -> forward
+        );
+    }
+
+    public Command sysIdQuasistaticCommand(boolean forward) {
+        return Commands.either(
+            routine.quasistatic(Direction.kForward), 
+            routine.quasistatic(Direction.kReverse), 
+            () -> forward
+        );
     }
 }

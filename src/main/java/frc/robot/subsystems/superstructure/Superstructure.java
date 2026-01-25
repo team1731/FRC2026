@@ -2,26 +2,39 @@ package frc.robot.subsystems.superstructure;
 
 import java.util.function.Supplier;
 
-import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
+import frc.lib.frc1731.field.Field;
 import frc.robot.commands.WaitForCommand;
+import frc.robot.subsystems.drive.SwerveSubsystem;
 import frc.robot.subsystems.flywheel.FlywheelSubsystem;
 import frc.robot.subsystems.hood.HoodSubsystem;
 import frc.robot.subsystems.turret.TurretSubsystem;
 
 public class Superstructure extends SubsystemBase {
+    private SwerveSubsystem swerve;
     private FlywheelSubsystem flywheel;
     private HoodSubsystem hood;
     private TurretSubsystem turret;
 
     public static ShotProfile hubShotProfile = new ShotProfile(0, 0, 0, false);
 
-    private static Pose2d shotTargetPose = new Pose2d();
-
-    public Superstructure(FlywheelSubsystem flywheel, HoodSubsystem hood, TurretSubsystem turret) {
+    public Superstructure(SwerveSubsystem swerve, FlywheelSubsystem flywheel, HoodSubsystem hood, TurretSubsystem turret) {
+        this.swerve = swerve;
         this.flywheel = flywheel;
         this.hood = hood;
         this.turret = turret;
+    }
+
+    /**
+     * TODO - Incorporate swerve yaw as well to accurately shoot into the goal from anywhere
+     */
+    private double getTurretShotAngle() {
+        Translation2d robotPose = swerve.getCurrentPose().getTranslation();
+        Translation2d hubPose = Field.HUB.getPosition().toTranslation2d();
+        double aimRadians = Math.atan((hubPose.getX() - robotPose.getX()) / (hubPose.getY() - robotPose.getY()));
+        return Math.toDegrees(aimRadians);
     }
 
     public Command passFuelCommand() {
@@ -58,7 +71,6 @@ public class Superstructure extends SubsystemBase {
 
     @Override
     public void periodic() {
-
+        SmartDashboard.putNumber("Turret Angle", getTurretShotAngle());
     }
-
 }

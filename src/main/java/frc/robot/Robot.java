@@ -4,6 +4,7 @@ import java.util.*;
 
 import org.littletonrobotics.junction.LoggedRobot;
 
+import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 
@@ -65,6 +66,7 @@ public class Robot extends LoggedRobot {
 	public void robotInit() {
 		DataLogManager.start();
 		MessageLog.start();
+		// SignalLogger.setPath("C:\\Users\\Abbas\\Documents\\Robotics\\ctre-logs");
 		AprilTagSubsystem.setupPortForwarding();
 		LiveWindow.disableAllTelemetry();
 
@@ -76,6 +78,7 @@ public class Robot extends LoggedRobot {
 
 		FollowPathCommand.warmupCommand().schedule();
 		AKLogger.start();
+		// SignalLogger.start();
 
 		kFieldLayout.logToShuffleboard(isSimulation());
 	}
