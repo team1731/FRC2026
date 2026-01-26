@@ -3,9 +3,10 @@ package frc.robot.subsystems.leds;
 import com.ctre.phoenix.led.CANdle;
 import com.ctre.phoenix.led.CANdle.LEDStripType;
 import com.ctre.phoenix.led.CANdle.VBatOutputMode;
-import com.ctre.phoenix.led.CANdleConfiguration;
 
-import frc.lib.frc1731.subsystem.BaseSubsystem;
+import frc.robot.subsystems.BaseSubsystem;
+
+import com.ctre.phoenix.led.CANdleConfiguration;
 
 public class LEDSubsystem extends BaseSubsystem {
     // TODO - Implement into frc1731 lib

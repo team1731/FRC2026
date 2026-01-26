@@ -1,7 +1,6 @@
 package frc.lib.frc1731.hardware.motor;
 
 import frc.lib.frc1731.PIDGains;
-import frc.lib.frc1731.hardware.MotorIOTalonFX;
 import frc.lib.frc1731.hardware.motor.ctre.*;
 import frc.lib.frc1731.hardware.motor.rev.*;
 import frc.lib.frc1731.log.SmartLogger;
@@ -24,14 +23,14 @@ public class MotorIOTest extends SubsystemBase {
     }
 
     public MotorIOTest(PortConfig config, Class<? extends MotorIO> cls) {
-        if (cls.getSimpleName().equals(OLD_MotorIOSparkFlex.class.getSimpleName())) {
-            // this.testMotor = new OLD_MotorIOSparkFlex(config);
-        } else if (cls.getSimpleName().equals(OLD_MotorIOSparkMax.class.getSimpleName())) {
-            // this.testMotor = new OLD_MotorIOSparkMax(config);
+        if (cls.getSimpleName().equals(MotorIOSparkFlex.class.getSimpleName())) {
+            this.testMotor = new MotorIOSparkFlex(config);
+        } else if (cls.getSimpleName().equals(MotorIOSparkMax.class.getSimpleName())) {
+            this.testMotor = new MotorIOSparkMax(config);
         } else if (cls.getSimpleName().equals(MotorIOTalonFX.class.getSimpleName())) {
             this.testMotor = new MotorIOTalonFX(config);
-        } else if (cls.getSimpleName().equals(OLD_MotorIOTalonFXS.class.getSimpleName())) {
-            // this.testMotor = new OLD_MotorIOTalonFXS(config);
+        } else if (cls.getSimpleName().equals(MotorIOTalonFXS.class.getSimpleName())) {
+            this.testMotor = new MotorIOTalonFXS(config);
         }
 
         this.logger = new SmartLogger("TestMotor/" + cls.getSimpleName() + "[" + config.kPort + "]");
@@ -41,16 +40,9 @@ public class MotorIOTest extends SubsystemBase {
     /**
      * Adds an inverted follower motor to this test motor
      */
-    public MotorIOTest withFollower(MotorIOTest other, boolean inverted) {
-        other.testMotor.follow(this.testMotor, inverted);
-        return this;
-    }
-
-    /**
-     * Adds a follower motor to this test motor
-     */
     public MotorIOTest withFollower(MotorIOTest other) {
-        return this.withFollower(other, false);
+        other.testMotor.follow(this.testMotor);
+        return this;
     }
 
     /**

@@ -3,7 +3,7 @@ package frc.lib.frc1731.hardware.motor;
 import java.util.ArrayList;
 import java.util.List;
 
-import frc.lib.frc1731.hardware.MotorIOTalonFX;
+import frc.lib.frc1731.hardware.motor.ctre.MotorIOTalonFX;
 
 /**
  * Utility class for creating and managing motors

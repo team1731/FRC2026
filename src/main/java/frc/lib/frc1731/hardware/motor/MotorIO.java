@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
-import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import frc.lib.frc1731.PIDGains;
 
@@ -16,9 +15,11 @@ public abstract class MotorIO {
 
     protected MotorIO(PortConfig config) {}
 
-    public abstract void follow(MotorIO master, boolean invertedFromMaster);
+    public abstract void follow(MotorIO master);
 
-    public abstract void withFollower(MotorIO follower, boolean invertedFromMaster);
+    public void withFollower(MotorIO follower) {
+        follower.follow(this);
+    }
 
     public abstract void withMotionProfile(double velocity, double acceleration);
 
@@ -30,8 +31,6 @@ public abstract class MotorIO {
     public abstract void withPIDGains(PIDGains gains);
 
     public abstract void setSoftLimits(double min, double max);
-
-    public abstract void setNeutralMode(NeutralModeValue mode);
 
     public abstract void setPercentOutput(double percent);
 

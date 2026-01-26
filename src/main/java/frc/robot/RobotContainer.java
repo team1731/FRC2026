@@ -12,8 +12,8 @@ public class RobotContainer {
     protected static LEDSubsystem led;
 
     /* Driver Buttons */
-    private final CommandXboxController xboxController = new CommandXboxController(0);
-    private final Trigger dResetSwerve = xboxController.povRight();
+    private final CommandXboxController driver = new CommandXboxController(0);
+    private final Trigger dResetSwerve = driver.povRight();
 
     /* Operator Buttons */
 
@@ -32,7 +32,7 @@ public class RobotContainer {
 
         // Drivetrain will execute this command periodically 
         // if no other command is active on the drivetrain
-        swerve.setDefaultCommand(swerve.drive(xboxController, () -> true));
+        swerve.setDefaultCommand(swerve.drive(driver, () -> true));
     }
 
     private void configureNamedCommands() {

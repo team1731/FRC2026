@@ -8,7 +8,8 @@ public enum MotorConstants {
     KRAKEN_X44(7530d, 275d, 4.05, 630.7),
     VORTEX(6784d, 211d, 3.6, 575.1),
     NEO(5676d, 105d, 2.6, 493.5),
-    FALCON_500(6380d, 257d, 4.69, 534.8);
+    FALCON_500(6380d, 257d, 4.69, 534.8),
+    MINION(7703d, 212d, 3.17d, 648.7d)
     ;
     public final double MAX_VELOCITY_RPM;
     public final double STALL_CURRENT_AMPS;

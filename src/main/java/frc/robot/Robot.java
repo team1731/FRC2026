@@ -5,7 +5,6 @@ import java.util.*;
 import org.littletonrobotics.junction.LoggedRobot;
 
 import com.pathplanner.lib.commands.FollowPathCommand;
-import com.pathplanner.lib.commands.PathPlannerAuto;
 
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -183,7 +182,7 @@ public class Robot extends LoggedRobot {
 			System.out.println("AUTO PERIODIC");
 		}
 
-		SmartDashboard.putString("Path running", PathPlannerAuto.currentPathName);
+		// SmartDashboard.putString("Path running", PathPlannerAuto.currentPathName);
 		//SmartDashboard.putNumber("current Pose X", currentPose.getX());
 		//SmartDashboard.putNumber ("current Pose Y", currentPose.getY());
 		//SmartDashboard.putNumber("target pose X",targetPose.getX());
