@@ -11,6 +11,7 @@ import frc.lib.frc1678.sim.RollerSim.RollerSimConstants;
 import frc.lib.frc1731.PIDGains;
 import frc.lib.frc1731.hardware.motor.MotorIO;
 import frc.robot.Robot;
+import frc.robot.subsystems.BaseSubsystem;
 
 public abstract class VelocitySubsystem<M extends MotorIO> extends BaseSubsystem {
     protected M motor; // The primary motor controller

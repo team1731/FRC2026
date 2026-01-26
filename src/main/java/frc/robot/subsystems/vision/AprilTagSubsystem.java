@@ -10,7 +10,7 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 
 import edu.wpi.first.net.PortForwarder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.lib.frc1731.subsystem.BaseSubsystem;
+import frc.robot.subsystems.BaseSubsystem;
 import frc.robot.subsystems.leds.LEDSubsystem;
 import frc.robot.subsystems.vision.camera.BasicCamera;
 import frc.robot.subsystems.vision.camera.Camera;

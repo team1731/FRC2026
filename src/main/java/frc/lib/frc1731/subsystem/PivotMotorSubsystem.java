@@ -12,6 +12,7 @@ import frc.lib.frc1678.sim.PivotSim.PivotSimConstants;
 import frc.lib.frc1731.PIDGains;
 import frc.lib.frc1731.hardware.motor.MotorIO;
 import frc.robot.Robot;
+import frc.robot.subsystems.BaseSubsystem;
 
 public abstract class PivotMotorSubsystem<M extends MotorIO> extends BaseSubsystem {
     protected M motor = null; // The primary motor controller
