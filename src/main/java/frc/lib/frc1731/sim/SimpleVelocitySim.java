@@ -39,7 +39,7 @@ public class SimpleVelocitySim {
     public void setVelocity(AngularVelocity velocity) {
         double pidOutput = simPIDCtrl.calculate(gearing);
         double ffOutput = simFF.calculate(velocity.in(RotationsPerSecond));
-        Voltage appliedVoltage = Volts.of(pidOutput + ffOutput);
+        appliedVoltage = Volts.of(pidOutput + ffOutput);
         sim.setVoltage(appliedVoltage);
     }
 

@@ -4,7 +4,6 @@ import java.util.*;
 
 import org.littletonrobotics.junction.LoggedRobot;
 
-import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 

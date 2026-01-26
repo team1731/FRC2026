@@ -1,9 +1,10 @@
 package frc.lib.frc1731.subsystem.converter;
 
 import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Unit;
 import edu.wpi.first.units.measure.*;
 
-public abstract class SubsystemConverter<M extends Measure<?>> {
+public abstract class SubsystemConverter<M extends Measure<? extends Unit>> {
     protected final double gearRatioScalar;
     protected SubsystemConverter(double gearRatio) {
         gearRatioScalar = gearRatio;

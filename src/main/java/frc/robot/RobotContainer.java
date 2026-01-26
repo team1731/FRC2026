@@ -5,6 +5,8 @@ import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.*;
 import frc.robot.subsystems.drive.SwerveSubsystem;
 import frc.robot.subsystems.flywheel.FlywheelSubsystem;
+import frc.robot.subsystems.hood.HoodConstants;
+import frc.robot.subsystems.hood.HoodSubsystem;
 import frc.robot.subsystems.leds.LEDSubsystem;
 import frc.robot.subsystems.superstructure.Superstructure;
 
@@ -13,6 +15,7 @@ public class RobotContainer {
     protected static SwerveSubsystem swerve;
     protected static LEDSubsystem led;
     protected static FlywheelSubsystem flywheel;
+    protected static HoodSubsystem hood;
 
     protected static Superstructure superstructure;
 
@@ -38,8 +41,9 @@ public class RobotContainer {
         swerve = new SwerveSubsystem(true);
         led = new LEDSubsystem(true);
         flywheel = new FlywheelSubsystem(true);
+        hood = new HoodSubsystem(true);
 
-        superstructure = new Superstructure(swerve, flywheel, null, null);
+        superstructure = new Superstructure(swerve, flywheel, hood, null);
 
         // protoHood = new MotorIOTest(new PortConfig(30), MotorIOTalonFX.class)
         //     .setSoftLimits(30d, 0d);
@@ -81,11 +85,15 @@ public class RobotContainer {
         dShoot.whileTrue(flywheel.setVelocityCommand(50));
         xboxController.rightBumper().whileTrue(flywheel.tuneableShotCommand());
 
-        xboxController.y().whileTrue(flywheel.sysIdDynamicCommand(true));
-        xboxController.a().whileTrue(flywheel.sysIdDynamicCommand(false));
+        xboxController.y().whileTrue(hood.sysIdDynamicCommand(true));
+        xboxController.a().whileTrue(hood.sysIdDynamicCommand(false));
 
-        xboxController.x().whileTrue(flywheel.sysIdQuasistaticCommand(true));
-        xboxController.b().whileTrue(flywheel.sysIdQuasistaticCommand(false));
+        xboxController.x().whileTrue(hood.sysIdQuasistaticCommand(true));
+        xboxController.b().whileTrue(hood.sysIdQuasistaticCommand(false));
+
+        xboxController.leftBumper().onTrue(hood.setDegreesCommand(HoodConstants.kStartDegrees));
+        xboxController.leftTrigger().onTrue(hood.setDegreesCommand(HoodConstants.kMaxDegrees));
+        xboxController.rightBumper().onTrue(hood.setDegreesCommand(40d));
     }
 
     /**

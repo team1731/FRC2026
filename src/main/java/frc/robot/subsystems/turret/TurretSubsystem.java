@@ -12,12 +12,13 @@ import edu.wpi.first.wpilibj2.command.Command;
 public class TurretSubsystem extends BaseSubsystem {
     private MotorIOTalonFX motor;
     private double targetDegrees = 0.0;
+    private AngularSubsystemConverter converter;
 
     public TurretSubsystem(boolean leftTurret, boolean enabled) {
         super(enabled);
         if (!enabled) return;
 
-        this.withConverter(new AngularSubsystemConverter(kGearRatio));
+        converter = new AngularSubsystemConverter(kGearRatio);
         motor = new MotorIOTalonFX(kLeftPortConfigs);
         motor.withPIDGains(kPositionGains);
     }

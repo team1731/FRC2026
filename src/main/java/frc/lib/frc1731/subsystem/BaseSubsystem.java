@@ -3,14 +3,14 @@ package frc.lib.frc1731.subsystem;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import frc.lib.frc1731.log.SmartLogger;
-import frc.lib.frc1731.subsystem.converter.SubsystemConverter;
+// import frc.lib.frc1731.subsystem.converter.SubsystemConverter;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public abstract class BaseSubsystem extends SubsystemBase {
     private boolean enabled = false;
     protected SmartLogger logger;
-    protected SubsystemConverter<?> converter;
+    // protected SubsystemConverter<?> converter;
 
     protected BaseSubsystem(boolean enabled) {
         this.enabled = enabled;
@@ -27,9 +27,9 @@ public abstract class BaseSubsystem extends SubsystemBase {
     /**
      * Adds a mechanism to motor position converter for easier conversions for calculations and movement logic
      */
-    protected void withConverter(SubsystemConverter<?> converter) {
-        this.converter = converter;
-    }
+    // protected void withConverter(SubsystemConverter<?> converter) {
+    //     this.converter = converter;
+    // }
 
     /**
      * Whether there is a command actively running on this subsystem
