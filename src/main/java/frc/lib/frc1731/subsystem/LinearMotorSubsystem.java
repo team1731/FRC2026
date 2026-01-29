@@ -13,6 +13,7 @@ import frc.lib.frc1731.hardware.motor.MotorIO;
 import frc.robot.Robot;
 import frc.robot.subsystems.BaseSubsystem;
 
+@Deprecated
 public abstract class LinearMotorSubsystem<M extends MotorIO> extends BaseSubsystem {
     protected M motor = null; // The primary motor controller
     private LinearSim sim = null; // The simulated model of the subsystem 

@@ -4,6 +4,7 @@ import frc.lib.frc1731.PIDGains;
 import frc.lib.frc1731.hardware.motor.ctre.*;
 import frc.lib.frc1731.hardware.motor.rev.*;
 import frc.lib.frc1731.log.SmartLogger;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 
 /**
@@ -14,6 +15,8 @@ public class MotorIOTest extends SubsystemBase {
     private double desiredOutput = 0d;
     private SmartLogger logger;
     private OutputType outputType = OutputType.kNone;
+
+    private String dashboardTab;
 
     private enum OutputType {
         kPercentOutput,
@@ -33,8 +36,20 @@ public class MotorIOTest extends SubsystemBase {
             this.testMotor = new MotorIOTalonFXS(config);
         }
 
-        this.logger = new SmartLogger("TestMotor/" + cls.getSimpleName() + "[" + config.kPort + "]");
+        dashboardTab = "TestMotor/" + cls.getSimpleName() + "[" + config.kPort + "]";
+
+        this.logger = new SmartLogger(dashboardTab);
         this.logger.log("Class Type", cls.getSimpleName());
+
+        SmartDashboard.putNumber(dashboardTab + "/Tuneable Output", desiredOutput);
+    }
+
+    /**
+     * Sets the maximum and minimum values that the motor can rotate to in rotations
+     */
+    public MotorIOTest setSoftLimits(double min, double max) {
+        this.testMotor.setSoftLimits(min, max);
+        return this;
     }
 
     /**
@@ -78,7 +93,16 @@ public class MotorIOTest extends SubsystemBase {
      * Set the desired output of the motor to a percentage of maximum output
      */
     public Command setPercentOutput(double percent) {
-        return new InstantCommand(() -> {
+        return run(() -> {
+            this.desiredOutput = percent;
+            this.testMotor.setPercentOutput(percent);
+            this.outputType = OutputType.kPercentOutput;
+        });
+    }
+
+    public Command setTuneablePercentOutput(double defaultValue) {
+        return run(() -> {
+            double percent = SmartDashboard.getNumber(dashboardTab + "/Tuneable Output", 0.0);
             this.desiredOutput = percent;
             this.testMotor.setPercentOutput(percent);
             this.outputType = OutputType.kPercentOutput;
@@ -89,7 +113,7 @@ public class MotorIOTest extends SubsystemBase {
      * Set the velocity of the motor in RPM
      */
     public Command setVelocityRPS(double velocityRPS) {
-        return new InstantCommand(() -> {
+        return run(() -> {
             this.desiredOutput = velocityRPS;
             this.testMotor.setVelocityRPS(velocityRPS);
             this.outputType = OutputType.kVelocity;
@@ -100,7 +124,7 @@ public class MotorIOTest extends SubsystemBase {
      * Set the position of the motor in rotations
      */
     public Command setPosition(double rotations) {
-        return new InstantCommand(() -> {
+        return run(() -> {
             this.desiredOutput = rotations;
             this.testMotor.setPosition(rotations);
             this.outputType = OutputType.kPosition;

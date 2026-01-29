@@ -64,6 +64,7 @@ public class Robot extends LoggedRobot {
 	public void robotInit() {
 		DataLogManager.start();
 		MessageLog.start();
+		// SignalLogger.setPath("C:\\Users\\Abbas\\Documents\\Robotics\\ctre-logs");
 		AprilTagSubsystem.setupPortForwarding();
 		LiveWindow.disableAllTelemetry();
 
@@ -75,6 +76,7 @@ public class Robot extends LoggedRobot {
 
 		FollowPathCommand.warmupCommand().schedule();
 		AKLogger.start();
+		// SignalLogger.start();
 
 		kFieldLayout.logToShuffleboard(isSimulation());
 	}

@@ -13,6 +13,7 @@ import frc.lib.frc1731.hardware.motor.MotorIO;
 import frc.robot.Robot;
 import frc.robot.subsystems.BaseSubsystem;
 
+@Deprecated
 public abstract class VelocitySubsystem<M extends MotorIO> extends BaseSubsystem {
     protected M motor; // The primary motor controller
 
