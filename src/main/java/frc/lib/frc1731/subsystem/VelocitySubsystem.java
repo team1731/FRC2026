@@ -54,17 +54,17 @@ public abstract class VelocitySubsystem<M extends MotorIO> extends BaseSubsystem
     }
 
     public Angle getMotorAngle() {
-        if (Robot.isSimulation()) return sim.getPosition().div(mechanismRatio);
+        if (Robot.isSimulation() && sim != null) return sim.getPosition().div(mechanismRatio);
         return motor != null ? Rotations.of(motor.getRotations()) : Degrees.zero();
     }
 
     public AngularVelocity getVelocity() {
-        if (Robot.isSimulation()) return sim.getVelocity().div(mechanismRatio);
+        if (Robot.isSimulation() && sim != null) return sim.getVelocity().div(mechanismRatio);
         return motor != null ? RotationsPerSecond.of(motor.getVelocityRPS()) : RotationsPerSecond.zero();
     }
 
     public Voltage getVoltage() {
-        if (Robot.isSimulation()) return sim.getAppliedVoltage();
+        if (Robot.isSimulation() && sim != null) return sim.getAppliedVoltage();
         return Volts.of(motor.getAppliedVoltage());
     }
 
@@ -85,7 +85,7 @@ public abstract class VelocitySubsystem<M extends MotorIO> extends BaseSubsystem
         return run(() -> {
             this.targetVelocity = kMaxVelocity.times(percent.getAsDouble());
             if (motor != null)  motor.setPercentOutput(percent.getAsDouble());
-            sim.setVoltage(Volts.of(percent.getAsDouble() * 12d));
+            if (motor != null) sim.setVoltage(Volts.of(percent.getAsDouble() * 12d));
         }).withName("SetPercent");
     }
 
