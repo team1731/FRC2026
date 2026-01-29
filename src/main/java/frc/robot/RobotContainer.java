@@ -9,6 +9,9 @@ import frc.robot.subsystems.drive.SwerveSubsystem;
 import frc.robot.subsystems.feeder.FeederSubsystem;
 import frc.robot.subsystems.flywheel.FlywheelSubsystem;
 import frc.robot.subsystems.hood.HoodSubsystem;
+import frc.robot.subsystems.intake.IntakeConstants;
+import frc.robot.subsystems.intake.IntakeRollerSubsystem;
+import frc.robot.subsystems.intake.IntakeSlideSubsystem;
 import frc.robot.subsystems.leds.LEDSubsystem;
 import frc.robot.subsystems.superstructure.Superstructure;
 import frc.robot.subsystems.turret.TurretSubsystem;
@@ -21,8 +24,11 @@ public class RobotContainer {
     protected static HoodSubsystem hood;
     protected static TurretSubsystem turret;
     protected static FeederSubsystem feeder;
+    protected static IntakeRollerSubsystem roller;
+    protected static IntakeSlideSubsystem slide;
 
     protected static Superstructure superstructure;
+
 
     /* Driver Buttons */
     private final CommandXboxController driver = new CommandXboxController(0);
@@ -47,6 +53,7 @@ public class RobotContainer {
         hood = new HoodSubsystem(true);
         turret = new TurretSubsystem(true);
         feeder = new FeederSubsystem(true);
+        roller = new IntakeRollerSubsystem(false);
 
         superstructure = new Superstructure(swerve, flywheel, hood, null);
 
@@ -57,6 +64,7 @@ public class RobotContainer {
         turret.setDefaultCommand(turret.setManualCommand(driver.getLeftX() / 2d));
         // hood.setDefaultCommand(hood.setManualCommand(driver.getRightY() / 2d));
         led.setDefaultCommand(led.setFireCommand());
+        roller.setDefaultCommand(roller.setPercentOutputCommand(0));
     }
 
     private void configureNamedCommands() {
@@ -77,6 +85,7 @@ public class RobotContainer {
 
         dShoot.whileTrue(flywheel.setVelocityCommand(RotationsPerSecond.of(50)));
         driver.rightBumper().whileTrue(flywheel.tuneShotCommand());
+        driver.leftTrigger().whileTrue(roller.setPercentOutputCommand(1.0));
     }
 
     /**
