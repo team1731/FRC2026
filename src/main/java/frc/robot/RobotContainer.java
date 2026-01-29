@@ -1,10 +1,13 @@
 package frc.robot;
 
+import static edu.wpi.first.units.Units.*;
+
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.*;
 import frc.robot.subsystems.drive.SwerveSubsystem;
 import frc.robot.subsystems.flywheel.FlywheelSubsystem;
+import frc.robot.subsystems.hood.HoodConstants;
 import frc.robot.subsystems.hood.HoodSubsystem;
 import frc.robot.subsystems.leds.LEDSubsystem;
 import frc.robot.subsystems.superstructure.Superstructure;
@@ -50,7 +53,7 @@ public class RobotContainer {
         swerve.setDefaultCommand(swerve.driveCommand(driver, () -> true));
         flywheel.setDefaultCommand(flywheel.stopCommand());
         turret.setDefaultCommand(turret.setManualCommand(driver.getLeftX() / 2d));
-        hood.setDefaultCommand(hood.setManualCommand(driver.getRightY() / 2d));
+        // hood.setDefaultCommand(hood.setManualCommand(driver.getRightY() / 2d));
         led.setDefaultCommand(led.setFireCommand());
     }
 
@@ -70,8 +73,12 @@ public class RobotContainer {
             swerve.resetPose(resetPosition);
         }));
 
-        dShoot.whileTrue(flywheel.setVelocityCommand(50));
-        driver.rightBumper().whileTrue(flywheel.tuneableShotCommand());
+        dShoot.whileTrue(flywheel.setVelocityCommand(RotationsPerSecond.of(50)));
+        driver.rightBumper().whileTrue(flywheel.tuneShotCommand());
+
+        driver.y().onTrue(hood.setAngleCommand(HoodConstants.kMaxAngle));
+        driver.b().onTrue(hood.setAngleCommand(Degrees.of(20)));
+        driver.a().onTrue(hood.setAngleCommand(HoodConstants.kStartAngle));
     }
 
     /**

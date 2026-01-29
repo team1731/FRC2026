@@ -36,9 +36,9 @@ public class HoodConstants {
     .setP(1.0) // 27 rotation error = max voltage (12 V)
     .setI(0.0)
     .setD(0.0)
-    .setV(0.0) // 
-    .setS(0.0)
-    .setA(0.0)
+    .setV(10) // 
+    .setS(0.02)
+    .setA(0.01)
     ;
 
     // public static final PIDGains kSimGains = new PIDGains().setP(1).setD(0);

@@ -17,6 +17,20 @@ public class SimpleVelocitySim {
     private double gearing = 1d;
     private Voltage appliedVoltage = Volts.zero();
 
+    public static class SimConstants {
+        public DCMotor motor;
+        public double gearing;
+        public Distance radius;
+        public Mass weight;
+
+        public SimConstants(DCMotor motor, double gearing, Distance radius, Mass weight) {
+            this.motor = motor;
+            this.gearing = gearing;
+            this.radius = radius;
+            this.weight = weight;
+        }
+    }
+
     public SimpleVelocitySim(DCMotor motor, double gearing, Distance radius, Mass weight, PIDGains gains) {
         sim = new RollerSim(new RollerSimConstants(motor, gearing, 0.5 * weight.in(Kilograms) * Math.pow(radius.in(Meters), 2)));
         this.gearing = gearing;
