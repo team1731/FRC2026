@@ -6,8 +6,8 @@ import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.*;
 import frc.robot.subsystems.drive.SwerveSubsystem;
+import frc.robot.subsystems.feeder.FeederSubsystem;
 import frc.robot.subsystems.flywheel.FlywheelSubsystem;
-import frc.robot.subsystems.hood.HoodConstants;
 import frc.robot.subsystems.hood.HoodSubsystem;
 import frc.robot.subsystems.leds.LEDSubsystem;
 import frc.robot.subsystems.superstructure.Superstructure;
@@ -20,6 +20,7 @@ public class RobotContainer {
     protected static FlywheelSubsystem flywheel;
     protected static HoodSubsystem hood;
     protected static TurretSubsystem turret;
+    protected static FeederSubsystem feeder;
 
     protected static Superstructure superstructure;
 
@@ -45,6 +46,7 @@ public class RobotContainer {
         flywheel = new FlywheelSubsystem(true);
         hood = new HoodSubsystem(true);
         turret = new TurretSubsystem(true);
+        feeder = new FeederSubsystem(true);
 
         superstructure = new Superstructure(swerve, flywheel, hood, null);
 
@@ -75,10 +77,6 @@ public class RobotContainer {
 
         dShoot.whileTrue(flywheel.setVelocityCommand(RotationsPerSecond.of(50)));
         driver.rightBumper().whileTrue(flywheel.tuneShotCommand());
-
-        driver.y().onTrue(hood.setAngleCommand(HoodConstants.kMaxAngle));
-        driver.b().onTrue(hood.setAngleCommand(Degrees.of(20)));
-        driver.a().onTrue(hood.setAngleCommand(HoodConstants.kStartAngle));
     }
 
     /**
@@ -87,4 +85,6 @@ public class RobotContainer {
     public void teleopInit() {
 
     }
+
+
 }
