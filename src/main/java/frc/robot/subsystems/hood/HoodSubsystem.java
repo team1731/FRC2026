@@ -104,6 +104,7 @@ public class HoodSubsystem extends BaseSubsystem {
     public Command setAngleCommand(Angle targetAngle) {
         return run(() -> {
             this.targetAngle = targetAngle;
+            motor.setPosition(kConverter.toMotor(targetAngle).in(Rotations));
             sim.setMechanismAngle(targetAngle);
         });
     }
