@@ -1,13 +1,14 @@
 package frc.robot.subsystems.hood;
 
 import edu.wpi.first.math.controller.ArmFeedforward;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.*;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj2.command.*;
-
+import frc.lib.frc1678.sim.PivotSim.PivotSimConstants;
 import frc.lib.frc1731.Utils;
 import frc.lib.frc1731.hardware.motor.ctre.MotorIOTalonFX;
-
+import frc.lib.frc1731.sim.SimpleAngularMotorSim;
 import frc.robot.Robot;
 import frc.robot.subsystems.BaseSubsystem;
 
@@ -17,17 +18,25 @@ import static frc.robot.subsystems.hood.HoodConstants.*;
 public class HoodSubsystem extends BaseSubsystem {
     private MotorIOTalonFX motor;
     private Angle targetAngle = Degrees.zero();
-    private ArmFeedforward simFF = new ArmFeedforward(kPositionGains.kS, kPositionGains.kG, kPositionGains.kV, kPositionGains.kA);
+    // private ArmFeedforward simFF = new ArmFeedforward(kPositionGains.kS, kPositionGains.kG, kPositionGains.kV, kPositionGains.kA);
 
-    private SingleJointedArmSim sim = new SingleJointedArmSim(
-        kDCMotor,
-        1d/kGearRatio,
-        0.5 * kHoodMass.in(Kilograms) * Math.pow(kHoodRadius.in(Meters), 2), // 0.0004
-        kHoodRadius.in(Meters), 
-        kStartAngle.in(Radians), 
-        kMaxAngle.in(Radians), 
-        false, 
-        kStartAngle.in(Radians)
+    // private SingleJointedArmSim sim = new SingleJointedArmSim(
+    //     kDCMotor,
+    //     1d/kGearRatio,
+    //     0.5 * kHoodMass.in(Kilograms) * Math.pow(kHoodRadius.in(Meters), 2), // 0.0004
+    //     kHoodRadius.in(Meters), 
+    //     kStartAngle.in(Radians), 
+    //     kMaxAngle.in(Radians), 
+    //     false, 
+    //     kStartAngle.in(Radians)
+    // );
+
+    private SimpleAngularMotorSim sim = new SimpleAngularMotorSim(
+        new PivotSimConstants()
+            .withMotor(DCMotor.getMinion(1))
+            .withPhysics(1d/kGearRatio, 0.02, false)
+            .withConstraints(kStartAngle.in(Degrees), kMaxAngle.in(Degrees), kStartAngle.in(Degrees), kHoodRadius.in(Meters)), 
+        kPositionGains
     );
 
     // private SysIdRoutine routine = new SysIdRoutine(
@@ -58,12 +67,13 @@ public class HoodSubsystem extends BaseSubsystem {
     }
 
     public Angle getMotorAngle() {
-        if (Robot.isSimulation()) return kConverter.toMotor(Radians.of(sim.getAngleRads()));
+        // if (Robot.isSimulation()) return kConverter.toMotor(Radians.of(sim.getAngleRads()));
+        if (Robot.isSimulation()) return kConverter.toMotor(sim.getMechanismAngle());
         return Rotations.of(motor.getRotations());
     }
 
     public Angle getHoodAngle() {
-        if (Robot.isSimulation()) return Radians.of(sim.getAngleRads());
+        if (Robot.isSimulation()) return sim.getMechanismAngle();
         return kConverter.toMechanism(Rotations.of(motor.getRotations()));
     }
 
@@ -74,7 +84,7 @@ public class HoodSubsystem extends BaseSubsystem {
     @SuppressWarnings("unused")
     private void setVoltage(Voltage volts) {
         motor.setVoltage(volts.in(Volts));
-        if (Robot.isSimulation()) sim.setInputVoltage(volts.in(Volts));
+        if (Robot.isSimulation()) sim.setVoltage(volts);
     }
 
     public boolean atTargetAngle() {
@@ -88,29 +98,37 @@ public class HoodSubsystem extends BaseSubsystem {
         logger.log("Target Position", kConverter.toMotor(getTargetAngle()).in(Rotations));
         logger.log("Target Degrees", getTargetAngle().in(Degrees));
         logger.log("At Target Angle", atTargetAngle());
-        sim.update(Robot.CLOCK.dt());
+        sim.periodic();
     }
 
-    public Command setHoodAngleCommand(Angle targetAngle) {
+    public Command setAngleCommand(Angle targetAngle) {
         return run(() -> {
             this.targetAngle = targetAngle;
             motor.setPosition(kConverter.toMotor(targetAngle).in(Rotations));
-            if (Robot.isReal()) return;
-            double outputCurrent = kPositionGains.toPIDController().calculate(getMotorAngle().in(Rotations), kConverter.toMotor(getTargetAngle()).in(Rotations))
-                                        + simFF.calculate(kConverter.toMotor(getTargetAngle()).in(Rotations), 0);
-
-            outputCurrent = Utils.clamp(outputCurrent, kCurrentLimit);
-
-            double appliedVolts = kDCMotor.getVoltage(outputCurrent, sim.getVelocityRadPerSec());
-            appliedVolts = Utils.clamp(appliedVolts, 12d);
-            sim.setInputVoltage(appliedVolts);
+            sim.setMechanismAngle(targetAngle);
         });
     }
+
+    // public Command setHoodAngleCommand(Angle targetAngle) {
+    //     return run(() -> {
+    //         this.targetAngle = targetAngle;
+    //         motor.setPosition(kConverter.toMotor(targetAngle).in(Rotations));
+    //         if (Robot.isReal()) return;
+    //         double outputCurrent = kPositionGains.toPIDController().calculate(getMotorAngle().in(Rotations), kConverter.toMotor(getTargetAngle()).in(Rotations))
+    //                                     + simFF.calculate(kConverter.toMotor(getTargetAngle()).in(Rotations), 0);
+
+    //         outputCurrent = Utils.clamp(outputCurrent, kCurrentLimit);
+
+    //         double appliedVolts = kDCMotor.getVoltage(outputCurrent, sim.getVelocityRadPerSec());
+    //         appliedVolts = Utils.clamp(appliedVolts, 12d);
+    //         sim.setInputVoltage(appliedVolts);
+    //     });
+    // }
 
     public Command setManualCommand(double percent) {
         return run(() -> {
             motor.setPercentOutput(percent);
-            sim.setInputVoltage(percent*12d);
+            sim.setVoltage(Volts.of(percent*12d));
         });
     }
 }

@@ -44,9 +44,9 @@ public class Superstructure extends SubsystemBase {
     }
 
     public Command shootFuelCommand(ShotProfile profile) {
-        return flywheel.setVelocityCommand(profile.flywheelRPS)
+        return flywheel.setVelocityCommand(RotationsPerSecond.of(profile.flywheelRPS))
         .alongWith(
-            hood.setHoodAngleCommand(Degrees.of(profile.hoodDegrees)),
+            hood.setAngleCommand(Degrees.of(profile.hoodDegrees)),
             turret.setTurretAngleCommand(Degrees.of(profile.turretDegrees))
         ).andThen(
             Commands.either(
@@ -58,9 +58,9 @@ public class Superstructure extends SubsystemBase {
     }
 
     public Command shootFuelCommand(Supplier<ShotProfile> profileSupplier) {
-        return flywheel.setVelocityCommand(profileSupplier.get().flywheelRPS)
+        return flywheel.setVelocityCommand(RotationsPerSecond.of(profileSupplier.get().flywheelRPS))
         .alongWith(
-            hood.setHoodAngleCommand(Degrees.of(profileSupplier.get().hoodDegrees)),
+            hood.setAngleCommand(Degrees.of(profileSupplier.get().hoodDegrees)),
             turret.setTurretAngleCommand(Degrees.of(profileSupplier.get().turretDegrees))
         ).andThen(
             Commands.either(

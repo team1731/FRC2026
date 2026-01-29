@@ -1,6 +1,7 @@
 package frc.lib.frc1731.subsystem.converter;
 
-import edu.wpi.first.units.measure.Angle;
+import static edu.wpi.first.units.Units.*;
+import edu.wpi.first.units.measure.*;
 
 public class AngularSubsystemConverter extends SubsystemConverter<Angle>{
     public AngularSubsystemConverter(double gearRatio) {
@@ -15,5 +16,13 @@ public class AngularSubsystemConverter extends SubsystemConverter<Angle>{
     @Override
     public Angle toMechanism(Angle motor) {
         return motor.times(gearRatioScalar);
+    }
+
+    public AngularVelocity toMotor(AngularVelocity mechanism) {
+        return mechanism.times(Seconds.of(1)).div(gearRatioScalar).div(Seconds.of(1));
+    }
+
+    public AngularVelocity toMechanism(AngularVelocity motor) {
+        return motor.times(Seconds.of(1)).times(gearRatioScalar).div(Seconds.of(1));
     }
 }
