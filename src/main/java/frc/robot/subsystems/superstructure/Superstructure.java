@@ -1,5 +1,7 @@
 package frc.robot.subsystems.superstructure;
 
+import static edu.wpi.first.units.Units.*;
+
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.Translation2d;
@@ -44,8 +46,8 @@ public class Superstructure extends SubsystemBase {
     public Command shootFuelCommand(ShotProfile profile) {
         return flywheel.setVelocityCommand(profile.flywheelRPS)
         .alongWith(
-            hood.setDegreesCommand(profile.hoodDegrees),
-            turret.setDegreesCommand(profile.turretDegrees)
+            hood.setHoodAngleCommand(Degrees.of(profile.hoodDegrees)),
+            turret.setTurretAngleCommand(Degrees.of(profile.turretDegrees))
         ).andThen(
             Commands.either(
                 new WaitForCommand(Commands.none(), () -> flywheel.atTargetVelocity()), // Replace with feeder.feedFuelCommand() once feeder added in 
@@ -58,8 +60,8 @@ public class Superstructure extends SubsystemBase {
     public Command shootFuelCommand(Supplier<ShotProfile> profileSupplier) {
         return flywheel.setVelocityCommand(profileSupplier.get().flywheelRPS)
         .alongWith(
-            hood.setDegreesCommand(profileSupplier.get().hoodDegrees),
-            turret.setDegreesCommand(profileSupplier.get().turretDegrees)
+            hood.setHoodAngleCommand(Degrees.of(profileSupplier.get().hoodDegrees)),
+            turret.setTurretAngleCommand(Degrees.of(profileSupplier.get().turretDegrees))
         ).andThen(
             Commands.either(
                 new WaitForCommand(Commands.none(), () -> flywheel.atTargetVelocity()), // Replace with feeder.feedFuelCommand() once feeder added in 

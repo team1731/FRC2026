@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.lib.frc1731.Utils;
 import frc.lib.frc1731.hardware.MotorIOTalonFX;
+import frc.lib.frc1731.math.LoggedTunableNumber;
 import frc.lib.frc1731.sim.SimpleVelocitySim;
 import frc.lib.frc1731.subsystem.BaseSubsystem;
 import frc.robot.Robot;
@@ -18,6 +19,7 @@ public class FlywheelSubsystem extends BaseSubsystem {
     private MotorIOTalonFX motor;
     private SimpleVelocitySim sim = SimpleVelocitySim.buildKrakenX60Sim(1, kGearRatio, kFlywheelRadius, kFlywheelMass, kVelocityGains);
     private double setpointVelocityRPS = 0.0;
+    private LoggedTunableNumber flywheelTunedSetpoint = new LoggedTunableNumber("Flywheel Setpoint RPS", 20d, () -> true);
 
     private SysIdRoutine routine = new SysIdRoutine(
         new SysIdRoutine.Config(
@@ -43,7 +45,6 @@ public class FlywheelSubsystem extends BaseSubsystem {
         if (!enabled) return;
         motor = new MotorIOTalonFX(kLeftFlywheelConfig);
         motor.withPIDGains(kVelocityGains);
-        SmartDashboard.putNumber("FlywheelSetpoint", setpointVelocityRPS);
     }
 
     @Override
@@ -82,7 +83,7 @@ public class FlywheelSubsystem extends BaseSubsystem {
 
     public Command tuneableShotCommand() {
         return run(() -> {
-            this.setpointVelocityRPS = SmartDashboard.getNumber("FlywheelSetpoint", setpointVelocityRPS);
+            this.setpointVelocityRPS = flywheelTunedSetpoint.get();
             motor.setVelocityRPS(setpointVelocityRPS);
             sim.setVelocity(RotationsPerSecond.of(setpointVelocityRPS));
         }).withName("Shoot");

@@ -5,12 +5,10 @@ import static edu.wpi.first.units.Units.*;
 import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.lib.frc1678.sim.PivotSim;
 import frc.lib.frc1678.sim.PivotSim.PivotSimConstants;
 import frc.lib.frc1731.PIDGains;
@@ -42,12 +40,8 @@ public class SimpleAngularMotorSim {
         Angle motorAngle = converter.toMotor(getMechanismAngle());
         Angle targetMotorAngle = converter.toMotor(angle);
         double pidOutput = profiledPID.calculate(motorAngle.in(Rotations), targetMotorAngle.in(Rotations));
-        double ffOutput = simFF.calculateWithVelocities(angle.in(Radians), getMotorVelocity(lastVelocity).in(RadiansPerSecond), getMotorVelocity(getMechanismVelocity()).in(RadiansPerSecond));
-        appliedVoltage = Volts.of(pidOutput + ffOutput);
-        SmartDashboard.putNumber("1234", getMotorVelocity(lastVelocity).in(RadiansPerSecond));
-        SmartDashboard.putNumber("5678", getMotorVelocity(getMechanismVelocity()).in(RadiansPerSecond));
-        SmartDashboard.putNumber("1122122ASJKLDKLSJADJKLASJLK", pidOutput);
-        SmartDashboard.putNumber("2223223ASJKLDKLSJADJKLASJLK", ffOutput);
+        // double ffOutput = simFF.calculateWithVelocities(angle.in(Radians), getMotorVelocity(lastVelocity).in(RadiansPerSecond), getMotorVelocity(getMechanismVelocity()).in(RadiansPerSecond));
+        appliedVoltage = Volts.of(pidOutput);
         sim.setVoltage(appliedVoltage);
     }
 
