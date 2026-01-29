@@ -56,7 +56,6 @@ public class AprilTagSubsystem extends BaseSubsystem {
 
     public void stopAutoLineup() {
         autoLineupHelper = null;
-        ledSubsystem.turnLineupColorsOff();
     }
  
     public static void setupPortForwarding() {
@@ -142,23 +141,23 @@ public class AprilTagSubsystem extends BaseSubsystem {
                 autoLineupHelper.initialize(camera1, camera2);
             }
 
-            if(autoLineupHelper.isInitialized()) {
-                LineupInstruction lineupInstruction = autoLineupHelper.getLineupFeedback();
-                if(lineupInstruction == LineupInstruction.TARGET_NOT_VISIBLE) {
-                    ledSubsystem.setNoTagFound();
-                } else if(lineupInstruction == LineupInstruction.TOO_FAR_LEFT) {
-                    ledSubsystem.setLineupTooFarLeftScheme();
-                    SmartDashboard.putString("Operator Command too far:","Left");
-                } else if(lineupInstruction == LineupInstruction.TOO_FAR_RIGHT) {
-                    ledSubsystem.setLineupTooFarRightScheme();
-                    SmartDashboard.putString("Operator Command too far: ","RIGHT");
-                } else {
-                    ledSubsystem.setLineupCenteredScheme();
-                    SmartDashboard.putString("Operator Command too far: ","Just Right");
-                }
+            // if(autoLineupHelper.isInitialized()) {
+            //     LineupInstruction lineupInstruction = autoLineupHelper.getLineupFeedback();
+            //     if(lineupInstruction == LineupInstruction.TARGET_NOT_VISIBLE) {
+            //         ledSubsystem.setNoTagFound();
+            //     } else if(lineupInstruction == LineupInstruction.TOO_FAR_LEFT) {
+            //         ledSubsystem.setLineupTooFarLeftScheme();
+            //         SmartDashboard.putString("Operator Command too far:","Left");
+            //     } else if(lineupInstruction == LineupInstruction.TOO_FAR_RIGHT) {
+            //         ledSubsystem.setLineupTooFarRightScheme();
+            //         SmartDashboard.putString("Operator Command too far: ","RIGHT");
+            //     } else {
+            //         ledSubsystem.setLineupCenteredScheme();
+            //         SmartDashboard.putString("Operator Command too far: ","Just Right");
+            //     }
 
                 
-            }
+            // }
         }
     }
 

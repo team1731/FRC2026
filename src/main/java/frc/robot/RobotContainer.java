@@ -51,6 +51,7 @@ public class RobotContainer {
         flywheel.setDefaultCommand(flywheel.stopCommand());
         turret.setDefaultCommand(turret.setManualCommand(driver.getLeftX() / 2d));
         hood.setDefaultCommand(hood.setManualCommand(driver.getRightY() / 2d));
+        led.setDefaultCommand(led.setFireCommand());
     }
 
     private void configureNamedCommands() {
