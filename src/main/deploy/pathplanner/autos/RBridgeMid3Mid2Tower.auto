@@ -7,19 +7,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "LBridgeToDepot"
+            "pathName": "RBridgeMid3OverBump"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "DepotToLGate"
+            "pathName": "Mid3toMid2"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "LGateToMidlinePass"
+            "pathName": "Mid2toTower"
           }
         }
       ]
