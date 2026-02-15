@@ -21,7 +21,6 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.frc1731.math.Vector2d;
-import frc.robot.AutoLoader;
 import frc.robot.Robot;
 import frc.robot.subsystems.BaseSubsystem;
 import frc.robot.subsystems.drive.generated.CommandSwerveDrivetrain;
@@ -126,7 +125,7 @@ public class SwerveSubsystem extends BaseSubsystem {
                     kPPConstants,
                     kPPConstants
                 ), RobotConfig.fromGUISettings(),
-                () -> AutoLoader.flipForRed(),
+                () -> Robot.isRedAlliance(),
                 this);
         } catch(Exception e) {
             System.out.println("CommandSwerveDrivetrain error - failed to configure auto bindings");

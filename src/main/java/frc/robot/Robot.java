@@ -35,7 +35,7 @@ public class Robot extends LoggedRobot {
 
 	private RobotContainer container;
 	private Command m_autonomousCommand = null;
-	private AutoLoader autoLoader;
+	private AutoLoader loader = new AutoLoader();
 
 	public static final FieldLayout kFieldLayout = new ReefscapeFieldLayout();
 	
@@ -70,9 +70,7 @@ public class Robot extends LoggedRobot {
 
 		// Instantiate our robot container. This will perform all of our button bindings,
 		container = new RobotContainer();
-
-		// Auto Loader MUST be initialized after RobotContainer
-		autoLoader = new AutoLoader();
+		loader = new AutoLoader();
 
 		FollowPathCommand.warmupCommand().schedule();
 		AKLogger.start();
@@ -108,12 +106,12 @@ public class Robot extends LoggedRobot {
 // ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 	@Override
 	public void robotPeriodic() {
-    // Runs the Scheduler.  This is responsible for polling buttons, adding newly-scheduled
-    // commands, running already-scheduled commands, removing finished or interrupted commands,
-    // and running subsystem periodic() methods.  This must be called from the robot's periodic
+    	// Runs the Scheduler.  This is responsible for polling buttons, adding newly-scheduled
+    	// commands, running already-scheduled commands, removing finished or interrupted commands,
+    	// and running subsystem periodic() methods.  This must be called from the robot's periodic
 		// block in order for anything in the Command-based framework to work.
 		CommandScheduler.getInstance().run();
-		autoLoader.update();
+		container.periodic();
 		CLOCK.update();
 	}
 
@@ -124,9 +122,7 @@ public class Robot extends LoggedRobot {
 //   ██ ▀▀ █▀ ▀██ ▀▀▀ █ ██ ██ ▀▀ ██ ▀▀ ██ ▀▀▀██ ▀▀ ███▀ ▀██ ██▄ █▀ ▀███ ██
 //   ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 	@Override
-	public void disabledInit() {
-		// driveSubsystem.getAprilTagSubsystem().startAutoLineup();
-	}
+	public void disabledInit() {}
 
 
 //   ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
@@ -164,7 +160,7 @@ public class Robot extends LoggedRobot {
 	public void autonomousInit() {
 		CommandScheduler.getInstance().cancelAll();
 		CLOCK.setAutoStartTime(Timer.getFPGATimestamp());
-		m_autonomousCommand = autoLoader.getSelectedAutoName();
+		m_autonomousCommand = loader.getSelectedAutoMode();
 		if (m_autonomousCommand != null) {
 			m_autonomousCommand.schedule();
 		} else {
@@ -203,12 +199,11 @@ public class Robot extends LoggedRobot {
 		// Record both DS control and joystick data in TELEOP
 		MessageLog.getLogger();
 
-		// cancel any outstanding auto commands
+		// Cancel any outstanding auto commands
 		CommandScheduler.getInstance().cancelAll();
 
 		currentKeypadCommand = "";
 		SmartDashboard.getString("keypadCommand", currentKeypadCommand);
-		container.teleopInit();
 	}
 
 //   ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
@@ -248,7 +243,6 @@ public class Robot extends LoggedRobot {
 	public void testInit() {
 		// Cancels all running commands at the start of test mode.
 		CommandScheduler.getInstance().cancelAll();
-		container.teleopInit();
 	}
 
 	/** This function is called periodically during test mode. */
