@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.534450784593438,
-        "y": 5.96237500000475
+        "x": 3.5273734939759036,
+        "y": 4.045927710843373
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.518135259818231,
-        "y": 5.954830316411243
+        "x": 3.188614457831325,
+        "y": 3.9038674698795175
       },
       "isLocked": false,
-      "linkedName": "LBridge"
+      "linkedName": "Hub"
     },
     {
       "anchor": {
-        "x": 0.4677386363655819,
-        "y": 5.96237500000475
+        "x": 1.560385542168675,
+        "y": 3.7618072289156625
       },
       "prevControl": {
-        "x": 1.8223201105455908,
-        "y": 5.964246744544532
+        "x": 2.7077951807228917,
+        "y": 3.6962409638554217
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "DepotComplete"
+      "linkedName": "Tower"
     }
   ],
   "rotationTargets": [],
@@ -33,7 +33,7 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 2.0,
+    "maxVelocity": 4.0,
     "maxAcceleration": 4.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 0.0
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -179.58402601891575
+    "rotation": 0.0
   },
-  "useDefaultConstraints": false
+  "useDefaultConstraints": true
 }
