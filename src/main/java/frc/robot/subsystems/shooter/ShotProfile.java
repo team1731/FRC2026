@@ -1,4 +1,4 @@
-package frc.robot.subsystems.superstructure;
+package frc.robot.subsystems.shooter;
 
 public class ShotProfile {
     public double turretDegrees, hoodDegrees, flywheelRPS;

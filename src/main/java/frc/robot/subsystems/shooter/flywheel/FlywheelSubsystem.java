@@ -1,11 +1,11 @@
-package frc.robot.subsystems.flywheel;
+package frc.robot.subsystems.shooter.flywheel;
 
 import frc.lib.frc1731.hardware.motor.ctre.MotorIOTalonFX;
 import frc.lib.frc1731.math.LoggedTunableNumber;
 import frc.lib.frc1731.subsystem.VelocitySubsystem;
 
 import static edu.wpi.first.units.Units.*;
-import static frc.robot.subsystems.flywheel.FlywheelConstants.*;
+import static frc.robot.subsystems.shooter.flywheel.FlywheelConstants.*;
 
 import edu.wpi.first.wpilibj2.command.Command;
 

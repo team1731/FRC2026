@@ -7,13 +7,13 @@ import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.*;
 import frc.robot.subsystems.drive.SwerveSubsystem;
 import frc.robot.subsystems.feeder.FeederSubsystem;
-import frc.robot.subsystems.flywheel.FlywheelSubsystem;
-import frc.robot.subsystems.hood.HoodSubsystem;
+import frc.robot.subsystems.shooter.flywheel.FlywheelSubsystem;
+import frc.robot.subsystems.shooter.hood.HoodSubsystem;
+import frc.robot.subsystems.intake.IntakePivotSubsystem;
 import frc.robot.subsystems.intake.IntakeRollerSubsystem;
-import frc.robot.subsystems.intake.IntakeSlideSubsystem;
 import frc.robot.subsystems.leds.LEDSubsystem;
+import frc.robot.subsystems.shooter.turret.TurretSubsystem;
 import frc.robot.subsystems.superstructure.Superstructure;
-import frc.robot.subsystems.turret.TurretSubsystem;
 
 public class RobotContainer {
     /* Subsystems */
@@ -24,7 +24,7 @@ public class RobotContainer {
     protected static TurretSubsystem turret;
     protected static FeederSubsystem feeder;
     protected static IntakeRollerSubsystem roller;
-    protected static IntakeSlideSubsystem slide;
+    protected static IntakePivotSubsystem pivot;
 
     protected static Superstructure superstructure;
 
@@ -51,6 +51,7 @@ public class RobotContainer {
         hood = new HoodSubsystem(true);
         turret = new TurretSubsystem(true);
         feeder = new FeederSubsystem(true);
+        pivot = new IntakePivotSubsystem(true);
         roller = new IntakeRollerSubsystem(true);
 
         superstructure = new Superstructure(swerve, flywheel, hood, turret);
@@ -59,9 +60,9 @@ public class RobotContainer {
         // if no other command is active on the drivetrain
         swerve.setDefaultCommand(swerve.driveCommand(driver, () -> true));
         flywheel.setDefaultCommand(flywheel.stopCommand());
-        turret.setDefaultCommand(turret.setManualCommand(driver.getLeftX() / 2d));
-        // hood.setDefaultCommand(hood.setManualCommand(driver.getRightY() / 2d));
-        led.setDefaultCommand(led.setFireCommand());
+        turret.setDefaultCommand(turret.setManualCommand(driver.getLeftX() / 10d));
+        hood.setDefaultCommand(hood.setManualCommand(driver.getRightY() / 10d));
+        // led.setDefaultCommand(led.setFireCommand());
         roller.setDefaultCommand(roller.setPercentOutputCommand(0));
     }
 
@@ -81,9 +82,13 @@ public class RobotContainer {
             swerve.resetPose(resetPosition);
         }));
 
-        dShoot.whileTrue(flywheel.setVelocityCommand(RotationsPerSecond.of(50)));
-        driver.rightBumper().whileTrue(flywheel.tuneShotCommand());
+        // dShoot.whileTrue(flywheel.setVelocityCommand(RotationsPerSecond.of(50)));
+        dShoot.whileTrue(flywheel.setPercentOutputCommand(0.8d).alongWith(feeder.setPercentOutputCommand(1.0)));
+        // driver.rightBumper().whileTrue(flywheel.tuneShotCommand());
         driver.leftTrigger().whileTrue(roller.setPercentOutputCommand(1.0));
+        driver.povDown().whileTrue(pivot.setManualCommand(-0.1));
+        driver.povUp().whileTrue(pivot.setManualCommand(0.1));
+        driver.leftBumper().whileTrue(roller.setPercentOutputCommand(-1.0));
     }
 
     public void periodic() {

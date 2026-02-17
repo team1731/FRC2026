@@ -10,9 +10,10 @@ import edu.wpi.first.wpilibj2.command.*;
 import frc.lib.frc1731.field.Field;
 import frc.robot.commands.WaitForCommand;
 import frc.robot.subsystems.drive.SwerveSubsystem;
-import frc.robot.subsystems.flywheel.FlywheelSubsystem;
-import frc.robot.subsystems.hood.HoodSubsystem;
-import frc.robot.subsystems.turret.TurretSubsystem;
+import frc.robot.subsystems.shooter.ShotProfile;
+import frc.robot.subsystems.shooter.flywheel.FlywheelSubsystem;
+import frc.robot.subsystems.shooter.hood.HoodSubsystem;
+import frc.robot.subsystems.shooter.turret.TurretSubsystem;
 
 public class Superstructure extends SubsystemBase {
     private SwerveSubsystem swerve;

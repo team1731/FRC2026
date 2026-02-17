@@ -1,19 +1,16 @@
-package frc.robot.subsystems.hood;
+package frc.robot.subsystems.shooter.hood;
 
-import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.*;
-import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.lib.frc1678.sim.PivotSim.PivotSimConstants;
-import frc.lib.frc1731.Utils;
 import frc.lib.frc1731.hardware.motor.ctre.MotorIOTalonFX;
 import frc.lib.frc1731.sim.SimpleAngularMotorSim;
 import frc.robot.Robot;
 import frc.robot.subsystems.BaseSubsystem;
 
 import static edu.wpi.first.units.Units.*;
-import static frc.robot.subsystems.hood.HoodConstants.*;
+import static frc.robot.subsystems.shooter.hood.HoodConstants.*;
 
 public class HoodSubsystem extends BaseSubsystem {
     private MotorIOTalonFX motor;

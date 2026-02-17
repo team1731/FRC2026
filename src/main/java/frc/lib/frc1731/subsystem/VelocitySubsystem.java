@@ -1,7 +1,6 @@
 package frc.lib.frc1731.subsystem;
 
 import static edu.wpi.first.units.Units.*;
-import static frc.robot.subsystems.flywheel.FlywheelConstants.kMaxVelocity;
 
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -21,6 +20,7 @@ public abstract class VelocitySubsystem<M extends MotorIO> extends BaseSubsystem
     private SimpleVelocitySim sim = null; // The simulated model of the subsystem
     private AngularVelocity epsilon = RotationsPerSecond.of(1); // The velocity tolerance to be considered "at target speed"
     private double mechanismRatio = 1d; // Mechanism input:output reduction ratio (i.e 2:1 ratio means 2 motor rotations per mechanism rotation)
+    private AngularVelocity kMaxVelocity = RotationsPerSecond.of(100); // The maximum velocity of the mechanism, used for percent output commands
 
     protected VelocitySubsystem(boolean enabled) {
         super(enabled);
@@ -38,6 +38,10 @@ public abstract class VelocitySubsystem<M extends MotorIO> extends BaseSubsystem
 
     protected void withTolerance(AngularVelocity epsilon) {
         this.epsilon = epsilon;
+    }
+
+    protected void withMaxVelocity(AngularVelocity maxVelocity) {
+        this.kMaxVelocity = maxVelocity;
     }
 
     protected void withSysId(double quasistaticRampRate, double dynamicStepRate, double timeout) {
