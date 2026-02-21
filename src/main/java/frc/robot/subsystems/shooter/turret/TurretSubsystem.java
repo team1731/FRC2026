@@ -2,13 +2,19 @@ package frc.robot.subsystems.shooter.turret;
 
 import frc.lib.frc1731.Utils;
 import frc.lib.frc1731.hardware.motor.ctre.MotorIOTalonFX;
+import frc.lib.frc6328.FieldConstants;
+import frc.lib.frc6328.FieldConstants.Hub;
 import frc.robot.Robot;
 import frc.robot.subsystems.BaseSubsystem;
 
 import static edu.wpi.first.units.Units.*;
 import static frc.robot.subsystems.shooter.turret.TurretConstants.*;
 
+import java.util.function.Supplier;
+
 import edu.wpi.first.math.controller.ArmFeedforward;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
@@ -53,6 +59,7 @@ public class TurretSubsystem extends BaseSubsystem {
         if (!enabled) return;
         motor = new MotorIOTalonFX(kLeftPortConfigs);
         motor.withPIDGains(kPositionGains);
+        motor.setSoftLimits(kMinAngle.in(Rotations), kMaxAngle.in(Rotations));
     }
 
     public Angle getTargetAngle() {
@@ -108,6 +115,15 @@ public class TurretSubsystem extends BaseSubsystem {
         return run(() -> {
             motor.setPercentOutput(percent);
             sim.setInputVoltage(percent*12d);
+        });
+    }
+
+    public Command aimAtHub(Supplier<Pose2d> swervePose) {
+        return run(() -> {
+            Translation2d targetPose = Utils.flip(FieldConstants.Hub.topCenterPoint.toTranslation2d());
+            Pose2d robotPose = swervePose.get();
+
+            
         });
     }
 }

@@ -10,7 +10,6 @@ import static frc.robot.subsystems.shooter.flywheel.FlywheelConstants.*;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class FlywheelSubsystem extends VelocitySubsystem<MotorIOTalonFX> {
-    private MotorIOTalonFX motor;
     private LoggedTunableNumber flywheelTunedSetpoint = new LoggedTunableNumber("Flywheel Setpoint RPS", 50, () -> true);
 
     public FlywheelSubsystem(boolean enabled) {

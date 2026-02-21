@@ -128,4 +128,8 @@ public class HoodSubsystem extends BaseSubsystem {
             sim.setVoltage(Volts.of(percent*12d));
         });
     }
+
+    public Command stowHoodCommand() {
+        return setAngleCommand(kStartAngle);
+    }
 }

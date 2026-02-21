@@ -16,7 +16,6 @@ import frc.robot.subsystems.vision.camera.BasicCamera;
 import frc.robot.subsystems.vision.camera.Camera;
 import frc.robot.subsystems.vision.camera.CameraChoice;
 import frc.robot.subsystems.vision.helpers.AutoLineupHelper;
-import frc.robot.subsystems.vision.helpers.AutoLineupHelper.LineupInstruction;
  
 public class AprilTagSubsystem extends BaseSubsystem {
     public static class AprilTagTarget {

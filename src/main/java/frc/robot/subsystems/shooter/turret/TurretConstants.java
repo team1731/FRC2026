@@ -2,7 +2,10 @@ package frc.robot.subsystems.shooter.turret;
 
 import static edu.wpi.first.units.Units.*;
 
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.Mass;
@@ -11,8 +14,20 @@ import frc.lib.frc1731.hardware.motor.PortConfig;
 import frc.lib.frc1731.subsystem.converter.AngularSubsystemConverter;
 
 public class TurretConstants {
-    public static final double kGearRatio = 20d / 160d;
+    public static final double kGearRatio = (15d / 40d * 15d / 40d * 40d / 160d); // 256.00 : 9.00 overall reduction;
     public static final double kEpsilon = 1d; // Degrees;
+
+    public static final Translation3d kLeftTurretToRobot = new Translation3d(
+        Units.inchesToMeters(-7.25d), 
+        Units.inchesToMeters(-5.75d), 
+        Units.inchesToMeters(11.4125d)
+    );
+
+    public static final Translation3d kRightTurretToRobot = new Translation3d(
+        Units.inchesToMeters(7.25d), 
+        Units.inchesToMeters(-5.75d), 
+        Units.inchesToMeters(11.4125d)
+    );
 
     public static final AngularSubsystemConverter kConverter = new AngularSubsystemConverter(kGearRatio);
 

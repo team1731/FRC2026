@@ -1,6 +1,8 @@
 package frc.lib.frc1731;
 
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.Trajectory;
+import frc.lib.frc6328.FieldConstants;
 
 /**
  * General utility class with helper methods
@@ -32,6 +34,10 @@ public final class Utils {
      */
     public static boolean isWithin(double value, double target, double tolerance) {
         return Math.abs(target - value) <= tolerance;
+    }
+
+    public static Translation2d flip(Translation2d point) {
+        return new Translation2d(FieldConstants.fieldLength - point.getX(), FieldConstants.fieldWidth - point.getY());
     }
 
     public static void printTrajectory(String name, Trajectory trajectory) {
