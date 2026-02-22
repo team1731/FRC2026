@@ -20,7 +20,6 @@ import frc.lib.frc1731.field.FieldLayout;
 import frc.lib.frc1731.field.ReefscapeFieldLayout;
 import frc.lib.frc1731.log.AKLogger;
 import frc.lib.frc1731.log.MessageLog;
-import frc.robot.subsystems.vision.AprilTagSubsystem;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -64,8 +63,6 @@ public class Robot extends LoggedRobot {
 	public void robotInit() {
 		DataLogManager.start();
 		MessageLog.start();
-		// SignalLogger.setPath("C:\\Users\\Abbas\\Documents\\Robotics\\ctre-logs");
-		AprilTagSubsystem.setupPortForwarding();
 		LiveWindow.disableAllTelemetry();
 
 		// Instantiate our robot container. This will perform all of our button bindings,

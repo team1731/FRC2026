@@ -24,7 +24,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.drive.DrivetrainVisionCallback;
 
-public class VSLAMSubsystem {
+public class OLD_VSLAMSubsystem {
 
     private float yaw_offset = 0.0f;
 
@@ -60,7 +60,7 @@ public class VSLAMSubsystem {
     public static final Transform2d ROBOT_TO_OCULUS = new Transform2d(Units.inchesToMeters(6.0),
             Units.inchesToMeters(-10), new Rotation2d());
 
-    public VSLAMSubsystem(DrivetrainVisionCallback visionCallback) {
+    public OLD_VSLAMSubsystem(DrivetrainVisionCallback visionCallback) {
         visionMeasurementCallback = visionCallback;
         networkTableInstance = NetworkTableInstance.getDefault();
     }

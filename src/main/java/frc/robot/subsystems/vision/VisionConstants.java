@@ -4,25 +4,23 @@ import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 public class VisionConstants {
     /*
      * PHOTONVISION CONSTANTS
      */
-    public static final String camera1Name = "ElevSide";
-    public static final String camera2Name = "BattSide";
-    public static final double camera1FOV = 59.76 * 46.81; // field of view for cam 1
-    public static final double camera2FOV = 79.49 * 64.11; // field of view for cam 2
-    public static final double camera2FOVRatio =2.67/1.33; //camera2FOV / camera1FOV;
+    // public static final String camera1Name = "ElevSide";
+    // public static final String camera2Name = "BattSide";
+    // public static final double camera1FOV = 59.76 * 46.81; // field of view for cam 1
+    // public static final double camera2FOV = 79.49 * 64.11; // field of view for cam 2
+    // public static final double camera2FOVRatio =2.67/1.33; //camera2FOV / camera1FOV;
 
     // AprilTag drive targeting constants
-    public static final double VISION_FORWARD_kP = 1;
-    public static final double VISION_STRAFE_kP = 0.1;
-    public static final double VISION_ROTATE_kP = 1;
-    public static final double MAX_ANGULAR_SPEED = RotationsPerSecond.of(0.1).in(RadiansPerSecond);
-    public static final double MAX_LINEAR_SPEED = 0.5;
+    // public static final double VISION_FORWARD_kP = 1;
+    // public static final double VISION_STRAFE_kP = 0.1;
+    // public static final double VISION_ROTATE_kP = 1;
+    // public static final double MAX_ANGULAR_SPEED = RotationsPerSecond.of(0.1).in(RadiansPerSecond);
+    // public static final double MAX_LINEAR_SPEED = 0.5;
 
     public static final double targetConfidenceDelta = 0.5;
 

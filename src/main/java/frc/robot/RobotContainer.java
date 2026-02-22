@@ -14,9 +14,15 @@ import frc.robot.subsystems.intake.IntakeSlideSubsystem;
 import frc.robot.subsystems.leds.LEDSubsystem;
 import frc.robot.subsystems.superstructure.Superstructure;
 import frc.robot.subsystems.turret.TurretSubsystem;
+import frc.robot.subsystems.vision.limelight.AprilTagSubsystem;
+import frc.robot.subsystems.vision.questnav.QuestNavSubsystem;
 
 public class RobotContainer {
     /* Subsystems */
+
+    protected static QuestNavSubsystem vslam;
+    protected static AprilTagSubsystem aprilTag;
+
     protected static SwerveSubsystem swerve;
     protected static LEDSubsystem led;
     protected static FlywheelSubsystem flywheel;
@@ -53,11 +59,21 @@ public class RobotContainer {
         feeder = new FeederSubsystem(true);
         roller = new IntakeRollerSubsystem(true);
 
+        vslam = new QuestNavSubsystem(true);
+        aprilTag = new AprilTagSubsystem(true);
+
         superstructure = new Superstructure(swerve, flywheel, hood, turret);
 
         // Drivetrain will execute this command periodically 
         // if no other command is active on the drivetrain
         swerve.setDefaultCommand(swerve.driveCommand(driver, () -> true));
+
+        vslam.setDefaultCommand(() -> {
+            vslam.addVisionMeasurement((pose, timestamp, stdDevs) -> {
+                swerve.addVisionMeasurement(pose, timestamp, stdDevs);
+            });
+        });
+
         flywheel.setDefaultCommand(flywheel.stopCommand());
         turret.setDefaultCommand(turret.setManualCommand(driver.getLeftX() / 2d));
         // hood.setDefaultCommand(hood.setManualCommand(driver.getRightY() / 2d));
