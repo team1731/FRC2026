@@ -55,7 +55,7 @@ public class QuadraticRegression extends Regression {
         // Step 4: Calculate residuals
         double ssr = 0, sst = 0;
         for (int i = 0; i < length; i++) {
-            ssr += Math.pow((outputs[i] - grabInterpolation(inputs[i])), 2);
+            ssr += Math.pow((outputs[i] - getInterpolation(inputs[i])), 2);
             sst += Math.pow(outputs[i] - sum_y/length, 2);
         }
 
@@ -63,7 +63,7 @@ public class QuadraticRegression extends Regression {
     }
 
     @Override
-    public double grabInterpolation(double input) {
+    public double getInterpolation(double input) {
         return a*(input*input)+b*input+c;
     }
 

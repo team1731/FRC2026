@@ -2,9 +2,6 @@ package frc.robot.subsystems.shooter.turret;
 
 import frc.lib.frc1731.Utils;
 import frc.lib.frc1731.hardware.motor.ctre.MotorIOTalonFX;
-import frc.lib.frc6328.FieldConstants;
-import frc.lib.frc6328.FieldConstants.Hub;
-import frc.robot.Robot;
 import frc.robot.subsystems.BaseSubsystem;
 
 import static edu.wpi.first.units.Units.*;
@@ -12,29 +9,14 @@ import static frc.robot.subsystems.shooter.turret.TurretConstants.*;
 
 import java.util.function.Supplier;
 
-import edu.wpi.first.math.controller.ArmFeedforward;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
-import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.units.measure.*;
+import edu.wpi.first.wpilibj2.command.*;
 
 public class TurretSubsystem extends BaseSubsystem {
-    private MotorIOTalonFX motor;
-    private Angle targetAngle = Degrees.zero();
-    private ArmFeedforward simFF = new ArmFeedforward(kPositionGains.kS, kPositionGains.kG, kPositionGains.kV, kPositionGains.kA);
-
-    private SingleJointedArmSim sim = new SingleJointedArmSim(
-        kDCMotor,
-        1d/kGearRatio,
-        0.5 * kTurretMass.in(Kilograms) * Math.pow(kTurretRadius.in(Meters), 2), // 0.0004
-        kTurretRadius.in(Meters), 
-        kMinAngle.in(Radians), 
-        kMaxAngle.in(Radians),
-        false, 
-        0d
-    );
+    private MotorIOTalonFX leftMotor, rightMotor;
+    private Angle leftTargetAngle = Degrees.zero();
+    private Angle rightTargetAngle = Degrees.zero();
 
     // private SysIdRoutine routine = new SysIdRoutine(
     //     new SysIdRoutine.Config(
@@ -57,73 +39,105 @@ public class TurretSubsystem extends BaseSubsystem {
     public TurretSubsystem(boolean enabled) {
         super(enabled);
         if (!enabled) return;
-        motor = new MotorIOTalonFX(kLeftPortConfigs);
-        motor.withPIDGains(kPositionGains);
-        motor.setSoftLimits(kMinAngle.in(Rotations), kMaxAngle.in(Rotations));
+        leftMotor = new MotorIOTalonFX(kLeftPortConfigs);
+        rightMotor = new MotorIOTalonFX(kRightPortConfigs);
+        
+        leftMotor.withPIDGains(kPositionGains);
+        rightMotor.withPIDGains(kPositionGains);
+
+        leftMotor.setSoftLimits(kConverter.toMotor(kMinAngle).in(Rotations), kConverter.toMotor(kMaxAngle).in(Rotations));
+        rightMotor.setSoftLimits(kConverter.toMotor(kMinAngle).in(Rotations), kConverter.toMotor(kMaxAngle).in(Rotations));
     }
 
-    public Angle getTargetAngle() {
-        return targetAngle;
+    public Angle getLeftTargetAngle() {
+        return leftTargetAngle;
     }
 
-    public Angle getTurretAngle() {
-        if (Robot.isSimulation()) return Radians.of(sim.getAngleRads());
-        return kConverter.toMechanism(Rotations.of(motor.getRotations()));
+    public Angle getRightTargetAngle() {
+        return rightTargetAngle;
+    }
+    
+    public Angle getLeftTurretAngle() {
+        return kConverter.toMechanism(Rotations.of(leftMotor.getRotations()));
     }
 
-    public Angle getMotorAngle() {
-        if (Robot.isSimulation()) return kConverter.toMotor(Radians.of(sim.getAngleRads()));
-        return Rotations.of(motor.getRotations());
+    public Angle getRightTurretAngle() {
+        return kConverter.toMechanism(Rotations.of(rightMotor.getRotations()));
     }
 
-    public boolean atTargetAngle() {
-        return getTurretAngle().isNear(getTargetAngle(), kEpsilon);
+    public boolean atLeftTargetAngle() {
+        return getLeftTurretAngle().isNear(getLeftTargetAngle(), kEpsilon);
     }
 
-    @SuppressWarnings("unused")
-    private void setVoltage(Voltage volts) {
-        motor.setVoltage(volts.in(Volts));
-        if (Robot.isSimulation()) sim.setInputVoltage(volts.in(Volts));
+    public boolean atRightTargetAngle() {
+        return getRightTurretAngle().isNear(getRightTargetAngle(), kEpsilon);
+    }
+
+    // @SuppressWarnings("unused")
+    // private void setVoltage(Voltage volts) {
+    //     leftMotor.setVoltage(volts.in(Volts));
+    // }
+
+    public Pose3d getLeftTurretPose(Pose3d swervePose) {
+        return swervePose.transformBy(kLeftTurretToRobot);
+    }
+
+    public Pose3d getRightTurretPose(Pose3d swervePose) {
+        return swervePose.transformBy(kRightTurretToRobot);
+    }
+
+    public Transform3d getTransformToTarget(Pose3d swervePose, Pose3d targetPose) {
+        return getLeftTurretPose(swervePose).minus(targetPose);
     }
 
     @Override
     public void periodicTelemetry() {
-        logger.log("Current Rotations", motor.getRotations());
-        logger.log("Current Degrees", getTurretAngle().in(Degrees));
-        logger.log("Target Rotations", kConverter.toMotor(getTargetAngle()).in(Rotations));
-        logger.log("Target Degrees", getTargetAngle().in(Degrees));
-        logger.log("At Target Angle", atTargetAngle());
-        sim.update(Robot.CLOCK.dt());
+        logger.log("Left/Motor Rotations", leftMotor.getRotations());
+        logger.log("Left/Turret Degrees", getLeftTurretAngle().in(Degrees));
+        logger.log("Left/Target Degrees", getLeftTargetAngle().in(Degrees));
+        logger.log("Left/At Target", atLeftTargetAngle());
+
+        logger.log("Right/Motor Rotations", rightMotor.getRotations());
+        logger.log("Right/Turret Degrees", getRightTurretAngle().in(Degrees));
+        logger.log("Right/Target Degrees", getRightTargetAngle().in(Degrees));
+        logger.log("Right/At Target", atRightTargetAngle());
     }
 
-    public Command setTurretAngleCommand(Angle targetAngle) {
+    public Command setLeftTurretCommand(double targetDegrees) {
         return run(() -> {
-            this.targetAngle = targetAngle;
-            motor.setPosition(kConverter.toMotor(targetAngle).in(Rotations));
-            if (Robot.isReal()) return;
-            double outputCurrent = kPositionGains.toPIDController().calculate(getMotorAngle().in(Rotations), kConverter.toMotor(getTargetAngle()).in(Rotations))
-                + simFF.calculate(kConverter.toMotor(getTargetAngle()).in(Radians), kConverter.toMotor(Rotations.of(sim.getVelocityRadPerSec()/(2*Math.PI))).in(Rotations));
-            outputCurrent = Utils.clamp(outputCurrent, kCurrentLimit);
-
-            double appliedVolts = kDCMotor.getVoltage(outputCurrent, sim.getVelocityRadPerSec());
-            appliedVolts = Utils.clamp(appliedVolts, 12d);
-            sim.setInputVoltage(appliedVolts);
+            leftMotor.setPosition(kConverter.toMotor(Degrees.of(targetDegrees)).in(Rotations));
         });
     }
 
-    public Command setManualCommand(double percent) {
+    public Command setRightTurretCommand(double targetDegrees) {
         return run(() -> {
-            motor.setPercentOutput(percent);
-            sim.setInputVoltage(percent*12d);
+            rightMotor.setPosition(kConverter.toMotor(Degrees.of(targetDegrees)).in(Rotations));
         });
     }
 
-    public Command aimAtHub(Supplier<Pose2d> swervePose) {
+    public Command driveManualCommand(double left, double right) {
         return run(() -> {
-            Translation2d targetPose = Utils.flip(FieldConstants.Hub.topCenterPoint.toTranslation2d());
-            Pose2d robotPose = swervePose.get();
+            leftMotor.setPercentOutput(left);
+            rightMotor.setPercentOutput(right);
+        });
+    }
 
-            
+    public Command aimCommand(Supplier<Pose2d> swervePose, Supplier<Pose2d> targetPose) {
+        return this.run(() -> {
+            Pose3d leftPose = new Pose3d(swervePose.get()).transformBy(kLeftTurretToRobot);
+            Pose3d rightPose = new Pose3d(swervePose.get()).transformBy(kRightTurretToRobot);
+
+            Transform3d leftTransformToTarget = new Pose3d(targetPose.get()).minus(leftPose);
+            Transform3d rightTransformToTarget = new Pose3d(targetPose.get()).minus(rightPose);
+
+            double leftTurretAngle = Math.toDegrees(Math.atan(leftTransformToTarget.getX() / leftTransformToTarget.getY())) - swervePose.get().getRotation().getDegrees();
+            double rightTurretAngle = Math.toDegrees(Math.atan(rightTransformToTarget.getX() / rightTransformToTarget.getY())) - swervePose.get().getRotation().getDegrees();
+
+            leftTurretAngle = Utils.clamp(leftTurretAngle, kMinAngle.in(Degrees), kMaxAngle.in(Degrees));
+            rightTurretAngle = Utils.clamp(rightTurretAngle, kMinAngle.in(Degrees), kMaxAngle.in(Degrees));
+
+            leftMotor.setPosition(kConverter.toMotor(Degrees.of(leftTurretAngle)).in(Rotations));
+            rightMotor.setPosition(kConverter.toMotor(Degrees.of(rightTurretAngle)).in(Rotations));
         });
     }
 }

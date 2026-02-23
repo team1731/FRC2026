@@ -18,7 +18,7 @@ public class IntakeRollerSubsystem extends VelocitySubsystem<MotorIOTalonFX>{
 
     @Override
     protected void initializeHardware() {
-        motor = new MotorIOTalonFX(kMotorConfig);
+        motor = new MotorIOTalonFX(kRollerMotorConfig);
         motor.withPIDGains(kPIDGains);
         
     }

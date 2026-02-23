@@ -7,12 +7,12 @@ public abstract class Regression {
     /**
      * Returns y assuming input is x
      */
-    public abstract double grabInterpolation(double input);
+    public abstract double getInterpolation(double input);
 
     /**
      * Returns x assuming output is y
      */
-    public double grabInverseInterpolation(double output) {
+    public double getInverseInterpolation(double output) {
         return 0.0;
     }
 
@@ -89,9 +89,9 @@ public abstract class Regression {
 
         switch (getRegressionType(inputs, outputs)) {
             case kLinear:
-                return new LinearRegression(inputs, outputs).grabInterpolation(input);
+                return new LinearRegression(inputs, outputs).getInterpolation(input);
             case kQuadratic:
-                return new QuadraticRegression(inputs, outputs).grabInterpolation(input);
+                return new QuadraticRegression(inputs, outputs).getInterpolation(input);
             default:
                 return Double.NaN;
         }

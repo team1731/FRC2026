@@ -11,9 +11,9 @@ import static frc.robot.subsystems.feeder.FeederConstants.*;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 
-public class FeederSubsystem extends VelocitySubsystem<MotorIOTalonFX>{
+public class IndexerSubsystem extends VelocitySubsystem<MotorIOTalonFX>{
 
-    public FeederSubsystem(boolean enabled) {
+    public IndexerSubsystem(boolean enabled) {
         super(enabled);
     }
 

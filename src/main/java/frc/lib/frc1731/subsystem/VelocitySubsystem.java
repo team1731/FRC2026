@@ -110,7 +110,7 @@ public abstract class VelocitySubsystem<M extends MotorIO> extends BaseSubsystem
     }
 
     public Command stopCommand() {
-        return setVelocityCommand(RotationsPerSecond.zero())
+        return setPercentOutputCommand(0.0)
         .withName("Stop");
     }
 }
