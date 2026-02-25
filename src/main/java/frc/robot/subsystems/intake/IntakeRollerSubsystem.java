@@ -5,6 +5,11 @@ import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static frc.robot.subsystems.intake.IntakeConstants.*;
 
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.FeedbackConfigs;
+import com.ctre.phoenix6.configs.MagnetSensorConfigs;
+import com.ctre.phoenix6.hardware.core.CoreCANcoder;
+
 import edu.wpi.first.math.system.plant.DCMotor;
 import frc.lib.frc1731.hardware.motor.ctre.MotorIOTalonFX;
 import frc.lib.frc1731.sim.SimpleVelocitySim.SimConstants;
@@ -20,7 +25,6 @@ public class IntakeRollerSubsystem extends VelocitySubsystem<MotorIOTalonFX>{
     protected void initializeHardware() {
         motor = new MotorIOTalonFX(kRollerMotorConfig);
         motor.withPIDGains(kPIDGains);
-        
     }
 
     @Override

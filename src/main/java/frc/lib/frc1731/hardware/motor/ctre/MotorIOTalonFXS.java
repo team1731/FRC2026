@@ -28,6 +28,8 @@ public class MotorIOTalonFXS extends MotorIO {
 
     private DynamicMotionMagicVoltage mmOutput = new DynamicMotionMagicVoltage(0d, 0d, 0d);
 
+    private MotionMagicVoltage mmVoltage = new MotionMagicVoltage(0);
+
     private List<PIDGains> pidGains = new ArrayList<>();
 
     public MotorIOTalonFXS(PortConfig config) {
@@ -37,6 +39,7 @@ public class MotorIOTalonFXS extends MotorIO {
 
         // Set up configuration
         cfg.MotorOutput.NeutralMode = NeutralModeValue.Brake; // Brake on default
+        cfg.Commutation.MotorArrangement = MotorArrangementValue.Minion_JST;
 
         cfg.MotorOutput.Inverted = config.kInverted ? // Inverted = ccw
             InvertedValue.CounterClockwise_Positive : 
@@ -180,7 +183,8 @@ public class MotorIOTalonFXS extends MotorIO {
 
     @Override
     public void setPosition(double rotations, int pidSlot) {
-        this.motor.setControl(mmOutput.withSlot(pidSlot).withPosition(rotations));
+        // this.motor.setControl(mmOutput.withSlot(pidSlot).withPosition(rotations));
+        this.motor.setControl(mmVoltage.withSlot(pidSlot).withPosition(rotations));
     }
 
     @Override

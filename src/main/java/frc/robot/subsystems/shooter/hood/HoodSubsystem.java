@@ -1,39 +1,55 @@
 package frc.robot.subsystems.shooter.hood;
 
 import edu.wpi.first.units.measure.*;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
+import frc.lib.frc1731.Utils;
 import frc.lib.frc1731.hardware.motor.ctre.MotorIOTalonFXS;
 import frc.robot.subsystems.BaseSubsystem;
 
 import static edu.wpi.first.units.Units.*;
 import static frc.robot.subsystems.shooter.hood.HoodConstants.*;
 
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
+
 public class HoodSubsystem extends BaseSubsystem {
     private MotorIOTalonFXS leftMotor, rightMotor;
     private Angle targetAngle = Degrees.zero();
 
+    private double targetRotations = 0;
+
     public HoodSubsystem(boolean enabled) {
         super(enabled);
         if (!isEnabled()) return;
-        leftMotor = new MotorIOTalonFXS(kLeftHoodConfig);
+        // leftMotor = new MotorIOTalonFXS(kLeftHoodConfig);
         rightMotor = new MotorIOTalonFXS(kRightHoodConfig);
-        
-        leftMotor.withPIDGains(kPositionGains);
+
+        // leftMotor.withPIDGains(kPositionGains);
         rightMotor.withPIDGains(kPositionGains);
 
-        leftMotor.resetEncoderPosition(kStartRotations.in(Rotations));
-        rightMotor.resetEncoderPosition(kStartRotations.in(Rotations));
+        // leftMotor.resetEncoderPosition(kStartRotations.in(Rotations));
+        // rightMotor.resetEncoderPosition(kStartRotations.in(Rotations));
 
-        leftMotor.setSoftLimits(kConverter.toMotor(kStartAngle).in(Rotations), kConverter.toMotor(kMaxAngle).in(Rotations));
-        rightMotor.setSoftLimits(kConverter.toMotor(kStartAngle).in(Rotations), kConverter.toMotor(kMaxAngle).in(Rotations));
+        // leftMotor.setSoftLimits(kConverter.toMotor(kStartAngle).in(Rotations), kConverter.toMotor(kMaxAngle).in(Rotations));
+        // rightMotor.setSoftLimits(kConverter.toMotor(kStartAngle).in(Rotations), kConverter.toMotor(kMaxAngle).in(Rotations));
+        rightMotor.setSoftLimits(0, 7);
+        rightMotor.withMotionMagicConfigs(new MotionMagicConfigs()
+            .withMotionMagicAcceleration(50)
+            .withMotionMagicCruiseVelocity(50)
+            .withMotionMagicJerk(100)
+        );
+
+        rightMotor.setDynamicMotionMagicSpeeds(20, 20);
+
+        rightMotor.resetEncoderPosition(0);
     }
 
     public Angle getMotorAngle() {
-        return Rotations.of(leftMotor.getRotations());
+        return Rotations.of(rightMotor.getRotations());
     }
 
     public Angle getHoodAngle() {
-        return kConverter.toMechanism(Rotations.of(leftMotor.getRotations()));
+        return kConverter.toMechanism(Rotations.of(rightMotor.getRotations()));
     }
 
     public Angle getTargetAngle() {
@@ -50,6 +66,10 @@ public class HoodSubsystem extends BaseSubsystem {
         return getHoodAngle().isNear(targetAngle, kEpsilon);
     }
 
+    public boolean atRightTarget() {
+        return Utils.isWithin(rightMotor.getRotations(), targetRotations, 1);
+    }
+
     @Override
     public void periodicTelemetry() {
         logger.log("Current Position", getMotorAngle().in(Rotations));
@@ -57,6 +77,8 @@ public class HoodSubsystem extends BaseSubsystem {
         logger.log("Target Position", kConverter.toMotor(getTargetAngle()).in(Rotations));
         logger.log("Target Degrees", getTargetAngle().in(Degrees));
         logger.log("At Target Angle", atTargetAngle());
+
+        SmartDashboard.putNumber("Hood Angle", rightMotor.getRotations());
     }
 
     public Command setLeftHoodCommand(double targetDegrees) {
@@ -68,6 +90,12 @@ public class HoodSubsystem extends BaseSubsystem {
     public Command setRightHoodCommand(double targetDegrees) {
         return this.run(() -> {
             rightMotor.setPosition(kConverter.toMotor(Degrees.of(targetDegrees)).in(Rotations));
+        });
+    }
+
+    public Command setRightHoodRotationsCommand(double rotations) {
+        return this.run(() -> {
+            rightMotor.setPosition(rotations);
         });
     }
 

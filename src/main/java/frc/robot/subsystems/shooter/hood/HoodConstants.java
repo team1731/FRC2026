@@ -23,22 +23,22 @@ public class HoodConstants {
     public static final Angle kStartRotations = kConverter.toMotor(kStartAngle);
     public static final Angle kMaxRotations = kConverter.toMotor(kMaxAngle);
     public static final Angle kRotationsRange = kMaxRotations.minus(kStartRotations);
+    public static final double kMaxRotationsValue = -7d;
 
     public static final Distance kHoodRadius = Inches.of(8.4d); // Radius of the hood
     public static final Mass kHoodMass = Pounds.of(2d); // Weight of the moving hood
 
-    public static final PortConfig kLeftHoodConfig = new PortConfig(0);
-    public static final PortConfig kRightHoodConfig = new PortConfig(0);
+    public static final PortConfig kLeftHoodConfig = new PortConfig("Left CANivore", 23, true);
+    public static final PortConfig kRightHoodConfig = new PortConfig("Left CANivore", 19, false);
 
     public static final double kCurrentLimit = 40d; // Amps
 
     public static final PIDGains kPositionGains = new PIDGains()
-    .setP(1.0) // 27 rotation error = max voltage (12 V)
-    .setI(0.0)
-    .setD(0.0)
-    .setV(10) // 
-    .setS(0.02)
-    .setA(0.01)
+        .setP(4.8)
+        .setD(0.1)
+        .setV(0.12)
+        .setS(0.25)
+        .setA(0.01)
     ;
 
     // public static final PIDGains kSimGains = new PIDGains().setP(1).setD(0);

@@ -17,8 +17,8 @@ public class FlywheelConstants {
     public static final Distance kFlywheelRadius = Inches.of(2d); // 4 inch diameter
     public static final Mass kFlywheelMass = Pounds.of(1d); // 1 lb flywheel
 
-    public static final PortConfig kLeftFlywheelConfig = new PortConfig("rio", 0, false);
-    public static final PortConfig kRightFlywheelConfig = new PortConfig("rio", 0, false);
+    public static final PortConfig kLeftFlywheelConfig = new PortConfig("Left CANivore", 24, false);
+    public static final PortConfig kRightFlywheelConfig = new PortConfig("Left CANivore", 20, true);
 
     public static final double kCurrentLimit = 60d; // Amps
 

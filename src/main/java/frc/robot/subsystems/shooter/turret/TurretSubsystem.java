@@ -9,8 +9,12 @@ import static frc.robot.subsystems.shooter.turret.TurretConstants.*;
 
 import java.util.function.Supplier;
 
+import com.ctre.phoenix6.configs.FeedbackConfigs;
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
+
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.units.measure.*;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 
 public class TurretSubsystem extends BaseSubsystem {
@@ -39,14 +43,26 @@ public class TurretSubsystem extends BaseSubsystem {
     public TurretSubsystem(boolean enabled) {
         super(enabled);
         if (!enabled) return;
-        leftMotor = new MotorIOTalonFX(kLeftPortConfigs);
+        // leftMotor = new MotorIOTalonFX(kLeftPortConfigs);
         rightMotor = new MotorIOTalonFX(kRightPortConfigs);
         
-        leftMotor.withPIDGains(kPositionGains);
+        // leftMotor.withPIDGains(kPositionGains);
         rightMotor.withPIDGains(kPositionGains);
+        rightMotor.withStatorCurrentLimit(kCurrentLimit);
 
-        leftMotor.setSoftLimits(kConverter.toMotor(kMinAngle).in(Rotations), kConverter.toMotor(kMaxAngle).in(Rotations));
-        rightMotor.setSoftLimits(kConverter.toMotor(kMinAngle).in(Rotations), kConverter.toMotor(kMaxAngle).in(Rotations));
+        rightMotor.setSoftLimits(-2, 2);
+        rightMotor.setDynamicMotionMagicSpeeds(20, 20);
+        rightMotor.withMotionMagicConfigs(
+            new MotionMagicConfigs()
+            .withMotionMagicCruiseVelocity(20)
+            .withMotionMagicAcceleration(20)
+        );
+
+        rightMotor.resetEncoderPosition(0);
+        // rightMotor.withFeedbackConfigs(new FeedbackConfigs().withSensorToMechanismRatio(1d / kGearRatio));
+
+        // leftMotor.setSoftLimits(kConverter.toMotor(kMinAngle).in(Rotations), kConverter.toMotor(kMaxAngle).in(Rotations));
+        // rightMotor.setSoftLimits(kConverter.toMotor(kMinAngle).in(Rotations), kConverter.toMotor(kMaxAngle).in(Rotations));
     }
 
     public Angle getLeftTargetAngle() {
@@ -92,15 +108,16 @@ public class TurretSubsystem extends BaseSubsystem {
 
     @Override
     public void periodicTelemetry() {
-        logger.log("Left/Motor Rotations", leftMotor.getRotations());
-        logger.log("Left/Turret Degrees", getLeftTurretAngle().in(Degrees));
-        logger.log("Left/Target Degrees", getLeftTargetAngle().in(Degrees));
-        logger.log("Left/At Target", atLeftTargetAngle());
+        // logger.log("Left/Motor Rotations", leftMotor.getRotations());
+        // logger.log("Left/Turret Degrees", getLeftTurretAngle().in(Degrees));
+        // logger.log("Left/Target Degrees", getLeftTargetAngle().in(Degrees));
+        // logger.log("Left/At Target", atLeftTargetAngle());
 
         logger.log("Right/Motor Rotations", rightMotor.getRotations());
-        logger.log("Right/Turret Degrees", getRightTurretAngle().in(Degrees));
-        logger.log("Right/Target Degrees", getRightTargetAngle().in(Degrees));
-        logger.log("Right/At Target", atRightTargetAngle());
+        SmartDashboard.putNumber("Right Rotations", rightMotor.getRotations());
+        // logger.log("Right/Turret Degrees", getRightTurretAngle().in(Degrees));
+        // logger.log("Right/Target Degrees", getRightTargetAngle().in(Degrees));
+        // logger.log("Right/At Target", atRightTargetAngle());
     }
 
     public Command setLeftTurretCommand(double targetDegrees) {
@@ -115,9 +132,27 @@ public class TurretSubsystem extends BaseSubsystem {
         });
     }
 
+    public Command setRightRotations(double targetRotations) {
+        return run(() -> {
+            rightMotor.setPosition(targetRotations);
+        });
+    }
+
+    public Command setRotations(double rots) {
+        return run(() -> {
+            rightMotor.setPosition(rots);
+        });
+    }
+
+    public Command stopCommand() {
+        return run(() -> {
+            rightMotor.setPercentOutput(0);
+        });
+    }
+
     public Command driveManualCommand(double left, double right) {
         return run(() -> {
-            leftMotor.setPercentOutput(left);
+            // leftMotor.setPercentOutput(left);
             rightMotor.setPercentOutput(right);
         });
     }

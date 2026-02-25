@@ -30,9 +30,16 @@ public class TurretConstants {
 
     public static final AngularSubsystemConverter kConverter = new AngularSubsystemConverter(kGearRatio);
 
-    public static final PIDGains kPositionGains = new PIDGains().setP(0d).setD(0.0).setS(0.01).setV(5);
-    public static final PortConfig kLeftPortConfigs = new PortConfig("rio", 30, false);
-    public static final PortConfig kRightPortConfigs = new PortConfig("rio", 31, false);
+    public static final PIDGains kPositionGains = new PIDGains()
+        .setP(4.8)
+        .setD(0.1)
+        .setV(0.12)
+        .setS(0.25)
+        .setA(0.01)
+    ;
+
+    public static final PortConfig kLeftPortConfigs = new PortConfig("Left CANivore", 22, false);
+    public static final PortConfig kRightPortConfigs = new PortConfig("Left CANivore", 18, false);
 
     public static final double kCurrentLimit = 40d; // Amps
 
