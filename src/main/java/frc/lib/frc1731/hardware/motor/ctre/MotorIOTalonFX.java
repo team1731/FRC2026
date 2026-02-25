@@ -28,6 +28,8 @@ public class MotorIOTalonFX extends MotorIO {
 
     private DynamicMotionMagicVoltage mmOutput = new DynamicMotionMagicVoltage(0d, 0d, 0d);
 
+    private MotionMagicVoltage mmVoltage = new MotionMagicVoltage(0);
+
     private List<PIDGains> pidGains = new ArrayList<>();
 
     public MotorIOTalonFX(PortConfig config) {
@@ -179,7 +181,8 @@ public class MotorIOTalonFX extends MotorIO {
 
     @Override
     public void setPosition(double rotations, int pidSlot) {
-        this.motor.setControl(mmOutput.withSlot(pidSlot).withPosition(rotations));
+        // this.motor.setControl(mmOutput.withSlot(pidSlot).withPosition(rotations));
+        this.motor.setControl(mmVoltage.withSlot(pidSlot).withPosition(rotations));
     }
 
     @Override

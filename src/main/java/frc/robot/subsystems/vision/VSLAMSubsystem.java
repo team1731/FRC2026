@@ -5,7 +5,9 @@ import java.util.EnumSet;
 import com.ctre.phoenix6.Utils;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.networktables.BooleanSubscriber;
 import edu.wpi.first.networktables.DoubleArrayPublisher;
@@ -59,6 +61,13 @@ public class VSLAMSubsystem {
      */
     public static final Transform2d ROBOT_TO_OCULUS = new Transform2d(Units.inchesToMeters(6.0),
             Units.inchesToMeters(-10), new Rotation2d());
+
+    public static final Transform3d kOculusToRobot = new Transform3d(
+            Units.inchesToMeters(-7.223150), 
+            Units.inchesToMeters(11.224197), 
+            Units.inchesToMeters(-7.260936),
+            new Rotation3d(0, 0, Math.PI)
+    );
 
     public VSLAMSubsystem(DrivetrainVisionCallback visionCallback) {
         visionMeasurementCallback = visionCallback;

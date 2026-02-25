@@ -73,7 +73,7 @@ public class Robot extends LoggedRobot {
 		loader = new AutoLoader();
 
 		FollowPathCommand.warmupCommand().schedule();
-		AKLogger.start();
+		// AKLogger.start();
 		// SignalLogger.start();
 
 		kFieldLayout.logToShuffleboard(isSimulation());

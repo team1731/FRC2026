@@ -195,16 +195,16 @@ public class SwerveSubsystem extends BaseSubsystem {
                 if (isFieldCentric.getAsBoolean()) {
                     drivetrain.setControl(
                         kFieldCentricControl
-                            .withVelocityX(-(Math.abs(m_xboxController.getLeftY()) * m_xboxController.getLeftY()) * kMaxSpeed)
-                            .withVelocityY(-(Math.abs(m_xboxController.getLeftX()) * m_xboxController.getLeftX()) * kMaxSpeed)
+                            .withVelocityX((Math.abs(m_xboxController.getLeftY()) * m_xboxController.getLeftY()) * kMaxSpeed)
+                            .withVelocityY((Math.abs(m_xboxController.getLeftX()) * m_xboxController.getLeftX()) * kMaxSpeed)
                             .withRotationalRate(-m_xboxController.getRightX() * kMaxAngularRate)
                             .withCenterOfRotation(RotationCenter)
                     );
                 } else {
                     drivetrain.setControl(
                         kRobotCentricControl
-                            .withVelocityX(-(Math.abs(m_xboxController.getLeftY()) * m_xboxController.getLeftY()) * kMaxSpeed)
-                            .withVelocityY(-(Math.abs(m_xboxController.getLeftX()) * m_xboxController.getLeftX()) * kMaxSpeed)
+                            .withVelocityX((Math.abs(m_xboxController.getLeftY()) * m_xboxController.getLeftY()) * kMaxSpeed)
+                            .withVelocityY((Math.abs(m_xboxController.getLeftX()) * m_xboxController.getLeftX()) * kMaxSpeed)
                             .withRotationalRate(-m_xboxController.getRightX() * kMaxAngularRate)
                             .withCenterOfRotation(RotationCenter)
                     );

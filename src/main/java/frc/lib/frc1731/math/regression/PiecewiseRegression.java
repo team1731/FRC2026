@@ -16,7 +16,7 @@ public class PiecewiseRegression extends Regression {
     }
 
     @Override
-    public double grabInterpolation(double input) {
+    public double getInterpolation(double input) {
         int startIndex = (int)(input/deltaDistance);
         int endIndex = startIndex + 1;
 
