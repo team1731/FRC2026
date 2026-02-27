@@ -1,18 +1,16 @@
 package frc.robot.subsystems;
 
-import java.util.Set;
 import java.util.function.Supplier;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.lib.frc1731.Utils;
-import frc.lib.frc1731.field.Field;
 import frc.lib.frc6328.FieldConstants;
+import frc.robot.Robot;
 import frc.robot.subsystems.drive.SwerveSubsystem;
+import frc.robot.subsystems.feeder.IndexerSubsystem;
+import frc.robot.subsystems.intake.IntakePivotSubsystem;
+import frc.robot.subsystems.intake.IntakeRollerSubsystem;
 import frc.robot.subsystems.shooter.ShotProfile;
 import frc.robot.subsystems.shooter.ShotTable;
 import frc.robot.subsystems.shooter.flywheel.FlywheelSubsystem;
@@ -24,6 +22,9 @@ public class Superstructure extends SubsystemBase {
     private FlywheelSubsystem flywheel;
     private HoodSubsystem hood;
     private TurretSubsystem turret;
+    private IndexerSubsystem indexer;
+    private IntakePivotSubsystem pivot;
+    private IntakeRollerSubsystem intake;
 
     private ShotTable shotTable = new ShotTable();
 
@@ -32,64 +33,135 @@ public class Superstructure extends SubsystemBase {
     private static Supplier<Pose2d> hubSupplier = () -> new Pose2d(Utils.flip(FieldConstants.Hub.topCenterPoint.toTranslation2d()), new Rotation2d());
     private static Supplier<Pose2d> passSupplier = () -> new Pose2d(Utils.flip(new Pose2d().getTranslation()), new Rotation2d());
 
-    public Superstructure(SwerveSubsystem swerve, FlywheelSubsystem flywheel, HoodSubsystem hood, TurretSubsystem turret) {
+    public Superstructure(SwerveSubsystem swerve, FlywheelSubsystem flywheel, HoodSubsystem hood, TurretSubsystem turret, 
+                            IndexerSubsystem indexer, IntakePivotSubsystem pivot, IntakeRollerSubsystem intake) {
         this.swerve = swerve;
         this.flywheel = flywheel;
         this.hood = hood;
         this.turret = turret;
+        this.indexer = indexer;
+        this.pivot = pivot;
+        this.intake = intake;
     }
 
-    private double getTurretShotAngle() {
-        Translation2d robotPose = swerve.getCurrentPose().getTranslation();
-        Translation2d hubPose = Field.HUB.getPosition().toTranslation2d();
-        double aimRadians = Math.atan((hubPose.getX() - robotPose.getX()) / (hubPose.getY() - robotPose.getY()));
-        return Math.toDegrees(aimRadians) - swerve.getCurrentPose().getRotation().getDegrees();
+    public Command resetGyroCommand() {
+        return new InstantCommand(() -> swerve.resetPose(
+            Robot.isRedAlliance() ? new Pose2d(10.38, 3.01, new Rotation2d(Math.toRadians(0)))
+                : new Pose2d(7.168, 5.006, new Rotation2d(Math.toRadians(180)))
+        ));
     }
 
-    private double getLeftShooterDistanceToHub() {
-        Translation2d hub = FieldConstants.Hub.topCenterPoint.toTranslation2d();
-        Pose3d leftShooter = turret.getLeftTurretPose(new Pose3d(swerve.getCurrentPose()));
-        return hub.getDistance(leftShooter.getTranslation().toTranslation2d());
+    public Command intakeCommand() {
+        return pivot.deployCommand().alongWith(intake.setPercentOutputCommand(0.6));
     }
 
-    private double getRightShooterDistanceToHub() {
-        Translation2d hub = FieldConstants.Hub.topCenterPoint.toTranslation2d();
-        Pose3d rightShooter = turret.getRightTurretPose(new Pose3d(swerve.getCurrentPose()));
-        return hub.getDistance(rightShooter.getTranslation().toTranslation2d());
-    }
-
-    public Command aimTurretAtHubCommand() {
-        return turret.aimCommand(() -> swerve.getCurrentPose(), hubSupplier);
-    }
-
-    public Command aimTurretForPassCommand() {
-        return turret.aimCommand(() -> swerve.getCurrentPose(), passSupplier);
-    }
-
-    public Command shootFuelCommand() {
-        return new DeferredCommand(
-            () -> {
-                double[] leftParameters = shotTable.getShotParameters(getLeftShooterDistanceToHub());
-                double[] rightParameters = shotTable.getShotParameters(getRightShooterDistanceToHub());
-
-                return hood.setLeftHoodCommand(leftParameters[0]).alongWith(
-                    hood.setRightHoodCommand(rightParameters[0]),
-                    flywheel.setLeftFlywheelCommand(leftParameters[1]),
-                    flywheel.setRightFlywheelCommand(rightParameters[1])
-                );
-            },
-            Set.of(flywheel, hood)
+    public Command shootCommand() {
+        return new ParallelCommandGroup(
+            flywheel.setManualCommand(0.5),
+            pivot.retractCommand(),
+            intake.setPercentOutputCommand(0.2),
+            hood.setRightHoodRotationsCommand(6),
+            Commands.waitUntil(() -> flywheel.atRightTargetVelocity() && hood.atRightTarget())
+            .andThen(indexer.setPercentOutputCommand(0.7))
         );
     }
 
-    public Command passFuelCommand() {
-        return new InstantCommand();
+    public Command passCommand() {
+        return new ParallelCommandGroup(
+            flywheel.setManualCommand(0.5),
+            pivot.deployCommand(),
+            intake.setPercentOutputCommand(0.5),
+            hood.setRightHoodRotationsCommand(6),
+            Commands.waitUntil(() -> flywheel.atRightTargetVelocity() && hood.atRightTarget())
+            .andThen(indexer.setPercentOutputCommand(0.7))
+        );
     }
+
+    public Command shootCommand(Supplier<Pose2d> targetPose) {
+        return new ParallelCommandGroup(
+            flywheel.setManualCommand(0.5),
+            pivot.retractCommand(),
+            intake.setPercentOutputCommand(0.2),
+            hood.setRightHoodRotationsCommand(6),
+            Commands.waitUntil(() -> flywheel.atRightTargetVelocity() && hood.atRightTarget())
+            .andThen(indexer.setPercentOutputCommand(0.7))
+        );
+    }
+
+    public Command spinIntakeRetractedCommand() {
+        return pivot.retractCommand().alongWith(intake.setPercentOutputCommand(0.5));
+    }
+
+    public Command feedthroughCommand() {
+        return new ParallelCommandGroup(
+            flywheel.setManualCommand(0.5),
+            pivot.deployCommand(),
+            intake.setPercentOutputCommand(0.5),
+            hood.setRightHoodRotationsCommand(6),
+            Commands.waitUntil(() -> flywheel.atRightTargetVelocity() && hood.atRightTarget())
+            .andThen(indexer.setPercentOutputCommand(0.7))
+        );
+    }
+
+    public Command aimTurretCommand() {
+        return turret.aimCommand(() -> swerve.getCurrentPose(), hubSupplier);
+    }
+
+    public Command unjamCommand() {
+        return Commands.none();
+    }
+
+    // private double getTurretShotAngle() {
+    //     Translation2d robotPose = swerve.getCurrentPose().getTranslation();
+    //     Translation2d hubPose = Field.HUB.getPosition().toTranslation2d();
+    //     double aimRadians = Math.atan((hubPose.getX() - robotPose.getX()) / (hubPose.getY() - robotPose.getY()));
+    //     return Math.toDegrees(aimRadians) - swerve.getCurrentPose().getRotation().getDegrees();
+    // }
+
+    // private double getLeftShooterDistanceToHub() {
+    //     Translation2d hub = FieldConstants.Hub.topCenterPoint.toTranslation2d();
+    //     Pose3d leftShooter = turret.getLeftTurretPose(new Pose3d(swerve.getCurrentPose()));
+    //     return hub.getDistance(leftShooter.getTranslation().toTranslation2d());
+    // }
+
+    // private double getRightShooterDistanceToHub() {
+    //     Translation2d hub = FieldConstants.Hub.topCenterPoint.toTranslation2d();
+    //     Pose3d rightShooter = turret.getRightTurretPose(new Pose3d(swerve.getCurrentPose()));
+    //     return hub.getDistance(rightShooter.getTranslation().toTranslation2d());
+    // }
+
+    // public Command aimTurretAtHubCommand() {
+    //     return turret.aimCommand(() -> swerve.getCurrentPose(), hubSupplier);
+    // }
+
+    // public Command aimTurretForPassCommand() {
+    //     return turret.aimCommand(() -> swerve.getCurrentPose(), passSupplier);
+    // }
+
+    // public Command shootFuelCommand() {
+    //     return new DeferredCommand(
+    //         () -> {
+    //             double[] leftParameters = shotTable.getShotParameters(getLeftShooterDistanceToHub());
+    //             double[] rightParameters = shotTable.getShotParameters(getRightShooterDistanceToHub());
+
+    //             return hood.setLeftHoodCommand(leftParameters[0]).alongWith(
+    //                 hood.setRightHoodCommand(rightParameters[0]),
+    //                 flywheel.setLeftFlywheelCommand(leftParameters[1]),
+    //                 flywheel.setRightFlywheelCommand(rightParameters[1])
+    //             );
+    //         },
+    //         Set.of(flywheel, hood)
+    //     );
+    // }
+
+    // public Command passFuelCommand() {
+    //     return new InstantCommand();
+    // }
 
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("Turret Angle", getTurretShotAngle());
-        SmartDashboard.putNumber("Left Shooter Distance", getLeftShooterDistanceToHub());
-        SmartDashboard.putNumber("Right Shooter Distance", getRightShooterDistanceToHub());
+        // SmartDashboard.putNumber("Turret Angle", getTurretShotAngle());
+        // SmartDashboard.putNumber("Left Shooter Distance", getLeftShooterDistanceToHub());
+        // SmartDashboard.putNumber("Right Shooter Distance", getRightShooterDistanceToHub());
     }
 }
