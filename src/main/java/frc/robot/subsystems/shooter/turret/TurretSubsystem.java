@@ -9,7 +9,6 @@ import static frc.robot.subsystems.shooter.turret.TurretConstants.*;
 
 import java.util.function.Supplier;
 
-import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 
 import edu.wpi.first.math.geometry.*;

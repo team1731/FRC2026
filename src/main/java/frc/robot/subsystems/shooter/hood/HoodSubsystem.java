@@ -100,7 +100,8 @@ public class HoodSubsystem extends BaseSubsystem {
     }
 
     public Command stowHoodCommand() {
-        return setLeftHoodCommand(kStartAngle.in(Degrees)).alongWith(setRightHoodCommand(kCurrentLimit));
+        // return setLeftHoodCommand(kStartAngle.in(Degrees)).alongWith(setRightHoodCommand(kCurrentLimit));
+        return setRightHoodRotationsCommand(0);
     }
 
     public Command setManualCommand(double left, double right) {
