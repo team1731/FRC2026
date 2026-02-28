@@ -1,6 +1,9 @@
 package frc.lib.frc1731;
 
+import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.trajectory.Trajectory;
+import frc.lib.frc6328.FieldConstants;
+import frc.robot.Robot;
 
 /**
  * General utility class with helper methods
@@ -32,6 +35,16 @@ public final class Utils {
      */
     public static boolean isWithin(double value, double target, double tolerance) {
         return Math.abs(target - value) <= tolerance;
+    }
+    
+    public static Translation2d flip(Translation2d point) {
+        if (Robot.isRedAlliance()) return new Translation2d(FieldConstants.fieldLength - point.getX(), FieldConstants.fieldWidth - point.getY());
+        return point;   
+    }
+
+    public static Translation3d flip(Translation3d point) {
+        if (Robot.isRedAlliance())  return new Translation3d(FieldConstants.fieldLength - point.getX(), FieldConstants.fieldWidth - point.getY(), point.getZ());
+        return point;   
     }
 
     public static void printTrajectory(String name, Trajectory trajectory) {

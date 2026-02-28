@@ -1,36 +1,39 @@
 package frc.robot;
 
-import static edu.wpi.first.units.Units.*;
+import static edu.wpi.first.units.Units.Degrees;
+import static frc.robot.subsystems.shooter.hood.HoodConstants.kMaxAngle;
 
-import edu.wpi.first.math.geometry.*;
+import com.pathplanner.lib.auto.NamedCommands;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.*;
+import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.drive.SwerveSubsystem;
-import frc.robot.subsystems.feeder.FeederSubsystem;
-import frc.robot.subsystems.flywheel.FlywheelSubsystem;
-import frc.robot.subsystems.hood.HoodSubsystem;
+import frc.robot.subsystems.feeder.IndexerSubsystem;
+import frc.robot.subsystems.shooter.flywheel.FlywheelSubsystem;
+import frc.robot.subsystems.shooter.hood.HoodSubsystem;
+import frc.robot.subsystems.intake.IntakePivotSubsystem;
 import frc.robot.subsystems.intake.IntakeRollerSubsystem;
-import frc.robot.subsystems.intake.IntakeSlideSubsystem;
-import frc.robot.subsystems.leds.LEDSubsystem;
-import frc.robot.subsystems.superstructure.Superstructure;
-import frc.robot.subsystems.turret.TurretSubsystem;
+import frc.robot.subsystems.shooter.turret.TurretSubsystem;
 import frc.robot.subsystems.vision.limelight.AprilTagSubsystem;
 import frc.robot.subsystems.vision.questnav.QuestNavSubsystem;
 
 public class RobotContainer {
     /* Subsystems */
-
     protected static QuestNavSubsystem vslam;
     protected static AprilTagSubsystem aprilTag;
 
     protected static SwerveSubsystem swerve;
-    protected static LEDSubsystem led;
+    // protected static LEDSubsystem led;
     protected static FlywheelSubsystem flywheel;
     protected static HoodSubsystem hood;
     protected static TurretSubsystem turret;
-    protected static FeederSubsystem feeder;
-    protected static IntakeRollerSubsystem roller;
-    protected static IntakeSlideSubsystem slide;
+    protected static IndexerSubsystem indexer;
+    protected static IntakeRollerSubsystem intake;
+    protected static IntakePivotSubsystem pivot;
 
     protected static Superstructure superstructure;
 
@@ -38,6 +41,18 @@ public class RobotContainer {
     private final CommandXboxController driver = new CommandXboxController(0);
     private final Trigger dResetSwerve = driver.povRight();
     private final Trigger dShoot = driver.rightTrigger();
+    private final Trigger dPass = driver.rightBumper();
+    private final Trigger dIntake = driver.leftTrigger();
+    private final Trigger dFeedthrough = driver.leftTrigger().and(driver.rightTrigger());
+    private final Trigger dInitClimb = driver.back();
+    private final Trigger dClimb = driver.start();
+
+    private final Trigger dHubShot = driver.a();
+    private final Trigger dTowerShot = driver.y();
+    private final Trigger dLeftCornerShot = driver.x();
+    private final Trigger dRightCornerShot = driver.b();
+
+    private final Trigger dUnjam = new Trigger(() -> false); // TODO - Add unjam button
 
     /* Operator Buttons */
 
@@ -52,17 +67,17 @@ public class RobotContainer {
      */
     private void configureSubsystems() {
         swerve = new SwerveSubsystem(true);
-        led = new LEDSubsystem(true);
+        // led = new LEDSubsystem(true);
         flywheel = new FlywheelSubsystem(true);
         hood = new HoodSubsystem(true);
         turret = new TurretSubsystem(true);
-        feeder = new FeederSubsystem(true);
-        roller = new IntakeRollerSubsystem(true);
+        indexer = new IndexerSubsystem(true);
+        pivot = new IntakePivotSubsystem(true);
+        intake = new IntakeRollerSubsystem(true);
 
+        superstructure = new Superstructure(swerve, flywheel, hood, turret, indexer, pivot, intake);
         vslam = new QuestNavSubsystem(true);
         aprilTag = new AprilTagSubsystem(true);
-
-        superstructure = new Superstructure(swerve, flywheel, hood, turret);
 
         // Drivetrain will execute this command periodically 
         // if no other command is active on the drivetrain
@@ -74,16 +89,28 @@ public class RobotContainer {
             });
         });
 
+        aprilTag.setDefaultCommand(aprilTag.run(() -> {
+            swerve.resetPose(aprilTag.getEstimatedPose());
+            }).ignoringDisable(true)
+            .onlyWhile(Robot.IS_ENABLED.negate())
+        );
+
         flywheel.setDefaultCommand(flywheel.stopCommand());
-        turret.setDefaultCommand(turret.setManualCommand(driver.getLeftX() / 2d));
-        // hood.setDefaultCommand(hood.setManualCommand(driver.getRightY() / 2d));
-        led.setDefaultCommand(led.setFireCommand());
-        roller.setDefaultCommand(roller.setPercentOutputCommand(0));
+        intake.setDefaultCommand(intake.stopCommand());
+        indexer.setDefaultCommand(indexer.stopCommand());
+
+        hood.setDefaultCommand(hood.setRightHoodCommand(kMaxAngle.in(Degrees)));
     }
 
     private void configureNamedCommands() {
         // Named commands useful for PathPlanner events
         // ex. NamedCommands.registerCommand("Example", new ExampleCommand());
+        NamedCommands.registerCommand("Shoot", superstructure.shootCommand());
+        NamedCommands.registerCommand("Intake", superstructure.intakeCommand());
+        NamedCommands.registerCommand("Feedthrough", superstructure.feedthroughCommand());
+        NamedCommands.registerCommand("Pass", Commands.none());
+        NamedCommands.registerCommand("Climb", Commands.none());
+        NamedCommands.registerCommand("Stow Hood", hood.stowHoodCommand());
     }
 
     /**
@@ -97,9 +124,21 @@ public class RobotContainer {
             swerve.resetPose(resetPosition);
         }));
 
-        dShoot.whileTrue(flywheel.setVelocityCommand(RotationsPerSecond.of(50)));
-        driver.rightBumper().whileTrue(flywheel.tuneShotCommand());
-        driver.leftTrigger().whileTrue(roller.setPercentOutputCommand(1.0));
+        driver.leftBumper().whileTrue(turret.driveManualCommand(0, 0.01)).onFalse(turret.stopCommand());
+        driver.rightBumper().whileTrue(turret.driveManualCommand(0, -0.01)).onFalse(turret.stopCommand());
+
+        dIntake.and(dShoot.negate()).whileTrue(superstructure.intakeCommand());
+        dShoot.and(dIntake.negate()).whileTrue(superstructure.shootCommand()).onFalse(hood.stowHoodCommand());
+        dFeedthrough.whileTrue(superstructure.feedthroughCommand());
+        dPass.whileTrue(superstructure.passCommand());
+
+        dInitClimb.onTrue(Commands.print("Pivotting to climb position").alongWith(pivot.retractCommand()));
+        dClimb.onTrue(Commands.print("Running climb sequence").alongWith(pivot.retractCommand()));
+
+        dHubShot.whileTrue(Commands.print("Shooting static shot from from HUB"));
+        dTowerShot.whileTrue(Commands.print("Shooting static shot from from TOWER"));
+        dLeftCornerShot.whileTrue(Commands.print("Shooting static shot from from the left corner"));
+        dRightCornerShot.whileTrue(Commands.print("Shooting static shot from from the right corner"));
     }
 
     public void periodic() {

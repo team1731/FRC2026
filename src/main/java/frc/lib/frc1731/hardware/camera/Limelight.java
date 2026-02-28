@@ -1,5 +1,7 @@
 package frc.lib.frc1731.hardware.camera;
 
+import java.util.Optional;
+
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.PoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -11,6 +13,12 @@ public class Limelight {
 
     public Limelight(String name) {
         this.name = name;
+        // this.estimator = new PoseEstimator<>(
+        //     null, 
+        //     null, 
+        //     null, 
+        //     null
+        // );
     }
 
     public void setLimelightPosition(Transform3d pose) {
@@ -43,5 +51,12 @@ public class Limelight {
 
     public PoseEstimator<Pose2d> getEstimator() {
         return estimator;
+    }
+
+    public Optional<Pose2d> getEstimatedPose() {
+        // if (estimator.getEstimatedPosition() == null) {
+            return Optional.empty();
+        // }
+        // return Optional.of(estimator.getEstimatedPosition());
     }
 }

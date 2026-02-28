@@ -101,7 +101,6 @@ public class QuestNavSubsystem extends BaseSubsystem {
                     measurementConsumer.accept(robotPose.toPose2d(), timestamp, QUESTNAV_STD_DEVS);
                     poseResetTimer.reset();
                 }
-                measurementConsumer.accept(robotPose.toPose2d(), timestamp, QUESTNAV_STD_DEVS);
             }
         }
     }

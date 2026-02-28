@@ -4,6 +4,7 @@ import frc.robot.subsystems.BaseSubsystem;
 
 import static frc.robot.subsystems.vision.limelight.AprilTagConstants.*;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import frc.lib.frc1731.hardware.camera.Limelight;
 
 public class AprilTagSubsystem extends BaseSubsystem {
@@ -18,6 +19,11 @@ public class AprilTagSubsystem extends BaseSubsystem {
     @Override
     public void periodicTelemetry() {
         limelight.periodic();
-        logger.log("Estimated Robot Pose", limelight.getEstimator().getEstimatedPosition());
+        logger.log("Estimated Robot Pose", getEstimatedPose());
+    }
+
+    public Pose2d getEstimatedPose() {
+        if (limelight.getEstimatedPose().isEmpty()) return new Pose2d();
+        return limelight.getEstimatedPose().get();
     }
 }
