@@ -2,6 +2,7 @@ package frc.robot.subsystems.shooter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import frc.lib.frc1731.math.regression.LinearRegression;
 import frc.lib.frc1731.math.regression.Regression;
@@ -13,8 +14,8 @@ public class ShotTable {
     private Regression flywheelModel;
 
     public ShotTable() {
-        ArrayList<Double> hoodDistances = new ArrayList<>();
-        ArrayList<Double> hoodAngles = new ArrayList<>();
+        List<Double> hoodDistances = List.of(0d, 1d, 2d, 4d);
+        List<Double> hoodAngles = List.of(18d, 20d, 25d, 30d);
 
         ArrayList<Double> flywheelDistances = new ArrayList<>();
         ArrayList<Double> flywheelSpeeds = new ArrayList<>();

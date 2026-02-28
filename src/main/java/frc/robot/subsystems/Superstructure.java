@@ -12,7 +12,6 @@ import frc.robot.subsystems.feeder.IndexerSubsystem;
 import frc.robot.subsystems.intake.IntakePivotSubsystem;
 import frc.robot.subsystems.intake.IntakeRollerSubsystem;
 import frc.robot.subsystems.shooter.ShotProfile;
-import frc.robot.subsystems.shooter.ShotTable;
 import frc.robot.subsystems.shooter.flywheel.FlywheelSubsystem;
 import frc.robot.subsystems.shooter.hood.HoodSubsystem;
 import frc.robot.subsystems.shooter.turret.TurretSubsystem;
@@ -26,7 +25,7 @@ public class Superstructure extends SubsystemBase {
     private IntakePivotSubsystem pivot;
     private IntakeRollerSubsystem intake;
 
-    private ShotTable shotTable = new ShotTable();
+    // private ShotTable shotTable = new ShotTable();
 
     public static ShotProfile hubShotProfile = new ShotProfile(0, 0, 0, false);
 
@@ -57,10 +56,10 @@ public class Superstructure extends SubsystemBase {
 
     public Command shootCommand() {
         return new ParallelCommandGroup(
-            flywheel.setManualCommand(0.5),
+            flywheel.setFlywheelPercentCommand(0.5, 0.5),
             pivot.retractCommand(),
             intake.setPercentOutputCommand(0.2),
-            hood.setRightHoodRotationsCommand(6),
+            hood.setHoodCommand(25, 25),
             Commands.waitUntil(() -> flywheel.atRightTargetVelocity() && hood.atRightTarget())
             .andThen(indexer.setPercentOutputCommand(0.7))
         );
@@ -68,22 +67,22 @@ public class Superstructure extends SubsystemBase {
 
     public Command passCommand() {
         return new ParallelCommandGroup(
-            flywheel.setManualCommand(0.5),
-            pivot.deployCommand(),
-            intake.setPercentOutputCommand(0.5),
-            hood.setRightHoodRotationsCommand(6),
-            Commands.waitUntil(() -> flywheel.atRightTargetVelocity() && hood.atRightTarget())
+            flywheel.setFlywheelPercentCommand(0.5, 0.5),
+            pivot.retractCommand(),
+            intake.setPercentOutputCommand(0.2),
+            hood.setHoodCommand(25, 25),
+            Commands.waitUntil(() -> flywheel.atBothTargetVelocity() && hood.atBothTarget() && turret.atBothTargetAngle())
             .andThen(indexer.setPercentOutputCommand(0.7))
         );
     }
 
     public Command shootCommand(Supplier<Pose2d> targetPose) {
         return new ParallelCommandGroup(
-            flywheel.setManualCommand(0.5),
+            flywheel.setFlywheelPercentCommand(0.5, 0.5),
             pivot.retractCommand(),
             intake.setPercentOutputCommand(0.2),
-            hood.setRightHoodRotationsCommand(6),
-            Commands.waitUntil(() -> flywheel.atRightTargetVelocity() && hood.atRightTarget())
+            hood.setHoodCommand(25, 25),
+            Commands.waitUntil(() -> flywheel.atBothTargetVelocity() && hood.atBothTarget() && turret.atBothTargetAngle())
             .andThen(indexer.setPercentOutputCommand(0.7))
         );
     }
@@ -94,10 +93,10 @@ public class Superstructure extends SubsystemBase {
 
     public Command feedthroughCommand() {
         return new ParallelCommandGroup(
-            flywheel.setManualCommand(0.5),
+            flywheel.setFlywheelPercentCommand(0.5, 0.5),
             pivot.deployCommand(),
             intake.setPercentOutputCommand(0.5),
-            hood.setRightHoodRotationsCommand(6),
+            hood.setHoodCommand(25, 25),
             Commands.waitUntil(() -> flywheel.atRightTargetVelocity() && hood.atRightTarget())
             .andThen(indexer.setPercentOutputCommand(0.7))
         );

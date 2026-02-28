@@ -13,14 +13,16 @@ public class FlywheelSubsystem extends BaseSubsystem {
     private MotorIOTalonFX leftMotor, rightMotor;
     private LoggedTunableNumber flywheelTunedSetpoint = new LoggedTunableNumber("Flywheel Setpoint RPS", 50, () -> true);
 
+    private double leftTargetVelocity = 0.0;
     private double rightTargetVelocity = 0.0;
     
     public FlywheelSubsystem(boolean enabled) {
         super(enabled);
         if (!isEnabled()) return;
-        // leftMotor = new MotorIOTalonFX(kLeftFlywheelConfig);
-        // leftMotor.withPIDGains(kVelocityGains);
-        // leftMotor.withStatorCurrentLimit(kCurrentLimit);
+        
+        leftMotor = new MotorIOTalonFX(kLeftFlywheelConfig);
+        leftMotor.withPIDGains(kVelocityGains);
+        leftMotor.withStatorCurrentLimit(kCurrentLimit);
 
         rightMotor = new MotorIOTalonFX(kRightFlywheelConfig);
         rightMotor.withPIDGains(kVelocityGains);
@@ -36,18 +38,26 @@ public class FlywheelSubsystem extends BaseSubsystem {
         // logger.log("Target Velocity RPS", getTargetVelocity().in(RotationsPerSecond));
         // logger.log("At Target Velocity", atTargetVelocity());
 
-        // logger.log("Left Velocity", leftMotor.getVelocityRPS());
+        logger.log("Left Velocity", leftMotor.getVelocityRPS());
         logger.log("Right Velocity", rightMotor.getVelocityRPS());
 
     }
 
-    public boolean atRightTargetVelocity() {
-        return Utils.isWithin(rightMotor.getVelocityRPS(), rightTargetVelocity, 20);
+    public boolean atLeftTargetVelocity() {
+        return Utils.isWithin(leftMotor.getVelocityRPS(), leftTargetVelocity, 5);
     }
 
-    // public Command tuneShotCommand() {
-    //     return super.setVelocityCommand(() -> RotationsPerSecond.of(flywheelTunedSetpoint.get()));
-    // }
+    public boolean atRightTargetVelocity() {
+        return Utils.isWithin(rightMotor.getVelocityRPS(), rightTargetVelocity, 5);
+    }
+
+    public boolean atBothTargetVelocity() {
+        return atLeftTargetVelocity() && atRightTargetVelocity();
+    }
+
+    public Command tuneShotCommand() {
+        return setFlywheelVelocityCommand(flywheelTunedSetpoint.get(), flywheelTunedSetpoint.get());
+    }
 
     public Command setLeftFlywheelCommand(double rps) {
         return this.run(() -> {
@@ -62,10 +72,21 @@ public class FlywheelSubsystem extends BaseSubsystem {
         });
     }
 
-    public Command setManualCommand(double percent) {
+    public Command setFlywheelPercentCommand(double left, double right) {
         return this.run(() -> {
-            // leftMotor.setPercentOutput(percent);
-            rightMotor.setPercentOutput(percent);
+            this.leftTargetVelocity = left * 100;
+            this.rightTargetVelocity = right * 100;
+            leftMotor.setPercentOutput(left);
+            rightMotor.setPercentOutput(right);
+        });
+    }
+
+    public Command setFlywheelVelocityCommand(double left, double right) {
+        return this.run(() -> {
+            this.leftTargetVelocity = left;
+            this.rightTargetVelocity = right;
+            leftMotor.setVelocityRPS(left);
+            rightMotor.setVelocityRPS(right);
         });
     }
 
@@ -73,12 +94,13 @@ public class FlywheelSubsystem extends BaseSubsystem {
         return this.run(() -> {
             double rps = flywheelTunedSetpoint.get();
             leftMotor.setVelocityRPS(rps);
+            rightMotor.setVelocityRPS(rps);
         });
     }
 
     public Command stopCommand() {
         return this.run(() -> {
-            // leftMotor.setPercentOutput(0);
+            leftMotor.setPercentOutput(0);
             rightMotor.setPercentOutput(0);
         });
     }

@@ -1,9 +1,13 @@
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Degrees;
+import static frc.robot.subsystems.shooter.hood.HoodConstants.kMaxAngle;
+
 import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.*;
 import frc.robot.subsystems.Superstructure;
@@ -14,9 +18,14 @@ import frc.robot.subsystems.shooter.hood.HoodSubsystem;
 import frc.robot.subsystems.intake.IntakePivotSubsystem;
 import frc.robot.subsystems.intake.IntakeRollerSubsystem;
 import frc.robot.subsystems.shooter.turret.TurretSubsystem;
+import frc.robot.subsystems.vision.limelight.AprilTagSubsystem;
+import frc.robot.subsystems.vision.questnav.QuestNavSubsystem;
 
 public class RobotContainer {
     /* Subsystems */
+    protected static QuestNavSubsystem vslam;
+    protected static AprilTagSubsystem aprilTag;
+
     protected static SwerveSubsystem swerve;
     // protected static LEDSubsystem led;
     protected static FlywheelSubsystem flywheel;
@@ -67,13 +76,30 @@ public class RobotContainer {
         intake = new IntakeRollerSubsystem(true);
 
         superstructure = new Superstructure(swerve, flywheel, hood, turret, indexer, pivot, intake);
+        vslam = new QuestNavSubsystem(true);
+        aprilTag = new AprilTagSubsystem(true);
 
         // Drivetrain will execute this command periodically 
         // if no other command is active on the drivetrain
         swerve.setDefaultCommand(swerve.driveCommand(driver, () -> true));
+
+        vslam.setDefaultCommand(() -> {
+            vslam.addVisionMeasurement((pose, timestamp, stdDevs) -> {
+                swerve.addVisionMeasurement(pose, timestamp, stdDevs);
+            });
+        });
+
+        aprilTag.setDefaultCommand(aprilTag.run(() -> {
+            swerve.resetPose(aprilTag.getEstimatedPose());
+            }).ignoringDisable(true)
+            .onlyWhile(Robot.IS_ENABLED.negate())
+        );
+
         flywheel.setDefaultCommand(flywheel.stopCommand());
         intake.setDefaultCommand(intake.stopCommand());
         indexer.setDefaultCommand(indexer.stopCommand());
+
+        hood.setDefaultCommand(hood.setRightHoodCommand(kMaxAngle.in(Degrees)));
     }
 
     private void configureNamedCommands() {

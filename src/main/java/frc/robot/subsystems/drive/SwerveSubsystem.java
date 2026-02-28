@@ -25,26 +25,20 @@ import frc.robot.Robot;
 import frc.robot.subsystems.BaseSubsystem;
 import frc.robot.subsystems.drive.generated.CommandSwerveDrivetrain;
 import frc.robot.subsystems.drive.generated.TunerConstants;
-import frc.robot.subsystems.vision.VSLAMSubsystem;
-import frc.robot.subsystems.vision.helpers.AprilTagTargetTracker;
+import frc.robot.subsystems.vision.OLD_VSLAMSubsystem;
 
 import static frc.robot.subsystems.drive.SwerveConstants.*;
 
 public class SwerveSubsystem extends BaseSubsystem {
     private CommandSwerveDrivetrain drivetrain;
-    private VSLAMSubsystem vslamSubsystem;
+    private OLD_VSLAMSubsystem vslamSubsystem;
 
     private final Telemetry telemetry = new Telemetry(TunerConstants.kSpeedAt12Volts.in(MetersPerSecond));
 
     private ChassisSpeeds targetSpeeds = new ChassisSpeeds();
 
-    private AprilTagTargetTracker aprilTagTargetTracker;
-
     private double fieldCentricHeading = 0.0;
     private double robotCentricHeading = 0.0;
-
-    private double lostTargetCount = 0;
-    private boolean lockedOnce = true;
 
     private final ProfiledPIDController headingPID = kHeadingGains.toProfiledPIDController(kMaxAngularRate, kMaxAngularAcceleration);
  
@@ -61,14 +55,18 @@ public class SwerveSubsystem extends BaseSubsystem {
 	    driveAtTargetControl.HeadingController.enableContinuousInput(-Math.PI/2, Math.PI/2);
 
         if (kUseVSLAM) {
-            vslamSubsystem = new VSLAMSubsystem(visionCallback);
+            vslamSubsystem = new OLD_VSLAMSubsystem(visionCallback);
             vslamSubsystem.configure();
         }
 
+        drivetrain.getKinematics();
+
         configureAutoBuilder();
         drivetrain.registerTelemetry(telemetry::telemeterize);
+    }
 
-        
+    public void addVisionMeasurement(Pose2d pose, double timestamp, Matrix<N3,N1> visionMeasurementStdDevs) {
+        drivetrain.addVisionMeasurement(pose, timestamp, visionMeasurementStdDevs);
     }
 
     public void resetPose(Pose2d pose) {
@@ -78,7 +76,7 @@ public class SwerveSubsystem extends BaseSubsystem {
         }
     }
 
-    public VSLAMSubsystem getVSLAMSubsystem() {
+    public OLD_VSLAMSubsystem getVSLAMSubsystem() {
         return kUseVSLAM? vslamSubsystem : null;
     }
 
@@ -213,42 +211,42 @@ public class SwerveSubsystem extends BaseSubsystem {
         }).withName("Drive" + (isFieldCentric.getAsBoolean() ? "FieldCentric" : "RobotCentric"));
     }
 
-    public Command driveToTargetCommand(CommandXboxController m_xboxController) {
-        return run(() -> {
-            double fieldCentricX = (Math.abs(m_xboxController.getLeftY()) * m_xboxController.getLeftY());
-            double fieldCentricY = (Math.abs(m_xboxController.getLeftX()) * m_xboxController.getLeftX());
+    // public Command driveToTargetCommand(CommandXboxController m_xboxController) {
+    //     return run(() -> {
+    //         double fieldCentricX = (Math.abs(m_xboxController.getLeftY()) * m_xboxController.getLeftY());
+    //         double fieldCentricY = (Math.abs(m_xboxController.getLeftX()) * m_xboxController.getLeftX());
 
-            if (Robot.isRedAlliance()) {
-                fieldCentricX = fieldCentricX * -1;
-                fieldCentricY = fieldCentricY * -1;
-            }
+    //         if (Robot.isRedAlliance()) {
+    //             fieldCentricX = fieldCentricX * -1;
+    //             fieldCentricY = fieldCentricY * -1;
+    //         }
 
-            aprilTagTargetTracker.recalculateDriveFeedback(getCurrentPose(), fieldCentricX, fieldCentricY);
+    //         aprilTagTargetTracker.recalculateDriveFeedback(getCurrentPose(), fieldCentricX, fieldCentricY);
 
-            if (aprilTagTargetTracker.hasVisibleTarget()) {
-                lostTargetCount = 0;
-                lockedOnce = true;
-            } else {
-                lostTargetCount++;
-            }
+    //         if (aprilTagTargetTracker.hasVisibleTarget()) {
+    //             lostTargetCount = 0;
+    //             lockedOnce = true;
+    //         } else {
+    //             lostTargetCount++;
+    //         }
 
-            if (aprilTagTargetTracker.hasVisibleTarget() || ((lostTargetCount < 5) && lockedOnce == true)) {
-                // note to self since this is confusing... Y becomes X and X becomes Y and that change happens earlier for driving at target
-                drivetrain.setControl(
-                        driveAtTargetControl.withVelocityX(aprilTagTargetTracker.getCalculatedX() * kMaxSpeed)
-                                .withVelocityY(  aprilTagTargetTracker.getCalculatedY() *kMaxSpeed)
-                                .withTargetDirection(aprilTagTargetTracker.getRotationTarget()));
-            } else {
-                drivetrain.setControl(
-                        kFieldCentricControl
-                                .withVelocityX(-(Math.abs(m_xboxController.getLeftY()) * m_xboxController.getLeftY())
-                                        * kMaxSpeed)
-                                .withVelocityY(-(Math.abs(m_xboxController.getLeftX()) * m_xboxController.getLeftX())
-                                        * kMaxSpeed)
-                                .withRotationalRate(-m_xboxController.getRightX() * kMaxAngularRate));
-            }
-        }).withName("DriveToTarget");
-    }
+    //         if (aprilTagTargetTracker.hasVisibleTarget() || ((lostTargetCount < 5) && lockedOnce == true)) {
+    //             // note to self since this is confusing... Y becomes X and X becomes Y and that change happens earlier for driving at target
+    //             drivetrain.setControl(
+    //                     driveAtTargetControl.withVelocityX(aprilTagTargetTracker.getCalculatedX() * kMaxSpeed)
+    //                             .withVelocityY(  aprilTagTargetTracker.getCalculatedY() *kMaxSpeed)
+    //                             .withTargetDirection(aprilTagTargetTracker.getRotationTarget()));
+    //         } else {
+    //             drivetrain.setControl(
+    //                     kFieldCentricControl
+    //                             .withVelocityX(-(Math.abs(m_xboxController.getLeftY()) * m_xboxController.getLeftY())
+    //                                     * kMaxSpeed)
+    //                             .withVelocityY(-(Math.abs(m_xboxController.getLeftX()) * m_xboxController.getLeftX())
+    //                                     * kMaxSpeed)
+    //                             .withRotationalRate(-m_xboxController.getRightX() * kMaxAngularRate));
+    //         }
+    //     }).withName("DriveToTarget");
+    // }
 
     public Command pathfindToPoseCommand(Pose2d targetPose, double endVelocity) {
         return AutoBuilder.pathfindToPose(
