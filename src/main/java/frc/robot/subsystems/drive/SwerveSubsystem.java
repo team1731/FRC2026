@@ -11,13 +11,11 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 
 import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.*;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -31,18 +29,13 @@ import gg.questnav.questnav.QuestNav;
 
 import static frc.robot.subsystems.drive.SwerveConstants.*;
 import static frc.robot.subsystems.vision.VisionConstants.*;
-
 public class SwerveSubsystem extends BaseSubsystem {
     private CommandSwerveDrivetrain drivetrain = null;
     private Limelight limelight = null;
     private QuestNav quest = null;
+    private SwerveDrivePoseEstimator estimator = null;
 
-    private SwerveDrivePoseEstimator estimator;
-
-    private double fieldCentricHeading = 0;
-    private double robotCentricHeading = 0;
-
-    private Timer poseResetTimer = new Timer();
+    private Timer questTimer = new Timer();
 
     private final ProfiledPIDController headingPID = kHeadingGains.toProfiledPIDController(kMaxAngularRate, kMaxAngularAcceleration);
     private final Telemetry telemetry = new Telemetry(TunerConstants.kSpeedAt12Volts.in(MetersPerSecond));
@@ -52,16 +45,15 @@ public class SwerveSubsystem extends BaseSubsystem {
         if(!enabled) return;
 
         this.drivetrain = TunerConstants.createDrivetrain();
-        driveAtTargetControl.HeadingController.setPID(10,0,0);
-	    driveAtTargetControl.HeadingController.enableContinuousInput(-Math.PI/2, Math.PI/2);
+        driveAtTargetControl.HeadingController = kDriveAtTargetGains.toPheonixPIDController();
 
         this.estimator = new SwerveDrivePoseEstimator(
             drivetrain.getKinematics(),
             Rotation2d.fromDegrees(getYaw()),
             drivetrain.getState().ModulePositions,
             new Pose2d(),
-            VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(5)),
-            VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(5))
+            kEstimatorStateStdev,
+            kEstimatorMeasurementStdev
         );
 
         if (kUseLimelight) {
@@ -90,7 +82,7 @@ public class SwerveSubsystem extends BaseSubsystem {
             LimelightHelpers.PoseEstimate estimate = limelight.getPoseEstimate();
             
             // if our angular velocity is greater than 720 degrees per second or we do not see any tags, ignore vision updates
-            if(Math.abs(drivetrain.getPigeon2().getAngularVelocityZDevice().getValueAsDouble()) > 720 || estimate.tagCount == 0) return;
+            if(Math.abs(drivetrain.getPigeon2().getAngularVelocityZDevice().getValueAsDouble()) > kMaxVisionAngularRate || estimate.tagCount == 0) return;
             Matrix<N3, N1> stdev = kSingleTagStdDevs;
             if (estimate.tagCount > 1) stdev = kMultiTagStdDevs;
             estimator.addVisionMeasurement(estimate.pose, estimate.timestampSeconds, stdev);
@@ -116,9 +108,9 @@ public class SwerveSubsystem extends BaseSubsystem {
                     Pose3d robotPose = questPose.transformBy(kRobotToOculus.inverse());
 
                     // Add the measurement to our estimator if 20 ms has passed since last update
-                    if (poseResetTimer.hasElapsed(0.2)) {
+                    if (questTimer.hasElapsed(0.2)) {
                         addVisionMeasurement(robotPose.toPose2d(), timestamp, kVSLAMStdDevs);
-                        poseResetTimer.reset();
+                        questTimer.reset();
                     }
                 }
             }
@@ -151,19 +143,19 @@ public class SwerveSubsystem extends BaseSubsystem {
      * 1. After the VSLAM connects successfully
      * 2. When the alliance changes
      */
-    public void configureInitialPosition() {
-        System.out.println("CommandSwerveDrivetrain: configuring a new position");
+    // public void configureInitialPosition() {
+    //     System.out.println("CommandSwerveDrivetrain: configuring a new position");
 
-	    Pose2d startingConfiguration = Robot.isRedAlliance()? 
-            new Pose2d(10.38, 3.01, new Rotation2d(0)) : 
-            new Pose2d(7.168, 5.006, new Rotation2d(Math.toRadians(180)));
-        resetPose(startingConfiguration);
+	//     Pose2d startingConfiguration = Robot.isRedAlliance()? 
+    //         new Pose2d(10.38, 3.01, new Rotation2d(0)) : 
+    //         new Pose2d(7.168, 5.006, new Rotation2d(Math.toRadians(180)));
+    //     resetPose(startingConfiguration);
 
-        Rotation2d operatorPerspective = Robot.isRedAlliance()? 
-                new Rotation2d(Math.toRadians(180)) : 
-                new Rotation2d(Math.toRadians(0));
-        drivetrain.setOperatorPerspectiveForward(operatorPerspective);
-    }
+    //     Rotation2d operatorPerspective = Robot.isRedAlliance()? 
+    //             new Rotation2d(Math.toRadians(180)) : 
+    //             new Rotation2d(Math.toRadians(0));
+    //     drivetrain.setOperatorPerspectiveForward(operatorPerspective);
+    // }
 
     public void configureAutoBuilder() {
         try {
@@ -216,9 +208,18 @@ public class SwerveSubsystem extends BaseSubsystem {
         Robot.kFieldLayout.setSimulatedRobotPose(getCurrentPose());
     }
 
-    public Command driveCommand(CommandXboxController m_xboxController, BooleanSupplier isFieldCentric) {
+    public Command resetGyro() {
+        return new InstantCommand(() -> resetPose(
+            Robot.isRedAlliance() ? new Pose2d(10.38, 3.01, new Rotation2d(Math.toRadians(0)))
+                : new Pose2d(7.168, 5.006, new Rotation2d(Math.toRadians(180)))
+        ));
+    }
+
+    public Command drive(CommandXboxController m_xboxController, BooleanSupplier isFieldCentric) {
         return run(() -> {
             Translation2d RotationCenter =  new Translation2d();
+            double fieldCentricHeading = 0;
+            double robotCentricHeading = 0;
 
             if(m_xboxController.getHID().getLeftStickButton()){ // might need to flip X and Y due to field begin Y,X
                 fieldCentricHeading = Math.toDegrees(Math.atan2(m_xboxController.getLeftX(),  m_xboxController.getLeftY())); // desired heading in field centric
@@ -265,7 +266,7 @@ public class SwerveSubsystem extends BaseSubsystem {
         }).withName("Drive" + (isFieldCentric.getAsBoolean() ? "FieldCentric" : "RobotCentric"));
     }
 
-    public Command pathfindToPoseCommand(Pose2d targetPose, double endVelocity) {
+    public Command pathfindToPose(Pose2d targetPose, double endVelocity) {
         return AutoBuilder.pathfindToPose(
             targetPose, 
             kPathfinderConstraints, 
@@ -273,7 +274,7 @@ public class SwerveSubsystem extends BaseSubsystem {
         ).withName("PathFindToPose");
     }
 
-    public Command setHeadingTargetCommand(CommandXboxController m_xboxController, Rotation2d targetHeading) {
+    public Command setHeadingTarget(CommandXboxController m_xboxController, Rotation2d targetHeading) {
         return this.run(() -> {
             drivetrain.setControl(
                 kFieldCentricControl
@@ -285,7 +286,7 @@ public class SwerveSubsystem extends BaseSubsystem {
         }).withName("SetHeadingTarget");
     }
 
-    public Command facePoseCommand(CommandXboxController m_xboxController, Supplier<Pose2d> targetPose) {
+    public Command facePose(CommandXboxController m_xboxController, Supplier<Pose2d> targetPose) {
         return this.run(() -> {
             Pose2d curPose = getCurrentPose();
 

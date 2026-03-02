@@ -1,83 +1,73 @@
 package frc.robot.subsystems.intake;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.lib.frc1731.Utils;
 import frc.lib.frc1731.hardware.motor.ctre.MotorIOTalonFX;
-import frc.robot.Robot;
+import frc.robot.Ports;
 import frc.robot.subsystems.BaseSubsystem;
 
 import static frc.robot.subsystems.intake.IntakeConstants.*;
 
-import com.ctre.phoenix6.configs.FeedbackConfigs;
-import com.ctre.phoenix6.configs.MotionMagicConfigs;
-import com.ctre.phoenix6.hardware.core.CoreCANcoder;
-
 public class IntakePivotSubsystem extends BaseSubsystem {
     private MotorIOTalonFX motor;
-    private double targetPosition = 0;
+
+    private double rotations = 0;
+    private double targetRotations = 0;
 
     public IntakePivotSubsystem(boolean enabled) {
         super(enabled);
         if (!isEnabled()) return;
-        motor = new MotorIOTalonFX(IntakeConstants.kPivotMotorConfig);
-        motor.getMotor().clearStickyFaults();
+        motor = new MotorIOTalonFX(Ports.kIntakePivotMotorConfig);
+        // motor.getMotor().clearStickyFaults();
         motor.withPIDGains(kPivotGains);
-        motor.withStatorCurrentLimit(40d);
+        motor.withStatorCurrentLimit(kPivotCurrentLimit);
         motor.setSoftLimits(kPivotIntakeRotations, kPivotStowRotations);
-        motor.withFeedbackConfigs(new FeedbackConfigs()
-            .withFeedbackRemoteSensorID(15)
-            .withRemoteCANcoder(new CoreCANcoder(15))
-            .withRotorToSensorRatio(36d)
-        );
-
-        motor.withMotionMagicConfigs(
-            new MotionMagicConfigs().withMotionMagicCruiseVelocity(1.5)
-            .withMotionMagicAcceleration(2)
-        );
-
-        motor.setDynamicMotionMagicSpeeds(1.5, 2);    
-        
-        Robot.IS_ENABLED.onTrue(new InstantCommand(() -> motor.setPercentOutput(0)));
+        motor.withFeedbackConfigs(kPivotFeedbackConfigs);
+        motor.withMotionMagicConfigs(kMotionMagicConfigs);
+        // motor.setDynamicMotionMagicSpeeds(1.5, 2);
     }
 
-    public boolean atTargetPosition() {
-        return Utils.isWithin(motor.getRotations(), targetPosition, 0.01);
+    public boolean atTargetRotations() {
+        return Utils.isWithin(motor.getRotations(), targetRotations, kEpsilon);
     }
 
     @Override
     public void periodicTelemetry() {
-        logger.log("Current Rotations", motor.getRotations());
-        logger.log("Target Rotations", targetPosition);
-        logger.log("At Target Position", atTargetPosition());
-        SmartDashboard.putNumber("POSITION", motor.getRotations());
+        rotations = motor.getRotations();
+
+        logger.log("Current Rotations", rotations);
+        logger.log("Target Rotations", targetRotations);
+        logger.log("At Target Position", atTargetRotations());
     }
     
-    private Command setPositionCommand(double position) {
+    private Command setRotations(double rotations) {
         return run(() -> {
-            targetPosition = position;
-            motor.setPosition(targetPosition);
-        }).until(() -> atTargetPosition());
+            targetRotations = rotations;
+            motor.setPosition(targetRotations);
+        });
     }
 
-    public Command setManualCommand(double percentOutput) {
+    public Command deploy() {
+        return this.setRotations(kPivotIntakeRotations);
+    }
+
+    public Command retract() {
+        return this.setRotations(kPivotStowRotations);
+    }
+
+    public Command driveManual(double percentOutput) {
         return run(() -> motor.setPercentOutput(percentOutput));
     }
 
-    public Command deployCommand() {
-        return this.setPositionCommand(kPivotIntakeRotations);
-    }
-
-    public Command retractCommand() {
-        return this.setPositionCommand(kPivotStowRotations);
-    }
-
-    public Command unjamCommand() {
+    public Command unjam() {
         // Runs the motor forward and reverse for short spurts to attempt to unjam the mechanism; Uses recursion?
-        return this.setManualCommand(0.2)
+        return this.driveManual(0.2)
             .withTimeout(0.5d)
-            .andThen(setManualCommand(-0.2))
-            .andThen(unjamCommand());
+            .andThen(driveManual(-0.2))
+            .andThen(unjam());
+    }
+
+    public Command stop() {
+        return this.driveManual(0).withTimeout(0);
     }
 }
