@@ -2,10 +2,11 @@ package frc.robot.subsystems.shooter.hood;
 
 import static edu.wpi.first.units.Units.*;
 
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
+
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.*;
 import frc.lib.frc1731.PIDGains;
-import frc.lib.frc1731.hardware.motor.PortConfig;
 import frc.lib.frc1731.subsystem.converter.AngularSubsystemConverter;
 
 public class HoodConstants {
@@ -13,7 +14,7 @@ public class HoodConstants {
 
     public static final AngularSubsystemConverter kConverter = new AngularSubsystemConverter(kGearRatio);
 
-    public static final Angle kEpsilon = Degrees.of(1d);
+    public static final double kEpsilon = 0.1d;
 
     // public static final Angle kStartAngle = Degrees.of(15.5);
     // public static final Angle kMaxAngle = Degrees.of(30.0);
@@ -29,9 +30,6 @@ public class HoodConstants {
     public static final Distance kHoodRadius = Inches.of(8.4d); // Radius of the hood
     public static final Mass kHoodMass = Pounds.of(2d); // Weight of the moving hood
 
-    public static final PortConfig kLeftHoodConfig = new PortConfig("Right CANivore", 23, true);
-    public static final PortConfig kRightHoodConfig = new PortConfig("Left CANivore", 19, false);
-
     public static final double kCurrentLimit = 40d; // Amps
 
     public static final PIDGains kPositionGains = new PIDGains()
@@ -41,6 +39,11 @@ public class HoodConstants {
         .setS(0.25)
         .setA(0.01)
     ;
+
+    public static final MotionMagicConfigs kMotionMagicConfigs = new MotionMagicConfigs()
+            .withMotionMagicAcceleration(50)
+            .withMotionMagicCruiseVelocity(50)
+            .withMotionMagicJerk(100);
 
     // public static final PIDGains kSimGains = new PIDGains().setP(1).setD(0);
 

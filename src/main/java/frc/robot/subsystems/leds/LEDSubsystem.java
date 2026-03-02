@@ -5,7 +5,7 @@ import frc.lib.frc1731.hardware.SimpleCANdle;
 import frc.robot.subsystems.BaseSubsystem;
 
 public class LEDSubsystem extends BaseSubsystem {
-    private SimpleCANdle candle; 
+    private SimpleCANdle candle;
     
     public LEDSubsystem(boolean enabled){
         super(enabled);

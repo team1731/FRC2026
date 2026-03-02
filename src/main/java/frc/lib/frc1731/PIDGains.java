@@ -1,6 +1,7 @@
 package frc.lib.frc1731;
 
 
+import com.ctre.phoenix6.swerve.utility.PhoenixPIDController;
 import com.pathplanner.lib.config.PIDConstants;
 
 import edu.wpi.first.math.controller.*;
@@ -315,6 +316,19 @@ public class PIDGains implements Sendable {
      */
     public PIDController toPIDController() {
         PIDController pidCtrl = new PIDController(kP, kI, kD);
+        pidCtrl.setTolerance(tolerance);
+        pidCtrl.setIZone(kIZone);
+        if (continuousInput) {
+            pidCtrl.enableContinuousInput(continuousMin, continuousMax);
+        }
+        return pidCtrl;
+    }
+
+    /**
+     * Creates a CTRE PID controller with the specified constants and configurations
+     */
+    public PhoenixPIDController toPheonixPIDController() {
+        PhoenixPIDController pidCtrl = new PhoenixPIDController(kP, kI, kD);
         pidCtrl.setTolerance(tolerance);
         pidCtrl.setIZone(kIZone);
         if (continuousInput) {

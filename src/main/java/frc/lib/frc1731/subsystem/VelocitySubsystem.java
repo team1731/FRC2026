@@ -85,7 +85,7 @@ public abstract class VelocitySubsystem<M extends MotorIO> extends BaseSubsystem
         if (Robot.isSimulation()) sim.setVoltage(volts); 
     }
 
-    public Command setPercentOutputCommand(DoubleSupplier percent) {
+    public Command setPercent(DoubleSupplier percent) {
         return run(() -> {
             this.targetVelocity = kMaxVelocity.times(percent.getAsDouble());
             if (motor != null)  motor.setPercentOutput(percent.getAsDouble());
@@ -93,11 +93,11 @@ public abstract class VelocitySubsystem<M extends MotorIO> extends BaseSubsystem
         }).withName("SetPercent");
     }
 
-    public Command setPercentOutputCommand(double percent) {
-        return this.setPercentOutputCommand(() -> percent);
+    public Command setPercent(double percent) {
+        return this.setPercent(() -> percent);
     }
 
-    public Command setVelocityCommand(Supplier<AngularVelocity> velocity) {
+    public Command setVelocity(Supplier<AngularVelocity> velocity) {
         return run(() -> {
             this.targetVelocity = velocity.get();
             if (motor != null) motor.setVelocityRPS(targetVelocity.in(RotationsPerSecond) / mechanismRatio);
@@ -105,12 +105,12 @@ public abstract class VelocitySubsystem<M extends MotorIO> extends BaseSubsystem
         }).withName("SetVelocity");
     }
 
-    public Command setVelocityCommand(AngularVelocity velocity) {
-        return this.setVelocityCommand(() -> velocity);
+    public Command setVelocity(AngularVelocity velocity) {
+        return this.setVelocity(() -> velocity);
     }
 
-    public Command stopCommand() {
-        return setPercentOutputCommand(0.0)
+    public Command stop() {
+        return setPercent(0.0)
         .withName("Stop");
     }
 }

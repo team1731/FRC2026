@@ -3,27 +3,12 @@ package frc.robot.subsystems.vision;
 import java.util.EnumSet;
 
 import com.ctre.phoenix6.Utils;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.networktables.BooleanSubscriber;
-import edu.wpi.first.networktables.DoubleArrayPublisher;
-import edu.wpi.first.networktables.DoublePublisher;
-import edu.wpi.first.networktables.DoubleSubscriber;
-import edu.wpi.first.networktables.FloatArraySubscriber;
-import edu.wpi.first.networktables.IntegerPublisher;
-import edu.wpi.first.networktables.IntegerSubscriber;
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableEvent;
-import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.networktables.*;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.smartdashboard.*;
 import frc.robot.subsystems.drive.DrivetrainVisionCallback;
 
 public class OLD_VSLAMSubsystem {
@@ -37,7 +22,7 @@ public class OLD_VSLAMSubsystem {
 
     private IntegerSubscriber questMiso;
     private IntegerPublisher questMosi;
-    private DoubleArrayPublisher resetPosePub;
+    // private DoubleArrayPublisher resetPosePub;
     // private IntegerSubscriber questFrameCount;
     private DoubleSubscriber questTimestamp;
     private FloatArraySubscriber questPosition;
@@ -220,7 +205,7 @@ public class OLD_VSLAMSubsystem {
         // float[] { 0.0f, 0.0f, 0.0f, 0.0f });
         questEulerAngles = ntDatatable.getFloatArrayTopic("eulerAngles").subscribe(new float[] { 0.0f, 0.0f, 0.0f });
         questBatteryPercent = ntDatatable.getDoubleTopic("device/batteryPercent").subscribe(0.0f);
-        resetPosePub = ntDatatable.getDoubleArrayTopic("resetpose").publish();
+        // resetPosePub = ntDatatable.getDoubleArrayTopic("resetpose").publish();
         heartbeatRequestSub = ntDatatable.getDoubleTopic("heartbeat/quest_to_robot").subscribe(0.0);
         heartbeatResponsePub = ntDatatable.getDoubleTopic("heartbeat/robot_to_quest").publish();
         questIsTracking = ntDatatable.getBooleanTopic("device/isTracking").subscribe(false);

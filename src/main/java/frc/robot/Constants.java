@@ -7,8 +7,8 @@ import frc.lib.frc1731.log.LogWriter.*;
 public final class Constants {
     public static final double stickDeadband = 0.1;
     public static final int kTICKS = 33024; // 16.125 * 2048;
-    public static final String LEFT_CANBUS = "Right CANivore";
-    public static final String RIGHT_CANBUS = "Left CANivore";
+    public static final String kLeftCANBus = "Right CANivore";
+    public static final String kRightCANBus = "Left CANivore";
     public static final class LogConstants {
         /*
          * To write to a log you must:

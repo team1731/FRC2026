@@ -2,14 +2,11 @@ package frc.robot;
 
 import com.pathplanner.lib.auto.NamedCommands;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.*;
 import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.drive.SwerveSubsystem;
-import frc.robot.subsystems.feeder.IndexerSubsystem;
+import frc.robot.subsystems.indexer.IndexerSubsystem;
 import frc.robot.subsystems.shooter.flywheel.FlywheelSubsystem;
 import frc.robot.subsystems.shooter.hood.HoodSubsystem;
 import frc.robot.subsystems.intake.IntakePivotSubsystem;
@@ -22,13 +19,13 @@ public class RobotContainer {
     protected static QuestNavSubsystem vslam;
 
     protected static SwerveSubsystem swerve;
-    // protected static LEDSubsystem led;
     protected static FlywheelSubsystem flywheel;
     protected static HoodSubsystem hood;
     protected static TurretSubsystem turret;
     protected static IndexerSubsystem indexer;
     protected static IntakeRollerSubsystem intake;
     protected static IntakePivotSubsystem pivot;
+    // protected static LEDSubsystem led;
 
     protected static Superstructure superstructure;
 
@@ -36,18 +33,8 @@ public class RobotContainer {
     private final CommandXboxController driver = new CommandXboxController(0);
     private final Trigger dResetSwerve = driver.povRight();
     private final Trigger dShoot = driver.rightTrigger();
-    private final Trigger dPass = driver.rightBumper();
     private final Trigger dIntake = driver.leftTrigger();
     private final Trigger dFeedthrough = driver.leftTrigger().and(driver.rightTrigger());
-    private final Trigger dInitClimb = driver.back();
-    private final Trigger dClimb = driver.start();
-
-    private final Trigger dHubShot = driver.a();
-    private final Trigger dTowerShot = driver.y();
-    private final Trigger dLeftCornerShot = driver.x();
-    private final Trigger dRightCornerShot = driver.b();
-
-    private final Trigger dUnjam = new Trigger(() -> false); // TODO - Add unjam button
 
     // private static final LoggedTunableNumber flywheelSetpoint = new LoggedTunableNumber("FlywheelSetpoint", () -> true);
     // private static final LoggedTunableNumber hoodSetpoint = new LoggedTunableNumber("HoodAngle", () -> true);
@@ -58,9 +45,6 @@ public class RobotContainer {
         configureSubsystems();
         configureNamedCommands();
         configureButtonBindings();
-
-        SmartDashboard.putNumber("Flywheel RPS", 50);
-        SmartDashboard.putNumber("Hood Rotations", 3);
     }
 
     /**
@@ -68,51 +52,40 @@ public class RobotContainer {
      */
     private void configureSubsystems() {
         swerve = new SwerveSubsystem(true);
-        // led = new LEDSubsystem(true);
         flywheel = new FlywheelSubsystem(true);
         hood = new HoodSubsystem(true);
         turret = new TurretSubsystem(true);
         indexer = new IndexerSubsystem(true);
         pivot = new IntakePivotSubsystem(true);
         intake = new IntakeRollerSubsystem(true);
+        // led = new LEDSubsystem(true);
 
         superstructure = new Superstructure(swerve, flywheel, hood, turret, indexer, pivot, intake);
-        // vslam = new QuestNavSubsystem(true);
 
         // Drivetrain will execute this command periodically 
         // if no other command is active on the drivetrain
-        swerve.setDefaultCommand(swerve.driveCommand(driver, () -> true));
+        swerve.setDefaultCommand(swerve.drive(driver, () -> true));
 
-        // vslam.setDefaultCommand(() -> {
-        //     vslam.addVisionMeasurement((pose, timestamp, stdDevs) -> {
-        //         swerve.addVisionMeasurement(pose, timestamp, stdDevs);
-        //     });
-        // });
-
-        // aprilTag.setDefaultCommand(aprilTag.run(() -> {
-        //     swerve.resetPose(aprilTag.getEstimatedPose());
-        //     }).ignoringDisable(true)
-        //     .onlyWhile(Robot.IS_DISABLED)
-        // );
-
-        flywheel.setDefaultCommand(flywheel.stopCommand());
-        intake.setDefaultCommand(intake.stopCommand());
-        indexer.setDefaultCommand(indexer.stopCommand());
-
-        // hood.setDefaultCommand(hood.driveManualCommand(0, 0));
-        hood.setDefaultCommand(hood.setHoodCommand(0, 0));
+        flywheel.setDefaultCommand(flywheel.stop());
+        intake.setDefaultCommand(intake.stop());
+        indexer.setDefaultCommand(indexer.stop());
+        hood.setDefaultCommand(hood.stow());
+        turret.setDefaultCommand(superstructure.aimTurret());
+        // turret.setDefaultCommand(superstructure.aimTurret());
         // turret.setDefaultCommand(turret.setRightTurretCommand(() -> -swerve.getYaw() % 360d));
     }
 
     private void configureNamedCommands() {
         // Named commands useful for PathPlanner events
         // ex. NamedCommands.registerCommand("Example", new ExampleCommand());
-        NamedCommands.registerCommand("Shoot", superstructure.shootCommand());
-        NamedCommands.registerCommand("Intake", superstructure.intakeCommand());
-        NamedCommands.registerCommand("Feedthrough", superstructure.feedthroughCommand());
-        NamedCommands.registerCommand("Pass", Commands.none());
-        NamedCommands.registerCommand("Climb", Commands.none());
-        NamedCommands.registerCommand("Stow Hood", hood.stowHoodCommand());
+        NamedCommands.registerCommand("Warmup", superstructure.warmup());
+        NamedCommands.registerCommand("Shoot", superstructure.shoot());
+        NamedCommands.registerCommand("Intake", superstructure.intake());
+        NamedCommands.registerCommand("Feedthrough", superstructure.feedthrough());
+        NamedCommands.registerCommand("Pass", superstructure.pass());
+        NamedCommands.registerCommand("Stow Hood", hood.stow());
+        NamedCommands.registerCommand("Init Climb", Commands.print("Starting Climb!!!"));
+        NamedCommands.registerCommand("Climb", Commands.print("Climbing!!!"));
     }
 
     /**
@@ -120,15 +93,10 @@ public class RobotContainer {
      */
     private void configureButtonBindings() {
         // Reset robot pose and heading
-        dResetSwerve.onTrue(new InstantCommand(() -> {
-            Pose2d resetPosition = Robot.isRedAlliance() ? new Pose2d(10.38, 3.01, new Rotation2d(Math.toRadians(0)))
-                : new Pose2d(7.168, 5.006, new Rotation2d(Math.toRadians(180)));
-            swerve.resetPose(resetPosition);
-        }));
-
-        dIntake.whileTrue(superstructure.intakeCommand());
-        dShoot.whileTrue(superstructure.shootCommand()).onFalse(hood.stowHoodCommand());
-        dFeedthrough.whileTrue(superstructure.feedthroughCommand());
+        dResetSwerve.onTrue(swerve.resetGyro());
+        dIntake.whileTrue(superstructure.intake());
+        dShoot.whileTrue(superstructure.shoot());
+        dFeedthrough.whileTrue(superstructure.feedthrough());
         // dPass.whileTrue(superstructure.passCommand());
 
         // dInitClimb.onTrue(Commands.print("Pivotting to climb position").alongWith(pivot.retractCommand()));

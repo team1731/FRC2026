@@ -1,20 +1,21 @@
-package frc.robot.subsystems.intake;
+package frc.robot.subsystems.indexer;
 
-import static edu.wpi.first.units.Units.*;
-import static frc.robot.subsystems.intake.IntakeConstants.*;
+import static frc.robot.subsystems.indexer.IndexerConstants.*;
 
 import frc.lib.frc1731.hardware.motor.ctre.MotorIOTalonFX;
 import frc.lib.frc1731.subsystem.VelocitySubsystem;
 import frc.robot.Ports;
 
-public class IntakeRollerSubsystem extends VelocitySubsystem<MotorIOTalonFX>{
-    public IntakeRollerSubsystem(boolean enabled){
+import static edu.wpi.first.units.Units.*;
+
+public class IndexerSubsystem extends VelocitySubsystem<MotorIOTalonFX>{
+    public IndexerSubsystem(boolean enabled) {
         super(enabled);
     }
 
     @Override
     protected void initializeHardware() {
-        motor = new MotorIOTalonFX(Ports.kIntakeRollerMotorConfig);
+        motor = new MotorIOTalonFX(Ports.kIndexerConfig);
         motor.withPIDGains(kPIDGains);
     }
 

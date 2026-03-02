@@ -1,141 +1,127 @@
 package frc.robot.subsystems.shooter.hood;
 
-import edu.wpi.first.wpilibj2.command.*;
 import frc.lib.frc1731.Utils;
 import frc.lib.frc1731.hardware.motor.ctre.MotorIOTalonFXS;
-import frc.robot.Robot;
+import frc.lib.frc1731.math.LoggedTunableNumber;
+import frc.robot.Ports;
 import frc.robot.subsystems.BaseSubsystem;
 
-import static edu.wpi.first.units.Units.*;
 import static frc.robot.subsystems.shooter.hood.HoodConstants.*;
 
 import java.util.function.DoubleSupplier;
 
-import com.ctre.phoenix6.configs.MotionMagicConfigs;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.Command;
 
 public class HoodSubsystem extends BaseSubsystem {
     private MotorIOTalonFXS leftMotor, rightMotor;
-    private double leftTargetDegrees = 0;
-    private double rightTargetDegrees = 0;
+    private double leftTargetRotations = 0;
+    private double rightTargetRotations = 0;
+
+    private double leftRotations = 0;
+    private double rightRotations = 0;
+
+    private LoggedTunableNumber leftSetpoint = new LoggedTunableNumber("Hood Left Setpoint Rotations", 3, () -> !DriverStation.isFMSAttached());
+    private LoggedTunableNumber rightSetpoint = new LoggedTunableNumber("Hood Left Setpoint Rotations", 3, () -> !DriverStation.isFMSAttached());
 
     public HoodSubsystem(boolean enabled) {
         super(enabled);
         if (!isEnabled()) return;
-        leftMotor = new MotorIOTalonFXS(kLeftHoodConfig);
-        rightMotor = new MotorIOTalonFXS(kRightHoodConfig);
-
+        leftMotor = new MotorIOTalonFXS(Ports.kLeftHoodConfig);
         leftMotor.withPIDGains(kPositionGains);
-        rightMotor.withPIDGains(kPositionGains);
-
-        leftMotor.withMotionMagicConfigs(new MotionMagicConfigs()
-            .withMotionMagicAcceleration(50)
-            .withMotionMagicCruiseVelocity(50)
-            .withMotionMagicJerk(100)
-        );
-
-        rightMotor.withMotionMagicConfigs(new MotionMagicConfigs()
-            .withMotionMagicAcceleration(50)
-            .withMotionMagicCruiseVelocity(50)
-            .withMotionMagicJerk(100)
-        );
-
-        leftMotor.setDynamicMotionMagicSpeeds(50, 50);
-        rightMotor.setDynamicMotionMagicSpeeds(50, 50);
-
+        leftMotor.withMotionMagicConfigs(kMotionMagicConfigs);
         leftMotor.resetEncoderPosition(0);
+        leftMotor.setSoftLimits(-0.1, 7);
+        // leftMotor.setDynamicMotionMagicSpeeds(50, 50);
+
+        rightMotor = new MotorIOTalonFXS(Ports.kRightHoodConfig);
+        rightMotor.withPIDGains(kPositionGains);
+        rightMotor.withMotionMagicConfigs(kMotionMagicConfigs);
         rightMotor.resetEncoderPosition(0);
-
-        // leftMotor.setSoftLimits(0, 7);
-        // rightMotor.setSoftLimits(0, 7);
-
-        // Robot.IS_ENABLED.onTrue(new InstantCommand(() -> {
-        //     leftMotor.setPercentOutput(0);
-        //     rightMotor.setPercentOutput(0);
-        // }));
+        rightMotor.setSoftLimits(-0.1, 7);
+        // rightMotor.setDynamicMotionMagicSpeeds(50, 50);
     }
 
-    public double getLeftHoodDegrees() {
-        return kConverter.toMechanism(Rotations.of(leftMotor.getRotations())).in(Degrees);
+    public boolean atLeftTargetRotations() {
+        return Utils.isWithin(leftRotations, leftTargetRotations, kEpsilon);
     }
 
-    public double getRightHoodDegrees() {
-        return kConverter.toMechanism(Rotations.of(rightMotor.getRotations())).in(Degrees);
+    public boolean atRightTargetRotations() {
+        return Utils.isWithin(rightRotations, rightTargetRotations, kEpsilon);
     }
 
-    public double getLeftTargetDegrees() {
-        // return kConverter.toMechanism(Rotations.of(leftTargetDegrees)).in(Degrees);
-        return leftTargetDegrees;
-    }
-
-    public double getRightTargetDegrees() {
-        // return kConverter.toMechanism(Rotations.of(rightTargetDegrees)).in(Degrees);
-        return rightTargetDegrees;
-    }
-
-    public boolean atLeftTarget() {
-        return Utils.isWithin(getLeftHoodDegrees(), getLeftTargetDegrees(), kEpsilon.in(Degrees));
-    }
-
-    public boolean atRightTarget() {
-        return Utils.isWithin(getRightHoodDegrees(), getRightTargetDegrees(), kEpsilon.in(Degrees));
-    }
-
-    public boolean atBothTarget() {
-        return atLeftTarget() && atRightTarget();
+    public boolean atBothTargetRotations() {
+        return atLeftTargetRotations() && atRightTargetRotations();
     }
 
     @Override
     public void periodicTelemetry() {
-        logger.log("Left Hood Position", getLeftHoodDegrees());
-        logger.log("Right Hood Position", getRightHoodDegrees());
-        logger.log("Left Hood Target Position", getLeftTargetDegrees());
-        logger.log("Right Hood Target Position", getRightTargetDegrees());
-        logger.log("Left Hood At Target Position", atLeftTarget());
-        logger.log("Right Hood At Target Position", atRightTarget());
+        leftRotations = leftMotor.getRotations();
+        rightRotations = rightMotor.getRotations();
+
+        logger.log("Left/Rotations", leftRotations);
+        logger.log("Left/Target Rotations", leftTargetRotations);
+        logger.log("Left/At Target", atLeftTargetRotations());
+
+        logger.log("Right/Rotations", rightRotations);
+        logger.log("Right/Target Rotations", rightTargetRotations);
+        logger.log("Right/At Target", atRightTargetRotations());
+
+        logger.log("At Both Target", atBothTargetRotations());
     }
 
-    public Command setLeftHoodCommand(double targetDegrees) {
-        return this.run(() -> {
-            this.leftTargetDegrees = kConverter.toMotor(Degrees.of(targetDegrees)).in(Rotations);
-            leftMotor.setPosition(targetDegrees);
+    public Command setLeft(DoubleSupplier rotations) {
+        return run(() -> {
+            leftTargetRotations = rotations.getAsDouble();
+            leftMotor.setPosition(leftTargetRotations);
         });
     }
 
-    public Command setRightHoodCommand(double targetDegrees) {
-        return this.run(() -> {
-            this.rightTargetDegrees = kConverter.toMotor(Degrees.of(targetDegrees)).in(Rotations);
-            rightMotor.setPosition(targetDegrees);
+    public Command setLeft(double rotations) {
+        return setLeft(() -> rotations);
+    }
+
+    public Command setRight(DoubleSupplier rotations) {
+        return run(() -> {
+            rightTargetRotations = rotations.getAsDouble();
+            rightMotor.setPosition(rightTargetRotations);
         });
     }
 
-    public Command setHoodCommand(double left, double right) {
-        return this.run(() -> {
-            this.leftTargetDegrees = left;
-            this.rightTargetDegrees = right;
-            
-            leftMotor.setPosition(left);
-            rightMotor.setPosition(right);
+    public Command setRight(double rotations) {
+        return setRight(() -> rotations);
+    }
+
+    public Command setRotations(DoubleSupplier left, DoubleSupplier right) {
+        return run(() -> {
+            leftTargetRotations = left.getAsDouble();
+            rightTargetRotations = right.getAsDouble();
+
+            leftMotor.setPosition(leftTargetRotations);
+            rightMotor.setPosition(rightTargetRotations);
         });
     }
 
-    public Command setHoodCommand(DoubleSupplier rotations) {
-        return this.run(() -> {
-            this.leftTargetDegrees = rotations.getAsDouble();
-            this.rightTargetDegrees = rotations.getAsDouble();
-            
-            leftMotor.setPosition(rotations.getAsDouble());
-            rightMotor.setPosition(rotations.getAsDouble());
-        });
+    public Command setRotations(double left, double right) {
+        return setRotations(() -> left, () -> right);
     }
 
-    public Command stowHoodCommand() {
-        return setHoodCommand(kStartRotations.in(Rotations), kStartRotations.in(Rotations));
+    public Command stow() {
+        return setRotations(0, 0);
     }
 
-    public Command driveManualCommand(double left, double right) {
+    public Command setTunedRotations() {
+        return setRotations(leftSetpoint.get(), rightSetpoint.get());
+    }
+
+    public Command driveManual(double left, double right) {
         return run(() -> {
             leftMotor.setPercentOutput(left);
             rightMotor.setPercentOutput(right);
         });
+    }
+    
+    public Command stop() {
+        return driveManual(0, 0).withTimeout(0);
     }
 }
