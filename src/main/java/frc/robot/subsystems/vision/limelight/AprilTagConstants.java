@@ -15,5 +15,5 @@ public class AprilTagConstants {
             Units.degreesToRadians(180.0)
         )
     );
-    public static final String kLimelightName = "limelight";
+    public static final String kLimelightName = "limelight-main";
 }

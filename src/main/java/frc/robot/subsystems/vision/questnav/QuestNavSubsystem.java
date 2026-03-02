@@ -2,6 +2,7 @@ package frc.robot.subsystems.vision.questnav;
 
 import frc.lib.frc1731.TriConsumer;
 import frc.robot.subsystems.BaseSubsystem;
+import frc.robot.subsystems.drive.SwerveSubsystem;
 import gg.questnav.questnav.*;
 
 import static frc.robot.subsystems.vision.questnav.VSLAMConstants.*;
@@ -15,13 +16,15 @@ import edu.wpi.first.wpilibj.Timer;
 
 public class QuestNavSubsystem extends BaseSubsystem {
     private QuestNav questNav;
+    private SwerveSubsystem drivetrain;
 
     private static boolean isConnected = false;
     private static boolean isTracking = false;
+    private static boolean isSeeded = false;
 
     private Timer poseResetTimer = new Timer();
 
-    private Pose3d currentPose = new Pose3d();
+   // private Pose3d currentPose = new Pose3d();
 
     private static Matrix<N3, N1> QUESTNAV_STD_DEVS =
     VecBuilder.fill(
@@ -30,21 +33,38 @@ public class QuestNavSubsystem extends BaseSubsystem {
         0.035 // Trust down to 2 degrees rotational
     );
 
-    public QuestNavSubsystem(boolean enabled) {
+
+
+    public QuestNavSubsystem(boolean enabled, SwerveSubsystem swerve) {
         super(enabled);
         questNav = new QuestNav();
         resetPose(new Pose3d());
+        poseResetTimer.restart();
+        drivetrain = swerve;
     }
 
     @Override
-    public void periodicTelemetry() {
+    public void periodic() {
         questNav.commandPeriodic();
+        if (!isSeeded || (!isEnabled() && poseResetTimer.hasElapsed(5))) {
+            if (drivetrain.hasGoodOdometry() && isConnected && isTracking) {
+                this.resetPose(new Pose3d(drivetrain.getCurrentPose()));
+                poseResetTimer.restart();
+            }
+        }
+    }
+
+
+
+    @Override
+    public void periodicTelemetry() {
+       
         isConnected = questNav.isConnected();
         isTracking = questNav.isTracking();
 
         logger.log("Is Connected", isConnected);
         logger.log("Is Tracking", isTracking);
-        logger.log("Current Pose", currentPose);
+
     }
 
     public Pose3d getPose() {
@@ -68,6 +88,7 @@ public class QuestNavSubsystem extends BaseSubsystem {
 
         // Set the QuestNav pose to the calculated Quest pose
         questNav.setPose(questResetPose);
+        poseResetTimer.reset();
     }
 
     public boolean isConnected() {
@@ -76,6 +97,11 @@ public class QuestNavSubsystem extends BaseSubsystem {
 
     public boolean isTracking() {
         return isTracking;
+    }
+
+    public boolean isSeeded() {
+        return isSeeded;
+
     }
 
     public void addVisionMeasurement(TriConsumer<Pose2d, Double, Matrix<N3, N1>> measurementConsumer) {
@@ -96,11 +122,12 @@ public class QuestNavSubsystem extends BaseSubsystem {
                 // Transform by the mount pose to get your robot pose
                 Pose3d robotPose = questPose.transformBy(kRobotToOculus.inverse());
 
-                // Add the measurement to our estimator if 20 ms has passed since last update
-                if (poseResetTimer.hasElapsed(0.2)) {
-                    measurementConsumer.accept(robotPose.toPose2d(), timestamp, QUESTNAV_STD_DEVS);
-                    poseResetTimer.reset();
+                if (isTracking() && isConnected() && isSeeded()) {
+
+                measurementConsumer.accept(robotPose.toPose2d(), timestamp, QUESTNAV_STD_DEVS);
+                 
                 }
+                
             }
         }
     }

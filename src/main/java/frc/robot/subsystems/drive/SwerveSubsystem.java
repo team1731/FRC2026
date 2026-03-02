@@ -24,6 +24,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.frc1731.hardware.camera.LimelightHelpers;
@@ -40,7 +41,7 @@ import static frc.robot.subsystems.drive.SwerveConstants.*;
 public class SwerveSubsystem extends BaseSubsystem {
     private CommandSwerveDrivetrain drivetrain;
 
-    private SwerveDrivePoseEstimator estimator;
+   // private SwerveDrivePoseEstimator estimator;
 
     private final Telemetry telemetry = new Telemetry(TunerConstants.kSpeedAt12Volts.in(MetersPerSecond));
 
@@ -49,11 +50,12 @@ public class SwerveSubsystem extends BaseSubsystem {
     private double fieldCentricHeading = 0.0;
     private double robotCentricHeading = 0.0;
 
+    private Timer timeSinceGoodLimelight = new Timer();
+    private boolean hadgoodLimelight = false;
+
     private final ProfiledPIDController headingPID = kHeadingGains.toProfiledPIDController(kMaxAngularRate, kMaxAngularAcceleration);
  
-    private DrivetrainVisionCallback visionCallback = (Pose2d pose, double timestamp, Matrix<N3,N1> visionMeasurementStdDevs) -> {
-        drivetrain.addVisionMeasurement(pose, timestamp, visionMeasurementStdDevs);  // comment this out to disable vslam
-    };
+
 
     public SwerveSubsystem(boolean enabled) {
         super(enabled);
@@ -63,14 +65,14 @@ public class SwerveSubsystem extends BaseSubsystem {
         driveAtTargetControl.HeadingController.setPID(10,0,0);
 	    driveAtTargetControl.HeadingController.enableContinuousInput(-Math.PI/2, Math.PI/2);
 
-        this.estimator = new SwerveDrivePoseEstimator(
-          drivetrain.getKinematics(),
-          Rotation2d.fromDegrees(getYaw()),
-          drivetrain.getState().ModulePositions,
-          new Pose2d(),
-          VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(5)),
-          VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(30))
-        );
+    //    this.estimator = new SwerveDrivePoseEstimator(
+    //      drivetrain.getKinematics(),
+    //      Rotation2d.fromDegrees(getYaw()),
+    //      drivetrain.getState().ModulePositions,
+    //      new Pose2d(),
+    //      VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(5)),
+    //      VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(30))
+    //    );
 
         configureAutoBuilder();
         drivetrain.registerTelemetry(telemetry::telemeterize);
@@ -80,12 +82,12 @@ public class SwerveSubsystem extends BaseSubsystem {
         drivetrain.addVisionMeasurement(pose, timestamp, visionMeasurementStdDevs);
     }
 
-    public void updateOdometry() {
+    public void updateVisionOdometry() {
         boolean useMegaTag2 = true; //set to false to use MegaTag1
         boolean doRejectUpdate = false;
         if(useMegaTag2 == false)
         {
-        LimelightHelpers.PoseEstimate mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
+        LimelightHelpers.PoseEstimate mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight-main");
         
         if(mt1.tagCount == 1 && mt1.rawFiducials.length == 1)
         {
@@ -105,12 +107,12 @@ public class SwerveSubsystem extends BaseSubsystem {
 
         if(!doRejectUpdate)
         {
-            estimator.addVisionMeasurement(mt1.pose, mt1.timestampSeconds, VecBuilder.fill(.5,.5,9999999));
+           drivetrain.addVisionMeasurement(mt1.pose, mt1.timestampSeconds, VecBuilder.fill(.5,.5,9999999));
         }
         }
         else if (useMegaTag2 == true)
         {
-            // LimelightHelpers.SetRobotOrientation("limelight-main", estimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
+            LimelightHelpers.SetRobotOrientation("limelight-main", drivetrain.getState().Pose.getRotation().getDegrees(), 0, 0, 0, 0, 0);
             LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-main");
             Pose2d botpose = LimelightHelpers.getBotPose2d("limelight-main");
 
@@ -123,20 +125,22 @@ public class SwerveSubsystem extends BaseSubsystem {
             {
                 doRejectUpdate = true;
             }
-            if(mt2.tagCount == 0)
+            if(mt2.tagCount <= 1)
             {
                 doRejectUpdate = true;
             }
             if(!doRejectUpdate)
             {
-                estimator.addVisionMeasurement(mt2.pose, mt2.timestampSeconds, VecBuilder.fill(.5,.5,9999999));
+                this.addVisionMeasurement(mt2.pose, mt2.timestampSeconds, VecBuilder.fill(.5,.5,9999999));
+                hadgoodLimelight = true;
+                timeSinceGoodLimelight.restart();
             }
         }
     }
 
     public void resetPose(Pose2d pose) {
         drivetrain.resetPose(pose);
-        estimator.resetPose(pose);
+
     }
 
     public double getYaw() {
@@ -205,13 +209,13 @@ public class SwerveSubsystem extends BaseSubsystem {
 
     @Override
     public void periodicTelemetry() {
-        drivetrain.periodic();
-        updateOdometry();
+      //  drivetrain.periodic();
+      //  updateOdometry();
 
         logger.log("Current Pose", getCurrentPose());
         logger.log("Current Speeds", getWheelSpeeds());
         logger.log("Target Speeds", targetSpeeds);
-        logger.log("Estimated Pose", estimator.getEstimatedPosition());
+        logger.log("Estimated Pose", getCurrentPose());
 
         Robot.kFieldLayout.setSimulatedRobotPose(getCurrentPose());
     }
@@ -252,17 +256,30 @@ public class SwerveSubsystem extends BaseSubsystem {
                             .withCenterOfRotation(RotationCenter)
                     );
                 } 
-                // else {
-                //     drivetrain.setControl(
-                //         kRobotCentricControl
-                //             .withVelocityX((Math.abs(m_xboxController.getLeftY()) * m_xboxController.getLeftY()) * kMaxSpeed)
-                //             .withVelocityY((Math.abs(m_xboxController.getLeftX()) * m_xboxController.getLeftX()) * kMaxSpeed)
-                //             .withRotationalRate(-m_xboxController.getRightX() * kMaxAngularRate)
-                //             .withCenterOfRotation(RotationCenter)
-                //     );
-                // }
+                 else {
+                     drivetrain.setControl(
+                         kRobotCentricControl
+                             .withVelocityX((Math.abs(m_xboxController.getLeftY()) * m_xboxController.getLeftY()) * kMaxSpeed)
+                             .withVelocityY((Math.abs(m_xboxController.getLeftX()) * m_xboxController.getLeftX()) * kMaxSpeed)
+                             .withRotationalRate(-m_xboxController.getRightX() * kMaxAngularRate)
+                             .withCenterOfRotation(RotationCenter)
+                     );
+                 }
             }
         }).withName("Drive" + (isFieldCentric.getAsBoolean() ? "FieldCentric" : "RobotCentric"));
+    }
+
+    public ChassisSpeeds getFieldRelativeChassisSpeeds() {    // used for shoot on the fly
+        return new ChassisSpeeds(
+                getFieldRelativeChassisSpeeds().vxMetersPerSecond * getCurrentPose().getRotation().getCos()
+                        - getFieldRelativeChassisSpeeds().vyMetersPerSecond * getCurrentPose().getRotation().getSin(),
+                getFieldRelativeChassisSpeeds().vyMetersPerSecond * getCurrentPose().getRotation().getCos()
+                        + getFieldRelativeChassisSpeeds().vxMetersPerSecond * getCurrentPose().getRotation().getSin(),
+                getFieldRelativeChassisSpeeds().omegaRadiansPerSecond);
+    }
+
+    public boolean hasGoodOdometry() {
+        return (hadgoodLimelight && timeSinceGoodLimelight.get()< 4);
     }
 
     // public Command driveToTargetCommand(CommandXboxController m_xboxController) {
@@ -302,39 +319,39 @@ public class SwerveSubsystem extends BaseSubsystem {
     //     }).withName("DriveToTarget");
     // }
 
-    public Command pathfindToPoseCommand(Pose2d targetPose, double endVelocity) {
-        return AutoBuilder.pathfindToPose(
-            targetPose, 
-            kPathfinderConstraints, 
-            endVelocity
-        ).withName("PathFindToPose");
-    }
+  //  public Command pathfindToPoseCommand(Pose2d targetPose, double endVelocity) {
+ //       return AutoBuilder.pathfindToPose(
+ //           targetPose, 
+ //           kPathfinderConstraints, 
+ //           endVelocity
+ //       ).withName("PathFindToPose");
+//    }
 
-    public Command setHeadingTargetCommand(CommandXboxController m_xboxController, Rotation2d targetHeading) {
-        return this.run(() -> {
-            drivetrain.setControl(
-                kFieldCentricControl
-                    .withVelocityX(-(Math.abs(m_xboxController.getLeftY()) * m_xboxController.getLeftY()) * kMaxSpeed)
-                    .withVelocityY(-(Math.abs(m_xboxController.getLeftX()) * m_xboxController.getLeftX()) * kMaxSpeed)
-                    .withRotationalRate(headingPID.calculate(drivetrain.getRotation3d().getZ() % 360d, targetHeading.getDegrees()))
-                    .withCenterOfRotation(new Translation2d(0, 0))
-            );
-        }).withName("SetHeadingTarget");
-    }
+ //   public Command setHeadingTargetCommand(CommandXboxController m_xboxController, Rotation2d targetHeading) {
+  //      return this.run(() -> {
+  //          drivetrain.setControl(
+  //              kFieldCentricControl
+  //                  .withVelocityX(-(Math.abs(m_xboxController.getLeftY()) * m_xboxController.getLeftY()) * kMaxSpeed)
+  //                  .withVelocityY(-(Math.abs(m_xboxController.getLeftX()) * m_xboxController.getLeftX()) * kMaxSpeed)
+  //                  .withRotationalRate(headingPID.calculate(drivetrain.getRotation3d().getZ() % 360d, targetHeading.getDegrees()))
+  //                  .withCenterOfRotation(new Translation2d(0, 0))
+  //          );
+  //      }).withName("SetHeadingTarget");
+  //  }
 
-    public Command facePoseCommand(CommandXboxController m_xboxController, Supplier<Pose2d> targetPose) {
-        return this.run(() -> {
-            Pose2d curPose = getCurrentPose();
-
-            Vector2d robotToTarget = new Vector2d(curPose.getX() - targetPose.get().getX(), curPose.getY() - targetPose.get().getY());
-
-            drivetrain.setControl(
-                kFieldCentricControl
-                    .withVelocityX(-(Math.abs(m_xboxController.getLeftY()) * m_xboxController.getLeftY()) * kMaxSpeed)
-                    .withVelocityY(-(Math.abs(m_xboxController.getLeftX()) * m_xboxController.getLeftX()) * kMaxSpeed)
-                    .withRotationalRate(headingPID.calculate(drivetrain.getRotation3d().getZ() % 360d, robotToTarget.getDirection().getDegrees()))
-                    .withCenterOfRotation(new Translation2d(0, 0))
-            );
-        }).withName("FacePose");
-    }
+ //   public Command facePoseCommand(CommandXboxController m_xboxController, Supplier<Pose2d> targetPose) {
+  //      return this.run(() -> {
+  //          Pose2d curPose = getCurrentPose();
+//
+  //          Vector2d robotToTarget = new Vector2d(curPose.getX() - targetPose.get().getX(), curPose.getY() - targetPose.get().getY());
+//
+  //          drivetrain.setControl(
+   //             kFieldCentricControl
+  //                  .withVelocityX(-(Math.abs(m_xboxController.getLeftY()) * m_xboxController.getLeftY()) * kMaxSpeed)
+ //                   .withVelocityY(-(Math.abs(m_xboxController.getLeftX()) * m_xboxController.getLeftX()) * kMaxSpeed)
+ //                   .withRotationalRate(headingPID.calculate(drivetrain.getRotation3d().getZ() % 360d, robotToTarget.getDirection().getDegrees()))
+ //                   .withCenterOfRotation(new Translation2d(0, 0))
+ //           );
+ //       }).withName("FacePose");
+ //   }
 }

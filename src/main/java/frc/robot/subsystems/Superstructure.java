@@ -23,7 +23,7 @@ public class Superstructure extends SubsystemBase {
     private SwerveSubsystem swerve;
     private FlywheelSubsystem flywheel;
     private HoodSubsystem hood;
-    private TurretSubsystem turret;
+   // private TurretSubsystem turret;
     private IndexerSubsystem indexer;
     private IntakePivotSubsystem pivot;
     private IntakeRollerSubsystem intake;
@@ -35,12 +35,12 @@ public class Superstructure extends SubsystemBase {
     private static Supplier<Pose2d> hubSupplier = () -> new Pose2d(Utils.flip(FieldConstants.Hub.topCenterPoint.toTranslation2d()), new Rotation2d());
     private static Supplier<Pose2d> passSupplier = () -> new Pose2d(Utils.flip(new Pose2d().getTranslation()), new Rotation2d());
 
-    public Superstructure(SwerveSubsystem swerve, FlywheelSubsystem flywheel, HoodSubsystem hood, TurretSubsystem turret, 
+    public Superstructure(SwerveSubsystem swerve, FlywheelSubsystem flywheel, HoodSubsystem hood,  
                             IndexerSubsystem indexer, IntakePivotSubsystem pivot, IntakeRollerSubsystem intake) {
         this.swerve = swerve;
         this.flywheel = flywheel;
         this.hood = hood;
-        this.turret = turret;
+       // this.turret = turret;
         this.indexer = indexer;
         this.pivot = pivot;
         this.intake = intake;
@@ -64,7 +64,7 @@ public class Superstructure extends SubsystemBase {
             pivot.retractCommand(),
             intake.setPercentOutputCommand(0.75),
             hood.setHoodCommand(2, 2),
-            turret.setRightTurretCommand(() -> swerve.getYaw()),
+         //   turret.setRightTurretCommand(() -> swerve.getYaw()),
             // Commands.waitUntil(() -> flywheel.atRightTargetVelocity() && hood.atBothTarget())
             Commands.waitSeconds(2)
             // Commands.waitSeconds(2)
@@ -107,9 +107,9 @@ public class Superstructure extends SubsystemBase {
         );
     }
 
-    public Command aimTurretCommand() {
-        return turret.aimCommand(() -> swerve.getCurrentPose(), hubSupplier);
-    }
+   // public Command aimTurretCommand() {
+       // return turret.aimCommand(() -> swerve.getCurrentPose(), hubSupplier);
+   // }
 
     public Command unjamCommand() {
         return Commands.none();
