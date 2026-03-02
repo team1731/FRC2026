@@ -28,7 +28,7 @@ public class IntakePivotSubsystem extends BaseSubsystem {
     }
 
     public boolean atTargetRotations() {
-        return Utils.isWithin(motor.getRotations(), targetRotations, kEpsilon);
+        return Utils.isWithin(rotations, targetRotations, kEpsilon);
     }
 
     @Override

@@ -11,6 +11,7 @@ import frc.robot.subsystems.shooter.flywheel.FlywheelSubsystem;
 import frc.robot.subsystems.shooter.hood.HoodSubsystem;
 import frc.robot.subsystems.intake.IntakePivotSubsystem;
 import frc.robot.subsystems.intake.IntakeRollerSubsystem;
+import frc.robot.subsystems.leds.LEDSubsystem;
 import frc.robot.subsystems.shooter.turret.TurretSubsystem;
 import frc.robot.subsystems.vision.QuestNavSubsystem;
 
@@ -25,7 +26,7 @@ public class RobotContainer {
     protected static IndexerSubsystem indexer;
     protected static IntakeRollerSubsystem intake;
     protected static IntakePivotSubsystem pivot;
-    // protected static LEDSubsystem led;
+    protected static LEDSubsystem led;
 
     protected static Superstructure superstructure;
 
@@ -58,7 +59,7 @@ public class RobotContainer {
         indexer = new IndexerSubsystem(true);
         pivot = new IntakePivotSubsystem(true);
         intake = new IntakeRollerSubsystem(true);
-        // led = new LEDSubsystem(true);
+        led = new LEDSubsystem(false);
 
         superstructure = new Superstructure(swerve, flywheel, hood, turret, indexer, pivot, intake);
 

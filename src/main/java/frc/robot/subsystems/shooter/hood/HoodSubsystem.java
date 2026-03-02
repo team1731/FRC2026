@@ -22,7 +22,7 @@ public class HoodSubsystem extends BaseSubsystem {
     private double rightRotations = 0;
 
     private LoggedTunableNumber leftSetpoint = new LoggedTunableNumber("Hood Left Setpoint Rotations", 3, () -> !DriverStation.isFMSAttached());
-    private LoggedTunableNumber rightSetpoint = new LoggedTunableNumber("Hood Left Setpoint Rotations", 3, () -> !DriverStation.isFMSAttached());
+    private LoggedTunableNumber rightSetpoint = new LoggedTunableNumber("Hood Right Setpoint Rotations", 3, () -> !DriverStation.isFMSAttached());
 
     public HoodSubsystem(boolean enabled) {
         super(enabled);

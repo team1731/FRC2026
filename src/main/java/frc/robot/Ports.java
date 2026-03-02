@@ -4,7 +4,7 @@ import frc.lib.frc1731.hardware.motor.PortConfig;
 
 public class Ports {
     // All Ports not including swerve ports because that would be a little annoying
-    public final static int kCANdleID = 0;
+    public final static int kCANdleID = 35;
 
     public static final int kPivotCANcoderId = 15;
 

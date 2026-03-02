@@ -16,7 +16,6 @@ import com.ctre.phoenix6.signals.LarsonBounceValue;
 import com.ctre.phoenix6.signals.RGBWColor;
 import com.ctre.phoenix6.signals.StatusLedWhenActiveValue;
 import com.ctre.phoenix6.signals.StripTypeValue;
-import com.ctre.phoenix6.sim.CANdleSimState;
 
 import edu.wpi.first.wpilibj.util.Color;
 
@@ -24,7 +23,6 @@ public class SimpleCANdle {
     private CANdle candle;
     private CANdleConfiguration config;
     private CANdleConfigurator configurator;
-    private CANdleSimState sim;
 
     public SimpleCANdle(int deviceID, int stripLength){
         this(deviceID, "rio", stripLength);
@@ -32,7 +30,6 @@ public class SimpleCANdle {
 
     public SimpleCANdle(int deviceID, String canbus, int stripLength){
         this.candle = new CANdle(deviceID, canbus);
-        this.sim = candle.getSimState();
 
         this.config = new CANdleConfiguration();
         this.config.LED.StripType = StripTypeValue.RGBW;

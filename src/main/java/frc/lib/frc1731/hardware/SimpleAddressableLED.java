@@ -6,7 +6,8 @@ import edu.wpi.first.wpilibj.AddressableLED;
 public class SimpleAddressableLED {
     private AddressableLED led;
 
-    public SimpleAddressableLED(int port) {
-        this.led = new AddressableLED(port);
+    public SimpleAddressableLED(int deviceID, int stripLength) {
+        this.led = new AddressableLED(deviceID);
+        led.setLength(stripLength);
     }
 }

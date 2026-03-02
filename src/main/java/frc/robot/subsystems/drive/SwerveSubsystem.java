@@ -42,41 +42,44 @@ public class SwerveSubsystem extends BaseSubsystem {
 
     public SwerveSubsystem(boolean enabled) {
         super(enabled);
-        if(!enabled) return;
-
-        this.drivetrain = TunerConstants.createDrivetrain();
-        driveAtTargetControl.HeadingController = kDriveAtTargetGains.toPheonixPIDController();
-
-        this.estimator = new SwerveDrivePoseEstimator(
-            drivetrain.getKinematics(),
-            Rotation2d.fromDegrees(getYaw()),
-            drivetrain.getState().ModulePositions,
-            new Pose2d(),
-            kEstimatorStateStdev,
-            kEstimatorMeasurementStdev
-        );
-
-        if (kUseLimelight) {
-            this.limelight = new Limelight(kLimelightName);
-            this.limelight.setLimelightPosition(kRobotToLimelight);
-        }
-
-        if (kUseVSLAM) {
-            quest = new QuestNav();
-        }
-
-        if (kTelemetrize) {
-            drivetrain.registerTelemetry(telemetry::telemeterize);
+        if(enabled) {
+            this.drivetrain = TunerConstants.createDrivetrain();
+            driveAtTargetControl.HeadingController = kDriveAtTargetGains.toPheonixPIDController();
+    
+            this.estimator = new SwerveDrivePoseEstimator(
+                drivetrain.getKinematics(),
+                Rotation2d.fromDegrees(getYaw()),
+                drivetrain.getState().ModulePositions,
+                new Pose2d(),
+                kEstimatorStateStdev,
+                kEstimatorMeasurementStdev
+            );
+    
+            if (kUseLimelight) {
+                this.limelight = new Limelight(kLimelightName);
+                this.limelight.setLimelightPosition(kRobotToLimelight);
+            }
+    
+            if (kUseVSLAM) {
+                quest = new QuestNav();
+            }
+    
+            if (kTelemetrize) {
+                drivetrain.registerTelemetry(telemetry::telemeterize);
+            }
         }
 
         configureAutoBuilder();
     }
 
     public void addVisionMeasurement(Pose2d pose, double timestamp, Matrix<N3,N1> visionMeasurementStdDevs) {
+        if (!isEnabled()) return;
         drivetrain.addVisionMeasurement(pose, timestamp, visionMeasurementStdDevs);
     }
 
     public void updateOdometry() {
+        if (!isEnabled()) return;
+
         if (kUseLimelight) {
             limelight.updateOrientation(drivetrain.getPigeon2());
             LimelightHelpers.PoseEstimate estimate = limelight.getPoseEstimate();
@@ -118,23 +121,28 @@ public class SwerveSubsystem extends BaseSubsystem {
     }
 
     public void resetPose(Pose2d pose) {
+        if (!isEnabled()) return;
         drivetrain.resetPose(pose);
         estimator.resetPose(pose);
     }
 
     public double getYaw() {
+        if (!isEnabled()) return 0;
         return drivetrain.getPigeon2().getYaw().getValueAsDouble();
     }
 
     public Pose2d getCurrentPose() {
+        if (!isEnabled()) return new Pose2d();
         return drivetrain.getState().Pose;
     }
 
     public SwerveDriveState getState() {
+        if (!isEnabled()) return new SwerveDriveState();
         return drivetrain.getState();
     }
 
     public ChassisSpeeds getWheelSpeeds() {
+        if (!isEnabled()) return new ChassisSpeeds();
         return getState().Speeds;
     }
 
@@ -164,7 +172,10 @@ public class SwerveSubsystem extends BaseSubsystem {
                 this::resetAutoPose,
                 this::getWheelSpeeds,
                 // Consumer of ChassisSpeeds to drive the robot
-                (speeds, feedsforwards)->drivetrain.setControl(autoRequest.withSpeeds(speeds)),
+                (speeds, feedsforwards)-> {
+                    if (!isEnabled()) return;
+                    drivetrain.setControl(autoRequest.withSpeeds(speeds));
+                },
                 new PPHolonomicDriveController(
                     kPPConstants,
                     kPPConstants
