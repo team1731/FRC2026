@@ -15,13 +15,11 @@ import frc.robot.subsystems.shooter.hood.HoodSubsystem;
 import frc.robot.subsystems.intake.IntakePivotSubsystem;
 import frc.robot.subsystems.intake.IntakeRollerSubsystem;
 import frc.robot.subsystems.shooter.turret.TurretSubsystem;
-import frc.robot.subsystems.vision.limelight.AprilTagSubsystem;
-import frc.robot.subsystems.vision.questnav.QuestNavSubsystem;
+import frc.robot.subsystems.vision.QuestNavSubsystem;
 
 public class RobotContainer {
     /* Subsystems */
     protected static QuestNavSubsystem vslam;
-    protected static AprilTagSubsystem aprilTag;
 
     protected static SwerveSubsystem swerve;
     // protected static LEDSubsystem led;
@@ -80,7 +78,6 @@ public class RobotContainer {
 
         superstructure = new Superstructure(swerve, flywheel, hood, turret, indexer, pivot, intake);
         // vslam = new QuestNavSubsystem(true);
-        aprilTag = new AprilTagSubsystem(true);
 
         // Drivetrain will execute this command periodically 
         // if no other command is active on the drivetrain

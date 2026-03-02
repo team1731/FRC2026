@@ -20,6 +20,8 @@ public class SwerveConstants {
     public static final double kDeadband = 0.05; // 5% joystick deadband
 
     public static final boolean kUseVSLAM = true;
+    public static final boolean kUseLimelight = true;
+    public static final boolean kTelemetrize = false;
 
     public static final PIDConstants kPPConstants = new PIDConstants(10d, 0d, 0d); // PID constants for PathPlanner path following
 

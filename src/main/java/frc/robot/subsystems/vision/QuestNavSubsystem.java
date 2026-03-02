@@ -1,10 +1,10 @@
-package frc.robot.subsystems.vision.questnav;
+package frc.robot.subsystems.vision;
 
 import frc.lib.frc1731.TriConsumer;
 import frc.robot.subsystems.BaseSubsystem;
 import gg.questnav.questnav.*;
 
-import static frc.robot.subsystems.vision.questnav.VSLAMConstants.*;
+import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
@@ -16,15 +16,14 @@ import edu.wpi.first.wpilibj.Timer;
 public class QuestNavSubsystem extends BaseSubsystem {
     private QuestNav questNav;
 
-    private static boolean isConnected = false;
-    private static boolean isTracking = false;
+    private boolean isConnected = false;
+    private boolean isTracking = false;
 
     private Timer poseResetTimer = new Timer();
 
     private Pose3d currentPose = new Pose3d();
 
-    private static Matrix<N3, N1> QUESTNAV_STD_DEVS =
-    VecBuilder.fill(
+    private static Matrix<N3, N1> QUESTNAV_STD_DEVS = VecBuilder.fill(
         0.02, // Trust down to 2cm in X direction
         0.02, // Trust down to 2cm in Y direction
         0.035 // Trust down to 2 degrees rotational
