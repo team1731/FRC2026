@@ -21,7 +21,7 @@ public class IndexerSubsystem extends VelocitySubsystem<MotorIOTalonFX>{
     protected void initializeHardware() {
         motor = new MotorIOTalonFX(kMotorConfig);
         motor.withPIDGains(kPIDGains);
-        motor.withFollower(new MotorIOTalonFX(kFollowerConfig));
+        // motor.withFollower(new MotorIOTalonFX(kFollowerConfig));
         this.withSimulation(new SimConstants(DCMotor.getKrakenX60(1), 1.0, Inches.of(1), Pounds.of(0.1)), kPIDGains);
 
     }

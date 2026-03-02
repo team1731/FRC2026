@@ -3,10 +3,13 @@ package frc.robot.subsystems.shooter.hood;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.lib.frc1731.Utils;
 import frc.lib.frc1731.hardware.motor.ctre.MotorIOTalonFXS;
+import frc.robot.Robot;
 import frc.robot.subsystems.BaseSubsystem;
 
 import static edu.wpi.first.units.Units.*;
 import static frc.robot.subsystems.shooter.hood.HoodConstants.*;
+
+import java.util.function.DoubleSupplier;
 
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 
@@ -23,9 +26,6 @@ public class HoodSubsystem extends BaseSubsystem {
 
         leftMotor.withPIDGains(kPositionGains);
         rightMotor.withPIDGains(kPositionGains);
-        
-        leftMotor.setSoftLimits(0, 7);
-        rightMotor.setSoftLimits(0, 7);
 
         leftMotor.withMotionMagicConfigs(new MotionMagicConfigs()
             .withMotionMagicAcceleration(50)
@@ -42,8 +42,16 @@ public class HoodSubsystem extends BaseSubsystem {
         leftMotor.setDynamicMotionMagicSpeeds(50, 50);
         rightMotor.setDynamicMotionMagicSpeeds(50, 50);
 
-        leftMotor.resetEncoderPosition(kStartRotations.in(Rotations));
-        rightMotor.resetEncoderPosition(kStartRotations.in(Rotations));
+        leftMotor.resetEncoderPosition(0);
+        rightMotor.resetEncoderPosition(0);
+
+        // leftMotor.setSoftLimits(0, 7);
+        // rightMotor.setSoftLimits(0, 7);
+
+        // Robot.IS_ENABLED.onTrue(new InstantCommand(() -> {
+        //     leftMotor.setPercentOutput(0);
+        //     rightMotor.setPercentOutput(0);
+        // }));
     }
 
     public double getLeftHoodDegrees() {
@@ -55,11 +63,13 @@ public class HoodSubsystem extends BaseSubsystem {
     }
 
     public double getLeftTargetDegrees() {
-        return kConverter.toMechanism(Rotations.of(leftTargetDegrees)).in(Degrees);
+        // return kConverter.toMechanism(Rotations.of(leftTargetDegrees)).in(Degrees);
+        return leftTargetDegrees;
     }
 
     public double getRightTargetDegrees() {
-        return kConverter.toMechanism(Rotations.of(rightTargetDegrees)).in(Degrees);
+        // return kConverter.toMechanism(Rotations.of(rightTargetDegrees)).in(Degrees);
+        return rightTargetDegrees;
     }
 
     public boolean atLeftTarget() {
@@ -76,7 +86,12 @@ public class HoodSubsystem extends BaseSubsystem {
 
     @Override
     public void periodicTelemetry() {
-        
+        logger.log("Left Hood Position", getLeftHoodDegrees());
+        logger.log("Right Hood Position", getRightHoodDegrees());
+        logger.log("Left Hood Target Position", getLeftTargetDegrees());
+        logger.log("Right Hood Target Position", getRightTargetDegrees());
+        logger.log("Left Hood At Target Position", atLeftTarget());
+        logger.log("Right Hood At Target Position", atRightTarget());
     }
 
     public Command setLeftHoodCommand(double targetDegrees) {
@@ -95,11 +110,21 @@ public class HoodSubsystem extends BaseSubsystem {
 
     public Command setHoodCommand(double left, double right) {
         return this.run(() -> {
-            this.leftTargetDegrees = kConverter.toMotor(Degrees.of(left)).in(Rotations);
-            this.rightTargetDegrees = kConverter.toMotor(Degrees.of(right)).in(Rotations);
+            this.leftTargetDegrees = left;
+            this.rightTargetDegrees = right;
             
             leftMotor.setPosition(left);
             rightMotor.setPosition(right);
+        });
+    }
+
+    public Command setHoodCommand(DoubleSupplier rotations) {
+        return this.run(() -> {
+            this.leftTargetDegrees = rotations.getAsDouble();
+            this.rightTargetDegrees = rotations.getAsDouble();
+            
+            leftMotor.setPosition(rotations.getAsDouble());
+            rightMotor.setPosition(rotations.getAsDouble());
         });
     }
 

@@ -4,7 +4,7 @@ import frc.lib.frc1731.PIDGains;
 import frc.lib.frc1731.hardware.motor.PortConfig;
 
 public class IntakeConstants {
-    public static final PortConfig kRollerMotorConfig = new PortConfig("Left CANivore", 16, true);
+    public static final PortConfig kRollerMotorConfig = new PortConfig("Right CANivore", 16, true);
     public static final PortConfig kPivotMotorConfig = new PortConfig("Left CANivore", 14);
     public static final PIDGains kPivotGains = new PIDGains()
         .setP(20d)
@@ -19,8 +19,8 @@ public class IntakeConstants {
     // public static final double kPivotStowRotations = 0.0; // rotations
     // public static final double kPositionTolerance = 0.2; // rotations
 
-    public static final double kPivotIntakeRotations = -0.27;
-    public static final double kPivotStowRotations = -0.12;
+    public static final double kPivotIntakeRotations = -0.091;
+    public static final double kPivotStowRotations = 0.038;
 
     // public static final double kMaxRotations = 3.726;
 

@@ -1,13 +1,10 @@
 package frc.robot;
 
-import static edu.wpi.first.units.Units.Degrees;
-import static frc.robot.subsystems.shooter.hood.HoodConstants.kMaxAngle;
-
 import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.wpilibj.AddressableLED;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.*;
 import frc.robot.subsystems.Superstructure;
@@ -54,12 +51,18 @@ public class RobotContainer {
 
     private final Trigger dUnjam = new Trigger(() -> false); // TODO - Add unjam button
 
+    // private static final LoggedTunableNumber flywheelSetpoint = new LoggedTunableNumber("FlywheelSetpoint", () -> true);
+    // private static final LoggedTunableNumber hoodSetpoint = new LoggedTunableNumber("HoodAngle", () -> true);
+
     /* Operator Buttons */
 
     public RobotContainer() {
         configureSubsystems();
         configureNamedCommands();
         configureButtonBindings();
+
+        SmartDashboard.putNumber("Flywheel RPS", 50);
+        SmartDashboard.putNumber("Hood Rotations", 3);
     }
 
     /**
@@ -76,30 +79,32 @@ public class RobotContainer {
         intake = new IntakeRollerSubsystem(true);
 
         superstructure = new Superstructure(swerve, flywheel, hood, turret, indexer, pivot, intake);
-        vslam = new QuestNavSubsystem(true);
+        // vslam = new QuestNavSubsystem(true);
         aprilTag = new AprilTagSubsystem(true);
 
         // Drivetrain will execute this command periodically 
         // if no other command is active on the drivetrain
         swerve.setDefaultCommand(swerve.driveCommand(driver, () -> true));
 
-        vslam.setDefaultCommand(() -> {
-            vslam.addVisionMeasurement((pose, timestamp, stdDevs) -> {
-                swerve.addVisionMeasurement(pose, timestamp, stdDevs);
-            });
-        });
+        // vslam.setDefaultCommand(() -> {
+        //     vslam.addVisionMeasurement((pose, timestamp, stdDevs) -> {
+        //         swerve.addVisionMeasurement(pose, timestamp, stdDevs);
+        //     });
+        // });
 
-        aprilTag.setDefaultCommand(aprilTag.run(() -> {
-            swerve.resetPose(aprilTag.getEstimatedPose());
-            }).ignoringDisable(true)
-            .onlyWhile(Robot.IS_ENABLED.negate())
-        );
+        // aprilTag.setDefaultCommand(aprilTag.run(() -> {
+        //     swerve.resetPose(aprilTag.getEstimatedPose());
+        //     }).ignoringDisable(true)
+        //     .onlyWhile(Robot.IS_DISABLED)
+        // );
 
         flywheel.setDefaultCommand(flywheel.stopCommand());
         intake.setDefaultCommand(intake.stopCommand());
         indexer.setDefaultCommand(indexer.stopCommand());
 
-        hood.setDefaultCommand(hood.setRightHoodCommand(kMaxAngle.in(Degrees)));
+        // hood.setDefaultCommand(hood.driveManualCommand(0, 0));
+        hood.setDefaultCommand(hood.setHoodCommand(0, 0));
+        // turret.setDefaultCommand(turret.setRightTurretCommand(() -> -swerve.getYaw() % 360d));
     }
 
     private void configureNamedCommands() {
@@ -124,21 +129,48 @@ public class RobotContainer {
             swerve.resetPose(resetPosition);
         }));
 
-        driver.leftBumper().whileTrue(turret.driveManualCommand(0, 0.01)).onFalse(turret.stopCommand());
-        driver.rightBumper().whileTrue(turret.driveManualCommand(0, -0.01)).onFalse(turret.stopCommand());
-
-        dIntake.and(dShoot.negate()).whileTrue(superstructure.intakeCommand());
-        dShoot.and(dIntake.negate()).whileTrue(superstructure.shootCommand()).onFalse(hood.stowHoodCommand());
+        dIntake.whileTrue(superstructure.intakeCommand());
+        dShoot.whileTrue(superstructure.shootCommand()).onFalse(hood.stowHoodCommand());
         dFeedthrough.whileTrue(superstructure.feedthroughCommand());
-        dPass.whileTrue(superstructure.passCommand());
+        // dPass.whileTrue(superstructure.passCommand());
 
-        dInitClimb.onTrue(Commands.print("Pivotting to climb position").alongWith(pivot.retractCommand()));
-        dClimb.onTrue(Commands.print("Running climb sequence").alongWith(pivot.retractCommand()));
+        // dInitClimb.onTrue(Commands.print("Pivotting to climb position").alongWith(pivot.retractCommand()));
+        // dClimb.onTrue(Commands.print("Running climb sequence").alongWith(pivot.retractCommand()));
 
-        dHubShot.whileTrue(Commands.print("Shooting static shot from from HUB"));
-        dTowerShot.whileTrue(Commands.print("Shooting static shot from from TOWER"));
-        dLeftCornerShot.whileTrue(Commands.print("Shooting static shot from from the left corner"));
-        dRightCornerShot.whileTrue(Commands.print("Shooting static shot from from the right corner"));
+        // dHubShot.whileTrue(Commands.print("Shooting static shot from from HUB"));
+        // dTowerShot.whileTrue(Commands.print("Shooting static shot from from TOWER"));
+        // dLeftCornerShot.whileTrue(Commands.print("Shooting static shot from from the left corner"));
+        // dRightCornerShot.whileTrue(Commands.print("Shooting static shot from from the right corner"));
+
+        // driver.y().whileTrue(
+        //     flywheel.setFlywheelVelocityCommand(
+        //         SmartDashboard.getNumber("Flywheel Set Point", 0), 
+        //         SmartDashboard.getNumber("Flywheel Set Point", 0)
+        //     ));
+
+        // driver.a().whileTrue(
+        //     hood.setHoodCommand(
+        //         SmartDashboard.getNumber("Hood Angle", 0),
+        //         SmartDashboard.getNumber("Hood Angle", 0)
+        //     ));
+
+        // driver.leftBumper().whileTrue(
+        //     turret.driveManualCommand(0.05, 0.05)
+        // ).onFalse(
+        //     turret.driveManualCommand(0, 0)
+        // );
+
+        // driver.rightBumper().whileTrue(
+        //     turret.driveManualCommand(-0.05, -0.05)
+        // ).onFalse(
+        //     turret.driveManualCommand(0, 0)
+        // );
+
+        // driver.y().whileTrue(flywheel.setFlywheelCommand(() -> SmartDashboard.getNumber("Flywheel RPS", 0)));
+        // // driver.y().whileTrue(flywheel.setFlywheelPercentCommand(0, 1));
+        // driver.a().whileTrue(hood.setHoodCommand(() -> SmartDashboard.getNumber("Hood Rotations", 0)));
+        // driver.x().whileTrue(indexer.setPercentOutputCommand(1.0));
+        // driver.a().whileTrue(hood.setHoodCommand(6, 6));
     }
 
     public void periodic() {

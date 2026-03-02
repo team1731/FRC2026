@@ -3,19 +3,12 @@ package frc.robot;
 import java.util.*;
 
 import org.littletonrobotics.junction.LoggedRobot;
-
-import com.pathplanner.lib.commands.FollowPathCommand;
-
-import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.livewindow.LiveWindow;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.lib.frc1731.RobotClock;
 import frc.lib.frc1731.field.FieldLayout;
 import frc.lib.frc1731.field.ReefscapeFieldLayout;
 import frc.lib.frc1731.log.AKLogger;
@@ -44,7 +37,7 @@ public class Robot extends LoggedRobot {
 	public static final Trigger IS_DISABLED = new Trigger(() -> DriverStation.isDisabled());
 	public static final Trigger IS_TEST = new Trigger(() -> DriverStation.isTest());
 
-	public static final RobotClock CLOCK = new RobotClock();
+	// public static final RobotClock CLOCK = new RobotClock();
 
 	public Robot() {}
 
@@ -61,19 +54,22 @@ public class Robot extends LoggedRobot {
 //   ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 	@Override
 	public void robotInit() {
-		DataLogManager.start();
-		MessageLog.start();
-		LiveWindow.disableAllTelemetry();
+		// DataLogManager.start();
+		// MessageLog.start();
+		AKLogger.start();
+		// SignalLogger.start();
+		// LiveWindow.disableAllTelemetry();
 
 		// Instantiate our robot container. This will perform all of our button bindings,
 		container = new RobotContainer();
 		loader = new AutoLoader();
+		// SmartDashboard.updateValues();
+		// Logger.start();
+		// Logger.addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables
 
-		FollowPathCommand.warmupCommand().schedule();
-		// AKLogger.start();
-		// SignalLogger.start();
+		// FollowPathCommand.warmupCommand().schedule();
 
-		kFieldLayout.logToShuffleboard(isSimulation());
+		// kFieldLayout.logToShuffleboard(isSimulation());
 	}
 
 //   ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
@@ -109,7 +105,7 @@ public class Robot extends LoggedRobot {
 		// block in order for anything in the Command-based framework to work.
 		CommandScheduler.getInstance().run();
 		container.periodic();
-		CLOCK.update();
+		// CLOCK.update();
 	}
 
 	/** This function is called once each time the robot enters Disabled mode. */
@@ -156,7 +152,7 @@ public class Robot extends LoggedRobot {
 	@Override
 	public void autonomousInit() {
 		CommandScheduler.getInstance().cancelAll();
-		CLOCK.setAutoStartTime(Timer.getFPGATimestamp());
+		// CLOCK.setAutoStartTime(Timer.getFPGATimestamp());
 		m_autonomousCommand = loader.getSelectedAutoMode();
 		if (m_autonomousCommand != null) {
 			m_autonomousCommand.schedule();
@@ -209,12 +205,12 @@ public class Robot extends LoggedRobot {
 //   ██ ▀▀ ██ ▀▀▀ ████ ▀▀▀ ██ ▀▀ 
 //   ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 	public static boolean doSD() {
-		long now = System.currentTimeMillis();
-		if (now - millis > 1000) {
-			MessageLog.getLogger().flush();
-			millis = now;
-			return true;
-		}
+		// long now = System.currentTimeMillis();
+		// if (now - millis > 1000) {
+		// 	MessageLog.getLogger().flush();
+		// 	millis = now;
+		// 	return true;
+		// }
 		return false;
 	}
 

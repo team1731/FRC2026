@@ -173,9 +173,9 @@ public abstract class BaseSubsystem extends SubsystemBase {
     public void periodic () {
         periodicOutput();
         periodicTelemetry();
-        logger.log("Command/Actively Commanded", isCurrentlyCommanded());
-        logger.log("Command/Has Default Command", !getDefaultCommand().equals(Commands.none()));
-        logger.log("Command/Active Command", getCurrentCommand().getName());
-        logger.log("Command/Default Command", getDefaultCommand().getName());
+        // logger.log("Command/Actively Commanded", isCurrentlyCommanded());
+        // logger.log("Command/Has Default Command", !getDefaultCommand().equals(Commands.none()));
+        // logger.log("Command/Active Command", getCurrentCommand().getName());
+        // logger.log("Command/Default Command", getDefaultCommand().getName());
     }
 }

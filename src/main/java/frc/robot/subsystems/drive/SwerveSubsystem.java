@@ -5,21 +5,29 @@ import static edu.wpi.first.units.Units.*;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
+import org.littletonrobotics.junction.Logger;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.lib.frc1731.hardware.camera.LimelightHelpers;
+import frc.lib.frc1731.hardware.camera.LimelightHelpers.PoseEstimate;
 import frc.lib.frc1731.math.Vector2d;
 import frc.robot.Robot;
 import frc.robot.subsystems.BaseSubsystem;
@@ -31,7 +39,8 @@ import static frc.robot.subsystems.drive.SwerveConstants.*;
 
 public class SwerveSubsystem extends BaseSubsystem {
     private CommandSwerveDrivetrain drivetrain;
-    private OLD_VSLAMSubsystem vslamSubsystem;
+
+    private SwerveDrivePoseEstimator estimator;
 
     private final Telemetry telemetry = new Telemetry(TunerConstants.kSpeedAt12Volts.in(MetersPerSecond));
 
@@ -54,12 +63,14 @@ public class SwerveSubsystem extends BaseSubsystem {
         driveAtTargetControl.HeadingController.setPID(10,0,0);
 	    driveAtTargetControl.HeadingController.enableContinuousInput(-Math.PI/2, Math.PI/2);
 
-        if (kUseVSLAM) {
-            vslamSubsystem = new OLD_VSLAMSubsystem(visionCallback);
-            vslamSubsystem.configure();
-        }
-
-        drivetrain.getKinematics();
+        this.estimator = new SwerveDrivePoseEstimator(
+          drivetrain.getKinematics(),
+          Rotation2d.fromDegrees(getYaw()),
+          drivetrain.getState().ModulePositions,
+          new Pose2d(),
+          VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(5)),
+          VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(30))
+        );
 
         configureAutoBuilder();
         drivetrain.registerTelemetry(telemetry::telemeterize);
@@ -69,15 +80,67 @@ public class SwerveSubsystem extends BaseSubsystem {
         drivetrain.addVisionMeasurement(pose, timestamp, visionMeasurementStdDevs);
     }
 
-    public void resetPose(Pose2d pose) {
-        drivetrain.resetPose(pose);
-        if(kUseVSLAM) {
-            vslamSubsystem.calculateNewOffset(pose);
+    public void updateOdometry() {
+        boolean useMegaTag2 = true; //set to false to use MegaTag1
+        boolean doRejectUpdate = false;
+        if(useMegaTag2 == false)
+        {
+        LimelightHelpers.PoseEstimate mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight");
+        
+        if(mt1.tagCount == 1 && mt1.rawFiducials.length == 1)
+        {
+            if(mt1.rawFiducials[0].ambiguity > .7)
+            {
+            doRejectUpdate = true;
+            }
+            if(mt1.rawFiducials[0].distToCamera > 3)
+            {
+            doRejectUpdate = true;
+            }
+        }
+        if(mt1.tagCount == 0)
+        {
+            doRejectUpdate = true;
+        }
+
+        if(!doRejectUpdate)
+        {
+            estimator.addVisionMeasurement(mt1.pose, mt1.timestampSeconds, VecBuilder.fill(.5,.5,9999999));
+        }
+        }
+        else if (useMegaTag2 == true)
+        {
+            // LimelightHelpers.SetRobotOrientation("limelight-main", estimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
+            LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-main");
+            Pose2d botpose = LimelightHelpers.getBotPose2d("limelight-main");
+
+            Logger.recordOutput("SmartLogs/Tag Count", mt2.tagCount);
+            Logger.recordOutput("SmartLogs/Is 2", mt2.isMegaTag2);
+            Logger.recordOutput("SmartLogs/PosePose", mt2.pose);    
+            Logger.recordOutput("SmartLogs/a", botpose);    
+            
+            if(Math.abs(drivetrain.getPigeon2().getAngularVelocityZDevice().getValueAsDouble()) > 720) // if our angular velocity is greater than 720 degrees per second, ignore vision updates
+            {
+                doRejectUpdate = true;
+            }
+            if(mt2.tagCount == 0)
+            {
+                doRejectUpdate = true;
+            }
+            if(!doRejectUpdate)
+            {
+                estimator.addVisionMeasurement(mt2.pose, mt2.timestampSeconds, VecBuilder.fill(.5,.5,9999999));
+            }
         }
     }
 
-    public OLD_VSLAMSubsystem getVSLAMSubsystem() {
-        return kUseVSLAM? vslamSubsystem : null;
+    public void resetPose(Pose2d pose) {
+        drivetrain.resetPose(pose);
+        estimator.resetPose(pose);
+    }
+
+    public double getYaw() {
+        return drivetrain.getPigeon2().getYaw().getValueAsDouble();
     }
 
     public Pose2d getCurrentPose() {
@@ -130,16 +193,12 @@ public class SwerveSubsystem extends BaseSubsystem {
         }
     }
 
-    public void zeroHeading() {
-        vslamSubsystem.zeroHeading();
-    }
-
     /**
      * Only reset the pose of the robot is we are in simulation or VSLAM not connected, 
      * otherwise the Oculus will read current position
      */
     private void resetAutoPose(Pose2d pose) {
-        if (Robot.isSimulation() || !kUseVSLAM || (kUseVSLAM && !vslamSubsystem.isConnected())) {
+        if (Robot.isSimulation() || !kUseVSLAM) {
             this.resetPose(pose);
         }
     }
@@ -147,18 +206,12 @@ public class SwerveSubsystem extends BaseSubsystem {
     @Override
     public void periodicTelemetry() {
         drivetrain.periodic();
+        updateOdometry();
 
         logger.log("Current Pose", getCurrentPose());
         logger.log("Current Speeds", getWheelSpeeds());
         logger.log("Target Speeds", targetSpeeds);
-
-        if(kUseVSLAM) {
-            logger.log("VSLAM Connected", vslamSubsystem.isConnected());
-            logger.log("VSLAM Tracking", vslamSubsystem.isTracking());
-
-            vslamSubsystem.cleanUpSubroutineMessages();
-            vslamSubsystem.processHeartbeat();
-        }
+        logger.log("Estimated Pose", estimator.getEstimatedPosition());
 
         Robot.kFieldLayout.setSimulatedRobotPose(getCurrentPose());
     }
@@ -167,23 +220,23 @@ public class SwerveSubsystem extends BaseSubsystem {
         return run(() -> {
             Translation2d RotationCenter =  new Translation2d();
 
-            if(m_xboxController.getHID().getLeftStickButton()){ // might need to flip X and Y due to field begin Y,X
-                fieldCentricHeading = Math.toDegrees(Math.atan2(m_xboxController.getLeftX(),  m_xboxController.getLeftY())); // desired heading in field centric
-                robotCentricHeading = drivetrain.getState().Pose.getRotation().getDegrees() - fieldCentricHeading; // current robot rotation in degrees
-                if(robotCentricHeading >= 0 && robotCentricHeading < 90){ // between 0 and 90
-                    RotationCenter = new Translation2d( 0.3, 0.3);
-                } else if(robotCentricHeading >= 90 && robotCentricHeading < 180){ // between 90 and 180
-                    RotationCenter = new Translation2d( 0.3, -0.3);
-                } else if(robotCentricHeading >= 180 && robotCentricHeading < 270){ // between 180 and 270
-                    RotationCenter = new Translation2d( -0.3, -0.3);
-                } else if(robotCentricHeading >= 270 && robotCentricHeading < 0){ // between 270 and 360
-                    RotationCenter = new Translation2d( -0.3, 0.3);
-                } else {
-                    RotationCenter = new Translation2d(0, 0);
-                }
-            } else {
-                RotationCenter = new Translation2d(0, 0);
-            }
+            // if(m_xboxController.getHID().getLeftStickButton()){ // might need to flip X and Y due to field begin Y,X
+            //     fieldCentricHeading = Math.toDegrees(Math.atan2(m_xboxController.getLeftX(),  m_xboxController.getLeftY())); // desired heading in field centric
+            //     robotCentricHeading = drivetrain.getState().Pose.getRotation().getDegrees() - fieldCentricHeading; // current robot rotation in degrees
+            //     if(robotCentricHeading >= 0 && robotCentricHeading < 90){ // between 0 and 90
+            //         RotationCenter = new Translation2d( 0.3, 0.3);
+            //     } else if(robotCentricHeading >= 90 && robotCentricHeading < 180){ // between 90 and 180
+            //         RotationCenter = new Translation2d( 0.3, -0.3);
+            //     } else if(robotCentricHeading >= 180 && robotCentricHeading < 270){ // between 180 and 270
+            //         RotationCenter = new Translation2d( -0.3, -0.3);
+            //     } else if(robotCentricHeading >= 270 && robotCentricHeading < 0){ // between 270 and 360
+            //         RotationCenter = new Translation2d( -0.3, 0.3);
+            //     } else {
+            //         RotationCenter = new Translation2d(0, 0);
+            //     }
+            // } else {
+            //     RotationCenter = new Translation2d(0, 0);
+            // }
 
             if ((Math.abs(m_xboxController.getLeftY()) < 0.05) && 
                 (Math.abs(m_xboxController.getLeftX()) < 0.05) &&
@@ -198,15 +251,16 @@ public class SwerveSubsystem extends BaseSubsystem {
                             .withRotationalRate(-m_xboxController.getRightX() * kMaxAngularRate)
                             .withCenterOfRotation(RotationCenter)
                     );
-                } else {
-                    drivetrain.setControl(
-                        kRobotCentricControl
-                            .withVelocityX((Math.abs(m_xboxController.getLeftY()) * m_xboxController.getLeftY()) * kMaxSpeed)
-                            .withVelocityY((Math.abs(m_xboxController.getLeftX()) * m_xboxController.getLeftX()) * kMaxSpeed)
-                            .withRotationalRate(-m_xboxController.getRightX() * kMaxAngularRate)
-                            .withCenterOfRotation(RotationCenter)
-                    );
-                }
+                } 
+                // else {
+                //     drivetrain.setControl(
+                //         kRobotCentricControl
+                //             .withVelocityX((Math.abs(m_xboxController.getLeftY()) * m_xboxController.getLeftY()) * kMaxSpeed)
+                //             .withVelocityY((Math.abs(m_xboxController.getLeftX()) * m_xboxController.getLeftX()) * kMaxSpeed)
+                //             .withRotationalRate(-m_xboxController.getRightX() * kMaxAngularRate)
+                //             .withCenterOfRotation(RotationCenter)
+                //     );
+                // }
             }
         }).withName("Drive" + (isFieldCentric.getAsBoolean() ? "FieldCentric" : "RobotCentric"));
     }

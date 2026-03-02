@@ -17,7 +17,7 @@ public class FlywheelConstants {
     public static final Distance kFlywheelRadius = Inches.of(2d); // 4 inch diameter
     public static final Mass kFlywheelMass = Pounds.of(1d); // 1 lb flywheel
 
-    public static final PortConfig kLeftFlywheelConfig = new PortConfig("Left CANivore", 24, false);
+    public static final PortConfig kLeftFlywheelConfig = new PortConfig("Right CANivore", 24, false);
     public static final PortConfig kRightFlywheelConfig = new PortConfig("Left CANivore", 20, true);
 
     public static final double kCurrentLimit = 60d; // Amps
@@ -25,9 +25,8 @@ public class FlywheelConstants {
     public static final SimConstants kSimConstants = new SimConstants(DCMotor.getKrakenX60(1), kGearRatio, kFlywheelRadius, kFlywheelMass);
 
     public static final PIDGains kVelocityGains = new PIDGains() // Tuned sys-id via simulation
-        .setP(0.040022)
-        .setA(0.0059818)
-        .setV(0.11934)
-        .setS(0.012762)
+        .setP(0.6)
+        .setA(0.1)
+        .setV(0.25)
         ;
 }
