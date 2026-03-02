@@ -12,6 +12,8 @@ import frc.lib.frc1731.subsystem.converter.AngularSubsystemConverter;
 
 public class TurretConstants {
     public static final double kGearRatio = (15d / 40d * 15d / 40d * 40d / 160d); // 256.00 : 9.00 overall reduction;
+    public static final double kRotorToSensor = 1d / (15d / 40d  * 15d / 40d / 5d);
+    public static final double kSensorToMech = 1d;
     public static final double kEpsilon = 1d; // Degrees;
 
     public static final Transform3d kLeftTurretToRobot = new Transform3d(
@@ -31,15 +33,18 @@ public class TurretConstants {
     public static final AngularSubsystemConverter kConverter = new AngularSubsystemConverter(kGearRatio);
 
     public static final PIDGains kPositionGains = new PIDGains()
-        .setP(4.8)
-        .setD(0.1)
+        .setP(30)
+        .setD(0.01)
         .setV(0.12)
         .setS(0.25)
         .setA(0.01)
     ;
 
-    public static final PortConfig kLeftPortConfigs = new PortConfig("Left CANivore", 22, false);
+    public static final PortConfig kLeftPortConfigs = new PortConfig("Right CANivore", 22, false);
     public static final PortConfig kRightPortConfigs = new PortConfig("Left CANivore", 18, false);
+
+    public static final double kRightMinDegrees = -128;
+    public static final double kRightMaxDegrees = 266;
 
     public static final double kCurrentLimit = 40d; // Amps
 

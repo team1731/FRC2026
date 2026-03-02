@@ -48,14 +48,14 @@ public class AKLogger {
 		// Logger.recordMetadata("Build Info - Branch", buildBranch);
 		// Logger.recordMetadata("Build Info - Commit Hash", buildCommitHash);
 		// Logger.recordMetadata("Build Info - Date", buildDate);
-    
-        Logger.recordMetadata("Event", DriverStation.getEventName());
-		Logger.recordMetadata("Game", DriverStation.getGameSpecificMessage());
-        Logger.recordMetadata("Robot", "MacDyver");
-        Logger.recordMetadata("Team", "Team1731");
 
-        DataLogManager.start();
-        DriverStation.startDataLog(DataLogManager.getLog());
+    
+        // Logger.recordMetadata("Event", DriverStation.getEventName());
+		// Logger.recordMetadata("Game", DriverStation.getGameSpecificMessage());
+        // Logger.recordMetadata("Robot", "MacDyver");
+        // Logger.recordMetadata("Team", "Team1731");
+        // DataLogManager.start();
+        // DriverStation.startDataLog(DataLogManager.getLog());
         Logger.addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables
 
 		String time = DateTimeFormatter.ofPattern("yy-MM-dd_HH-mm-ss").format(LocalDateTime.now());
@@ -65,7 +65,7 @@ public class AKLogger {
             LoggedPowerDistribution.getInstance(1, ModuleType.kRev); // Enables power distribution logging
         }
 
-        Logger.start();
         SmartDashboard.updateValues();
+        Logger.start();
     }
 }

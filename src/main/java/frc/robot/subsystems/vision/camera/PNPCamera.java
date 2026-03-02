@@ -14,7 +14,7 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Timer;
-import frc.robot.subsystems.vision.VisionConstants;
+import frc.robot.subsystems.vision.OLD_VisionConstants;
 
 
 public class PNPCamera implements Camera {
@@ -81,7 +81,7 @@ public class PNPCamera implements Camera {
     }
 
     public boolean isStale() {
-        return ((Timer.getFPGATimestamp() - lastUpdateTS) > VisionConstants.targetConfidenceDelta);
+        return ((Timer.getFPGATimestamp() - lastUpdateTS) > OLD_VisionConstants.targetConfidenceDelta);
     }
 
     public PhotonPipelineResult getLatestResult() {

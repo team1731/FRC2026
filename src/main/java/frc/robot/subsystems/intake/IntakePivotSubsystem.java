@@ -2,8 +2,10 @@ package frc.robot.subsystems.intake;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.lib.frc1731.Utils;
 import frc.lib.frc1731.hardware.motor.ctre.MotorIOTalonFX;
+import frc.robot.Robot;
 import frc.robot.subsystems.BaseSubsystem;
 
 import static frc.robot.subsystems.intake.IntakeConstants.*;
@@ -35,7 +37,9 @@ public class IntakePivotSubsystem extends BaseSubsystem {
             .withMotionMagicAcceleration(2)
         );
 
-        motor.setDynamicMotionMagicSpeeds(1.5, 2);       
+        motor.setDynamicMotionMagicSpeeds(1.5, 2);    
+        
+        Robot.IS_ENABLED.onTrue(new InstantCommand(() -> motor.setPercentOutput(0)));
     }
 
     public boolean atTargetPosition() {

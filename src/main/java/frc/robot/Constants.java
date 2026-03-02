@@ -7,33 +7,8 @@ import frc.lib.frc1731.log.LogWriter.*;
 public final class Constants {
     public static final double stickDeadband = 0.1;
     public static final int kTICKS = 33024; // 16.125 * 2048;
-    public static final String CANBUS_NAME = "canivore1";
-    public static final String CANBUS_2_NAME = "canivore1";
-
-    public static final class JoystickConstants {
-        public static final int opA = 1;
-        public static final int opB = 2;
-        public static final int opC = 3;
-        public static final int opD = 4;
-        public static final int opE = 5;
-        public static final int opF = 6;
-        public static final int opG = 7;
-        public static final int opH = 8;
-        public static final int opI = 9;
-        public static final int opJ = 10;
-        public static final int opK = 11;
-        public static final int opL = 12;
-
-        public static final int op1 = 1;
-        public static final int op2 = 2;
-        public static final int op3 = 3;
-        public static final int op4 = 4;
-        public static final int op5 = 5;
-        public static final int op6 = 6;
-        public static final int op7 = 7;
-        public static final int op8 = 8;
-    }
-
+    public static final String LEFT_CANBUS = "Right CANivore";
+    public static final String RIGHT_CANBUS = "Left CANivore";
     public static final class LogConstants {
         /*
          * To write to a log you must:
@@ -51,13 +26,11 @@ public final class Constants {
                 Log.ARM_PATH_RECORDING, false,
                 Log.POSE_ESTIMATIONS, false);
     }
-
     public static final class AutoConstants {
         public static final String kNoVSLAMPostfix = "_NoVSLAM";
         public static final String kAutoDefault = "1_HubPreloadClimb"; // Note: when setting the default auto, do not include Blu_/Red_ prefixes
         public static final String kAutoCodeKey = "Auto Selector";
     }
-
     public static final class OpConstants {
         // KEYBOARD CONSTANTS
         public static final int kPWM_LedString = 1; // PWM # for Addressable Led String

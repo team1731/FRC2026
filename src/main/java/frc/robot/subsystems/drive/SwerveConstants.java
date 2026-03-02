@@ -20,6 +20,8 @@ public class SwerveConstants {
     public static final double kDeadband = 0.05; // 5% joystick deadband
 
     public static final boolean kUseVSLAM = true;
+    public static final boolean kUseLimelight = true;
+    public static final boolean kTelemetrize = false;
 
     public static final PIDConstants kPPConstants = new PIDConstants(10d, 0d, 0d); // PID constants for PathPlanner path following
 
@@ -38,12 +40,12 @@ public class SwerveConstants {
     public static final SwerveRequest.FieldCentric kFieldCentricControl = new SwerveRequest.FieldCentric()
         .withDeadband(kMaxSpeed * kDeadband) // Add a 5% deadband
         .withRotationalDeadband(kMaxAngularRate * kDeadband) // Add a 5% deadband
-        .withDriveRequestType(DriveRequestType.Velocity); // Use open-loop control for drive motors
+        .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
 
     public static final SwerveRequest.RobotCentric kRobotCentricControl = new SwerveRequest.RobotCentric()
         .withDeadband(kMaxSpeed * kDeadband) // Add a 5% deadband
         .withRotationalDeadband(kMaxAngularRate * kDeadband) // Add a 5% deadband
-        .withDriveRequestType(DriveRequestType.Velocity);
+        .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
     private static final double kDriveToTargetMaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
     private static final double kDriveToTargetDeadband = 0.01; // Add a 1% deadband

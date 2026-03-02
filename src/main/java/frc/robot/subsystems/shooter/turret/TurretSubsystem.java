@@ -1,15 +1,18 @@
 package frc.robot.subsystems.shooter.turret;
 
-import frc.lib.frc1731.Utils;
 import frc.lib.frc1731.hardware.motor.ctre.MotorIOTalonFX;
+import frc.robot.Robot;
 import frc.robot.subsystems.BaseSubsystem;
 
 import static edu.wpi.first.units.Units.*;
 import static frc.robot.subsystems.shooter.turret.TurretConstants.*;
 
+import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
+import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
+import com.ctre.phoenix6.hardware.core.CoreCANcoder;
 
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.units.measure.*;
@@ -33,7 +36,7 @@ public class TurretSubsystem extends BaseSubsystem {
         leftMotor.withStatorCurrentLimit(kCurrentLimit);
         rightMotor.withStatorCurrentLimit(kCurrentLimit);
 
-        leftMotor.setSoftLimits(-2, 2);
+        leftMotor.setSoftLimits(-0.2453, 0.3806);
         leftMotor.setDynamicMotionMagicSpeeds(20, 20);
         leftMotor.withMotionMagicConfigs(
             new MotionMagicConfigs()
@@ -41,14 +44,32 @@ public class TurretSubsystem extends BaseSubsystem {
             .withMotionMagicAcceleration(20)
         );
 
+        leftMotor.withFeedbackConfigs(
+            new FeedbackConfigs()
+            .withFusedCANcoder(new CoreCANcoder(29, "Right CANivore"))
+            .withRotorToSensorRatio(kRotorToSensor)
+            .withSensorToMechanismRatio(kSensorToMech)
+        );
         
-        rightMotor.setSoftLimits(-2, 2);
-        rightMotor.setDynamicMotionMagicSpeeds(20, 20);
+        rightMotor.setSoftLimits(-0.7321, 0.1616);
+        rightMotor.setDynamicMotionMagicSpeeds(40, 20);
         rightMotor.withMotionMagicConfigs(
             new MotionMagicConfigs()
-            .withMotionMagicCruiseVelocity(20)
-            .withMotionMagicAcceleration(20)
+            .withMotionMagicCruiseVelocity(1)
+            .withMotionMagicAcceleration(1)
         );
+
+        rightMotor.withFeedbackConfigs(
+            new FeedbackConfigs()
+            .withFusedCANcoder(new CoreCANcoder(30, "Left CANivore"))
+            .withRotorToSensorRatio(kRotorToSensor)
+            .withSensorToMechanismRatio(kSensorToMech)
+        );
+
+        Robot.IS_ENABLED.onTrue(new InstantCommand(() -> {
+            leftMotor.setPercentOutput(0);
+            rightMotor.setPercentOutput(0);
+        }));
     }
 
     public Angle getLeftTargetAngle() {
@@ -105,15 +126,15 @@ public class TurretSubsystem extends BaseSubsystem {
 
     @Override
     public void periodicTelemetry() {
-        // logger.log("Left/Motor Rotations", leftMotor.getRotations());
-        // logger.log("Left/Turret Degrees", getLeftTurretAngle().in(Degrees));
-        // logger.log("Left/Target Degrees", getLeftTargetAngle().in(Degrees));
-        // logger.log("Left/At Target", atLeftTargetAngle());
+        logger.log("Left/Motor Rotations", leftMotor.getRotations());
+        logger.log("Left/Turret Degrees", getLeftTurretAngle().in(Degrees));
+        logger.log("Left/Target Degrees", getLeftTargetAngle().in(Degrees));
+        logger.log("Left/At Target", atLeftTargetAngle());
 
-        // logger.log("Right/Motor Rotations", rightMotor.getRotations());
-        // logger.log("Right/Turret Degrees", getRightTurretAngle().in(Degrees));
-        // logger.log("Right/Target Degrees", getRightTargetAngle().in(Degrees));
-        // logger.log("Right/At Target", atRightTargetAngle());
+        logger.log("Right/Motor Rotations", rightMotor.getRotations());
+        logger.log("Right/Turret Degrees", getRightTurretAngle().in(Degrees));
+        logger.log("Right/Target Degrees", getRightTargetAngle().in(Degrees));
+        logger.log("Right/At Target", atRightTargetAngle());
     }
 
     public Command setLeftTurretCommand(double targetDegrees) {
@@ -124,7 +145,32 @@ public class TurretSubsystem extends BaseSubsystem {
 
     public Command setRightTurretCommand(double targetDegrees) {
         return run(() -> {
-            rightMotor.setPosition(kConverter.toMotor(Degrees.of(targetDegrees)).in(Rotations));
+            // rightMotor.setPosition(kConverter.toMotor(Degrees.of(targetDegrees)).in(Rotations));
+            this.rightTargetAngle = Degrees.of(targetDegrees);
+            if (targetDegrees >= 266) {
+                rightTargetAngle = rightTargetAngle.minus(Degrees.of(360));
+            } else if (targetDegrees <= -128) {
+                rightTargetAngle = rightTargetAngle.plus(Degrees.of(360));
+            }
+
+            SmartDashboard.putNumber("Right Turret Degrees", turretRotationsToDegrees(rightMotor.getRotations()));
+            rightMotor.setPosition(degreesToTurretRotations(targetDegrees));
+        });
+    }
+
+    public Command setRightTurretCommand(DoubleSupplier targetDegrees) {
+        return run(() -> {
+            // rightMotor.setPosition(kConverter.toMotor(Degrees.of(targetDegrees)).in(Rotations));
+            this.rightTargetAngle = Degrees.of(targetDegrees.getAsDouble());
+            if (targetDegrees.getAsDouble() >= 266) {
+                rightTargetAngle = rightTargetAngle.minus(Degrees.of(360));
+            } else if (targetDegrees.getAsDouble() <= -128) {
+                rightTargetAngle = rightTargetAngle.plus(Degrees.of(360));
+            }
+
+            SmartDashboard.putNumber("Right Turret Degrees", turretRotationsToDegrees(rightMotor.getRotations()));
+            SmartDashboard.putNumber("Swerve yaw", targetDegrees.getAsDouble());
+            rightMotor.setPosition(degreesToTurretRotations(rightTargetAngle.in(Degrees)));
         });
     }
 
@@ -150,6 +196,15 @@ public class TurretSubsystem extends BaseSubsystem {
     //     });
     // }
 
+    public double turretRotationsToDegrees(double rotations) {
+        return (rotations + 0.44093) / 0.00226478;
+    }
+
+    public double degreesToTurretRotations(double degrees) {
+        return 0.002678 * degrees - 0.44093;
+    }
+
+
     public Command stopCommand() {
         return run(() -> {
             leftMotor.setPercentOutput(0);
@@ -159,8 +214,9 @@ public class TurretSubsystem extends BaseSubsystem {
 
     public Command driveManualCommand(double left, double right) {
         return run(() -> {
-            leftMotor.setPercentOutput(left);
+            // leftMotor.setPercentOutput(left);
             rightMotor.setPercentOutput(right);
+            SmartDashboard.putNumber("Right Turret Degrees", turretRotationsToDegrees(rightMotor.getRotations()));
         });
     }
 

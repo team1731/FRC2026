@@ -1,5 +1,7 @@
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Rotations;
+
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.*;
@@ -13,6 +15,7 @@ import frc.robot.subsystems.intake.IntakePivotSubsystem;
 import frc.robot.subsystems.intake.IntakeRollerSubsystem;
 import frc.robot.subsystems.shooter.ShotProfile;
 import frc.robot.subsystems.shooter.flywheel.FlywheelSubsystem;
+import frc.robot.subsystems.shooter.hood.HoodConstants;
 import frc.robot.subsystems.shooter.hood.HoodSubsystem;
 import frc.robot.subsystems.shooter.turret.TurretSubsystem;
 
@@ -51,54 +54,56 @@ public class Superstructure extends SubsystemBase {
     }
 
     public Command intakeCommand() {
-        return pivot.deployCommand().alongWith(intake.setPercentOutputCommand(0.6));
+        return pivot.deployCommand().alongWith(intake.setPercentOutputCommand(1));
     }
 
     public Command shootCommand() {
         return new ParallelCommandGroup(
-            flywheel.setFlywheelPercentCommand(0.5, 0.5),
+            // flywheel.setFlywheelPercentCommand(1.0, 1.0),
+            flywheel.setFlywheelVelocityCommand(80, 80),
             pivot.retractCommand(),
-            intake.setPercentOutputCommand(0.2),
-            hood.setHoodCommand(25, 25),
-            Commands.waitUntil(() -> flywheel.atRightTargetVelocity() && hood.atRightTarget())
-            .andThen(indexer.setPercentOutputCommand(0.7))
+            intake.setPercentOutputCommand(0.75),
+            hood.setHoodCommand(2, 2),
+            turret.setRightTurretCommand(() -> swerve.getYaw()),
+            // Commands.waitUntil(() -> flywheel.atRightTargetVelocity() && hood.atBothTarget())
+            Commands.waitSeconds(2)
+            // Commands.waitSeconds(2)
+            .andThen(indexer.setPercentOutputCommand(1.0))
         );
     }
 
-    public Command passCommand() {
-        return new ParallelCommandGroup(
-            flywheel.setFlywheelPercentCommand(0.5, 0.5),
-            pivot.retractCommand(),
-            intake.setPercentOutputCommand(0.2),
-            hood.setHoodCommand(25, 25),
-            Commands.waitUntil(() -> flywheel.atBothTargetVelocity() && hood.atBothTarget() && turret.atBothTargetAngle())
-            .andThen(indexer.setPercentOutputCommand(0.7))
-        );
-    }
+    // public Command passCommand() {
+    //     return new ParallelCommandGroup(
+    //         flywheel.setFlywheelPercentCommand(0.5, 0.5),
+    //         pivot.retractCommand(),
+    //         intake.setPercentOutputCommand(0.75),
+    //         hood.setHoodCommand(25, 25),
+    //         // Commands.waitUntil(() -> flywheel.atRightTargetVelocity() && hood.atRightTarget())
+    //         Commands.waitSeconds(1.5)
+    //         .andThen(indexer.setPercentOutputCommand(1.0))
+    //     );
+    // }
 
-    public Command shootCommand(Supplier<Pose2d> targetPose) {
-        return new ParallelCommandGroup(
-            flywheel.setFlywheelPercentCommand(0.5, 0.5),
-            pivot.retractCommand(),
-            intake.setPercentOutputCommand(0.2),
-            hood.setHoodCommand(25, 25),
-            Commands.waitUntil(() -> flywheel.atBothTargetVelocity() && hood.atBothTarget() && turret.atBothTargetAngle())
-            .andThen(indexer.setPercentOutputCommand(0.7))
-        );
-    }
-
-    public Command spinIntakeRetractedCommand() {
-        return pivot.retractCommand().alongWith(intake.setPercentOutputCommand(0.5));
-    }
+    // public Command shootCommand(Supplier<Pose2d> targetPose) {
+    //     return new ParallelCommandGroup(
+    //         flywheel.setFlywheelPercentCommand(1.0, 1.0),
+    //         pivot.retractCommand(),
+    //         intake.setPercentOutputCommand(0.5),
+    //         hood.setHoodCommand(25, 25),
+    //         // Commands.waitUntil(() -> flywheel.atRightTargetVelocity() && hood.atRightTarget())
+    //         Commands.waitSeconds(1.5)
+    //         .andThen(indexer.setPercentOutputCommand(1.0))
+    //     );
+    // }
 
     public Command feedthroughCommand() {
         return new ParallelCommandGroup(
-            flywheel.setFlywheelPercentCommand(0.5, 0.5),
+            flywheel.setFlywheelVelocityCommand(50, 50),
             pivot.deployCommand(),
-            intake.setPercentOutputCommand(0.5),
-            hood.setHoodCommand(25, 25),
+            intake.setPercentOutputCommand(1),
+            hood.setHoodCommand(2, 2),
             Commands.waitUntil(() -> flywheel.atRightTargetVelocity() && hood.atRightTarget())
-            .andThen(indexer.setPercentOutputCommand(0.7))
+            .andThen(indexer.setPercentOutputCommand(1.0))
         );
     }
 
