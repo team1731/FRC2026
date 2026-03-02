@@ -58,16 +58,19 @@ public abstract class VelocitySubsystem<M extends MotorIO> extends BaseSubsystem
     }
 
     public Angle getMotorAngle() {
+        if (!isEnabled()) return Degrees.of(0);
         if (Robot.isSimulation() && sim != null) return sim.getPosition().div(mechanismRatio);
         return motor != null ? Rotations.of(motor.getRotations()) : Degrees.zero();
     }
 
     public AngularVelocity getVelocity() {
+        if (!isEnabled()) return DegreesPerSecond.of(0);
         if (Robot.isSimulation() && sim != null) return sim.getVelocity().div(mechanismRatio);
         return motor != null ? RotationsPerSecond.of(motor.getVelocityRPS()) : RotationsPerSecond.zero();
     }
 
     public Voltage getVoltage() {
+        if (!isEnabled()) return Volts.of(0);
         if (Robot.isSimulation() && sim != null) return sim.getAppliedVoltage();
         return Volts.of(motor.getAppliedVoltage());
     }
@@ -81,15 +84,16 @@ public abstract class VelocitySubsystem<M extends MotorIO> extends BaseSubsystem
     }
 
     protected void setVoltage(Voltage volts) {
+        if (!isEnabled()) return;
         if (motor != null)  motor.setVoltage(volts.in(Volts));
-        if (Robot.isSimulation()) sim.setVoltage(volts); 
+        if (Robot.isSimulation() && sim != null) sim.setVoltage(volts); 
     }
 
     public Command setPercent(DoubleSupplier percent) {
         return run(() -> {
             this.targetVelocity = kMaxVelocity.times(percent.getAsDouble());
             if (motor != null)  motor.setPercentOutput(percent.getAsDouble());
-            if (motor != null) sim.setVoltage(Volts.of(percent.getAsDouble() * 12d));
+            if (motor != null && sim != null) sim.setVoltage(Volts.of(percent.getAsDouble() * 12d));
         }).withName("SetPercent");
     }
 
@@ -101,7 +105,7 @@ public abstract class VelocitySubsystem<M extends MotorIO> extends BaseSubsystem
         return run(() -> {
             this.targetVelocity = velocity.get();
             if (motor != null) motor.setVelocityRPS(targetVelocity.in(RotationsPerSecond) / mechanismRatio);
-            sim.setVelocity(targetVelocity);
+            if (sim != null) sim.setVelocity(targetVelocity);
         }).withName("SetVelocity");
     }
 

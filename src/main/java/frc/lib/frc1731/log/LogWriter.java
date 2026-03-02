@@ -35,15 +35,15 @@ public class LogWriter {
     }
 
     public static void setupLogging() {
-        if(LogConstants.loggingEnabled && LogConstants.logMode == LogMode.DATA_LOG) {
+        if(LogConstants.loggingEnabled) {
             DataLogManager.logNetworkTables(LogConstants.logNetworkTables);
             DataLogManager.start();
         }
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public static ILogger getLogger(Log log, Class typeClass) {
-        Boolean logEnabled = LogConstants.loggers.get(log);
-        if(!LogConstants.loggingEnabled || logEnabled == null || !logEnabled.booleanValue()) {
+        if(!LogConstants.loggingEnabled) {
             return new MockLogger(); // disabled, ignore logging attempts
         }
 
