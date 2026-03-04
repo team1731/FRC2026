@@ -25,6 +25,7 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.frc1731.hardware.camera.LimelightHelpers;
@@ -112,7 +113,6 @@ public class SwerveSubsystem extends BaseSubsystem {
         }
         else if (useMegaTag2 == true)
         {
-            LimelightHelpers.SetRobotOrientation("limelight-main", drivetrain.getState().Pose.getRotation().getDegrees(), 0, 0, 0, 0, 0);
             LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-main");
             Pose2d botpose = LimelightHelpers.getBotPose2d("limelight-main");
 
@@ -128,10 +128,15 @@ public class SwerveSubsystem extends BaseSubsystem {
             if(mt2.tagCount <= 1)
             {
                 doRejectUpdate = true;
+                
             }
             if(!doRejectUpdate)
             {
+                //System.out.println("doing it");
+                SmartDashboard.putNumber("Posex", mt2.pose.getX());
+                SmartDashboard.putNumber ("PoseY", mt2.pose.getY());
                 this.addVisionMeasurement(mt2.pose, mt2.timestampSeconds, VecBuilder.fill(.5,.5,9999999));
+                
                 hadgoodLimelight = true;
                 timeSinceGoodLimelight.restart();
             }
@@ -209,8 +214,8 @@ public class SwerveSubsystem extends BaseSubsystem {
 
     @Override
     public void periodicTelemetry() {
-      //  drivetrain.periodic();
-      //  updateOdometry();
+       // drivetrain.periodic();
+       // updateOdometry();
 
         logger.log("Current Pose", getCurrentPose());
         logger.log("Current Speeds", getWheelSpeeds());
@@ -279,6 +284,8 @@ public class SwerveSubsystem extends BaseSubsystem {
     }
 
     public boolean hasGoodOdometry() {
+        SmartDashboard.putBoolean("had good limelight", hadgoodLimelight);
+        SmartDashboard.putNumber("Timesincegood", timeSinceGoodLimelight.get());
         return (hadgoodLimelight && timeSinceGoodLimelight.get()< 4);
     }
 

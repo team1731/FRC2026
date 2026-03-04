@@ -1,6 +1,7 @@
 package frc.robot.subsystems.vision.questnav;
 
 import frc.lib.frc1731.TriConsumer;
+import frc.robot.Robot;
 import frc.robot.subsystems.BaseSubsystem;
 import frc.robot.subsystems.drive.SwerveSubsystem;
 import gg.questnav.questnav.*;
@@ -12,7 +13,9 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class QuestNavSubsystem extends BaseSubsystem {
     private QuestNav questNav;
@@ -46,11 +49,18 @@ public class QuestNavSubsystem extends BaseSubsystem {
     @Override
     public void periodic() {
         questNav.commandPeriodic();
-        if (!isSeeded || (!isEnabled() && poseResetTimer.hasElapsed(5))) {
-            if (drivetrain.hasGoodOdometry() && isConnected && isTracking) {
+        SmartDashboard.putBoolean("isSeeded", isSeeded);
+        SmartDashboard.putBoolean("isTracking", questNav.isTracking());
+        SmartDashboard.putBoolean("isConnected", questNav.isConnected());
+        SmartDashboard.putBoolean("hasgoodtracking", drivetrain.hasGoodOdometry());
+        if (!isSeeded || (DriverStation.isDisabled() && poseResetTimer.hasElapsed(5))) {
+            if (drivetrain.hasGoodOdometry() && questNav.isTracking() && questNav.isConnected()) {
                 this.resetPose(new Pose3d(drivetrain.getCurrentPose()));
                 poseResetTimer.restart();
             }
+        }
+        if (!questNav.isConnected() || !questNav.isTracking() ) {
+            isSeeded = false;
         }
     }
 

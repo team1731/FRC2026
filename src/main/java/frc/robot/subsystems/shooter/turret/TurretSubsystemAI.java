@@ -51,10 +51,11 @@ public class TurretSubsystemAI extends SubsystemBase {
         double rotorToSensor, double sensorToMechanism,
         Translation2d robotToTurret,
         Supplier<Pose2d> poseSupplier,
-        Supplier<ChassisSpeeds> velocitySupplier
+        Supplier<ChassisSpeeds> velocitySupplier,
+        String canivore
     ) {
         this.m_name = name;
-        this.m_motor = new TalonFX(motorID);
+        this.m_motor = new TalonFX(motorID,canivore);
         this.m_coder = new CANcoder(coderID);
         this.m_reverseLimit = reverseLimit;
         this.m_forwardLimit = forwardLimit;

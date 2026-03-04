@@ -13,7 +13,7 @@
 package frc.robot.subsystems.vision;
 
 //import org.littletonrobotics.junction.AutoLog;
-
+ 
 /** Interface for handling input/output operations with the Oculus Quest hardware. */
 public interface OculusIO {
   /** Data structure for Oculus inputs that can be automatically logged. */

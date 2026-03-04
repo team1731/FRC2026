@@ -96,7 +96,8 @@ public class RobotContainer {
             // Velocity supplier for shooting on the move
             new Translation2d(0.10, 0.15),  //location of turret in meters
             swerve::getCurrentPose, // Pose Supplier
-            swerve::getFieldRelativeChassisSpeeds);
+            swerve::getFieldRelativeChassisSpeeds,
+            "Right CANivore");
 
     // Right Turret: 180° CCW (+), -200° CW (-) [Mirrored]
     m_rightTurret = new TurretSubsystemAI(
@@ -109,9 +110,10 @@ public class RobotContainer {
             39.111, (39.111 / 28.44),
             new Translation2d(0.10, -0.15),
             swerve::getCurrentPose, // Same Pose Supplier
-            swerve::getFieldRelativeChassisSpeeds
+            swerve::getFieldRelativeChassisSpeeds,
+            "Left CANivore");
 
-    );
+   
     
 
 
