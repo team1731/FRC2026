@@ -11,12 +11,14 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
+import static frc.robot.subsystems.vision.questnav.VSLAMConstants.*;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -24,10 +26,12 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.lib.frc1731.TriConsumer;
 import frc.lib.frc1731.hardware.camera.LimelightHelpers;
 import frc.lib.frc1731.hardware.camera.LimelightHelpers.PoseEstimate;
 import frc.lib.frc1731.math.Vector2d;
@@ -36,6 +40,8 @@ import frc.robot.subsystems.BaseSubsystem;
 import frc.robot.subsystems.drive.generated.CommandSwerveDrivetrain;
 import frc.robot.subsystems.drive.generated.TunerConstants;
 import frc.robot.subsystems.vision.OLD_VSLAMSubsystem;
+import gg.questnav.questnav.PoseFrame;
+import gg.questnav.questnav.QuestNav;
 
 import static frc.robot.subsystems.drive.SwerveConstants.*;
 
@@ -51,8 +57,28 @@ public class SwerveSubsystem extends BaseSubsystem {
     private double fieldCentricHeading = 0.0;
     private double robotCentricHeading = 0.0;
 
-    private Timer timeSinceGoodLimelight = new Timer();
-    private boolean hadgoodLimelight = false;
+    private Timer GoodLimelightTimer = new Timer();
+  //  private boolean hadgoodLimelight = false;
+    private boolean visionCheckingHasStarted = false;
+    private Pose2d baselinePose;
+    private boolean hasGoodOdometry = false;
+    private double distanceBetweenPoses;
+    private boolean headingIsInitialized = false;
+
+
+    private QuestNav questNav;
+    private static boolean isQuestConnected = false;
+    private static boolean isQuestTracking = false;
+    private static boolean isQuestSeeded = false;
+
+        private static Matrix<N3, N1> QUESTNAV_STD_DEVS =
+    VecBuilder.fill(
+        0.02, // Trust down to 2cm in X direction
+        0.02, // Trust down to 2cm in Y direction
+        0.035 // Trust down to 2 degrees rotational
+    );
+
+    private Timer questPoseResetTimer = new Timer();  // ussed primarily in dissabled to reset the pose every few seconds in case the robot is moved b4 auto
 
     private final ProfiledPIDController headingPID = kHeadingGains.toProfiledPIDController(kMaxAngularRate, kMaxAngularAcceleration);
  
@@ -61,6 +87,7 @@ public class SwerveSubsystem extends BaseSubsystem {
     public SwerveSubsystem(boolean enabled) {
         super(enabled);
         if(!enabled) return;
+        questNav = new QuestNav();
 
         this.drivetrain = TunerConstants.createDrivetrain();
         driveAtTargetControl.HeadingController.setPID(10,0,0);
@@ -113,13 +140,14 @@ public class SwerveSubsystem extends BaseSubsystem {
         }
         else if (useMegaTag2 == true)
         {
+            LimelightHelpers.SetRobotOrientation("limelight-main", -getCurrentPose().getRotation().getDegrees(), 0, 0, 0, 0, 0);
             LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-main");
-            Pose2d botpose = LimelightHelpers.getBotPose2d("limelight-main");
+            // Pose2d botpose = LimelightHelpers.getBotPose2d("limelight-main");
 
             Logger.recordOutput("SmartLogs/Tag Count", mt2.tagCount);
             Logger.recordOutput("SmartLogs/Is 2", mt2.isMegaTag2);
             Logger.recordOutput("SmartLogs/PosePose", mt2.pose);    
-            Logger.recordOutput("SmartLogs/a", botpose);    
+            // Logger.recordOutput("SmartLogs/a", botpose);    
             
             if(Math.abs(drivetrain.getPigeon2().getAngularVelocityZDevice().getValueAsDouble()) > 720) // if our angular velocity is greater than 720 degrees per second, ignore vision updates
             {
@@ -137,15 +165,51 @@ public class SwerveSubsystem extends BaseSubsystem {
                 SmartDashboard.putNumber ("PoseY", mt2.pose.getY());
                 this.addVisionMeasurement(mt2.pose, mt2.timestampSeconds, VecBuilder.fill(.5,.5,9999999));
                 
-                hadgoodLimelight = true;
-                timeSinceGoodLimelight.restart();
+                
+                if (!visionCheckingHasStarted) {
+                    GoodLimelightTimer.restart();
+                    baselinePose = mt2.pose;
+                    visionCheckingHasStarted = true;
+                } else if (GoodLimelightTimer.hasElapsed(2)) {
+                    distanceBetweenPoses = distanceBetween(mt2.pose, baselinePose);
+                    SmartDashboard.putNumber("distanceBetweenPoses", distanceBetweenPoses);
+                    SmartDashboard.putBoolean("hasGoodOdometry", hasGoodOdometry);
+                    if (distanceBetweenPoses < .005) {
+                        hasGoodOdometry = true;                 
+                    } else {
+                        hasGoodOdometry = false;
+                    }
+                    visionCheckingHasStarted = false;
+
+                }
             }
         }
     }
 
+    public static double distanceBetween(Pose2d a, Pose2d b) { Translation2d ta = a.getTranslation(); Translation2d tb = b.getTranslation(); return ta.getDistance(tb); }
+    
+    public boolean hasGoodOdometry() {
+        return hasGoodOdometry;
+    }
+
     public void resetPose(Pose2d pose) {
         drivetrain.resetPose(pose);
+        resetQuestPose(new Pose3d(pose));   
+    }
 
+    public void resetHeadingButtonPressed() {
+        Pose2d resetPosition = Robot.isRedAlliance()
+                ? new Pose2d(getCurrentPose().getX(), getCurrentPose().getY(), new Rotation2d(Math.toRadians(0)))
+                : new Pose2d(getCurrentPose().getX(), getCurrentPose().getY(), new Rotation2d(Math.toRadians(180)));
+        resetPose(resetPosition);
+
+    }
+
+    public void resetJustHeading(Pose2d autoStartPose) {  // this is called from auto preloads
+        Pose2d resetPosition =  new Pose2d(getCurrentPose().getX(), getCurrentPose().getY(), autoStartPose.getRotation());
+                resetPose(resetPosition);
+
+        
     }
 
     public double getYaw() {
@@ -172,10 +236,10 @@ public class SwerveSubsystem extends BaseSubsystem {
     public void configureInitialPosition() {
         System.out.println("CommandSwerveDrivetrain: configuring a new position");
 
-	    Pose2d startingConfiguration = Robot.isRedAlliance()? 
-            new Pose2d(10.38, 3.01, new Rotation2d(0)) : 
-            new Pose2d(7.168, 5.006, new Rotation2d(Math.toRadians(180)));
-        resetPose(startingConfiguration);
+	   // Pose2d startingConfiguration = Robot.isRedAlliance()? 
+       //     new Pose2d(10.38, 3.01, new Rotation2d(0)) : 
+       //     new Pose2d(7.168, 5.006, new Rotation2d(Math.toRadians(180)));
+       // resetPose(startingConfiguration);
 
         Rotation2d operatorPerspective = Robot.isRedAlliance()? 
                 new Rotation2d(Math.toRadians(180)) : 
@@ -208,8 +272,41 @@ public class SwerveSubsystem extends BaseSubsystem {
      */
     private void resetAutoPose(Pose2d pose) {
         if (Robot.isSimulation() || !kUseVSLAM) {
-            this.resetPose(pose);
+          //  this.resetPose(pose);  we probably do not want to do this if VSLAM and limelight are working?
         }
+        this.resetPose(pose);
+    }
+
+    @Override
+    public void periodic () {
+        super.periodic();
+        // if(!headingIsInitialized) {
+        //      Pose2d resetPosition = Robot.isRedAlliance() ? new Pose2d(getCurrentPose().getX(), getCurrentPose().getY(), new Rotation2d(Math.toRadians(0)))
+        //         : new Pose2d(getCurrentPose().getX(), getCurrentPose().getY(), new Rotation2d(Math.toRadians(180)));
+        //         resetPose(resetPosition);
+        // }
+
+        updateVisionOdometry();
+        questNav.commandPeriodic();
+        SmartDashboard.putBoolean("isSeeded", isQuestSeeded);
+        SmartDashboard.putBoolean("isTracking", questNav.isTracking());
+        SmartDashboard.putBoolean("isConnected", questNav.isConnected());
+        SmartDashboard.putBoolean("hasgoodtracking",hasGoodOdometry());
+        if (!isQuestSeeded || (DriverStation.isDisabled() && questPoseResetTimer.hasElapsed(5))) {
+            if (hasGoodOdometry() && questNav.isTracking() && questNav.isConnected()) {
+                this.resetQuestPose(new Pose3d(getCurrentPose()));
+                questPoseResetTimer.restart();
+                isQuestSeeded = true;
+            }
+        }
+        if (!questNav.isConnected() || !questNav.isTracking() ) {
+            isQuestSeeded = false;
+        }
+        if (questNav.isConnected() && questNav.isTracking()&& isQuestSeeded) {
+            addQuestVisionMeasurement();
+        }
+
+
     }
 
     @Override
@@ -255,8 +352,8 @@ public class SwerveSubsystem extends BaseSubsystem {
                 if (isFieldCentric.getAsBoolean()) {
                     drivetrain.setControl(
                         kFieldCentricControl
-                            .withVelocityX((Math.abs(m_xboxController.getLeftY()) * m_xboxController.getLeftY()) * kMaxSpeed)
-                            .withVelocityY((Math.abs(m_xboxController.getLeftX()) * m_xboxController.getLeftX()) * kMaxSpeed)
+                            .withVelocityX((-Math.abs(m_xboxController.getLeftY()) * m_xboxController.getLeftY()) * kMaxSpeed)
+                            .withVelocityY((-Math.abs(m_xboxController.getLeftX()) * m_xboxController.getLeftX()) * kMaxSpeed)
                             .withRotationalRate(-m_xboxController.getRightX() * kMaxAngularRate)
                             .withCenterOfRotation(RotationCenter)
                     );
@@ -264,8 +361,8 @@ public class SwerveSubsystem extends BaseSubsystem {
                  else {
                      drivetrain.setControl(
                          kRobotCentricControl
-                             .withVelocityX((Math.abs(m_xboxController.getLeftY()) * m_xboxController.getLeftY()) * kMaxSpeed)
-                             .withVelocityY((Math.abs(m_xboxController.getLeftX()) * m_xboxController.getLeftX()) * kMaxSpeed)
+                             .withVelocityX((-Math.abs(m_xboxController.getLeftY()) * m_xboxController.getLeftY()) * kMaxSpeed)
+                             .withVelocityY((-Math.abs(m_xboxController.getLeftX()) * m_xboxController.getLeftX()) * kMaxSpeed)
                              .withRotationalRate(-m_xboxController.getRightX() * kMaxAngularRate)
                              .withCenterOfRotation(RotationCenter)
                      );
@@ -283,11 +380,8 @@ public class SwerveSubsystem extends BaseSubsystem {
                 getFieldRelativeChassisSpeeds().omegaRadiansPerSecond);
     }
 
-    public boolean hasGoodOdometry() {
-        SmartDashboard.putBoolean("had good limelight", hadgoodLimelight);
-        SmartDashboard.putNumber("Timesincegood", timeSinceGoodLimelight.get());
-        return (hadgoodLimelight && timeSinceGoodLimelight.get()< 4);
-    }
+
+
 
     // public Command driveToTargetCommand(CommandXboxController m_xboxController) {
     //     return run(() -> {
@@ -361,4 +455,56 @@ public class SwerveSubsystem extends BaseSubsystem {
  //           );
  //       }).withName("FacePose");
  //   }
+
+     public Pose3d getQuestPose() {
+        // Get the latest pose data frames from the Quest
+        PoseFrame[] poseFrames = questNav.getAllUnreadPoseFrames();
+
+        if (poseFrames.length > 0) {
+            // Get the most recent Quest pose
+            Pose3d questPose = poseFrames[poseFrames.length - 1].questPose3d();
+
+            // Transform by the mount pose to get your robot pose
+            Pose3d robotPose = questPose.transformBy(kRobotToOculus.inverse());
+            return robotPose;
+        }
+        return null;
+    }
+
+     public void resetQuestPose(Pose3d robotPose) {
+        // Transform the robot pose by the mount pose to get the corresponding Quest pose
+        Pose3d questResetPose = robotPose.transformBy(kRobotToOculus);
+
+        // Set the QuestNav pose to the calculated Quest pose
+        questNav.setPose(questResetPose);
+        questPoseResetTimer.reset();
+    }
+
+  public void addQuestVisionMeasurement() {
+        questPoseResetTimer.start();
+
+        // Get the latest pose data frames from the Quest
+        PoseFrame[] questFrames = questNav.getAllUnreadPoseFrames();
+
+        // Loop over the pose data frames and send them to the pose estimator
+        for (PoseFrame questFrame : questFrames) {
+            // Make sure the Quest was tracking the pose for this frame
+            if (questFrame.isTracking()) {
+                // Get the pose of the Quest
+                Pose3d questPose = questFrame.questPose3d();
+                // Get timestamp for when the data was sent
+                double timestamp = questFrame.dataTimestamp();
+
+                // Transform by the mount pose to get your robot pose
+                Pose3d robotPose = questPose.transformBy(kRobotToOculus.inverse());
+
+                if (isQuestTracking && isQuestConnected && isQuestSeeded) {
+
+                addVisionMeasurement(robotPose.toPose2d(), timestamp, QUESTNAV_STD_DEVS);
+                 
+                }
+                
+            }
+        }
+    }
 }

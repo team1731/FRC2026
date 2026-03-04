@@ -1,7 +1,5 @@
 package frc.robot.subsystems;
 
-import static edu.wpi.first.units.Units.Rotations;
-
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.*;
@@ -15,15 +13,14 @@ import frc.robot.subsystems.intake.IntakePivotSubsystem;
 import frc.robot.subsystems.intake.IntakeRollerSubsystem;
 import frc.robot.subsystems.shooter.ShotProfile;
 import frc.robot.subsystems.shooter.flywheel.FlywheelSubsystem;
-import frc.robot.subsystems.shooter.hood.HoodConstants;
 import frc.robot.subsystems.shooter.hood.HoodSubsystem;
-import frc.robot.subsystems.shooter.turret.TurretSubsystem;
+import frc.robot.subsystems.shooter.turret.TurretSubsystemAI;
 
 public class Superstructure extends SubsystemBase {
     private SwerveSubsystem swerve;
     private FlywheelSubsystem flywheel;
     private HoodSubsystem hood;
-   // private TurretSubsystem turret;
+    private TurretSubsystemAI leftTurret, rightTurret;
     private IndexerSubsystem indexer;
     private IntakePivotSubsystem pivot;
     private IntakeRollerSubsystem intake;
@@ -36,7 +33,8 @@ public class Superstructure extends SubsystemBase {
     private static Supplier<Pose2d> passSupplier = () -> new Pose2d(Utils.flip(new Pose2d().getTranslation()), new Rotation2d());
 
     public Superstructure(SwerveSubsystem swerve, FlywheelSubsystem flywheel, HoodSubsystem hood,  
-                            IndexerSubsystem indexer, IntakePivotSubsystem pivot, IntakeRollerSubsystem intake) {
+                            IndexerSubsystem indexer, IntakePivotSubsystem pivot, IntakeRollerSubsystem intake,
+                                TurretSubsystemAI leftTurret, TurretSubsystemAI rightTurret) {
         this.swerve = swerve;
         this.flywheel = flywheel;
         this.hood = hood;
@@ -44,6 +42,8 @@ public class Superstructure extends SubsystemBase {
         this.indexer = indexer;
         this.pivot = pivot;
         this.intake = intake;
+        this.leftTurret = leftTurret;
+        this.rightTurret = rightTurret;
     }
 
     public Command resetGyroCommand() {
@@ -59,16 +59,20 @@ public class Superstructure extends SubsystemBase {
 
     public Command shootCommand() {
         return new ParallelCommandGroup(
-            // flywheel.setFlywheelPercentCommand(1.0, 1.0),
-            flywheel.setFlywheelVelocityCommand(80, 80),
+            flywheel.setFlywheelVelocityCommand(50, 50),
             pivot.retractCommand(),
             intake.setPercentOutputCommand(0.75),
             hood.setHoodCommand(2, 2),
-         //   turret.setRightTurretCommand(() -> swerve.getYaw()),
-            // Commands.waitUntil(() -> flywheel.atRightTargetVelocity() && hood.atBothTarget())
-            Commands.waitSeconds(2)
-            // Commands.waitSeconds(2)
+            // Commands.waitUntil(() -> flywheel.atBothTargetVelocity() && hood.atBothTarget())
+            Commands.waitSeconds(1.5)
             .andThen(indexer.setPercentOutputCommand(1.0))
+        );
+    }
+
+    public Command warmupCommand() {
+        return new ParallelCommandGroup(
+            flywheel.setFlywheelVelocityCommand(50, 50),
+            hood.stowHoodCommand()
         );
     }
 

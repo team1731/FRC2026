@@ -1,40 +1,49 @@
-package frc.robot;
+package frc.robot.autos;
 
 import java.io.File;
-import java.util.*;
-
-import com.pathplanner.lib.commands.PathPlannerAuto;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 import edu.wpi.first.wpilibj.Filesystem;
-import edu.wpi.first.wpilibj.smartdashboard.*;
-import edu.wpi.first.wpilibj2.command.*;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import frc.robot.Constants;
+import frc.robot.Robot;
 import frc.robot.Constants.AutoConstants;
 
 public class AutoLoader {
-    private static SendableChooser<String> autoChooser = new SendableChooser<>();
+    private static final SendableChooser<String> autoChooser = new SendableChooser<>();
     private static HashMap<String, String> autoPaths;
 
-    public AutoLoader() {
+    public static HashMap<String, String> getAutoPaths() {
+        return autoPaths;
+    }
+
+    public static SendableChooser<String> loadAutoChooser() {
         String[] autoModes = getAutoModes();
 		for (String autoMode : autoModes) {
 			autoChooser.addOption(autoMode, autoMode);
+			System.out.println("Added autoMode '" + autoMode + "' to autoChooser.");
 		}
-
+		
 		// pre-load the default auto
-        String defaultAuto = Constants.AutoConstants.kAutoDefault;
-		autoChooser.setDefaultOption(defaultAuto, defaultAuto);
-
-        // Put on SmartDashboard
-        SmartDashboard.putData(AutoConstants.kAutoCodeKey, autoChooser);
+		autoChooser.setDefaultOption(Constants.AutoConstants.kAutoDefault, Constants.AutoConstants.kAutoDefault);
+        
+        return autoChooser;
     }
-
+    
     private static String[] getAutoModes() {
         autoPaths = findPaths(new File(Filesystem.getLaunchDirectory(),
-            (Robot.isReal() ? "/home/lvuser" : "/src/main") + "/deploy/pathplanner/autos"));
-
+            (Robot.isReal() ? "home/lvuser" : "src/main") + "/deploy/pathplanner/autos"));
         List<String> autoModes = new ArrayList<String>();
         for (String key : autoPaths.keySet()) {
             String stripKey = key.toString();
+            if (stripKey.endsWith(AutoConstants.kNoVSLAMPostfix)) {
+                continue; // exclude these from the chooser
+            }
+            if (stripKey.startsWith("Red_") || stripKey.startsWith("Blu_")) {
+                stripKey = stripKey.substring(4, stripKey.length());
+            }
             if (!autoModes.contains(stripKey)) {
                 autoModes.add(stripKey);
             }
@@ -54,17 +63,15 @@ public class AutoLoader {
             } else {
                 for (File file : files) {
                     String fileName = file.getName();
-                    String key = fileName.replace(".auto", "");
-                    String path = file.getAbsolutePath();
-                    System.out.println(path);
-                    autoPaths.put(key, path);
+                    if ((fileName.startsWith("Blu") || fileName.startsWith("Red")) && fileName.endsWith(".auto")) {
+                        String key = fileName.replace(".auto", "");
+                        String path = file.getAbsolutePath();
+                        System.out.println(path);
+                        autoPaths.put(key, path);
+                    }
                 }
             }
         }
         return autoPaths;
-    }
-
-    public Command getSelectedAutoMode() {
-        return new PathPlannerAuto(autoChooser.getSelected());
     }
 }

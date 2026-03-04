@@ -16,6 +16,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import java.util.function.Supplier;
@@ -33,10 +34,11 @@ public class TurretSubsystemAI extends SubsystemBase {
     private final double m_reverseLimit; 
     private final String m_name;
     private final Translation2d m_robotToTurret;
+    private boolean inverted = false;
 
     // Targets
-    private final Translation2d BLUE_TARGET = new Translation2d(0.0, 5.5);
-    private final Translation2d RED_TARGET = new Translation2d(16.5, 5.5);
+    private final Translation2d BLUE_TARGET = new Translation2d(4.625594, 4.034536);
+    private final Translation2d RED_TARGET = new Translation2d(11.915394, 4.034536);
 
     // Suppliers
     private final Supplier<Pose2d> m_robotPoseSupplier;
@@ -46,7 +48,7 @@ public class TurretSubsystemAI extends SubsystemBase {
     private double m_currentTargetDeg = 0.0;
 
     public TurretSubsystemAI(
-        String name, int motorID, int coderID, double offset, 
+        String name, int motorID, boolean inverted, int coderID, double offset, 
         double reverseLimit, double forwardLimit, 
         double rotorToSensor, double sensorToMechanism,
         Translation2d robotToTurret,
@@ -57,11 +59,13 @@ public class TurretSubsystemAI extends SubsystemBase {
         this.m_name = name;
         this.m_motor = new TalonFX(motorID,canivore);
         this.m_coder = new CANcoder(coderID);
+        this.inverted = inverted;
         this.m_reverseLimit = reverseLimit;
         this.m_forwardLimit = forwardLimit;
         this.m_robotToTurret = robotToTurret;
         this.m_robotPoseSupplier = poseSupplier;
         this.m_robotVelocitySupplier = velocitySupplier;
+
 
         configureDevices(offset, rotorToSensor, sensorToMechanism);
     }
@@ -78,16 +82,18 @@ public class TurretSubsystemAI extends SubsystemBase {
         motorConfig.Feedback.RotorToSensorRatio = rotorToSensor;
         motorConfig.Feedback.SensorToMechanismRatio = sensorToMechanism;
 
+
         motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-        motorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
+        motorConfig.MotorOutput.Inverted = inverted ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
         motorConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = m_forwardLimit / 360.0;
         motorConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = m_reverseLimit / 360.0;
         motorConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
         motorConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+        motorConfig.CurrentLimits.StatorCurrentLimit = 40d;
 
-        motorConfig.Slot0.kP = 65.0; 
-        motorConfig.MotionMagic.MotionMagicCruiseVelocity = 5.0;
-        motorConfig.MotionMagic.MotionMagicAcceleration = 15.0;
+        motorConfig.Slot0.kP = 30.0; 
+        motorConfig.MotionMagic.MotionMagicCruiseVelocity = 4;
+        motorConfig.MotionMagic.MotionMagicAcceleration = 4;
 
         m_motor.getConfigurator().apply(motorConfig);
         m_motor.setPosition(m_coder.getAbsolutePosition().waitForUpdate(0.2).getValueAsDouble());
@@ -99,7 +105,7 @@ public class TurretSubsystemAI extends SubsystemBase {
 
         if (m_shouldMove) {
             Pose2d robotPose = m_robotPoseSupplier.get();
-            ChassisSpeeds robotVel = m_robotVelocitySupplier.get(); // Must be field-relative speeds
+          //  ChassisSpeeds robotVel = m_robotVelocitySupplier.get(); // Must be field-relative speeds
             
             Translation2d actualGoal = (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red) 
                 ? RED_TARGET : BLUE_TARGET;
@@ -115,16 +121,16 @@ public class TurretSubsystemAI extends SubsystemBase {
             // Second pass: Adjust TOF based on the virtual goal's distance
             for (int i = 0; i < 2; i++) {
                 Translation2d virtualGoal = new Translation2d(
-                    actualGoal.getX() - (robotVel.vxMetersPerSecond * timeOfFlight),
-                    actualGoal.getY() - (robotVel.vyMetersPerSecond * timeOfFlight)
+                    actualGoal.getX() - (0* timeOfFlight),
+                    actualGoal.getY() - (0 * timeOfFlight)
                 );
                 timeOfFlight = turretFieldPos.getDistance(virtualGoal) / NOTE_VELOCITY_MPS;
             }
 
             // 3. Final Virtual Goal Calculation
             Translation2d finalVirtualGoal = new Translation2d(
-                actualGoal.getX() - (robotVel.vxMetersPerSecond * timeOfFlight),
-                actualGoal.getY() - (robotVel.vyMetersPerSecond * timeOfFlight)
+                actualGoal.getX() - (0 * timeOfFlight),
+                actualGoal.getY() - (0 * timeOfFlight)
             );
 
             // 4. Calculate Heading to the Virtual Goal
@@ -138,14 +144,20 @@ public class TurretSubsystemAI extends SubsystemBase {
                 fieldTargetHeading, 
                 currentPosDeg
             );
+            m_motor.setControl(m_mmRequest.withPosition(m_currentTargetDeg / 360.0));
         } else {
             m_currentTargetDeg = 0.0; 
+                           m_motor.setVoltage(0);
+          
         }
 
-        m_motor.setControl(m_mmRequest.withPosition(m_currentTargetDeg / 360.0));
+
         
         SmartDashboard.putNumber("Turret/" + m_name + " Angle", currentPosDeg);
         SmartDashboard.putBoolean("Turret/" + m_name + " Ready", isAtTarget(1.2));
+        SmartDashboard.putNumber("Turret/Target", m_currentTargetDeg);
+        SmartDashboard.putNumber("Turret/Reverse Limit", m_reverseLimit);
+        SmartDashboard.putNumber("Turret/Forward Limit", m_forwardLimit);
     }
 
     private double calculateBestTurretAngle(double robotHeading, double targetHeading, double current) {
@@ -174,5 +186,11 @@ public class TurretSubsystemAI extends SubsystemBase {
 
     public void setTrackingEnabled(boolean enabled) {
         this.m_shouldMove = enabled;
+    }
+
+    public Command setTrackingCommand(boolean enabled) {
+        return runOnce(() -> {
+            this.setTrackingEnabled(enabled);
+        });
     }
 }

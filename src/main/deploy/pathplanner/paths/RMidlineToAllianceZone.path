@@ -3,42 +3,40 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.5273734939759036,
-        "y": 4.045927710843373
+        "x": 7.804208273894435,
+        "y": 2.6311554921540665
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.188614457831325,
-        "y": 3.9038674698795175
+        "x": 7.739514978601996,
+        "y": 0.5609700427960065
       },
       "isLocked": false,
-      "linkedName": "Hub"
+      "linkedName": "RMidline1"
     },
     {
       "anchor": {
-        "x": 1.560385542168675,
-        "y": 3.7618072289156625
+        "x": 3.52151212553495,
+        "y": 0.6386019971469341
       },
       "prevControl": {
-        "x": 2.7077951807228917,
-        "y": 3.6962409638554217
+        "x": 5.358801711840227,
+        "y": 0.6386019971469341
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Tower"
+      "linkedName": null
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.5,
+      "rotationDegrees": 0.0
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "Shoot",
-      "waypointRelativePos": 0,
-      "endWaypointRelativePos": null,
-      "command": null
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 2.0,
     "maxAcceleration": 2.0,
@@ -55,7 +53,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 90.0
   },
   "useDefaultConstraints": false
 }
