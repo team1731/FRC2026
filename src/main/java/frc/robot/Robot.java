@@ -52,6 +52,8 @@ public class Robot extends LoggedRobot {
 	private final Field2d currentPoseField = new Field2d();
 	private Pose2d targetPose;
 	private final Field2d targetPoseField = new Field2d();
+	boolean vslamConnectionStatusChanged = false;
+	private boolean isVslamConnected = false;
 	
 
 	private RobotContainer container;
@@ -224,24 +226,28 @@ public class Robot extends LoggedRobot {
 			allianceChanged = true;
 		}
 		
-		//boolean vslamConnectionStatusChanged = false;
-		//boolean isVSLAMConnected = (driveSubsystem.getVSLAMSubsytem() != null)? driveSubsystem.getVSLAMSubsytem().isConnected() : false; 
-		//if(isVSLAMConnected != lastVSLAMConnectedCheck) {
-		//	System.out.println("VSLAM connection status changed. VSLAM connection status: " + (isVSLAMConnected? "Connected" : "Disconnected"));
-		//	vslamConnectionStatusChanged = true;
-		//	lastVSLAMConnectedCheck = isVSLAMConnected;
-		//}
+	//	boolean vslamConnectionStatusChanged = false;
+	//	boolean isVSLAMConnected = (driveSubsystem.getVSLAMSubsytem() != null)? driveSubsystem.getVSLAMSubsytem().isConnected() : false; 
+		if(swerve.isVslamConnected()  && !isVslamConnected) {
+			System.out.println("VSLAM went from not connected to Connected so we will reset the pose");
+			vslamConnectionStatusChanged = true;
+			
+		} else {
+			isVslamConnected = false;
+		}
+	     
 
 		/*
 		 * If any of these above conditions changed, kick off creation of a new auto command
 		 */
-		if(autoCodeChanged || allianceChanged ) {
+		if(autoCodeChanged || allianceChanged || vslamConnectionStatusChanged ) {
+			vslamConnectionStatusChanged = false;
 			m_autonomousCommand = null;
 			m_autonomousCommand = (PathPlannerAuto) AutoFactory.getAutonomousCommand(selectedAutoCode, redAlliance);		
 			
 			if (m_autonomousCommand.getStartingPose() != null) {
 				Pose2d startingPose = isRedAlliance? new Pose2d(17.55 - m_autonomousCommand.getStartingPose().getX(), 8.05 - m_autonomousCommand.getStartingPose().getY(),m_autonomousCommand.getStartingPose().getRotation().rotateBy(Rotation2d.k180deg)): m_autonomousCommand.getStartingPose();
-            	swerve.resetJustHeading(startingPose);  // this will just set the heading so the limelight will track correctly
+            	swerve.resetPose(startingPose);  // 
 			}
 
 			if (m_autonomousCommand != null){

@@ -3,38 +3,38 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.5634333333333332,
-        "y": 0.6439333333333332
+        "x": 3.5439444444451205,
+        "y": 0.5854666666617323
       },
       "prevControl": null,
       "nextControl": {
-        "x": 8.279744444449333,
-        "y": 0.6341888888888627
+        "x": 8.565276763354614,
+        "y": 0.09383133618146378
       },
       "isLocked": false,
-      "linkedName": "RGate"
+      "linkedName": "RTrench"
     },
     {
       "anchor": {
-        "x": 7.812011111116,
-        "y": 2.894899999999974
+        "x": 7.831500000000677,
+        "y": 4.093466666661733
       },
       "prevControl": {
-        "x": 7.782777777782666,
-        "y": 0.5464888888888639
+        "x": 7.831500000000677,
+        "y": 2.411440989058308
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "RMidline1"
+      "linkedName": "RMidline2"
     }
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.1305660377358515,
+      "waypointRelativePos": 0.18490566037735812,
       "rotationDegrees": 0.0
     },
     {
-      "waypointRelativePos": 0.651320754716978,
+      "waypointRelativePos": 0.5818867924528325,
       "rotationDegrees": 90.0
     }
   ],
@@ -42,8 +42,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 3.0,
-    "maxAcceleration": 3.0,
+    "maxVelocity": 2.0,
+    "maxAcceleration": 2.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -57,7 +57,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.21307158865881337
+    "rotation": 0.0
   },
   "useDefaultConstraints": false
 }

@@ -67,8 +67,7 @@ public class SwerveSubsystem extends BaseSubsystem {
 
 
     private QuestNav questNav;
-    private static boolean isQuestConnected = false;
-    private static boolean isQuestTracking = false;
+
     private static boolean isQuestSeeded = false;
 
         private static Matrix<N3, N1> QUESTNAV_STD_DEVS =
@@ -194,7 +193,8 @@ public class SwerveSubsystem extends BaseSubsystem {
 
     public void resetPose(Pose2d pose) {
         drivetrain.resetPose(pose);
-        resetQuestPose(new Pose3d(pose));   
+        resetQuestPose(new Pose3d(pose));  
+        isQuestSeeded = true; 
     }
 
     public void resetHeadingButtonPressed() {
@@ -292,17 +292,17 @@ public class SwerveSubsystem extends BaseSubsystem {
         SmartDashboard.putBoolean("isTracking", questNav.isTracking());
         SmartDashboard.putBoolean("isConnected", questNav.isConnected());
         SmartDashboard.putBoolean("hasgoodtracking",hasGoodOdometry());
-        if (!isQuestSeeded || (DriverStation.isDisabled() && questPoseResetTimer.hasElapsed(5))) {
-            if (hasGoodOdometry() && questNav.isTracking() && questNav.isConnected()) {
-                this.resetQuestPose(new Pose3d(getCurrentPose()));
-                questPoseResetTimer.restart();
+      //  if (!isQuestSeeded || (DriverStation.isDisabled() && questPoseResetTimer.hasElapsed(5))) {
+      //      if (hasGoodOdometry() && questNav.isTracking() && questNav.isConnected()) {
+       //         this.resetQuestPose(new Pose3d(getCurrentPose()));
+      //          questPoseResetTimer.restart();
                 isQuestSeeded = true;
-            }
-        }
-        if (!questNav.isConnected() || !questNav.isTracking() ) {
+       //     }
+       // }
+        if ( !questNav.isTracking() ) {
             isQuestSeeded = false;
         }
-        if (questNav.isConnected() && questNav.isTracking()&& isQuestSeeded) {
+        if (questNav.isTracking() & isQuestSeeded) {
             addQuestVisionMeasurement();
         }
 
@@ -476,6 +476,7 @@ public class SwerveSubsystem extends BaseSubsystem {
         Pose3d questResetPose = robotPose.transformBy(kRobotToOculus);
 
         // Set the QuestNav pose to the calculated Quest pose
+        System.out.println("setting quest pose@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
         questNav.setPose(questResetPose);
         questPoseResetTimer.reset();
     }
@@ -498,7 +499,7 @@ public class SwerveSubsystem extends BaseSubsystem {
                 // Transform by the mount pose to get your robot pose
                 Pose3d robotPose = questPose.transformBy(kRobotToOculus.inverse());
 
-                if (isQuestTracking && isQuestConnected && isQuestSeeded) {
+                if (questNav.isTracking()  && isQuestSeeded) {
 
                 addVisionMeasurement(robotPose.toPose2d(), timestamp, QUESTNAV_STD_DEVS);
                  
@@ -507,4 +508,8 @@ public class SwerveSubsystem extends BaseSubsystem {
             }
         }
     }
+
+public boolean isVslamConnected() {
+   return (questNav.isTracking() );
+}
 }

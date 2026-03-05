@@ -33,11 +33,11 @@ public class IntakePivotSubsystem extends BaseSubsystem {
         );
 
         motor.withMotionMagicConfigs(
-            new MotionMagicConfigs().withMotionMagicCruiseVelocity(1.5)
+            new MotionMagicConfigs().withMotionMagicCruiseVelocity(12)
             .withMotionMagicAcceleration(2)
         );
 
-        motor.setDynamicMotionMagicSpeeds(1.5, 2);    
+        motor.setDynamicMotionMagicSpeeds(2, 2);    
         
         Robot.IS_ENABLED.onTrue(new InstantCommand(() -> motor.setPercentOutput(0)));
     }

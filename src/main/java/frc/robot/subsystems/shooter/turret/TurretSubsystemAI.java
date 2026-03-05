@@ -48,7 +48,7 @@ public class TurretSubsystemAI extends SubsystemBase {
     private double m_currentTargetDeg = 0.0;
 
     public TurretSubsystemAI(
-        String name, int motorID, boolean inverted, int coderID, double offset, 
+        String name, int motorID, boolean inverted, int coderID, double offset, double discontinuity, 
         double reverseLimit, double forwardLimit, 
         double rotorToSensor, double sensorToMechanism,
         Translation2d robotToTurret,
@@ -67,12 +67,13 @@ public class TurretSubsystemAI extends SubsystemBase {
         this.m_robotVelocitySupplier = velocitySupplier;
 
 
-        configureDevices(offset, rotorToSensor, sensorToMechanism);
+        configureDevices(offset, discontinuity, rotorToSensor, sensorToMechanism);
     }
 
-    private void configureDevices(double offset, double rotorToSensor, double sensorToMechanism) {
+    private void configureDevices(double offset, double discontinuity, double rotorToSensor, double sensorToMechanism) {
         CANcoderConfiguration coderConfig = new CANcoderConfiguration();
         coderConfig.MagnetSensor.MagnetOffset = offset;
+        coderConfig.MagnetSensor.AbsoluteSensorDiscontinuityPoint = discontinuity;
         coderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
         m_coder.getConfigurator().apply(coderConfig);
 
@@ -80,6 +81,7 @@ public class TurretSubsystemAI extends SubsystemBase {
         motorConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
         motorConfig.Feedback.FeedbackRemoteSensorID = m_coder.getDeviceID();
         motorConfig.Feedback.RotorToSensorRatio = rotorToSensor;
+
         motorConfig.Feedback.SensorToMechanismRatio = sensorToMechanism;
 
 
@@ -91,7 +93,11 @@ public class TurretSubsystemAI extends SubsystemBase {
         motorConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
         motorConfig.CurrentLimits.StatorCurrentLimit = 40d;
 
-        motorConfig.Slot0.kP = 30.0; 
+        motorConfig.Slot0.kP = 60.0; 
+        motorConfig.Slot0.kS = 0.2;
+        motorConfig.Slot0.kA = 0.01;
+        motorConfig.Slot0.kI = 0;
+        motorConfig.Slot0.kD = 0.5;
         motorConfig.MotionMagic.MotionMagicCruiseVelocity = 4;
         motorConfig.MotionMagic.MotionMagicAcceleration = 4;
 
@@ -144,13 +150,13 @@ public class TurretSubsystemAI extends SubsystemBase {
                 fieldTargetHeading, 
                 currentPosDeg
             );
-            m_motor.setControl(m_mmRequest.withPosition(m_currentTargetDeg / 360.0));
+            
         } else {
             m_currentTargetDeg = 0.0; 
-                           m_motor.setVoltage(0);
+                         //  m_motor.setVoltage(0);
           
         }
-
+        // m_motor.setControl(m_mmRequest.withPosition(m_currentTargetDeg / 360.0));
 
         
         SmartDashboard.putNumber("Turret/" + m_name + " Angle", currentPosDeg);

@@ -6,6 +6,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.*;
+import frc.lib.frc1731.math.LoggedTunableNumber;
 import frc.robot.commands.GoalTrackingCommand;
 import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.drive.SwerveSubsystem;
@@ -53,8 +54,8 @@ public class RobotContainer {
     
         private final Trigger dUnjam = new Trigger(() -> false); // TODO - Add unjam button
     
-        // private static final LoggedTunableNumber flywheelSetpoint = new LoggedTunableNumber("FlywheelSetpoint", () -> true);
-        // private static final LoggedTunableNumber hoodSetpoint = new LoggedTunableNumber("HoodAngle", () -> true);
+        private static final LoggedTunableNumber flywheelSetpoint = new LoggedTunableNumber("FlywheelSetpoint", () -> true);
+        private static final LoggedTunableNumber hoodSetpoint = new LoggedTunableNumber("HoodAngle", () -> true);
     
         /* Operator Buttons */
     
@@ -89,9 +90,10 @@ public class RobotContainer {
             22, // Motor CAN ID
             true,
             29, // CANcoder CAN ID
-            0.018798828125, // Offset (Rotations)
-            -249.0, // Reverse Limit
-            121.0, // Forward Limit
+            0.0185546875, // Offset (Rotations)0.018798828125
+            .282, //discontinuty
+            -303.92, // Reverse Limit
+            93.0, // Forward Limit
             35.555, 1.0/(35.555 / 28.44), // rotor to sensor and sensor to mechanism
             // Velocity supplier for shooting on the move
             new Translation2d(0.10, 0.15),  //location of turret in meters
@@ -106,6 +108,7 @@ public class RobotContainer {
             true,
             30,
             -0.13330078125,
+            0.6625, //discontinuity
             -132.0, // Reverse Limit (further CW)
             276.0, // Forward Limit (shorter CCW)
             35.555, 1.0/(35.555 / 28.44),
@@ -135,14 +138,14 @@ public class RobotContainer {
         // hood.setDefaultCommand(hood.driveManualCommand(0, 0));
         hood.setDefaultCommand(hood.setHoodCommand(0, 0));
         // turret.setDefaultCommand(turret.setRightTurretCommand(() -> -swerve.getYaw() % 360d));
-        // m_leftTurret.setDefaultCommand(m_leftTurret.setTrackingCommand(true));
-        // m_rightTurret.setDefaultCommand(m_rightTurret.setTrackingCommand(true));
+         m_leftTurret.setDefaultCommand(m_leftTurret.setTrackingCommand(false));
+         m_rightTurret.setDefaultCommand(m_rightTurret.setTrackingCommand(false));
     }
 
     private void configureNamedCommands() {
         // Named commands useful for PathPlanner events
         // ex. NamedCommands.registerCommand("Example", new ExampleCommand());
-        NamedCommands.registerCommand("Shoot", superstructure.shootCommand());
+        NamedCommands.registerCommand("Shoot", superstructure.shootCommand().withTimeout(3));
         NamedCommands.registerCommand("Intake", superstructure.intakeCommand());
         NamedCommands.registerCommand("Feedthrough", superstructure.feedthroughCommand());
         NamedCommands.registerCommand("Pass", Commands.none());
@@ -161,7 +164,7 @@ public class RobotContainer {
         }));
 
         dIntake.whileTrue(superstructure.intakeCommand());
-        dShoot.whileTrue(superstructure.shootCommand()).onFalse(hood.stowHoodCommand());
+        // dShoot.whileTrue(superstructure.shootCommand()).onFalse(hood.stowHoodCommand());
         dFeedthrough.whileTrue(superstructure.feedthroughCommand());
 
 
@@ -169,8 +172,13 @@ public class RobotContainer {
         // 2. Bind both turrets to a single button (e.g., Left Trigger)
         // While held, both track the goal. When released, both return to 0 (Safe Return).
        dHubShot.whileTrue(
-            new GoalTrackingCommand(m_leftTurret, m_rightTurret)
+            // new GoalTrackingCommand(m_leftTurret, m_rightTurret)
+            hood.setHoodCommand(() -> SmartDashboard.getNumber("Hood Rotations", 0)).alongWith(
+                flywheel.setFlywheelCommand(() -> SmartDashboard.getNumber("Flywheel RPS", 50))
+            )
         );
+
+        driver.rightTrigger().whileTrue(indexer.setPercentOutputCommand(1));
     
         // dPass.whileTrue(superstructure.passCommand());
 

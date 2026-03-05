@@ -15,7 +15,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 
 public class FlywheelSubsystem extends BaseSubsystem {
     private MotorIOTalonFX leftMotor, rightMotor;
-    private LoggedTunableNumber flywheelTunedSetpoint = new LoggedTunableNumber("Flywheel Setpoint RPS", 50, () -> true);
+    // private LoggedTunableNumber flywheelTunedSetpoint = new LoggedTunableNumber("Flywheel Setpoint RPS", 50, () -> true);
 
     private double leftTargetVelocity = 0.0;
     private double rightTargetVelocity = 0.0;
@@ -68,9 +68,9 @@ public class FlywheelSubsystem extends BaseSubsystem {
         return atLeftTargetVelocity() && atRightTargetVelocity();
     }
 
-    public Command tuneShotCommand() {
-        return setFlywheelVelocityCommand(flywheelTunedSetpoint.get(), flywheelTunedSetpoint.get());
-    }
+    // public Command tuneShotCommand() {
+    //     return setFlywheelVelocityCommand(flywheelTunedSetpoint.get(), flywheelTunedSetpoint.get());
+    // }
 
     public Command setLeftFlywheelCommand(double rps) {
         return this.run(() -> {
@@ -114,9 +114,9 @@ public class FlywheelSubsystem extends BaseSubsystem {
 
     public Command tuneableShotCommand() {
         return this.run(() -> {
-            double rps = flywheelTunedSetpoint.get();
-            leftMotor.setVelocityRPS(rps);
-            rightMotor.setVelocityRPS(rps);
+            // double rps = flywheelTunedSetpoint.get();
+            // leftMotor.setVelocityRPS(rps);
+            // rightMotor.setVelocityRPS(rps);
         });
     }
 
