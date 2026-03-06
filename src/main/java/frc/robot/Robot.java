@@ -26,6 +26,7 @@ import frc.lib.frc1731.field.FieldLayout;
 import frc.lib.frc1731.field.ReefscapeFieldLayout;
 import frc.lib.frc1731.log.AKLogger;
 import frc.lib.frc1731.log.MessageLog;
+import frc.lib.frc6328.FieldConstants;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.autos.AutoFactory;
 import frc.robot.autos.AutoLoader;
@@ -231,8 +232,9 @@ public class Robot extends LoggedRobot {
 		if(swerve.isVslamConnected()  && !isVslamConnected) {
 			System.out.println("VSLAM went from not connected to Connected so we will reset the pose");
 			vslamConnectionStatusChanged = true;
+			isVslamConnected = true;
 			
-		} else {
+		} else if (!swerve.isVslamConnected()) {
 			isVslamConnected = false;
 		}
 	     
@@ -246,7 +248,7 @@ public class Robot extends LoggedRobot {
 			m_autonomousCommand = (PathPlannerAuto) AutoFactory.getAutonomousCommand(selectedAutoCode, redAlliance);		
 			
 			if (m_autonomousCommand.getStartingPose() != null) {
-				Pose2d startingPose = isRedAlliance? new Pose2d(17.55 - m_autonomousCommand.getStartingPose().getX(), 8.05 - m_autonomousCommand.getStartingPose().getY(),m_autonomousCommand.getStartingPose().getRotation().rotateBy(Rotation2d.k180deg)): m_autonomousCommand.getStartingPose();
+				Pose2d startingPose = isRedAlliance? new Pose2d(16.518 - m_autonomousCommand.getStartingPose().getX(), 8.043 - m_autonomousCommand.getStartingPose().getY(),m_autonomousCommand.getStartingPose().getRotation().rotateBy(Rotation2d.k180deg)): m_autonomousCommand.getStartingPose();
             	swerve.resetPose(startingPose);  // 
 			}
 

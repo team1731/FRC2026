@@ -75,6 +75,12 @@
                 "data": {
                   "name": "Warmup"
                 }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "StowHood"
+                }
               }
             ]
           }
@@ -102,6 +108,12 @@
           "type": "named",
           "data": {
             "name": "Shoot"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "StowHood"
           }
         }
       ]

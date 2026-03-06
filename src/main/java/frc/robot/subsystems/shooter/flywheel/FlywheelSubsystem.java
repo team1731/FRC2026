@@ -103,6 +103,15 @@ public class FlywheelSubsystem extends BaseSubsystem {
         });
     }
 
+    public Command setFlywheelVelocityCommand(DoubleSupplier left, DoubleSupplier right) {
+        return this.run(() -> {
+            this.leftTargetVelocity = left.getAsDouble();
+            this.rightTargetVelocity = right.getAsDouble();
+            leftMotor.setVelocityRPS(left.getAsDouble());
+            rightMotor.setVelocityRPS(right.getAsDouble());
+        });
+    }
+
     public Command setFlywheelCommand(DoubleSupplier velocity) {
         return this.run(() -> {
             this.leftTargetVelocity = velocity.getAsDouble();

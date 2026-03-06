@@ -12,12 +12,12 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Robot;
 
 import java.util.function.Supplier;
 
@@ -29,7 +29,6 @@ public class TurretSubsystemAI extends SubsystemBase {
     private final MotionMagicVoltage m_mmRequest = new MotionMagicVoltage(0);
 
     // Constants
-    private final double NOTE_VELOCITY_MPS = 15.0; // Adjust based on your shooter's exit speed
     private final double m_forwardLimit; 
     private final double m_reverseLimit; 
     private final String m_name;
@@ -37,14 +36,12 @@ public class TurretSubsystemAI extends SubsystemBase {
     private boolean inverted = false;
 
     // Targets
-    private final Translation2d BLUE_TARGET = new Translation2d(4.625594, 4.034536);
-    private final Translation2d RED_TARGET = new Translation2d(11.915394, 4.034536);
+    public static final Translation2d BLUE_TARGET = new Translation2d(4.625594, 4.034536);
+    public static final Translation2d RED_TARGET = new Translation2d(11.915394, 4.034536);
 
     // Suppliers
     private final Supplier<Pose2d> m_robotPoseSupplier;
-    private final Supplier<ChassisSpeeds> m_robotVelocitySupplier;
 
-    private boolean m_shouldMove = false;
     private double m_currentTargetDeg = 0.0;
 
     public TurretSubsystemAI(
@@ -53,7 +50,6 @@ public class TurretSubsystemAI extends SubsystemBase {
         double rotorToSensor, double sensorToMechanism,
         Translation2d robotToTurret,
         Supplier<Pose2d> poseSupplier,
-        Supplier<ChassisSpeeds> velocitySupplier,
         String canivore
     ) {
         this.m_name = name;
@@ -64,7 +60,6 @@ public class TurretSubsystemAI extends SubsystemBase {
         this.m_forwardLimit = forwardLimit;
         this.m_robotToTurret = robotToTurret;
         this.m_robotPoseSupplier = poseSupplier;
-        this.m_robotVelocitySupplier = velocitySupplier;
 
 
         configureDevices(offset, discontinuity, rotorToSensor, sensorToMechanism);
@@ -109,56 +104,59 @@ public class TurretSubsystemAI extends SubsystemBase {
     public void periodic() {
         double currentPosDeg = m_motor.getPosition().getValueAsDouble() * 360.0;
 
-        if (m_shouldMove) {
-            Pose2d robotPose = m_robotPoseSupplier.get();
-          //  ChassisSpeeds robotVel = m_robotVelocitySupplier.get(); // Must be field-relative speeds
-            
-            Translation2d actualGoal = (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red) 
-                ? RED_TARGET : BLUE_TARGET;
+        //     if (m_shouldMove) {
+        //         Pose2d robotPose = m_robotPoseSupplier.get();
+        //         // ChassisSpeeds robotVel = m_robotVelocitySupplier.get(); // Must be field-relative speeds
+                
+        //         Translation2d actualGoal = (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red) 
+        //             ? RED_TARGET : BLUE_TARGET;
 
-            // 1. Calculate turret's current field position
-            Translation2d turretFieldPos = robotPose.getTranslation().plus(
-                m_robotToTurret.rotateBy(robotPose.getRotation())
-            );
+        //         // 1. Calculate turret's current field position
+        //         Translation2d turretFieldPos = robotPose.getTranslation().plus(
+        //             m_robotToTurret.rotateBy(robotPose.getRotation())
+        //         );
 
-            // 2. Iterative Solver for Time of Flight (TOF)
-            double timeOfFlight = turretFieldPos.getDistance(actualGoal) / NOTE_VELOCITY_MPS;
-            
-            // Second pass: Adjust TOF based on the virtual goal's distance
-            for (int i = 0; i < 2; i++) {
-                Translation2d virtualGoal = new Translation2d(
-                    actualGoal.getX() - (0* timeOfFlight),
-                    actualGoal.getY() - (0 * timeOfFlight)
-                );
-                timeOfFlight = turretFieldPos.getDistance(virtualGoal) / NOTE_VELOCITY_MPS;
-            }
+        //         // 2. Iterative Solver for Time of Flight (TOF)
+        //         double timeOfFlight = turretFieldPos.getDistance(actualGoal) / NOTE_VELOCITY_MPS;
+                
+        //         // Second pass: Adjust TOF based on the virtual goal's distance
+        //         for (int i = 0; i < 2; i++) {
+        //             Translation2d virtualGoal = new Translation2d(
+        //                 actualGoal.getX() - (0* timeOfFlight),
+        //                 actualGoal.getY() - (0 * timeOfFlight)
+        //             );
+        //             timeOfFlight = turretFieldPos.getDistance(virtualGoal) / NOTE_VELOCITY_MPS;
+        //         }
 
-            // 3. Final Virtual Goal Calculation
-            Translation2d finalVirtualGoal = new Translation2d(
-                actualGoal.getX() - (0 * timeOfFlight),
-                actualGoal.getY() - (0 * timeOfFlight)
-            );
+        //         // 3. Final Virtual Goal Calculation
+        //         Translation2d finalVirtualGoal = new Translation2d(
+        //             actualGoal.getX() - (0 * timeOfFlight),
+        //             actualGoal.getY() - (0 * timeOfFlight)
+        //         );
 
-            // 4. Calculate Heading to the Virtual Goal
-            double fieldTargetHeading = Math.toDegrees(Math.atan2(
-                finalVirtualGoal.getY() - turretFieldPos.getY(),
-                finalVirtualGoal.getX() - turretFieldPos.getX()
-            ));
+        //         // 4. Calculate Heading to the Virtual Goal
+        //         double fieldTargetHeading = Math.toDegrees(Math.atan2(
+        //             finalVirtualGoal.getY() - turretFieldPos.getY(),
+        //             finalVirtualGoal.getX() - turretFieldPos.getX()
+        //         ));
 
-            m_currentTargetDeg = calculateBestTurretAngle(
-                robotPose.getRotation().getDegrees(), 
-                fieldTargetHeading, 
-                currentPosDeg
-            );
-            
-        } else {
-            m_currentTargetDeg = 0.0; 
-                         //  m_motor.setVoltage(0);
-          
-        }
-        // m_motor.setControl(m_mmRequest.withPosition(m_currentTargetDeg / 360.0));
+        //         m_currentTargetDeg = calculateBestTurretAngle(
+        //             robotPose.getRotation().getDegrees(), 
+        //             fieldTargetHeading, 
+        //             currentPosDeg
+        //         );
+        //     } else {
+        //         m_currentTargetDeg = 0.0; 
+        //                     //  m_motor.setVoltage(0);
+        //     }
+        //     m_motor.setControl(m_mmRequest.withPosition(m_currentTargetDeg / 360.0));
 
-        
+        //     SmartDashboard.putNumber("Turret/" + m_name + " Angle", currentPosDeg);
+        //     SmartDashboard.putBoolean("Turret/" + m_name + " Ready", isAtTarget(1.2));
+        //     SmartDashboard.putNumber("Turret/Target", m_currentTargetDeg);
+        //     SmartDashboard.putNumber("Turret/Reverse Limit", m_reverseLimit);
+        //     SmartDashboard.putNumber("Turret/Forward Limit", m_forwardLimit);
+
         SmartDashboard.putNumber("Turret/" + m_name + " Angle", currentPosDeg);
         SmartDashboard.putBoolean("Turret/" + m_name + " Ready", isAtTarget(1.2));
         SmartDashboard.putNumber("Turret/Target", m_currentTargetDeg);
@@ -190,13 +188,80 @@ public class TurretSubsystemAI extends SubsystemBase {
         return Math.abs(m_currentTargetDeg - currentPosDeg) < tolerance;
     }
 
-    public void setTrackingEnabled(boolean enabled) {
-        this.m_shouldMove = enabled;
-    }
+    // public void setTrackingEnabled(boolean enabled) {
+    //     this.m_shouldMove = enabled;
+    // }
 
-    public Command setTrackingCommand(boolean enabled) {
-        return runOnce(() -> {
-            this.setTrackingEnabled(enabled);
+    // public void setZero(boolean zero) {
+    //     this.shouldZero = zero;
+    // }
+
+    public Command trackTargetCommand(Translation2d target) {
+        return run(() -> {
+            double currentPosDeg = m_motor.getPosition().getValueAsDouble() * 360.0;
+            Pose2d robotPose = m_robotPoseSupplier.get();
+            
+            Translation2d actualGoal = (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red) 
+                ? RED_TARGET : BLUE_TARGET;
+
+            // 1. Calculate turret's current field position
+            Translation2d turretFieldPos = robotPose.getTranslation().plus(
+                m_robotToTurret.rotateBy(robotPose.getRotation())
+            );
+
+            // 2. Iterative Solver for Time of Flight (TOF)
+            // double timeOfFlight = turretFieldPos.getDistance(actualGoal) / NOTE_VELOCITY_MPS;
+            
+            // // Second pass: Adjust TOF based on the virtual goal's distance
+            // for (int i = 0; i < 2; i++) {
+            //     Translation2d virtualGoal = new Translation2d(
+            //         actualGoal.getX() - (0* timeOfFlight),
+            //         actualGoal.getY() - (0 * timeOfFlight)
+            //     );
+            //     timeOfFlight = turretFieldPos.getDistance(virtualGoal) / NOTE_VELOCITY_MPS;
+            // }
+
+            // // 3. Final Virtual Goal Calculation
+            // Translation2d finalVirtualGoal = new Translation2d(
+            //     actualGoal.getX() - (0 * timeOfFlight),
+            //     actualGoal.getY() - (0 * timeOfFlight)
+            // );
+
+            // 4. Calculate Heading to the Virtual Goal
+            double fieldTargetHeading = Math.toDegrees(Math.atan2(
+                actualGoal.getY() - turretFieldPos.getY(),
+                actualGoal.getX() - turretFieldPos.getX()
+            ));
+
+            m_currentTargetDeg = calculateBestTurretAngle(
+                robotPose.getRotation().getDegrees(), 
+                fieldTargetHeading, 
+                currentPosDeg
+            );
+
+            m_motor.setControl(m_mmRequest.withPosition(m_currentTargetDeg / 360.0));
         });
     }
+
+    public Command setZeroCommand() {
+        return run(() -> {
+            m_motor.setControl(m_mmRequest.withPosition(0));
+        });
+    }
+
+    public Command trackHubCommand() {
+        return trackTargetCommand(Robot.isRedAlliance() ? RED_TARGET : BLUE_TARGET);
+    }
+
+    // public Command setTrackingCommand(boolean enabled) {
+    //     return runOnce(() -> {
+    //         this.setTrackingEnabled(enabled);
+    //     });
+    // }
+
+    // public Command setZeroCommand(boolean enabled) {
+    //     return run(() -> {
+    //         this.setZero(enabled);
+    //     });
+    // }
 }

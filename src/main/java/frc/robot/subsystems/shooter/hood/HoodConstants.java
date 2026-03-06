@@ -22,7 +22,7 @@ public class HoodConstants {
     // public static final Angle kStartRotations = kConverter.toMotor(kStartAngle);
     // public static final Angle kMaxRotations = kConverter.toMotor(kMaxAngle);
     public static final Angle kStartRotations = Rotations.of(0);
-    public static final Angle kMaxRotations = Rotations.of(7.76);
+    public static final Angle kMaxRotations = Rotations.of(7.25);
     public static final Angle kRotationsRange = kMaxRotations.minus(kStartRotations);
     public static final double kMaxRotationsValue = -7d;
 

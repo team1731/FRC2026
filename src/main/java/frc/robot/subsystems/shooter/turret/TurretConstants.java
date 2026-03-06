@@ -17,15 +17,15 @@ public class TurretConstants {
     public static final double kEpsilon = 1d; // Degrees;
 
     public static final Transform3d kLeftTurretToRobot = new Transform3d(
-        Units.inchesToMeters(-7.25d), 
         Units.inchesToMeters(-5.75d), 
+        Units.inchesToMeters(7.25d), 
         Units.inchesToMeters(11.4125d),
         new Rotation3d()
     );
 
     public static final Transform3d kRightTurretToRobot = new Transform3d(
-        Units.inchesToMeters(7.25d), 
         Units.inchesToMeters(-5.75d), 
+        Units.inchesToMeters(-7.25d), 
         Units.inchesToMeters(11.4125d),
         new Rotation3d()
     );

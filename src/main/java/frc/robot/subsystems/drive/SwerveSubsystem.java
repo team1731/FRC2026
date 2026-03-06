@@ -199,8 +199,8 @@ public class SwerveSubsystem extends BaseSubsystem {
 
     public void resetHeadingButtonPressed() {
         Pose2d resetPosition = Robot.isRedAlliance()
-                ? new Pose2d(getCurrentPose().getX(), getCurrentPose().getY(), new Rotation2d(Math.toRadians(0)))
-                : new Pose2d(getCurrentPose().getX(), getCurrentPose().getY(), new Rotation2d(Math.toRadians(180)));
+                ? new Pose2d(getCurrentPose().getX(), getCurrentPose().getY(), new Rotation2d(Math.toRadians(180)))
+                : new Pose2d(getCurrentPose().getX(), getCurrentPose().getY(), new Rotation2d(Math.toRadians(0)));
         resetPose(resetPosition);
 
     }
@@ -302,7 +302,7 @@ public class SwerveSubsystem extends BaseSubsystem {
         if ( !questNav.isTracking() ) {
             isQuestSeeded = false;
         }
-        if (questNav.isTracking() & isQuestSeeded) {
+        if (questNav.isTracking() && isQuestSeeded && questNav.isConnected()) {
             addQuestVisionMeasurement();
         }
 
@@ -352,8 +352,8 @@ public class SwerveSubsystem extends BaseSubsystem {
                 if (isFieldCentric.getAsBoolean()) {
                     drivetrain.setControl(
                         kFieldCentricControl
-                            .withVelocityX((-Math.abs(m_xboxController.getLeftY()) * m_xboxController.getLeftY()) * kMaxSpeed)
-                            .withVelocityY((-Math.abs(m_xboxController.getLeftX()) * m_xboxController.getLeftX()) * kMaxSpeed)
+                            .withVelocityX(-(Math.abs(m_xboxController.getLeftY()) * m_xboxController.getLeftY()) * kMaxSpeed)
+                            .withVelocityY(-(Math.abs(m_xboxController.getLeftX()) * m_xboxController.getLeftX()) * kMaxSpeed)
                             .withRotationalRate(-m_xboxController.getRightX() * kMaxAngularRate)
                             .withCenterOfRotation(RotationCenter)
                     );
@@ -361,8 +361,8 @@ public class SwerveSubsystem extends BaseSubsystem {
                  else {
                      drivetrain.setControl(
                          kRobotCentricControl
-                             .withVelocityX((-Math.abs(m_xboxController.getLeftY()) * m_xboxController.getLeftY()) * kMaxSpeed)
-                             .withVelocityY((-Math.abs(m_xboxController.getLeftX()) * m_xboxController.getLeftX()) * kMaxSpeed)
+                             .withVelocityX(-(Math.abs(m_xboxController.getLeftY()) * m_xboxController.getLeftY()) * kMaxSpeed)
+                             .withVelocityY(-(Math.abs(m_xboxController.getLeftX()) * m_xboxController.getLeftX()) * kMaxSpeed)
                              .withRotationalRate(-m_xboxController.getRightX() * kMaxAngularRate)
                              .withCenterOfRotation(RotationCenter)
                      );
@@ -373,11 +373,11 @@ public class SwerveSubsystem extends BaseSubsystem {
 
     public ChassisSpeeds getFieldRelativeChassisSpeeds() {    // used for shoot on the fly
         return new ChassisSpeeds(
-                getFieldRelativeChassisSpeeds().vxMetersPerSecond * getCurrentPose().getRotation().getCos()
-                        - getFieldRelativeChassisSpeeds().vyMetersPerSecond * getCurrentPose().getRotation().getSin(),
-                getFieldRelativeChassisSpeeds().vyMetersPerSecond * getCurrentPose().getRotation().getCos()
-                        + getFieldRelativeChassisSpeeds().vxMetersPerSecond * getCurrentPose().getRotation().getSin(),
-                getFieldRelativeChassisSpeeds().omegaRadiansPerSecond);
+                getWheelSpeeds().vxMetersPerSecond * getCurrentPose().getRotation().getCos()
+                        - getWheelSpeeds().vyMetersPerSecond * getCurrentPose().getRotation().getSin(),
+                getWheelSpeeds().vyMetersPerSecond * getCurrentPose().getRotation().getCos()
+                        + getWheelSpeeds().vxMetersPerSecond * getCurrentPose().getRotation().getSin(),
+                getWheelSpeeds().omegaRadiansPerSecond);
     }
 
 
@@ -510,6 +510,6 @@ public class SwerveSubsystem extends BaseSubsystem {
     }
 
 public boolean isVslamConnected() {
-   return (questNav.isTracking() );
+   return (questNav.isTracking()  && questNav.isConnected());
 }
 }

@@ -16,13 +16,13 @@ public class GoalTrackingCommand extends Command {
 
     @Override
     public void initialize() {
-         m_leftTurret.setTrackingEnabled(true);
-       m_rightTurret.setTrackingEnabled(true);
+      //    m_leftTurret.setTrackingEnabled(true);
+      //  m_rightTurret.setTrackingEnabled(true);
     }
 
     @Override
     public void end(boolean interrupted) {
-     m_leftTurret.setTrackingEnabled(false);
-       m_rightTurret.setTrackingEnabled(false);
+    //  m_leftTurret.setTrackingEnabled(false);
+    //    m_rightTurret.setTrackingEnabled(false);
     }
 }

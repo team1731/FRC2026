@@ -3,7 +3,6 @@ package frc.robot.subsystems.shooter.hood;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.lib.frc1731.Utils;
 import frc.lib.frc1731.hardware.motor.ctre.MotorIOTalonFXS;
-import frc.robot.Robot;
 import frc.robot.subsystems.BaseSubsystem;
 
 import static edu.wpi.first.units.Units.*;
@@ -29,18 +28,16 @@ public class HoodSubsystem extends BaseSubsystem {
 
         leftMotor.withMotionMagicConfigs(new MotionMagicConfigs()
             .withMotionMagicAcceleration(50)
-            .withMotionMagicCruiseVelocity(50)
-            .withMotionMagicJerk(100)
+            .withMotionMagicCruiseVelocity(120)
         );
 
         rightMotor.withMotionMagicConfigs(new MotionMagicConfigs()
             .withMotionMagicAcceleration(50)
-            .withMotionMagicCruiseVelocity(50)
-            .withMotionMagicJerk(100)
+            .withMotionMagicCruiseVelocity(120)
         );
 
-        leftMotor.setDynamicMotionMagicSpeeds(50, 50);
-        rightMotor.setDynamicMotionMagicSpeeds(50, 50);
+        leftMotor.setDynamicMotionMagicSpeeds(50, 120);
+        rightMotor.setDynamicMotionMagicSpeeds(50, 120);
 
         leftMotor.resetEncoderPosition(0);
         rightMotor.resetEncoderPosition(0);
@@ -115,6 +112,16 @@ public class HoodSubsystem extends BaseSubsystem {
             
             leftMotor.setPosition(left);
             rightMotor.setPosition(right);
+        });
+    }
+
+    public Command setHoodCommand(DoubleSupplier left, DoubleSupplier right) {
+        return this.run(() -> {
+            this.leftTargetDegrees = left.getAsDouble();
+            this.rightTargetDegrees = right.getAsDouble();
+            
+            leftMotor.setPosition(left.getAsDouble());
+            rightMotor.setPosition(right.getAsDouble());
         });
     }
 
