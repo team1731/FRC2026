@@ -19,6 +19,17 @@ public class ShotTable {
         new ShotEntry(Units.inchesToMeters(150), 5.5, 50, 1.45)
     );
 
+    private List<ShotEntry> interpolatingEntries = List.of(
+        new ShotEntry(1, 0, 28, 0.5),
+        new ShotEntry(2, 1.75, 35, 0.75),
+        new ShotEntry(3, 3, 40, 0.85),
+        new ShotEntry(4, 5.5, 50, 1.25),
+        new ShotEntry(5, 6, 60, 1.4),
+        new ShotEntry(6, 6, 65, 1.6),
+        new ShotEntry(7, 6, 70, 1.8),
+        new ShotEntry(8, 6, 75, 2.0)
+    );
+
     public ShotTable() {
         List<Double> distances = new ArrayList<>();
         List<Double> hoodAngles = new ArrayList<>();
@@ -35,6 +46,25 @@ public class ShotTable {
         hoodModel = new LinearRegression(distances.toArray(new Double[0]), hoodAngles.toArray(new Double[0]));
         flywheelModel = new LinearRegression(distances.toArray(new Double[0]), flywheelSpeeds.toArray(new Double[0]));
         tofModel = new LinearRegression(distances.toArray(new Double[0]), tofs.toArray(new Double[0]));
+    }
+
+    public ShotTable backup() {
+        List<Double> distances = new ArrayList<>();
+        List<Double> hoodAngles = new ArrayList<>();
+        List<Double> flywheelSpeeds = new ArrayList<>();
+        List<Double> tofs = new ArrayList<>();
+
+        for (ShotEntry entry : interpolatingEntries) {
+            distances.add(entry.distance);
+            hoodAngles.add(entry.hoodRotations);
+            flywheelSpeeds.add(entry.flywheelRPS);
+            tofs.add(entry.timeOfFlight);
+        }
+
+        hoodModel = new PiecewiseRegression(hoodAngles.toArray(new Double[0]), 1d);
+        flywheelModel = new PiecewiseRegression(flywheelSpeeds.toArray(new Double[0]), 1d);
+        tofModel = new PiecewiseRegression(tofs.toArray(new Double[0]), 1d);
+        return this;
     }
 
     public double[] getShotParameters(double distance) {

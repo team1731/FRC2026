@@ -12,8 +12,6 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -151,12 +149,6 @@ public class TurretSubsystemAI extends SubsystemBase {
         //     }
         //     m_motor.setControl(m_mmRequest.withPosition(m_currentTargetDeg / 360.0));
 
-        //     SmartDashboard.putNumber("Turret/" + m_name + " Angle", currentPosDeg);
-        //     SmartDashboard.putBoolean("Turret/" + m_name + " Ready", isAtTarget(1.2));
-        //     SmartDashboard.putNumber("Turret/Target", m_currentTargetDeg);
-        //     SmartDashboard.putNumber("Turret/Reverse Limit", m_reverseLimit);
-        //     SmartDashboard.putNumber("Turret/Forward Limit", m_forwardLimit);
-
         SmartDashboard.putNumber("Turret/" + m_name + " Angle", currentPosDeg);
         SmartDashboard.putBoolean("Turret/" + m_name + " Ready", isAtTarget(1.2));
         SmartDashboard.putNumber("Turret/Target", m_currentTargetDeg);
@@ -201,8 +193,8 @@ public class TurretSubsystemAI extends SubsystemBase {
             double currentPosDeg = m_motor.getPosition().getValueAsDouble() * 360.0;
             Pose2d robotPose = m_robotPoseSupplier.get();
             
-            Translation2d actualGoal = (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red) 
-                ? RED_TARGET : BLUE_TARGET;
+            // Translation2d actualGoal = (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red) 
+            //     ? RED_TARGET : BLUE_TARGET;
 
             // 1. Calculate turret's current field position
             Translation2d turretFieldPos = robotPose.getTranslation().plus(
@@ -229,8 +221,8 @@ public class TurretSubsystemAI extends SubsystemBase {
 
             // 4. Calculate Heading to the Virtual Goal
             double fieldTargetHeading = Math.toDegrees(Math.atan2(
-                actualGoal.getY() - turretFieldPos.getY(),
-                actualGoal.getX() - turretFieldPos.getX()
+                target.getY() - turretFieldPos.getY(),
+                target.getX() - turretFieldPos.getX()
             ));
 
             m_currentTargetDeg = calculateBestTurretAngle(

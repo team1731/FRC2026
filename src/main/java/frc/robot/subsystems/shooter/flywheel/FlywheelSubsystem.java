@@ -2,7 +2,6 @@ package frc.robot.subsystems.shooter.flywheel;
 
 import frc.lib.frc1731.Utils;
 import frc.lib.frc1731.hardware.motor.ctre.MotorIOTalonFX;
-import frc.lib.frc1731.math.LoggedTunableNumber;
 import frc.robot.Robot;
 import frc.robot.subsystems.BaseSubsystem;
 
