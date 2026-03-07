@@ -4,9 +4,10 @@ package frc.lib.frc1731.math.regression;
  * Class that represents a piecewise regression model
  */
 public class PiecewiseRegression extends Regression {
-    private double[] values;
+    private Double[] values;
     private double deltaDistance; // meters
-    public PiecewiseRegression(double[] values, double deltaDistanceMeters) {
+
+    public PiecewiseRegression(Double[] values, double deltaDistanceMeters) {
         if (values.length == 0) {
             throw new IllegalArgumentException("Input length does not match output length");
         }

@@ -7,25 +7,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "LBridgeToDepot"
+            "pathName": "RTrenchToMidline"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "DepotToLGate"
+            "pathName": "Midline1ToOutpost"
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": null
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "Mid3toTower"
+            "name": "Shoot"
           }
         }
       ]

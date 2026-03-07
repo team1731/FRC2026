@@ -6,6 +6,8 @@ import java.io.File;
 import edu.wpi.first.wpilibj.Timer;
 
 import org.littletonrobotics.junction.LoggedRobot;
+import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.NT4Publisher;
 
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.commands.PathPlannerAuto;
@@ -19,14 +21,11 @@ import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.frc1731.field.FieldLayout;
 import frc.lib.frc1731.field.ReefscapeFieldLayout;
-import frc.lib.frc1731.log.AKLogger;
 import frc.lib.frc1731.log.MessageLog;
-import frc.lib.frc6328.FieldConstants;
 import frc.robot.Constants.AutoConstants;
 import frc.robot.autos.AutoFactory;
 import frc.robot.autos.AutoLoader;
@@ -67,6 +66,8 @@ public class Robot extends LoggedRobot {
 	public static final Trigger IS_AUTONOMOUS = new Trigger(() -> DriverStation.isAutonomous());
 	public static final Trigger IS_DISABLED = new Trigger(() -> DriverStation.isDisabled());
 	public static final Trigger IS_TEST = new Trigger(() -> DriverStation.isTest());
+
+	public static final boolean SHOULD_LOG = true;
 
 	// public static final RobotClock CLOCK = new RobotClock();
 
@@ -149,6 +150,10 @@ public class Robot extends LoggedRobot {
 			fnf.printStackTrace();
 		}
 		SmartDashboard.updateValues();
+		if (SHOULD_LOG) {
+			Logger.addDataReceiver(new NT4Publisher());
+			Logger.start();
+		}
 	}
 
 
@@ -279,7 +284,7 @@ public class Robot extends LoggedRobot {
 //   ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 	@Override
 	public void disabledPeriodic() {	
-		autoPreload();	
+		autoPreload();
 		if (Robot.isReal()) {
 			try {
 				OptionalInt stationNumberInt = DriverStation.getLocation();

@@ -1,6 +1,5 @@
 package frc.robot.subsystems.intake;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.lib.frc1731.Utils;
@@ -51,7 +50,6 @@ public class IntakePivotSubsystem extends BaseSubsystem {
         logger.log("Current Rotations", motor.getRotations());
         logger.log("Target Rotations", targetPosition);
         logger.log("At Target Position", atTargetPosition());
-        SmartDashboard.putNumber("POSITION", motor.getRotations());
     }
     
     private Command setPositionCommand(double position) {

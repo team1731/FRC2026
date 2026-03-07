@@ -3,7 +3,6 @@ package frc.robot.subsystems.drive;
 import static edu.wpi.first.units.Units.*;
 
 import java.util.function.BooleanSupplier;
-import java.util.function.Supplier;
 
 import org.littletonrobotics.junction.Logger;
 
@@ -16,30 +15,23 @@ import static frc.robot.subsystems.vision.questnav.VSLAMConstants.*;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.lib.frc1731.TriConsumer;
 import frc.lib.frc1731.hardware.camera.LimelightHelpers;
-import frc.lib.frc1731.hardware.camera.LimelightHelpers.PoseEstimate;
-import frc.lib.frc1731.math.Vector2d;
 import frc.robot.Robot;
 import frc.robot.subsystems.BaseSubsystem;
 import frc.robot.subsystems.drive.generated.CommandSwerveDrivetrain;
 import frc.robot.subsystems.drive.generated.TunerConstants;
-import frc.robot.subsystems.vision.OLD_VSLAMSubsystem;
+import frc.robot.subsystems.vision.limelight.AprilTagConstants;
 import gg.questnav.questnav.PoseFrame;
 import gg.questnav.questnav.QuestNav;
 
@@ -47,8 +39,6 @@ import static frc.robot.subsystems.drive.SwerveConstants.*;
 
 public class SwerveSubsystem extends BaseSubsystem {
     private CommandSwerveDrivetrain drivetrain;
-
-   // private SwerveDrivePoseEstimator estimator;
 
     private final Telemetry telemetry = new Telemetry(TunerConstants.kSpeedAt12Volts.in(MetersPerSecond));
 
@@ -110,77 +100,45 @@ public class SwerveSubsystem extends BaseSubsystem {
     }
 
     public void updateVisionOdometry() {
-        boolean useMegaTag2 = true; //set to false to use MegaTag1
         boolean doRejectUpdate = false;
-        if(useMegaTag2 == false)
-        {
-        LimelightHelpers.PoseEstimate mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight-main");
-        
-        if(mt1.tagCount == 1 && mt1.rawFiducials.length == 1)
-        {
-            if(mt1.rawFiducials[0].ambiguity > .7)
-            {
-            doRejectUpdate = true;
-            }
-            if(mt1.rawFiducials[0].distToCamera > 3)
-            {
-            doRejectUpdate = true;
-            }
-        }
-        if(mt1.tagCount == 0)
-        {
-            doRejectUpdate = true;
-        }
+        LimelightHelpers.SetRobotOrientation(AprilTagConstants.kLimelightName, -getCurrentPose().getRotation().getDegrees(), 0, 0, 0, 0, 0);
+        LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(AprilTagConstants.kLimelightName);
 
+        Logger.recordOutput("SmartLogs/Tag Count", mt2.tagCount);
+        Logger.recordOutput("SmartLogs/Estimated Limelight Pose", mt2.pose);
+        
+        if(Math.abs(drivetrain.getPigeon2().getAngularVelocityZDevice().getValueAsDouble()) > 720) // if our angular velocity is greater than 720 degrees per second, ignore vision updates
+        {
+            doRejectUpdate = true;
+        }
+        if(mt2.tagCount <= 1)
+        {
+            doRejectUpdate = true;
+            
+        }
         if(!doRejectUpdate)
         {
-           drivetrain.addVisionMeasurement(mt1.pose, mt1.timestampSeconds, VecBuilder.fill(.5,.5,9999999));
-        }
-        }
-        else if (useMegaTag2 == true)
-        {
-            LimelightHelpers.SetRobotOrientation("limelight-main", -getCurrentPose().getRotation().getDegrees(), 0, 0, 0, 0, 0);
-            LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight-main");
-            // Pose2d botpose = LimelightHelpers.getBotPose2d("limelight-main");
-
-            Logger.recordOutput("SmartLogs/Tag Count", mt2.tagCount);
-            Logger.recordOutput("SmartLogs/Is 2", mt2.isMegaTag2);
-            Logger.recordOutput("SmartLogs/PosePose", mt2.pose);    
-            // Logger.recordOutput("SmartLogs/a", botpose);    
+            //System.out.println("doing it");
+            // SmartDashboard.putNumber("Posex", mt2.pose.getX());
+            // SmartDashboard.putNumber ("PoseY", mt2.pose.getY());
+            this.addVisionMeasurement(mt2.pose, mt2.timestampSeconds, VecBuilder.fill(.5,.5,9999999));
             
-            if(Math.abs(drivetrain.getPigeon2().getAngularVelocityZDevice().getValueAsDouble()) > 720) // if our angular velocity is greater than 720 degrees per second, ignore vision updates
-            {
-                doRejectUpdate = true;
-            }
-            if(mt2.tagCount <= 1)
-            {
-                doRejectUpdate = true;
-                
-            }
-            if(!doRejectUpdate)
-            {
-                //System.out.println("doing it");
-                SmartDashboard.putNumber("Posex", mt2.pose.getX());
-                SmartDashboard.putNumber ("PoseY", mt2.pose.getY());
-                this.addVisionMeasurement(mt2.pose, mt2.timestampSeconds, VecBuilder.fill(.5,.5,9999999));
-                
-                
-                if (!visionCheckingHasStarted) {
-                    GoodLimelightTimer.restart();
-                    baselinePose = mt2.pose;
-                    visionCheckingHasStarted = true;
-                } else if (GoodLimelightTimer.hasElapsed(2)) {
-                    distanceBetweenPoses = distanceBetween(mt2.pose, baselinePose);
-                    SmartDashboard.putNumber("distanceBetweenPoses", distanceBetweenPoses);
-                    SmartDashboard.putBoolean("hasGoodOdometry", hasGoodOdometry);
-                    if (distanceBetweenPoses < .005) {
-                        hasGoodOdometry = true;                 
-                    } else {
-                        hasGoodOdometry = false;
-                    }
-                    visionCheckingHasStarted = false;
-
+            
+            if (!visionCheckingHasStarted) {
+                GoodLimelightTimer.restart();
+                baselinePose = mt2.pose;
+                visionCheckingHasStarted = true;
+            } else if (GoodLimelightTimer.hasElapsed(2)) {
+                distanceBetweenPoses = distanceBetween(mt2.pose, baselinePose);
+                // SmartDashboard.putNumber("distanceBetweenPoses", distanceBetweenPoses);
+                // SmartDashboard.putBoolean("hasGoodOdometry", hasGoodOdometry);
+                if (distanceBetweenPoses < .005) {
+                    hasGoodOdometry = true;                 
+                } else {
+                    hasGoodOdometry = false;
                 }
+                visionCheckingHasStarted = false;
+
             }
         }
     }
@@ -319,7 +277,7 @@ public class SwerveSubsystem extends BaseSubsystem {
         logger.log("Target Speeds", targetSpeeds);
         logger.log("Estimated Pose", getCurrentPose());
 
-        Robot.kFieldLayout.setSimulatedRobotPose(getCurrentPose());
+        // Robot.kFieldLayout.setSimulatedRobotPose(getCurrentPose());
     }
 
     public Command driveCommand(CommandXboxController m_xboxController, BooleanSupplier isFieldCentric) {

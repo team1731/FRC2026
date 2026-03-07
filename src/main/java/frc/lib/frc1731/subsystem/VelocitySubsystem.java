@@ -82,14 +82,14 @@ public abstract class VelocitySubsystem<M extends MotorIO> extends BaseSubsystem
 
     protected void setVoltage(Voltage volts) {
         if (motor != null)  motor.setVoltage(volts.in(Volts));
-        if (Robot.isSimulation()) sim.setVoltage(volts); 
+        if (Robot.isSimulation() && sim != null) sim.setVoltage(volts); 
     }
 
     public Command setPercentOutputCommand(DoubleSupplier percent) {
         return run(() -> {
             this.targetVelocity = kMaxVelocity.times(percent.getAsDouble());
             if (motor != null)  motor.setPercentOutput(percent.getAsDouble());
-            if (motor != null) sim.setVoltage(Volts.of(percent.getAsDouble() * 12d));
+            if (motor != null && sim != null) sim.setVoltage(Volts.of(percent.getAsDouble() * 12d));
         }).withName("SetPercent");
     }
 
@@ -101,7 +101,7 @@ public abstract class VelocitySubsystem<M extends MotorIO> extends BaseSubsystem
         return run(() -> {
             this.targetVelocity = velocity.get();
             if (motor != null) motor.setVelocityRPS(targetVelocity.in(RotationsPerSecond) / mechanismRatio);
-            sim.setVelocity(targetVelocity);
+            if (sim != null) sim.setVelocity(targetVelocity);
         }).withName("SetVelocity");
     }
 

@@ -2,7 +2,13 @@
   "robotWidth": 0.9,
   "robotLength": 0.9,
   "holonomicMode": true,
-  "pathFolders": [],
+  "pathFolders": [
+    "LTrenchMidline",
+    "LTrenchMidlineDepot",
+    "MiddlePreload",
+    "RTrenchMidline",
+    "RTrenchMidlineOutpost"
+  ],
   "autoFolders": [],
   "defaultMaxVel": 4.0,
   "defaultMaxAccel": 4.0,
