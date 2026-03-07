@@ -14,9 +14,10 @@ public class ShotTable {
     private List<ShotEntry> entries = List.of(
         new ShotEntry(Units.inchesToMeters(45.5), 0, 28, 0.56),
         new ShotEntry(Units.inchesToMeters(72.5), 1.5, 30, 0.71),
-        new ShotEntry(Units.inchesToMeters(91), 2, 38, 0.89),
-        new ShotEntry(Units.inchesToMeters(128), 4, 43, 1.26),
-        new ShotEntry(Units.inchesToMeters(150), 5.5, 50, 1.45)
+        new ShotEntry(Units.inchesToMeters(91), 1.75, 38, 0.89),
+        new ShotEntry(Units.inchesToMeters(128), 3.0, 43, 1.26),
+        new ShotEntry(Units.inchesToMeters(150), 5.5, 50, 1.45),
+        new ShotEntry(Units.inchesToMeters(180), 5.5, 90, 1.6)
     );
 
     public ShotTable() {
