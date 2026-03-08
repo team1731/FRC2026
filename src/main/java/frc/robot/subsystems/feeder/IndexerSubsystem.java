@@ -31,5 +31,4 @@ public class IndexerSubsystem extends VelocitySubsystem<MotorIOTalonFX>{
         logger.log("Current Velocity", getVelocity().in(RotationsPerSecond));
         logger.log("Target Velocity", getTargetVelocity().in(RotationsPerSecond));
     }
-    
 }

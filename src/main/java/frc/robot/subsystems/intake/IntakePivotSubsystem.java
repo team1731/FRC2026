@@ -47,9 +47,9 @@ public class IntakePivotSubsystem extends BaseSubsystem {
 
     @Override
     public void periodicTelemetry() {
-        logger.log("Current Rotations", motor.getRotations());
-        logger.log("Target Rotations", targetPosition);
-        logger.log("At Target Position", atTargetPosition());
+        // logger.log("Current Rotations", motor.getRotations());
+        // logger.log("Target Rotations", targetPosition);
+        // logger.log("At Target Position", atTargetPosition());
     }
     
     private Command setPositionCommand(double position) {

@@ -10,6 +10,8 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
+
+import static frc.robot.subsystems.vision.limelight.AprilTagConstants.*;
 import static frc.robot.subsystems.vision.questnav.VSLAMConstants.*;
 
 import edu.wpi.first.math.Matrix;
@@ -18,6 +20,7 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N1;
@@ -91,6 +94,9 @@ public class SwerveSubsystem extends BaseSubsystem {
     //      VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(30))
     //    );
 
+        Transform3d tf = kCameraToRobot;
+        LimelightHelpers.setCameraPose_RobotSpace(kLimelightName, tf.getX(), tf.getY(), tf.getZ(), tf.getRotation().getX(), tf.getRotation().getY(), tf.getRotation().getZ());
+
         configureAutoBuilder();
         drivetrain.registerTelemetry(telemetry::telemeterize);
     }
@@ -100,46 +106,29 @@ public class SwerveSubsystem extends BaseSubsystem {
     }
 
     public void updateVisionOdometry() {
-        boolean doRejectUpdate = false;
-        LimelightHelpers.SetRobotOrientation(AprilTagConstants.kLimelightName, -getCurrentPose().getRotation().getDegrees(), 0, 0, 0, 0, 0);
+        LimelightHelpers.SetRobotOrientation(kLimelightName, drivetrain.getPigeon2().getYaw().getValueAsDouble(), 0, 0, 0, 0, 0);
         LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(AprilTagConstants.kLimelightName);
-
-        Logger.recordOutput("SmartLogs/Tag Count", mt2.tagCount);
-        Logger.recordOutput("SmartLogs/Estimated Limelight Pose", mt2.pose);
         
-        if(Math.abs(drivetrain.getPigeon2().getAngularVelocityZDevice().getValueAsDouble()) > 720) // if our angular velocity is greater than 720 degrees per second, ignore vision updates
-        {
-            doRejectUpdate = true;
-        }
-        if(mt2.tagCount <= 1)
-        {
-            doRejectUpdate = true;
-            
-        }
-        if(!doRejectUpdate)
-        {
-            //System.out.println("doing it");
-            // SmartDashboard.putNumber("Posex", mt2.pose.getX());
-            // SmartDashboard.putNumber ("PoseY", mt2.pose.getY());
-            this.addVisionMeasurement(mt2.pose, mt2.timestampSeconds, VecBuilder.fill(.5,.5,9999999));
-            
-            
-            if (!visionCheckingHasStarted) {
-                GoodLimelightTimer.restart();
-                baselinePose = mt2.pose;
-                visionCheckingHasStarted = true;
-            } else if (GoodLimelightTimer.hasElapsed(2)) {
-                distanceBetweenPoses = distanceBetween(mt2.pose, baselinePose);
-                // SmartDashboard.putNumber("distanceBetweenPoses", distanceBetweenPoses);
-                // SmartDashboard.putBoolean("hasGoodOdometry", hasGoodOdometry);
-                if (distanceBetweenPoses < .005) {
-                    hasGoodOdometry = true;                 
-                } else {
-                    hasGoodOdometry = false;
-                }
-                visionCheckingHasStarted = false;
+        // Do not use estimate if we are rotating too fast or if we see less than 2 tags
+        if(Math.abs(drivetrain.getPigeon2().getAngularVelocityZDevice().getValueAsDouble()) > 720 || mt2.tagCount <= 1) return;
 
+        this.addVisionMeasurement(mt2.pose, mt2.timestampSeconds, VecBuilder.fill(.5,.5,9999999));
+        
+        if (!visionCheckingHasStarted) {
+            GoodLimelightTimer.restart();
+            baselinePose = mt2.pose;
+            visionCheckingHasStarted = true;
+        } else if (GoodLimelightTimer.hasElapsed(2)) {
+            distanceBetweenPoses = distanceBetween(mt2.pose, baselinePose);
+            // SmartDashboard.putNumber("distanceBetweenPoses", distanceBetweenPoses);
+            // SmartDashboard.putBoolean("hasGoodOdometry", hasGoodOdometry);
+            if (distanceBetweenPoses < .005) {
+                hasGoodOdometry = true;                 
+            } else {
+                hasGoodOdometry = false;
             }
+            visionCheckingHasStarted = false;
+
         }
     }
 

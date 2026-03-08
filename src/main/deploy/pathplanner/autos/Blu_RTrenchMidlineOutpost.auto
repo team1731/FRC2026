@@ -5,7 +5,7 @@
     "data": {
       "commands": [
         {
-          "type": "race",
+          "type": "deadline",
           "data": {
             "commands": [
               {
@@ -36,7 +36,13 @@
           }
         },
         {
-          "type": "race",
+          "type": "named",
+          "data": {
+            "name": "StopShoot"
+          }
+        },
+        {
+          "type": "deadline",
           "data": {
             "commands": [
               {
@@ -44,24 +50,11 @@
                 "data": {
                   "pathName": "RTrenchToOutpost"
                 }
-              }
-            ]
-          }
-        },
-        {
-          "type": "race",
-          "data": {
-            "commands": [
+              },
               {
                 "type": "named",
                 "data": {
                   "name": "Intake"
-                }
-              },
-              {
-                "type": "wait",
-                "data": {
-                  "waitTime": 2.0
                 }
               }
             ]
@@ -71,6 +64,12 @@
           "type": "path",
           "data": {
             "pathName": "ROutpostToScore"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 2.0
           }
         },
         {

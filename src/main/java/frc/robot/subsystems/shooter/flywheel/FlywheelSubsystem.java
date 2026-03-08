@@ -134,4 +134,11 @@ public class FlywheelSubsystem extends BaseSubsystem {
             rightMotor.setPercentOutput(0);
         });
     }
+
+    public Command stopOnceCommand() {
+        return this.runOnce(() -> {
+            leftMotor.setPercentOutput(0);
+            rightMotor.setPercentOutput(0);
+        });
+    }
 }

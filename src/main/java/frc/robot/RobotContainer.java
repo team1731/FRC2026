@@ -36,21 +36,29 @@ public class RobotContainer {
     /* Driver Buttons */
     private final CommandXboxController driver = new CommandXboxController(0);
     private final Trigger dResetSwerve = driver.povRight();
+
+    private final Trigger dIntake = driver.leftTrigger();
     private final Trigger dShoot = driver.rightTrigger();
     private final Trigger dPass = driver.y();
-    private final Trigger dIntake = driver.leftTrigger();
-    private final Trigger dFeedthrough = driver.leftTrigger().and(driver.rightTrigger());
+
+    private final Trigger dFeedthrough = dIntake.and(dShoot);
+    private final Trigger dPassFeedthrough = dIntake.and(dPass);
 
     private final Trigger dTowerShot = driver.a();
     private final Trigger dTrenchShot = driver.b();
+    private final Trigger dHubShot = driver.x();
+
+    private final Trigger dRetractIntake = driver.leftBumper();
+    private final Trigger dUnjam = driver.rightBumper();
 
     /* Operator Buttons */
 
     public RobotContainer(SwerveSubsystem swerve) {
         this.swerve = swerve;
         configureSubsystems();
-        configureNamedCommands();
         configureButtonBindings();
+        configureNamedCommands();
+        configureDefaultCommands();
 
         SmartDashboard.putNumber("Flywheel RPS", 50);
         SmartDashboard.putNumber("Hood Rotations", 3);
@@ -101,32 +109,19 @@ public class RobotContainer {
         superstructure = new Superstructure(swerve, flywheel, hood, 
                                                 indexer, pivot, intake, 
                                                     m_leftTurret, m_rightTurret);
-
-        // aprilTag = new AprilTagSubsystem(true);
-
-        // Drivetrain will execute this command periodically 
-        // if no other command is active on the drivetrain
-        swerve.setDefaultCommand(swerve.driveCommand(driver, () -> true));
-
-        flywheel.setDefaultCommand(flywheel.stopCommand());
-        intake.setDefaultCommand(intake.stopCommand());
-        indexer.setDefaultCommand(indexer.stopCommand());
-
-        hood.setDefaultCommand(hood.stowHoodCommand());
-        m_leftTurret.setDefaultCommand(m_leftTurret.trackHubCommand());
-        m_rightTurret.setDefaultCommand(m_rightTurret.trackHubCommand());
     }
 
     private void configureNamedCommands() {
         // Named commands useful for PathPlanner events
         // ex. NamedCommands.registerCommand("Example", new ExampleCommand());
         NamedCommands.registerCommand("StopShoot", flywheel.stopCommand().alongWith(hood.stowHoodCommand()).alongWith(indexer.stopCommand()));
-        NamedCommands.registerCommand("Shoot", superstructure.immediateShootCommand().withTimeout(6.5));
+        NamedCommands.registerCommand("Shoot", superstructure.immediateShootCommand().withTimeout(6).andThen(flywheel.stopOnceCommand()));
         NamedCommands.registerCommand("Intake", superstructure.intakeCommand());
         NamedCommands.registerCommand("Feedthrough", superstructure.feedthroughFuelCommand());
         NamedCommands.registerCommand("Pass", Commands.none());
         NamedCommands.registerCommand("Climb", Commands.none());
         NamedCommands.registerCommand("Stow Hood", hood.stowHoodCommand());
+        NamedCommands.registerCommand("Stow Pivot", pivot.retractCommand());
         NamedCommands.registerCommand("Warmup", superstructure.warmupCommand());
     }
 
@@ -141,61 +136,34 @@ public class RobotContainer {
 
         dIntake.whileTrue(superstructure.intakeCommand());
         dShoot.whileTrue(superstructure.shootFuelCommand()).onFalse(hood.stowHoodCommand());
-        dFeedthrough.whileTrue(superstructure.feedthroughFuelCommand());
-
         dPass.whileTrue(superstructure.passFuelCommand()).onFalse(hood.stowHoodCommand());
 
+        dFeedthrough.whileTrue(superstructure.feedthroughFuelCommand());
+        dPassFeedthrough.whileTrue(superstructure.passFeedthroughCommand());
+
+        dHubShot.whileTrue(superstructure.shootFuelCommand(1.8));
         dTowerShot.whileTrue(superstructure.shootFuelCommand(3));
         dTrenchShot.whileTrue(superstructure.shootFuelCommand(4));
-        driver.x().whileTrue(superstructure.shootFuelCommand(1.8));
-        
 
-        driver.leftBumper().whileTrue(pivot.retractCommand());
-
-        // driver.rightTrigger().whileTrue(indexer.setPercentOutputCommand(1));
-    
-        // dPass.whileTrue(superstructure.passCommand());
-
-        // dInitClimb.onTrue(Commands.print("Pivotting to climb position").alongWith(pivot.retractCommand()));
-        // dClimb.onTrue(Commands.print("Running climb sequence").alongWith(pivot.retractCommand()));
-
-        // dHubShot.whileTrue(Commands.print("Shooting static shot from from HUB"));
-        // dTowerShot.whileTrue(Commands.print("Shooting static shot from from TOWER"));
-        // dLeftCornerShot.whileTrue(Commands.print("Shooting static shot from from the left corner"));
-        // dRightCornerShot.whileTrue(Commands.print("Shooting static shot from from the right corner"));
-
-        // driver.y().whileTrue(
-        //     flywheel.setFlywheelVelocityCommand(
-        //         SmartDashboard.getNumber("Flywheel Set Point", 0), 
-        //         SmartDashboard.getNumber("Flywheel Set Point", 0)
-        //     ));
-
-        // driver.a().whileTrue(
-        //     hood.setHoodCommand(
-        //         SmartDashboard.getNumber("Hood Angle", 0),
-        //         SmartDashboard.getNumber("Hood Angle", 0)
-        //     ));
-
-        // driver.leftBumper().whileTrue(
-        //     turret.driveManualCommand(0.05, 0.05)
-        // ).onFalse(
-        //     turret.driveManualCommand(0, 0)
-        // );
-
-        // driver.rightBumper().whileTrue(
-        //     turret.driveManualCommand(-0.05, -0.05)
-        // ).onFalse(
-        //     turret.driveManualCommand(0, 0)
-        // );
-
-        // driver.y().whileTrue(flywheel.setFlywheelCommand(() -> SmartDashboard.getNumber("Flywheel RPS", 0)));
-        // // driver.y().whileTrue(flywheel.setFlywheelPercentCommand(0, 1));
-        // driver.a().whileTrue(hood.setHoodCommand(() -> SmartDashboard.getNumber("Hood Rotations", 0)));
-        // driver.x().whileTrue(indexer.setPercentOutputCommand(1.0));
-        // driver.a().whileTrue(hood.setHoodCommand(6, 6));
+        dRetractIntake.onTrue(pivot.retractCommand());
+        dUnjam.whileTrue(indexer.setPercentOutputCommand(-0.5));
     }
 
     public void periodic() {
         // Add any periodic loop code to run here
+    }
+
+    public void configureDefaultCommands() {
+        // Drivetrain will execute this command periodically 
+        // if no other command is active on the drivetrain
+        swerve.setDefaultCommand(swerve.driveCommand(driver, () -> true));
+
+        flywheel.setDefaultCommand(flywheel.stopCommand());
+        intake.setDefaultCommand(intake.stopCommand());
+        indexer.setDefaultCommand(indexer.stopCommand());
+
+        hood.setDefaultCommand(hood.stowHoodCommand());
+        m_leftTurret.setDefaultCommand(m_leftTurret.trackHubCommand());
+        m_rightTurret.setDefaultCommand(m_rightTurret.trackHubCommand());
     }
 }

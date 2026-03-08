@@ -241,6 +241,12 @@ public class TurretSubsystemAI extends SubsystemBase {
         });
     }
 
+    public Command set180Command() {
+        return run(() -> {
+            m_motor.setControl(m_mmRequest.withPosition(180));
+        });
+    }
+
     public Command trackHubCommand() {
         return trackTargetCommand(Robot.isRedAlliance() ? RED_TARGET : BLUE_TARGET);
     }
