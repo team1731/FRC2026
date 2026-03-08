@@ -84,7 +84,7 @@ public class TurretSubsystemAI extends SubsystemBase {
         motorConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = m_reverseLimit / 360.0;
         motorConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
         motorConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
-        motorConfig.CurrentLimits.StatorCurrentLimit = 40d;
+        motorConfig.CurrentLimits.StatorCurrentLimit = 30d;
 
         motorConfig.Slot0.kP = 60.0; 
         motorConfig.Slot0.kS = 0.2;

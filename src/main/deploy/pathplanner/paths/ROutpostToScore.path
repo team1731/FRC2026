@@ -3,45 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.5473894436519258,
-        "y": 2.3335663338088444
+        "x": 0.7080240963855422,
+        "y": 0.6364819277108438
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.002614457831324,
-        "y": 2.3958433734939764
+        "x": 1.4418144654633058,
+        "y": 1.1234844339869419
       },
       "isLocked": false,
-      "linkedName": "RBridge"
+      "linkedName": "ROutpost"
     },
     {
       "anchor": {
-        "x": 6.193734939759036,
-        "y": 2.3335663338088444
+        "x": 2.8875178316690437,
+        "y": 2.074793152639087
       },
       "prevControl": {
-        "x": 5.943754413049326,
-        "y": 2.3304460347949925
-      },
-      "nextControl": {
-        "x": 6.805686746987951,
-        "y": 2.341204819277109
-      },
-      "isLocked": false,
-      "linkedName": null
-    },
-    {
-      "anchor": {
-        "x": 7.804208273894435,
-        "y": 2.1882168674698788
-      },
-      "prevControl": {
-        "x": 6.368578313253011,
-        "y": 2.089867469879518
+        "x": 2.6478055910486167,
+        "y": 1.905519571165927
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Mid5"
+      "linkedName": "RTrench"
     }
   ],
   "rotationTargets": [],
@@ -58,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 0.4250395306428823
   },
   "reversed": false,
-  "folder": null,
+  "folder": "RTrenchMidline",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 180.0
   },
   "useDefaultConstraints": true
 }

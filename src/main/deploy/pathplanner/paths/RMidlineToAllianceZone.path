@@ -52,14 +52,7 @@
   ],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "Warmup",
-      "waypointRelativePos": 0,
-      "endWaypointRelativePos": null,
-      "command": null
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,
@@ -70,13 +63,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 0.4250395306428823
   },
   "reversed": false,
   "folder": "RTrenchMidline",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 90.0
+    "rotation": 88.45184230102204
   },
   "useDefaultConstraints": false
 }

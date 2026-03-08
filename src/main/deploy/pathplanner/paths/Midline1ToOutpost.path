@@ -20,12 +20,12 @@
         "y": 0.6364819277108438
       },
       "prevControl": {
-        "x": 4.951904267569561,
+        "x": 4.95190426756956,
         "y": 0.6882365639447925
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "RDepot"
+      "linkedName": "ROutpost"
     }
   ],
   "rotationTargets": [
@@ -80,7 +80,7 @@
   "folder": "RTrenchMidlineOutpost",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 90.0
+    "rotation": 88.45184230102204
   },
   "useDefaultConstraints": true
 }

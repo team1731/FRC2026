@@ -5,28 +5,15 @@
     "data": {
       "commands": [
         {
-          "type": "race",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "RTrenchToMidline"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Intake"
-                }
-              }
-            ]
+            "pathName": "RBumpToMidline"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "RMidlineToAllianceZone"
+            "pathName": "MidlineOverBumpToAllianceZone"
           }
         },
         {
@@ -36,16 +23,9 @@
           }
         },
         {
-          "type": "race",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "RTrenchToOutpost"
-                }
-              }
-            ]
+            "pathName": "RTrenchToOutpost"
           }
         },
         {
@@ -53,15 +33,15 @@
           "data": {
             "commands": [
               {
-                "type": "named",
-                "data": {
-                  "name": "Intake"
-                }
-              },
-              {
                 "type": "wait",
                 "data": {
                   "waitTime": 2.0
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Intake"
                 }
               }
             ]

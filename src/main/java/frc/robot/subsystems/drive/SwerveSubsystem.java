@@ -272,10 +272,14 @@ public class SwerveSubsystem extends BaseSubsystem {
        // drivetrain.periodic();
        // updateOdometry();
 
-        logger.log("Current Pose", getCurrentPose());
-        logger.log("Current Speeds", getWheelSpeeds());
-        logger.log("Target Speeds", targetSpeeds);
-        logger.log("Estimated Pose", getCurrentPose());
+        // logger.log("Current Pose", getCurrentPose());
+        // logger.log("Current Speeds", getWheelSpeeds());
+        // logger.log("Target Speeds", targetSpeeds);
+        // logger.log("Estimated Pose", getCurrentPose());
+
+        // if(getQuestPose() != null) {
+        //     logger.log("Questnav Estimated Pose", getQuestPose());
+        // }
 
         // Robot.kFieldLayout.setSimulatedRobotPose(getCurrentPose());
     }

@@ -73,7 +73,7 @@ public class RobotContainer {
             22, // Motor CAN ID
             true,
             29, // CANcoder CAN ID
-            0.0185546875, // Offset (Rotations)0.018798828125
+            0.016357421875  , // Offset (Rotations)0.018798828125
             .282, //discontinuty
             -303.92, // Reverse Limit
             93.0, // Forward Limit
@@ -89,7 +89,7 @@ public class RobotContainer {
             18,
             true,
             30,
-            -0.19482421875,
+            -0.283447265625,
             0.742, //discontinuity
            -92.5, // Reverse Limit (further CW)
             319.7, // Forward Limit (shorter CCW)
@@ -120,7 +120,8 @@ public class RobotContainer {
     private void configureNamedCommands() {
         // Named commands useful for PathPlanner events
         // ex. NamedCommands.registerCommand("Example", new ExampleCommand());
-        NamedCommands.registerCommand("Shoot", superstructure.immediateShootCommand().withTimeout(3));
+        NamedCommands.registerCommand("StopShoot", flywheel.stopCommand().alongWith(hood.stowHoodCommand()).alongWith(indexer.stopCommand()));
+        NamedCommands.registerCommand("Shoot", superstructure.immediateShootCommand().withTimeout(6.5));
         NamedCommands.registerCommand("Intake", superstructure.intakeCommand());
         NamedCommands.registerCommand("Feedthrough", superstructure.feedthroughFuelCommand());
         NamedCommands.registerCommand("Pass", Commands.none());
@@ -146,6 +147,10 @@ public class RobotContainer {
 
         dTowerShot.whileTrue(superstructure.shootFuelCommand(3));
         dTrenchShot.whileTrue(superstructure.shootFuelCommand(4));
+        driver.x().whileTrue(superstructure.shootFuelCommand(1.8));
+        
+
+        driver.leftBumper().whileTrue(pivot.retractCommand());
 
         // driver.rightTrigger().whileTrue(indexer.setPercentOutputCommand(1));
     

@@ -32,7 +32,7 @@ public class IntakePivotSubsystem extends BaseSubsystem {
         );
 
         motor.withMotionMagicConfigs(
-            new MotionMagicConfigs().withMotionMagicCruiseVelocity(12)
+            new MotionMagicConfigs().withMotionMagicCruiseVelocity(3)
             .withMotionMagicAcceleration(2)
         );
 

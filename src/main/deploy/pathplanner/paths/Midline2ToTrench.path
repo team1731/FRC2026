@@ -9,7 +9,7 @@
       "prevControl": null,
       "nextControl": {
         "x": 7.914591377397366,
-        "y": 0.8387831193533057
+        "y": 0.8387831193533062
       },
       "isLocked": false,
       "linkedName": "RMidline2"
@@ -63,7 +63,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 0.4250395306428823
   },
   "reversed": false,
   "folder": "RTrenchMidline",

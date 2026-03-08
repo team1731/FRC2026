@@ -3,16 +3,32 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.5634333333333332,
-        "y": 0.6439333333333332
+        "x": 4.459922222222222,
+        "y": 0.6829111111111104
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.946533523537802,
-        "y": 0.6256633380884444
+        "x": 6.077500000000001,
+        "y": 0.5172555555555562
       },
       "isLocked": false,
       "linkedName": "RGate"
+    },
+    {
+      "anchor": {
+        "x": 6.272388888888889,
+        "y": 0.6829111111111104
+      },
+      "prevControl": {
+        "x": 5.775422222223024,
+        "y": 0.6439333333324293
+      },
+      "nextControl": {
+        "x": 7.866325304280075,
+        "y": 0.8079257319292041
+      },
+      "isLocked": false,
+      "linkedName": null
     },
     {
       "anchor": {
@@ -20,8 +36,8 @@
         "y": 2.4370756062767476
       },
       "prevControl": {
-        "x": 7.817146932952923,
-        "y": 1.2467189728958648
+        "x": 7.734055555555555,
+        "y": 0.9070333333333336
       },
       "nextControl": null,
       "isLocked": false,
@@ -30,19 +46,19 @@
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.1305660377358515,
+      "waypointRelativePos": 0.25,
       "rotationDegrees": 0.0
     },
     {
-      "waypointRelativePos": 0.651320754716978,
+      "waypointRelativePos": 1.15,
       "rotationDegrees": 90.0
     }
   ],
   "constraintZones": [
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 0.693732193732191,
-      "maxWaypointRelativePos": 1.0,
+      "minWaypointRelativePos": 1.5201773835920123,
+      "maxWaypointRelativePos": 2.0,
       "constraints": {
         "maxVelocity": 1.0,
         "maxAcceleration": 2.0,
@@ -54,14 +70,7 @@
     }
   ],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "Intake",
-      "waypointRelativePos": 0.0,
-      "endWaypointRelativePos": null,
-      "command": null
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,
@@ -72,7 +81,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 90.0
+    "rotation": 88.45184230102204
   },
   "reversed": false,
   "folder": "RTrenchMidline",

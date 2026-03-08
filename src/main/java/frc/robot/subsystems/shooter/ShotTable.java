@@ -13,22 +13,22 @@ public class ShotTable {
 
     private List<ShotEntry> entries = List.of(
         new ShotEntry(Units.inchesToMeters(45.5), 0, 28, 0.56),
-        new ShotEntry(Units.inchesToMeters(72.5), 1.5, 30, 0.71),
-        new ShotEntry(Units.inchesToMeters(91), 1.75, 38, 0.89),
-        new ShotEntry(Units.inchesToMeters(128), 3.0, 43, 1.26),
-        new ShotEntry(Units.inchesToMeters(150), 5.5, 50, 1.45),
-        new ShotEntry(Units.inchesToMeters(180), 5.5, 90, 1.6)
+        new ShotEntry(Units.inchesToMeters(72.5), 0.5, 30, 0.71),
+        new ShotEntry(Units.inchesToMeters(91), 1, 38, 0.89),
+        new ShotEntry(Units.inchesToMeters(128), 2, 43, 1.26),
+        new ShotEntry(Units.inchesToMeters(150), 2.5, 50, 1.45),
+        new ShotEntry(Units.inchesToMeters(180), 3.5, 58, 1.6)
     );
 
     private List<ShotEntry> interpolatingEntries = List.of(
         new ShotEntry(1, 0, 28, 0.5),
-        new ShotEntry(2, 1.75, 35, 0.75),
-        new ShotEntry(3, 3, 40, 0.85),
-        new ShotEntry(4, 5.5, 50, 1.25),
-        new ShotEntry(5, 6, 60, 1.4),
-        new ShotEntry(6, 6, 65, 1.6),
-        new ShotEntry(7, 6, 70, 1.8),
-        new ShotEntry(8, 6, 75, 2.0)
+        new ShotEntry(2, 1.75, 30, 0.75),
+        new ShotEntry(3, 3, 35, 0.85),
+        new ShotEntry(4, 5.5, 45, 1.25),
+        new ShotEntry(5, 6, 50, 1.4),
+        new ShotEntry(6, 6, 55, 1.6),
+        new ShotEntry(7, 6, 60, 1.8),
+        new ShotEntry(8, 6, 65, 2.0)
     );
 
     public ShotTable() {

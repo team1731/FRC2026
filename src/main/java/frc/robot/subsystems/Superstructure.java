@@ -25,7 +25,7 @@ public class Superstructure extends SubsystemBase {
     private IntakePivotSubsystem pivot;
     private IntakeRollerSubsystem intake;
 
-    private ShotTable shotTable = new ShotTable().backup();
+    private ShotTable shotTable = new ShotTable();
 
     // Targets
     private final Translation2d BLUE_TARGET = new Translation2d(4.625594, 4.034536);
@@ -87,7 +87,9 @@ public class Superstructure extends SubsystemBase {
                 pivot.retractCommand(),
                 intake.setPercentOutputCommand(0.75),
                 Commands.waitSeconds(1.5)
-                .andThen(indexer.setPercentOutputCommand(1.0))
+                .andThen(indexer.setPercentOutputCommand(1.0)
+                .withTimeout(1.5)
+                .andThen(indexer.setPercentOutputCommand(-1).withTimeout(0.125)).repeatedly())
             );
         }, Set.of(flywheel, hood, indexer, intake, pivot, leftTurret, rightTurret));
     }
@@ -105,7 +107,9 @@ public class Superstructure extends SubsystemBase {
                 pivot.retractCommand(),
                 intake.setPercentOutputCommand(0.75),
                 Commands.waitSeconds(1.5)
-                .andThen(indexer.setPercentOutputCommand(1.0))
+                .andThen(indexer.setPercentOutputCommand(1.0)
+                .withTimeout(1.5)
+                .andThen(indexer.setPercentOutputCommand(-1).withTimeout(0.125)).repeatedly())
             );
         }, Set.of(flywheel, hood, indexer, intake, pivot, leftTurret, rightTurret));
     }
@@ -177,7 +181,9 @@ public class Superstructure extends SubsystemBase {
                 pivot.retractCommand(),
                 intake.setPercentOutputCommand(0.75),
                 Commands.waitSeconds(1.5)
-                .andThen(indexer.setPercentOutputCommand(1.0))
+                .andThen(indexer.setPercentOutputCommand(1.0)
+                .withTimeout(1.5)
+                .andThen(indexer.setPercentOutputCommand(-1).withTimeout(0.125)).repeatedly())
             );
         }, Set.of(flywheel, hood, indexer, intake, pivot, leftTurret, rightTurret));
     }

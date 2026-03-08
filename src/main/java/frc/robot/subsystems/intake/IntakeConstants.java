@@ -7,7 +7,7 @@ public class IntakeConstants {
     public static final PortConfig kRollerMotorConfig = new PortConfig("Right CANivore", 16, true);
     public static final PortConfig kPivotMotorConfig = new PortConfig("Left CANivore", 14);
     public static final PIDGains kPivotGains = new PIDGains()
-        .setP(60)
+        .setP(30)
         .setD(.5)
         .setS(.25)
         .setV(0.12)

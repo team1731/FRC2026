@@ -83,12 +83,12 @@ public class HoodSubsystem extends BaseSubsystem {
 
     @Override
     public void periodicTelemetry() {
-        logger.log("Left Hood Position", getLeftHoodDegrees());
-        logger.log("Right Hood Position", getRightHoodDegrees());
-        logger.log("Left Hood Target Position", getLeftTargetDegrees());
-        logger.log("Right Hood Target Position", getRightTargetDegrees());
-        logger.log("Left Hood At Target Position", atLeftTarget());
-        logger.log("Right Hood At Target Position", atRightTarget());
+        // logger.log("Left Hood Position", getLeftHoodDegrees());
+        // logger.log("Right Hood Position", getRightHoodDegrees());
+        // logger.log("Left Hood Target Position", getLeftTargetDegrees());
+        // logger.log("Right Hood Target Position", getRightTargetDegrees());
+        // logger.log("Left Hood At Target Position", atLeftTarget());
+        // logger.log("Right Hood At Target Position", atRightTarget());
     }
 
     public Command setLeftHoodCommand(double targetDegrees) {

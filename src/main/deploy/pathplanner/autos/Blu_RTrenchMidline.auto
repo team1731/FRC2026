@@ -5,15 +5,41 @@
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "race",
           "data": {
-            "pathName": "RTrenchToMidline"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "RTrenchToMidline"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Intake"
+                }
+              }
+            ]
           }
         },
         {
-          "type": "path",
+          "type": "race",
           "data": {
-            "pathName": "RMidlineToAllianceZone"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "RMidlineToAllianceZone"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Warmup"
+                }
+              }
+            ]
           }
         },
         {
@@ -23,15 +49,41 @@
           }
         },
         {
-          "type": "path",
+          "type": "race",
           "data": {
-            "pathName": "RTrenchToMidline2"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "RTrenchToMidline2"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Intake"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "StopShoot"
+                }
+              }
+            ]
           }
         },
         {
-          "type": "path",
+          "type": "race",
           "data": {
-            "pathName": "RMidlineToAllianceZone2"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Midline2ToTrench"
+                }
+              }
+            ]
           }
         },
         {

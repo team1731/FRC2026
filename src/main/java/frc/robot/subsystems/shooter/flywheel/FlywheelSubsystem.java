@@ -46,12 +46,12 @@ public class FlywheelSubsystem extends BaseSubsystem {
         // logger.log("Target Velocity RPS", getTargetVelocity().in(RotationsPerSecond));
         // logger.log("At Target Velocity", atTargetVelocity());
 
-        logger.log("Left Velocity", leftMotor.getVelocityRPS());
-        logger.log("Right Velocity", rightMotor.getVelocityRPS());
-        logger.log("Left Target Velocity", leftTargetVelocity);
-        logger.log("Right Target Velocity", rightTargetVelocity);
-        logger.log("At Left Target Velocity", atLeftTargetVelocity());
-        logger.log("At Right Target Velocity", atRightTargetVelocity());
+        // logger.log("Left Velocity", leftMotor.getVelocityRPS());
+        // logger.log("Right Velocity", rightMotor.getVelocityRPS());
+        // logger.log("Left Target Velocity", leftTargetVelocity);
+        // logger.log("Right Target Velocity", rightTargetVelocity);
+        // logger.log("At Left Target Velocity", atLeftTargetVelocity());
+        // logger.log("At Right Target Velocity", atRightTargetVelocity());
         
     }
 
