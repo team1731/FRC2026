@@ -15,7 +15,7 @@ import frc.robot.Robot;
 import frc.robot.subsystems.BaseSubsystem;
 
 @Deprecated
-public abstract class PivotMotorSubsystem<M extends MotorIO> extends BaseSubsystem {
+public abstract class AngularMotorSubsystem<M extends MotorIO> extends BaseSubsystem {
     protected M motor = null; // The primary motor controller
     private PivotSim sim = null; // The simulated model of the subsystem 
     private PIDController simPID = null; // The active PIDController for simulating the subsystem
@@ -27,7 +27,7 @@ public abstract class PivotMotorSubsystem<M extends MotorIO> extends BaseSubsyst
 
     private double gearRatioScalar = 1.0; // Gear ratio reduction (i.e 3:1 means 3 input rotations per output rotation)
 
-    protected PivotMotorSubsystem(boolean enabled) {
+    protected AngularMotorSubsystem(boolean enabled) {
         super(enabled);
         if (!isEnabled()) return;
         configureHardware();

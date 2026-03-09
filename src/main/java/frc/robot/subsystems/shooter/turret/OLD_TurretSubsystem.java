@@ -19,7 +19,7 @@ import frc.robot.Robot;
 
 import java.util.function.Supplier;
 
-public class TurretSubsystemAI extends SubsystemBase {
+public class OLD_TurretSubsystem extends SubsystemBase {
     
     // Hardware & Requests
     private final TalonFX m_motor;
@@ -42,7 +42,7 @@ public class TurretSubsystemAI extends SubsystemBase {
 
     private double m_currentTargetDeg = 0.0;
 
-    public TurretSubsystemAI(
+    public OLD_TurretSubsystem(
         String name, int motorID, boolean inverted, int coderID, double offset, double discontinuity, 
         double reverseLimit, double forwardLimit, 
         double rotorToSensor, double sensorToMechanism,
@@ -74,9 +74,7 @@ public class TurretSubsystemAI extends SubsystemBase {
         motorConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
         motorConfig.Feedback.FeedbackRemoteSensorID = m_coder.getDeviceID();
         motorConfig.Feedback.RotorToSensorRatio = rotorToSensor;
-
         motorConfig.Feedback.SensorToMechanismRatio = sensorToMechanism;
-
 
         motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         motorConfig.MotorOutput.Inverted = inverted ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;

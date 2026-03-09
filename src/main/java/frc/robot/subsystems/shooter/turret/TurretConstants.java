@@ -1,14 +1,14 @@
 package frc.robot.subsystems.shooter.turret;
 
-import static edu.wpi.first.units.Units.*;
+import com.ctre.phoenix6.configs.*;
+import com.ctre.phoenix6.signals.*;
 
 import edu.wpi.first.math.geometry.*;
-import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.measure.*;
 import frc.lib.frc1731.PIDGains;
 import frc.lib.frc1731.hardware.motor.PortConfig;
 import frc.lib.frc1731.subsystem.converter.AngularSubsystemConverter;
+import frc.robot.subsystems.shooter.turret.TurretSubsystem.TurretConfigs;
 
 public class TurretConstants {
     public static final double kGearRatio = (15d / 40d * 15d / 40d * 40d / 160d); // 256.00 : 9.00 overall reduction;
@@ -33,25 +33,62 @@ public class TurretConstants {
     public static final AngularSubsystemConverter kConverter = new AngularSubsystemConverter(kGearRatio);
 
     public static final PIDGains kPositionGains = new PIDGains()
-        .setP(30)
-        .setD(0.01)
-        .setV(0.12)
-        .setS(0.25)
+        .setP(60)
+        .setD(0.5)
+        .setS(0.2)
         .setA(0.01)
     ;
 
     public static final PortConfig kLeftPortConfigs = new PortConfig("Right CANivore", 22, false);
     public static final PortConfig kRightPortConfigs = new PortConfig("Left CANivore", 18, false);
 
-    public static final double kRightMinDegrees = -128;
-    public static final double kRightMaxDegrees = 266;
+    public static final double kCurrentLimit = 30d; // Amps
 
-    public static final double kCurrentLimit = 40d; // Amps
+    public static final FeedbackConfigs kLeftFeedbackConfigs = new FeedbackConfigs()
+    .withFeedbackSensorSource(FeedbackSensorSourceValue.FusedCANcoder)
+    .withFeedbackRemoteSensorID(29)
+    .withRotorToSensorRatio(35.555)
+    .withSensorToMechanismRatio(28.44 / 35.555);
 
-    public static final DCMotor kDCMotor = DCMotor.getKrakenX60(1);
+    public static final FeedbackConfigs kRightFeedbackConfigs = new FeedbackConfigs()
+    .withFeedbackSensorSource(FeedbackSensorSourceValue.FusedCANcoder)
+    .withFeedbackRemoteSensorID(30)
+    .withRotorToSensorRatio(35.555)
+    .withSensorToMechanismRatio(28.44 / 35.555);
 
-    public static final Mass kTurretMass = Pounds.of(6d);
-    public static final Distance kTurretRadius = Inches.of(8d);
-    public static final Angle kMinAngle = Degrees.of(-45);
-    public static final Angle kMaxAngle = Degrees.of(225d);
+    public static final CANcoderConfiguration kLeftCANCoderConfigs = new CANcoderConfiguration()
+    .withMagnetSensor(new MagnetSensorConfigs()
+        .withAbsoluteSensorDiscontinuityPoint(0.282)
+        .withMagnetOffset(0.016357421875)
+        .withSensorDirection(SensorDirectionValue.CounterClockwise_Positive)
+    );
+
+    public static final CANcoderConfiguration kRightCANCoderConfigs = new CANcoderConfiguration()
+    .withMagnetSensor(new MagnetSensorConfigs()
+        .withAbsoluteSensorDiscontinuityPoint(0.742)
+        .withMagnetOffset(-0.283447265625)
+        .withSensorDirection(SensorDirectionValue.CounterClockwise_Positive)
+    );
+        
+    public static final TurretConfigs kLeftTurretConfigs = new TurretConfigs(
+        "Left",
+        kLeftPortConfigs,
+        29,
+        kLeftFeedbackConfigs,
+        kLeftCANCoderConfigs,
+        93.0,
+        -303.92,
+        kLeftTurretToRobot
+    );
+
+    public static final TurretConfigs kRightTurretConfigs = new TurretConfigs(
+        "Right",
+        kRightPortConfigs,
+        30,
+        kRightFeedbackConfigs,
+        kRightCANCoderConfigs,
+        319.7,
+        -92.5,
+        kLeftTurretToRobot
+    );
 }

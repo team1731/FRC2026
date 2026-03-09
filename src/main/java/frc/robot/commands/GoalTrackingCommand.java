@@ -1,13 +1,13 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.shooter.turret.TurretSubsystemAI;
+import frc.robot.subsystems.shooter.turret.OLD_TurretSubsystem;
 
 public class GoalTrackingCommand extends Command {
-     private final TurretSubsystemAI m_leftTurret;
-   private final TurretSubsystemAI m_rightTurret;
+     private final OLD_TurretSubsystem m_leftTurret;
+   private final OLD_TurretSubsystem m_rightTurret;
 
-    public GoalTrackingCommand(TurretSubsystemAI left, TurretSubsystemAI right) {
+    public GoalTrackingCommand(OLD_TurretSubsystem left, OLD_TurretSubsystem right) {
          m_leftTurret = left;
        m_rightTurret = right;
         // Require both so no other command moves them individually

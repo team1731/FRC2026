@@ -73,6 +73,7 @@ public class MotorIOTalonFX extends MotorIO {
     @Override
     public void withMotionProfile(double velocity, double acceleration) {
         this.mmOutput = new DynamicMotionMagicVoltage(0d, velocity, acceleration);
+        this.mmVoltage = new MotionMagicVoltage(0);
 
         MotionMagicConfigs mm = cfg.MotionMagic;
         mm.MotionMagicCruiseVelocity = velocity; 

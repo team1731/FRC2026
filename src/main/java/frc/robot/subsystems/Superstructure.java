@@ -14,13 +14,13 @@ import frc.robot.subsystems.intake.IntakeRollerSubsystem;
 import frc.robot.subsystems.shooter.ShotTable;
 import frc.robot.subsystems.shooter.flywheel.FlywheelSubsystem;
 import frc.robot.subsystems.shooter.hood.HoodSubsystem;
-import frc.robot.subsystems.shooter.turret.TurretSubsystemAI;
+import frc.robot.subsystems.shooter.turret.OLD_TurretSubsystem;
 
 public class Superstructure extends SubsystemBase {
     private SwerveSubsystem swerve;
     private FlywheelSubsystem flywheel;
     private HoodSubsystem hood;
-    private TurretSubsystemAI leftTurret, rightTurret;
+    private OLD_TurretSubsystem leftTurret, rightTurret;
     private IndexerSubsystem indexer;
     private IntakePivotSubsystem pivot;
     private IntakeRollerSubsystem intake;
@@ -36,7 +36,7 @@ public class Superstructure extends SubsystemBase {
 
     public Superstructure(SwerveSubsystem swerve, FlywheelSubsystem flywheel, HoodSubsystem hood,  
                             IndexerSubsystem indexer, IntakePivotSubsystem pivot, IntakeRollerSubsystem intake,
-                                TurretSubsystemAI leftTurret, TurretSubsystemAI rightTurret) {
+                                OLD_TurretSubsystem leftTurret, OLD_TurretSubsystem rightTurret) {
         this.swerve = swerve;
         this.flywheel = flywheel;
         this.hood = hood;

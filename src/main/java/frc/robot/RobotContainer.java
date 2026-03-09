@@ -14,7 +14,7 @@ import frc.robot.subsystems.shooter.flywheel.FlywheelSubsystem;
 import frc.robot.subsystems.shooter.hood.HoodSubsystem;
 import frc.robot.subsystems.intake.IntakePivotSubsystem;
 import frc.robot.subsystems.intake.IntakeRollerSubsystem;
-import frc.robot.subsystems.shooter.turret.TurretSubsystemAI;
+import frc.robot.subsystems.shooter.turret.OLD_TurretSubsystem;
 public class RobotContainer {
     /* Subsystems */
 
@@ -28,8 +28,8 @@ public class RobotContainer {
     protected static IndexerSubsystem indexer;
     protected static IntakeRollerSubsystem intake;
     protected static IntakePivotSubsystem pivot;
-    protected static TurretSubsystemAI m_leftTurret;
-    protected static TurretSubsystemAI m_rightTurret;
+    protected static OLD_TurretSubsystem m_leftTurret;
+    protected static OLD_TurretSubsystem m_rightTurret;
 
     protected static Superstructure superstructure;
 
@@ -76,7 +76,7 @@ public class RobotContainer {
 
 
         // Left Turret: 200° CCW (+), -180° CW (-)
-        m_leftTurret = new TurretSubsystemAI(
+        m_leftTurret = new OLD_TurretSubsystem(
             "Left",
             22, // Motor CAN ID
             true,
@@ -92,7 +92,7 @@ public class RobotContainer {
             "Right CANivore");
 
         // Right Turret: 180° CCW (+), -200° CW (-) [Mirrored]
-        m_rightTurret = new TurretSubsystemAI(
+        m_rightTurret = new OLD_TurretSubsystem(
             "Right",
             18,
             true,
