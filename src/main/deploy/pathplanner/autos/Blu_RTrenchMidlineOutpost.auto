@@ -24,9 +24,22 @@
           }
         },
         {
-          "type": "path",
+          "type": "deadline",
           "data": {
-            "pathName": "RMidlineToAllianceZone"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "RMidlineToAllianceZone"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Warmup"
+                }
+              }
+            ]
           }
         },
         {
@@ -36,9 +49,22 @@
           }
         },
         {
-          "type": "named",
+          "type": "deadline",
           "data": {
-            "name": "StopShoot"
+            "commands": [
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 0.1
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "StopShoot"
+                }
+              }
+            ]
           }
         },
         {
@@ -61,15 +87,28 @@
           }
         },
         {
-          "type": "path",
-          "data": {
-            "pathName": "ROutpostToScore"
-          }
-        },
-        {
           "type": "wait",
           "data": {
             "waitTime": 2.0
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "ROutpostToScore"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Warmup"
+                }
+              }
+            ]
           }
         },
         {

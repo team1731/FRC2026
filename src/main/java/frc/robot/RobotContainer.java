@@ -35,7 +35,7 @@ public class RobotContainer {
 
     /* Driver Buttons */
     private final CommandXboxController driver = new CommandXboxController(0);
-    private final Trigger dResetSwerve = driver.povRight();
+    private final Trigger dResetSwerve = driver.start();
 
     private final Trigger dIntake = driver.leftTrigger();
     private final Trigger dShoot = driver.rightTrigger();
@@ -44,12 +44,16 @@ public class RobotContainer {
     private final Trigger dFeedthrough = dIntake.and(dShoot);
     private final Trigger dPassFeedthrough = dIntake.and(dPass);
 
-    private final Trigger dTowerShot = driver.a();
     private final Trigger dTrenchShot = driver.b();
     private final Trigger dHubShot = driver.x();
 
     private final Trigger dRetractIntake = driver.leftBumper();
     private final Trigger dUnjam = driver.rightBumper();
+
+    private final Trigger dLeftTurretLeft = driver.povLeft();
+    private final Trigger dLeftTurretRight = driver.povRight();
+    private final Trigger dRightTurretLeft = driver.povDown();
+    private final Trigger dRightTurretRight = driver.povUp();
 
     /* Operator Buttons */
 
@@ -62,6 +66,7 @@ public class RobotContainer {
 
         SmartDashboard.putNumber("Flywheel RPS", 50);
         SmartDashboard.putNumber("Hood Rotations", 3);
+        // SmartDashboard.putNumber("Distance Shot", 1.5);
     }
 
     /**
@@ -81,7 +86,7 @@ public class RobotContainer {
             22, // Motor CAN ID
             true,
             29, // CANcoder CAN ID
-            0.016357421875  , // Offset (Rotations)0.018798828125
+            0.019775390625  , // Offset (Rotations)0.018798828125
             .282, //discontinuty
             -303.92, // Reverse Limit
             93.0, // Forward Limit
@@ -97,7 +102,7 @@ public class RobotContainer {
             18,
             true,
             30,
-            -0.283447265625,
+            0.035888671875,
             0.742, //discontinuity
            -92.5, // Reverse Limit (further CW)
             319.7, // Forward Limit (shorter CCW)
@@ -115,7 +120,7 @@ public class RobotContainer {
         // Named commands useful for PathPlanner events
         // ex. NamedCommands.registerCommand("Example", new ExampleCommand());
         NamedCommands.registerCommand("StopShoot", flywheel.stopCommand().alongWith(hood.stowHoodCommand()).alongWith(indexer.stopCommand()));
-        NamedCommands.registerCommand("Shoot", superstructure.immediateShootCommand().withTimeout(6).andThen(flywheel.stopOnceCommand()));
+        NamedCommands.registerCommand("Shoot", superstructure.immediateShootCommand().withTimeout(5).andThen(flywheel.stopOnceCommand()));
         NamedCommands.registerCommand("Intake", superstructure.intakeCommand());
         NamedCommands.registerCommand("Feedthrough", superstructure.feedthroughFuelCommand());
         NamedCommands.registerCommand("Pass", Commands.none());
@@ -136,17 +141,25 @@ public class RobotContainer {
 
         dIntake.whileTrue(superstructure.intakeCommand());
         dShoot.whileTrue(superstructure.shootFuelCommand()).onFalse(hood.stowHoodCommand());
-        dPass.whileTrue(superstructure.passFuelCommand()).onFalse(hood.stowHoodCommand());
+        // dPass.whileTrue(superstructure.passFuelCommand()).onFalse(hood.stowHoodCommand());
 
         dFeedthrough.whileTrue(superstructure.feedthroughFuelCommand());
-        dPassFeedthrough.whileTrue(superstructure.passFeedthroughCommand());
+        // dPassFeedthrough.whileTrue(superstructure.passFeedthroughCommand());
 
         dHubShot.whileTrue(superstructure.shootFuelCommand(1.8));
-        dTowerShot.whileTrue(superstructure.shootFuelCommand(3));
+        driver.y().whileTrue(superstructure.shootFuelCommand(2.5));
         dTrenchShot.whileTrue(superstructure.shootFuelCommand(4));
 
         dRetractIntake.onTrue(pivot.retractCommand());
         dUnjam.whileTrue(indexer.setPercentOutputCommand(-0.5));
+
+        // dTurretUnjam.whileTrue(m_leftTurret.setTargetCommand(-45).alongWith(m_rightTurret.setTargetCommand(45)));
+        dLeftTurretLeft.whileTrue(m_leftTurret.setTargetCommand(-200));
+        dLeftTurretRight.whileTrue(m_leftTurret.setTargetCommand(80));
+        dRightTurretLeft.whileTrue(m_rightTurret.setTargetCommand(-80));
+        dRightTurretRight.whileTrue(m_rightTurret.setTargetCommand(200));
+
+        // driver.back().whileTrue(superstructure.shootFuelCommand(() -> SmartDashboard.getNumber("Distance Shot", 1.8)));
     }
 
     public void periodic() {
