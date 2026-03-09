@@ -106,30 +106,32 @@ public class SwerveSubsystem extends BaseSubsystem {
     }
 
     public void updateVisionOdometry() {
-        LimelightHelpers.SetRobotOrientation(kLimelightName, drivetrain.getPigeon2().getYaw().getValueAsDouble(), 0, 0, 0, 0, 0);
+        // double orientation = Robot.isRedAlliance() ? 180 - getCurrentPose().getRotation().getDegrees() : getCurrentPose().getRotation().getDegrees();
+        double orientation = drivetrain.getPigeon2().getYaw().getValueAsDouble();
+        LimelightHelpers.SetRobotOrientation(kLimelightName, orientation, 0, 0, 0, 0, 0);
         LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(AprilTagConstants.kLimelightName);
         
         // Do not use estimate if we are rotating too fast or if we see less than 2 tags
         if(Math.abs(drivetrain.getPigeon2().getAngularVelocityZDevice().getValueAsDouble()) > 720 || mt2.tagCount <= 1) return;
 
-        this.addVisionMeasurement(mt2.pose, mt2.timestampSeconds, VecBuilder.fill(.5,.5,9999999));
+        // this.addVisionMeasurement(mt2.pose, mt2.timestampSeconds, VecBuilder.fill(.5,.5,2));
         
-        if (!visionCheckingHasStarted) {
-            GoodLimelightTimer.restart();
-            baselinePose = mt2.pose;
-            visionCheckingHasStarted = true;
-        } else if (GoodLimelightTimer.hasElapsed(2)) {
-            distanceBetweenPoses = distanceBetween(mt2.pose, baselinePose);
-            // SmartDashboard.putNumber("distanceBetweenPoses", distanceBetweenPoses);
-            // SmartDashboard.putBoolean("hasGoodOdometry", hasGoodOdometry);
-            if (distanceBetweenPoses < .005) {
-                hasGoodOdometry = true;                 
-            } else {
-                hasGoodOdometry = false;
-            }
-            visionCheckingHasStarted = false;
+        // if (!visionCheckingHasStarted) {
+        //     GoodLimelightTimer.restart();
+        //     baselinePose = mt2.pose;
+        //     visionCheckingHasStarted = true;
+        // } else if (GoodLimelightTimer.hasElapsed(2)) {
+        //     distanceBetweenPoses = distanceBetween(mt2.pose, baselinePose);
+        //     // SmartDashboard.putNumber("distanceBetweenPoses", distanceBetweenPoses);
+        //     // SmartDashboard.putBoolean("hasGoodOdometry", hasGoodOdometry);
+        //     if (distanceBetweenPoses < .005) {
+        //         hasGoodOdometry = true;                 
+        //     } else {
+        //         hasGoodOdometry = false;
+        //     }
+        //     visionCheckingHasStarted = false;
 
-        }
+        // }
     }
 
     public static double distanceBetween(Pose2d a, Pose2d b) { Translation2d ta = a.getTranslation(); Translation2d tb = b.getTranslation(); return ta.getDistance(tb); }

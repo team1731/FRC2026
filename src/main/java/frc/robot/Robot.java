@@ -100,9 +100,9 @@ public class Robot extends LoggedRobot {
 		setupSmartDashboard();
 		swerve.configureInitialPosition();  // sets the operator perspective
 		// SmartDashboard.updateValues();
-		Logger.start();
-		Logger.addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables
-			PathPlannerLogging.setLogCurrentPoseCallback((pose) -> {
+		// Logger.start();
+		// Logger.addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables
+		PathPlannerLogging.setLogCurrentPoseCallback((pose) -> {
 			currentPose = pose;
 			currentPoseField.setRobotPose(pose);
 			SmartDashboard.putData("PathPlanner current pose", currentPoseField);

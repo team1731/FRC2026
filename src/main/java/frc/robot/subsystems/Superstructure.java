@@ -3,6 +3,8 @@ package frc.robot.subsystems;
 import static frc.robot.subsystems.shooter.turret.TurretConstants.*;
 
 import java.util.Set;
+import java.util.function.DoubleSupplier;
+
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.*;
@@ -65,10 +67,10 @@ public class Superstructure extends SubsystemBase {
     }
 
     public Command runIndexerCommand() {
-        return indexer.setPercentOutputCommand(1.0)
-            .withTimeout(1.5)
-            .andThen(indexer.setPercentOutputCommand(-1).withTimeout(0.125))
-            .repeatedly();
+        return indexer.setPercentOutputCommand(1.0);
+            // .withTimeout(1.5)
+            // .andThen(indexer.setPercentOutputCommand(-1).withTimeout(0.125))
+            // .repeatedly();
     }
 
     public Command shootFuelCommand(Translation2d target) {
@@ -103,6 +105,24 @@ public class Superstructure extends SubsystemBase {
         return new DeferredCommand(() -> {
             double[] leftParameters = shotTable.getShotParameters(distance);
             double[] rightParameters = shotTable.getShotParameters(distance);
+
+            return flywheel.setFlywheelVelocityCommand(() -> leftParameters[1], () -> rightParameters[1])
+            .alongWith(
+                hood.setHoodCommand(() -> leftParameters[0], () -> rightParameters[0]),
+                leftTurret.setZeroCommand(),
+                rightTurret.setZeroCommand(),
+                pivot.retractCommand(),
+                intake.setPercentOutputCommand(0.75),
+                Commands.waitSeconds(1.5)
+                .andThen(runIndexerCommand())
+            );
+        }, Set.of(flywheel, hood, indexer, intake, pivot, leftTurret, rightTurret));
+    }
+
+    public Command shootFuelCommand(DoubleSupplier distance) {
+        return new DeferredCommand(() -> {
+            double[] leftParameters = shotTable.getShotParameters(distance.getAsDouble());
+            double[] rightParameters = shotTable.getShotParameters(distance.getAsDouble());
 
             return flywheel.setFlywheelVelocityCommand(() -> leftParameters[1], () -> rightParameters[1])
             .alongWith(
@@ -202,7 +222,7 @@ public class Superstructure extends SubsystemBase {
                 rightTurret.trackTargetCommand(newTarget),
                 pivot.retractCommand(),
                 intake.setPercentOutputCommand(0.75),
-                Commands.waitSeconds(1.5)
+                Commands.waitSeconds(1.25)
                 .andThen(runIndexerCommand())
             );
         }, Set.of(flywheel, hood, indexer, intake, pivot, leftTurret, rightTurret));
