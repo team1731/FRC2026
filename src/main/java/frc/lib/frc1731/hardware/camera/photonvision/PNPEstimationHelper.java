@@ -1,4 +1,4 @@
-package frc.robot.subsystems.vision.helpers;
+package frc.lib.frc1731.hardware.camera.photonvision;
 
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
@@ -10,13 +10,11 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import frc.robot.subsystems.drive.DrivetrainVisionCallback;
-import frc.robot.subsystems.vision.VisionConstants;
-import frc.robot.subsystems.vision.camera.PNPCamera;
+import frc.lib.frc1731.TriConsumer;
 
 public class PNPEstimationHelper {
 
-    public static void updatePoseEstimations(PNPCamera camera, DrivetrainVisionCallback callback) {
+    public static void updatePoseEstimations(PNPCamera camera, TriConsumer<Pose2d, Double, Matrix<N3, N1>> addVisionMeasurementConsumer) {
         if(camera == null) return;
         PhotonCamera photonCamera = camera.getCamera();
         PhotonPoseEstimator poseEstimator = camera.getPoseEstimator();
@@ -39,7 +37,7 @@ public class PNPEstimationHelper {
                                 estPose.getRotation().getDegrees()));
                         camera.setLastUpdatedTS(Timer.getFPGATimestamp());
                         camera.setEstimatedPose(est.estimatedPose.toPose2d());
-                        callback.addVisionMeasurement(est.estimatedPose.toPose2d(), est.timestampSeconds, estStdDevs);
+                        addVisionMeasurementConsumer.accept(est.estimatedPose.toPose2d(), est.timestampSeconds, estStdDevs);
                     });
             } catch (Exception e) {
                 e.printStackTrace();
@@ -57,7 +55,7 @@ public class PNPEstimationHelper {
      * @param estimatedPose The estimated pose to guess standard deviations for.
      */
     public static Matrix<N3, N1> getEstimationStdDevs(PhotonCamera camera, Pose2d estimatedPose, PhotonPoseEstimator photonEstimator) {
-        var estStdDevs = VisionConstants.kSingleTagStdDevs;
+        var estStdDevs = VecBuilder.fill(2, 2, 8);
         var targets = camera.getLatestResult().getTargets();
         int numTags = 0;
         double avgDist = 0;
@@ -76,7 +74,7 @@ public class PNPEstimationHelper {
         avgDist /= numTags;
         // Decrease std devs if multiple targets are visible
         if (numTags > 1) {
-            estStdDevs = VisionConstants.kMultiTagStdDevs;
+            estStdDevs = VecBuilder.fill(0.05, 0.05, 1);
         }
 
         // Increase std devs based on (average) distance

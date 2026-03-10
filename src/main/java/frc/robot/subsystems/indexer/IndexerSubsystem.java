@@ -1,13 +1,14 @@
-package frc.robot.subsystems.feeder;
+package frc.robot.subsystems.indexer;
 
 import frc.lib.frc1731.hardware.motor.ctre.MotorIOTalonFX;
 import frc.lib.frc1731.sim.SimpleVelocitySim.SimConstants;
 import frc.lib.frc1731.subsystem.VelocitySubsystem;
+import frc.robot.Ports;
 
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Pounds;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static frc.robot.subsystems.feeder.FeederConstants.*;
+import static frc.robot.subsystems.indexer.IndexerConstants.*;
 
 import edu.wpi.first.math.system.plant.DCMotor;
 
@@ -19,7 +20,7 @@ public class IndexerSubsystem extends VelocitySubsystem<MotorIOTalonFX>{
 
     @Override
     protected void initializeHardware() {
-        motor = new MotorIOTalonFX(kMotorConfig);
+        motor = new MotorIOTalonFX(Ports.kIndexerConfig);
         motor.withPIDGains(kPIDGains);
         // motor.withFollower(new MotorIOTalonFX(kFollowerConfig));
         this.withSimulation(new SimConstants(DCMotor.getKrakenX60(1), 1.0, Inches.of(1), Pounds.of(0.1)), kPIDGains);

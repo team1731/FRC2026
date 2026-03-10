@@ -39,7 +39,7 @@ public final class Utils {
     
     public static Translation2d flip(Translation2d point) {
         if (Robot.isRedAlliance()) return new Translation2d(FieldConstants.fieldLength - point.getX(), FieldConstants.fieldWidth - point.getY());
-        return point;   
+        return point;
     }
 
     public static Translation3d flip(Translation3d point) {

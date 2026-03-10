@@ -5,7 +5,7 @@ import java.util.HashMap;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants.AutoConstants;
+import frc.robot.RobotConstants;
 
 public class AutoFactory {
     private static boolean flipRedBlue;
@@ -38,8 +38,8 @@ public class AutoFactory {
         } else {
             System.out
                 .println("ERROR: no such auto path name found in src/main/deploy/pathplanner/autos: " + alliancePathName + 
-                    ", switching to default auto " + AutoConstants.kAutoDefault);
-            alliancePathName = "Blu_" + AutoConstants.kAutoDefault ;
+                    ", switching to default auto " + RobotConstants.kAutoDefault);
+            alliancePathName = "Blu_" + RobotConstants.kAutoDefault;
             flipRedBlue = redAlliance;
         }
         Command command = new PathPlannerAuto(alliancePathName);

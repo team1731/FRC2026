@@ -1,6 +1,6 @@
 //LimelightHelpers v1.14 (REQUIRES LLOS 2026.0 OR LATER)
 
-package frc.lib.frc1731.hardware.camera;
+package frc.lib.frc1731.hardware.camera.limelight;
 
 import edu.wpi.first.networktables.DoubleArrayEntry;
 import edu.wpi.first.networktables.NetworkTable;

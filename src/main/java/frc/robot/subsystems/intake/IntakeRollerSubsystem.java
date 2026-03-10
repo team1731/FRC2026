@@ -5,6 +5,7 @@ import static frc.robot.subsystems.intake.IntakeConstants.*;
 
 import frc.lib.frc1731.hardware.motor.ctre.MotorIOTalonFX;
 import frc.lib.frc1731.subsystem.VelocitySubsystem;
+import frc.robot.Ports;
 
 public class IntakeRollerSubsystem extends VelocitySubsystem<MotorIOTalonFX>{
     public IntakeRollerSubsystem(boolean enabled){
@@ -14,8 +15,8 @@ public class IntakeRollerSubsystem extends VelocitySubsystem<MotorIOTalonFX>{
 
     @Override
     protected void initializeHardware() {
-        motor = new MotorIOTalonFX(kRollerMotorConfig);
-        motor.withPIDGains(kPIDGains);
+        motor = new MotorIOTalonFX(Ports.kIntakeRollerConfig);
+        motor.withPIDGains(kRollerGains);
         motor.withStatorCurrentLimit(40);
     }
 

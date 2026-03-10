@@ -1,4 +1,4 @@
-package frc.lib.frc1731.hardware.camera;
+package frc.lib.frc1731.hardware.camera.limelight;
 
 import edu.wpi.first.math.geometry.Transform3d;
 

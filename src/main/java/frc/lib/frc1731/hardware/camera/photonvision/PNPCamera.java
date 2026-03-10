@@ -1,4 +1,4 @@
-package frc.robot.subsystems.vision.camera;
+package frc.lib.frc1731.hardware.camera.photonvision;
 
 import java.util.List;
 
@@ -14,7 +14,6 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Timer;
-import frc.robot.subsystems.vision.VisionConstants;
 
 
 public class PNPCamera implements Camera {
@@ -81,7 +80,7 @@ public class PNPCamera implements Camera {
     }
 
     public boolean isStale() {
-        return ((Timer.getFPGATimestamp() - lastUpdateTS) > VisionConstants.targetConfidenceDelta);
+        return ((Timer.getFPGATimestamp() - lastUpdateTS) > 0.5);
     }
 
     public PhotonPipelineResult getLatestResult() {

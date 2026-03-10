@@ -1,4 +1,4 @@
-package frc.robot.subsystems.vision.camera;
+package frc.lib.frc1731.hardware.camera.photonvision;
 
 public enum CameraProcessing {
     DEFAULT,

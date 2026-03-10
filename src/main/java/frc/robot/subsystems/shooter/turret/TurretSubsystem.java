@@ -3,78 +3,102 @@ package frc.robot.subsystems.shooter.turret;
 import static frc.robot.subsystems.shooter.turret.TurretConstants.*;
 
 import java.util.function.*;
-
-import com.ctre.phoenix6.configs.CANcoderConfiguration;
-import com.ctre.phoenix6.configs.FeedbackConfigs;
-import com.ctre.phoenix6.configs.MotionMagicConfigs;
-
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj2.command.*;
-import frc.lib.frc1731.hardware.motor.PortConfig;
+import frc.lib.frc1731.Utils;
 import frc.lib.frc1731.hardware.motor.ctre.MotorIOTalonFX;
+import frc.lib.frc6328.FieldConstants;
 import frc.robot.subsystems.BaseSubsystem;
 
 public class TurretSubsystem extends BaseSubsystem {
     private MotorIOTalonFX motor;
-    private Transform3d robotToTurret;
+    private Translation2d robotToTurret;
     private Supplier<Pose2d> swervePoseSupplier;
 
-    public static record TurretConfigs(String name, PortConfig motorConfigs, int cancoderID, 
-                                        FeedbackConfigs feedbackConfigs, CANcoderConfiguration cancoderConfigs,
-                                            double forwardLimitDegrees, double reverseLimitDegrees, Transform3d robotToTurret) {}
+    private double targetDegrees = 0;
+    private double minDegrees, maxDegrees;
 
-    public TurretSubsystem(TurretConfigs configs, Supplier<Pose2d> swervePoseSupplier, boolean enabled) {
-        super(enabled);
-        super.setName(configs.name + getName());
-        configureDevices(configs);
+    public TurretSubsystem(TurretConfiguration configs, Supplier<Pose2d> swervePoseSupplier, boolean enabled) {
+        super(configs.name(), enabled);
+        if (!isEnabled()) return;
+        initializeHardware(configs);
 
-        this.robotToTurret = configs.robotToTurret;
+        this.robotToTurret = configs.robotToTurret().getTranslation().toTranslation2d();
         this.swervePoseSupplier = swervePoseSupplier;
+        this.minDegrees = configs.minDegrees();
+        this.maxDegrees = configs.maxDegrees();
     }
 
-    private void configureDevices(TurretConfigs configs) {
-        // Add motor/cancoder configs here
-        motor = new MotorIOTalonFX(configs.motorConfigs);
+    private void initializeHardware(TurretConfiguration configs) {
+        motor = new MotorIOTalonFX(configs.motorConfigs());
         motor.withPIDGains(kPositionGains);
-        motor.withCANCoder(configs.feedbackConfigs.FeedbackRemoteSensorID, configs.motorConfigs.kBus, configs.cancoderConfigs);
-        motor.withFeedbackConfigs(configs.feedbackConfigs);
+        motor.withCANCoder(configs.feedbackConfigs().FeedbackRemoteSensorID, configs.motorConfigs().kBus, configs.cancoderConfigs());
+        motor.withFeedbackConfigs(configs.feedbackConfigs());
+        motor.withMotionProfile(kMaxTurretVelocity, kMaxTurretAcceleration);
         motor.withStatorCurrentLimit(kCurrentLimit);
-        motor.withMotionProfile(4, 4);
+        motor.setSoftLimits(configs.minDegrees() / 360.0, configs.maxDegrees() / 360.0);
+        motor.setNeutralMode(NeutralModeValue.Brake);
     }
 
     public Pose2d getTurretPose() {
-        return swervePoseSupplier.get();
+        if (!isEnabled()) return new Pose2d();
+        Translation2d swerve = swervePoseSupplier.get().getTranslation();
+        return new Pose2d(swerve.plus(robotToTurret.rotateBy(swervePoseSupplier.get().getRotation())), swervePoseSupplier.get().getRotation());
+    }
+
+    public boolean atTarget() {
+        if (!isEnabled()) return true;
+        return Utils.isWithin(motor.getRotations() * 360.0, targetDegrees, kEpsilon);
+    }
+
+    private double processTarget(double targetDegrees) {
+        if (!isEnabled()) return targetDegrees;
+        double yaw = swervePoseSupplier.get().getRotation().getDegrees();
+        double output = (targetDegrees - yaw + 180) % 360;
+        // output -= 360;
+        if (output > maxDegrees) output -= 360;
+        if (output < minDegrees) output += 360;
+        // output = Utils.clamp(output, minDegrees, maxDegrees);
+        return output;
     }
 
     @Override
     public void periodicTelemetry() {
+        logger.log("Pose", getTurretPose());
+        logger.log("Current Degrees", motor.getRotations() * 360.0);
+        logger.log("Target Degrees", targetDegrees);
+        logger.log("At Target", atTarget());
+    }
 
+    public Command trackHub() {
+        return track(() -> FieldConstants.Hub.topCenterPoint.toTranslation2d());
     }
 
     public Command track(Supplier<Translation2d> target) {
-        return run(() -> {
-
-        }).withName("Track");
+        // return run(() -> {
+        //    Translation2d turretToTarget = target.get().minus(getTurretPose().getTranslation());
+        //    targetDegrees = calculateTurretOutput(Math.atan(turretToTarget.getY() / turretToTarget.getX()));
+        //    motor.setPosition(targetDegrees / 360.0);
+        // }).withName("Track");
+        return this.setDegrees(() -> {
+            Translation2d turretToTarget = target.get().minus(getTurretPose().getTranslation());
+            return processTarget(Math.toDegrees(Math.atan2(turretToTarget.getY(), turretToTarget.getX())));
+        });
     }
 
     public Command track(Translation2d target) {
         return this.track(() -> target);
     }
 
-
     public Command setDegrees(DoubleSupplier degrees) {
         return run(() -> {
-
+            targetDegrees = processTarget(degrees.getAsDouble());
+            motor.setPosition(targetDegrees / 360.0);
         }).withName("SetDegrees");
     }
 
     public Command setDegrees(double degrees) {
         return this.setDegrees(() -> degrees);
-    }
-
-    public Command stop() {
-        return run(() -> {
-
-        }).withName("Stop");
     }
 }

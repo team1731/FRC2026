@@ -3,6 +3,7 @@ package frc.lib.frc6328;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.util.Units;
+import frc.robot.Robot;
 import edu.wpi.first.math.geometry.*;
 
 import java.io.IOException;
@@ -327,9 +328,8 @@ public class FieldConstants {
         synchronized (this) {
           if (layout == null) {
             try {
-              Path p = Path.of(
-                          "src",
-                          "main",
+                String directory = (Robot.isReal() ? "home/lvuser" : "src/main");
+              Path p = Path.of(directory,
                           "deploy",
                           fieldType.json(),
                           name + ".json");

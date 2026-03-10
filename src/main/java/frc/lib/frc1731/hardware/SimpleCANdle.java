@@ -1,22 +1,9 @@
 package frc.lib.frc1731.hardware;
 
 import com.ctre.phoenix6.configs.*;
-import com.ctre.phoenix6.controls.ColorFlowAnimation;
-import com.ctre.phoenix6.controls.EmptyAnimation;
-import com.ctre.phoenix6.controls.FireAnimation;
-import com.ctre.phoenix6.controls.LarsonAnimation;
-import com.ctre.phoenix6.controls.RainbowAnimation;
-import com.ctre.phoenix6.controls.RgbFadeAnimation;
-import com.ctre.phoenix6.controls.SingleFadeAnimation;
-import com.ctre.phoenix6.controls.StrobeAnimation;
-import com.ctre.phoenix6.controls.TwinkleAnimation;
-import com.ctre.phoenix6.controls.TwinkleOffAnimation;
+import com.ctre.phoenix6.controls.*;
+import com.ctre.phoenix6.signals.*;
 import com.ctre.phoenix6.hardware.CANdle;
-import com.ctre.phoenix6.signals.LarsonBounceValue;
-import com.ctre.phoenix6.signals.RGBWColor;
-import com.ctre.phoenix6.signals.StatusLedWhenActiveValue;
-import com.ctre.phoenix6.signals.StripTypeValue;
-import com.ctre.phoenix6.sim.CANdleSimState;
 
 import edu.wpi.first.wpilibj.util.Color;
 
@@ -24,7 +11,7 @@ public class SimpleCANdle {
     private CANdle candle;
     private CANdleConfiguration config;
     private CANdleConfigurator configurator;
-    private CANdleSimState sim;
+    // private CANdleSimState sim;
 
     public SimpleCANdle(int deviceID, int stripLength){
         this(deviceID, "rio", stripLength);
@@ -32,7 +19,7 @@ public class SimpleCANdle {
 
     public SimpleCANdle(int deviceID, String canbus, int stripLength){
         this.candle = new CANdle(deviceID, canbus);
-        this.sim = candle.getSimState();
+        // this.sim = candle.getSimState();
 
         this.config = new CANdleConfiguration();
         this.config.LED.StripType = StripTypeValue.RGBW;

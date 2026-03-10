@@ -23,10 +23,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.lib.frc1731.field.FieldLayout;
-import frc.lib.frc1731.field.ReefscapeFieldLayout;
-import frc.lib.frc1731.log.MessageLog;
-import frc.robot.Constants.AutoConstants;
 import frc.robot.autos.AutoFactory;
 import frc.robot.autos.AutoLoader;
 import frc.robot.subsystems.drive.SwerveSubsystem;
@@ -54,22 +50,14 @@ public class Robot extends LoggedRobot {
 	private final Field2d targetPoseField = new Field2d();
 	boolean vslamConnectionStatusChanged = false;
 	private boolean isVslamConnected = false;
-	
 
 	private RobotContainer container;
-	//private Command m_autonomousCommand = null;
 
-	public static final FieldLayout kFieldLayout = new ReefscapeFieldLayout();
-	
 	public static final Trigger IS_ENABLED = new Trigger(() -> DriverStation.isEnabled());
 	public static final Trigger IS_TELEOP = new Trigger(() -> DriverStation.isTeleop());
 	public static final Trigger IS_AUTONOMOUS = new Trigger(() -> DriverStation.isAutonomous());
 	public static final Trigger IS_DISABLED = new Trigger(() -> DriverStation.isDisabled());
 	public static final Trigger IS_TEST = new Trigger(() -> DriverStation.isTest());
-
-	public static final boolean SHOULD_LOG = true;
-
-	// public static final RobotClock CLOCK = new RobotClock();
 
 	public Robot() {}
 
@@ -119,7 +107,7 @@ public class Robot extends LoggedRobot {
 		// kFieldLayout.logToShuffleboard(isSimulation());
 	}
 	private void setupSmartDashboard() {
-		SmartDashboard.putData(AutoConstants.kAutoCodeKey, autoChooser);
+		SmartDashboard.putData(RobotConstants.kAutoCodeKey, autoChooser);
 		SmartDashboard.putString("Build Info - Branch", "N/A");
 		SmartDashboard.putString("Build Info - Commit Hash", "N/A");
 		SmartDashboard.putString("Build Info - Date", "N/A");
@@ -150,7 +138,7 @@ public class Robot extends LoggedRobot {
 			fnf.printStackTrace();
 		}
 		SmartDashboard.updateValues();
-		if (SHOULD_LOG) {
+		if (RobotConstants.kShouldLog) {
 			Logger.addDataReceiver(new NT4Publisher());
 			Logger.start();
 		}
@@ -214,7 +202,7 @@ public class Robot extends LoggedRobot {
 		    selectedAutoCode = autoChooser.getSelected();
 		} 
 		if(selectedAutoCode == null) {
-			selectedAutoCode = autoCode == null ? Constants.AutoConstants.kAutoDefault : autoCode;
+			selectedAutoCode = autoCode == null ? RobotConstants.kAutoDefault : autoCode;
 		}
 		if(!selectedAutoCode.equals(autoCode)) {
 			System.out.println("New Auto Code read from dashboard. OLD: " + autoCode + ", NEW: " + selectedAutoCode);
@@ -247,7 +235,7 @@ public class Robot extends LoggedRobot {
 		/*
 		 * If any of these above conditions changed, kick off creation of a new auto command
 		 */
-		if(autoCodeChanged || allianceChanged || vslamConnectionStatusChanged ) {
+		if(autoCodeChanged || allianceChanged || vslamConnectionStatusChanged) {
 			vslamConnectionStatusChanged = false;
 			m_autonomousCommand = null;
 			m_autonomousCommand = (PathPlannerAuto) AutoFactory.getAutonomousCommand(selectedAutoCode, redAlliance);		
@@ -362,9 +350,6 @@ public void autonomousPeriodic() {
 //   ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 	@Override
 	public void teleopInit() {
-		// Record both DS control and joystick data in TELEOP
-		MessageLog.getLogger();
-
 		// Cancel any outstanding auto commands
 		CommandScheduler.getInstance().cancelAll();
 

@@ -236,6 +236,10 @@ public class MotorIOTalonFXS extends MotorIO {
         applyConfigs();
     }
 
+    public void withFeedbackConfigs(ExternalFeedbackConfigs configs) {
+        this.configurator.apply(configs);
+    }
+
     public void withMotionMagicConfigs(MotionMagicConfigs configs) {
         this.configurator.apply(configs);
     }

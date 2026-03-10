@@ -14,6 +14,7 @@ import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.*;
 
 import frc.lib.frc1731.log.SmartLogger;
+import frc.robot.RobotConstants;
 
 public abstract class BaseSubsystem extends SubsystemBase {
     private boolean enabled = false;
@@ -21,10 +22,16 @@ public abstract class BaseSubsystem extends SubsystemBase {
 
     private SysIdRoutine sysIdRoutine = null;
 
-    protected BaseSubsystem(boolean enabled) {
+    protected BaseSubsystem(String nameModifier, boolean enabled) {
         this.enabled = enabled;
+        this.setName(nameModifier + getName());
         this.logger = new SmartLogger(getName());
     }
+
+    protected BaseSubsystem(boolean enabled) {
+        this("", enabled);
+    }
+
 
     /**
      * Whether we want the subsystem's hardware to be commandable
@@ -170,12 +177,16 @@ public abstract class BaseSubsystem extends SubsystemBase {
     public void periodicOutput() {} // If needed, periodic output to hardware
 
     @Override
-    public void periodic () {
-        periodicOutput();
-        // periodicTelemetry();
-        // logger.log("Command/Actively Commanded", isCurrentlyCommanded());
-        // logger.log("Command/Has Default Command", !getDefaultCommand().equals(Commands.none()));
-        // logger.log("Command/Active Command", getCurrentCommand().getName());
-        // logger.log("Command/Default Command", getDefaultCommand().getName());
+    public void periodic() {
+        if (isEnabled()) {
+            periodicOutput();
+            if (!RobotConstants.kShouldLog) return;
+
+            periodicTelemetry();
+            logger.log("Command/Actively Commanded", isCurrentlyCommanded());
+            logger.log("Command/Has Default Command", !getDefaultCommand().equals(Commands.none()));
+            logger.log("Command/Active Command", getCurrentCommand().getName());
+            logger.log("Command/Default Command", getDefaultCommand().getName());
+        }
     }
 }
