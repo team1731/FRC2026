@@ -11,6 +11,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -18,6 +19,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Robot;
 
 import java.util.function.Supplier;
+
+import org.littletonrobotics.junction.Logger;
 
 public class TurretSubsystemAI extends SubsystemBase {
     
@@ -154,6 +157,12 @@ public class TurretSubsystemAI extends SubsystemBase {
         SmartDashboard.putNumber("Turret/Target", m_currentTargetDeg);
         SmartDashboard.putNumber("Turret/Reverse Limit", m_reverseLimit);
         SmartDashboard.putNumber("Turret/Forward Limit", m_forwardLimit);
+        Translation2d pose = m_robotPoseSupplier.get().getTranslation().minus(m_robotToTurret.rotateBy(m_robotPoseSupplier.get().getRotation().plus(Rotation2d.k180deg)));
+        Logger.recordOutput(m_name + "TurretPose", pose);
+        Translation2d target = Robot.isRedAlliance() ? RED_TARGET : BLUE_TARGET;
+        double distance = target.getDistance(pose);
+        Logger.recordOutput(m_name + "TurretDistance", distance);
+        // Logger.recordOutput(m_name + "TurretPose", m_robotPoseSupplier.get().getTranslation().minus(m_robotToTurret.rotateBy(m_robotPoseSupplier.get().getRotation())));
     }
 
     private double calculateBestTurretAngle(double robotHeading, double targetHeading, double current) {
@@ -231,18 +240,21 @@ public class TurretSubsystemAI extends SubsystemBase {
                 currentPosDeg
             );
 
+            if (m_name.equals("Right")) return;
             m_motor.setControl(m_mmRequest.withPosition(m_currentTargetDeg / 360.0));
         });
     }
 
     public Command setZeroCommand() {
         return run(() -> {
+            if (m_name.equals("Right")) return;
             m_motor.setControl(m_mmRequest.withPosition(0));
         });
     }
 
     public Command set180Command() {
         return run(() -> {
+            if (m_name.equals("Right")) return;
             m_motor.setControl(m_mmRequest.withPosition(180));
         });
     }
@@ -255,6 +267,7 @@ public class TurretSubsystemAI extends SubsystemBase {
             } else if (degrees <= m_reverseLimit) {
                 output += 360;
             }
+            if (m_name.equals("Right")) return;
             m_motor.setControl(m_mmRequest.withPosition(output));
         });
     }

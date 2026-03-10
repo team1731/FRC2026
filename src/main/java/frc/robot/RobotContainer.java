@@ -156,10 +156,16 @@ public class RobotContainer {
         // dTurretUnjam.whileTrue(m_leftTurret.setTargetCommand(-45).alongWith(m_rightTurret.setTargetCommand(45)));
         dLeftTurretLeft.whileTrue(m_leftTurret.setTargetCommand(-200));
         dLeftTurretRight.whileTrue(m_leftTurret.setTargetCommand(80));
-        dRightTurretLeft.whileTrue(m_rightTurret.setTargetCommand(-80));
-        dRightTurretRight.whileTrue(m_rightTurret.setTargetCommand(200));
+        // dRightTurretLeft.whileTrue(m_rightTurret.setTargetCommand(-80));
+        // dRightTurretRight.whileTrue(m_rightTurret.setTargetCommand(200));
 
-        // driver.back().whileTrue(superstructure.shootFuelCommand(() -> SmartDashboard.getNumber("Distance Shot", 1.8)));
+        driver.back().whileTrue(
+            hood.setHoodCommand(() -> SmartDashboard.getNumber("Hood Angle", 0.0))
+            .alongWith(flywheel.setFlywheelCommand(() -> SmartDashboard.getNumber("Flywheel RPS", 0.0)))
+            .alongWith(Commands.waitUntil(() -> flywheel.atLeftTargetVelocity() && hood.atLeftTarget()).andThen(
+                indexer.setPercentOutputCommand(1.0)
+            ))
+        );
     }
 
     public void periodic() {

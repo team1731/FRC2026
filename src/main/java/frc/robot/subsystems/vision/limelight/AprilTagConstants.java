@@ -6,10 +6,9 @@ import edu.wpi.first.math.util.Units;
 
 public class AprilTagConstants {
     public static final Transform3d kCameraToRobot = new Transform3d(
-        Units.inchesToMeters(-11.25),
-        Units.inchesToMeters(9.5),
-        Units.inchesToMeters(13.25
-        ),
+        0.28575,
+        -0.2413,
+        0.33655,
         new Rotation3d(
             Units.degreesToRadians(0.0),
             Units.degreesToRadians(110.0),
