@@ -113,7 +113,7 @@ public class Superstructure {
     }
 
     public Command trackHub() {
-        return leftTurret.trackHub().alongWith(rightTurret.trackHub());
+        return leftTurret.trackHub().alongWith(/*rightTurret.trackHub()*/);
     }
 
     public Command stopShooters() {
@@ -125,7 +125,7 @@ public class Superstructure {
     }
 
     public boolean rightShooterReady() {
-        return rightHood.atTarget() && rightFlywheel.atTargetVelocity() && rightTurret.atTarget();
+        return rightHood.atTarget() && rightFlywheel.atTargetVelocity()/*&& rightTurret.atTarget() */ ;
     }
     
     public Command wrapShot(Command shotCommand, boolean feedthrough) {

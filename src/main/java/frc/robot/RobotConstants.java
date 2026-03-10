@@ -5,7 +5,7 @@ public final class RobotConstants {
 
     public static final String kMainCANBus = "Left CANivore";
     public static final String kSecondCANBus = "Right CANivore";
-    public static final boolean kShouldLog = true;
+    public static final boolean kShouldLog = false;
 
     public static final String kNoVSLAMPostfix = "_NoVSLAM";
     public static final String kAutoDefault = "RTrenchMidline"; // Note: when setting the default auto, do not include Blu_/Red_ prefixes

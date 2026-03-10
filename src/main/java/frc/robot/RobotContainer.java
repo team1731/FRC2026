@@ -90,8 +90,8 @@ public class RobotContainer {
         leftHood = new HoodSubsystem(kLeftHoodConfig, true);
         rightHood = new HoodSubsystem(kRightHoodConfig, true);
 
-        leftTurret = new TurretSubsystem(kLeftTurretConfigs, () -> swerve.getCurrentPose(), true);
-        rightTurret = new TurretSubsystem(kRightTurretConfigs, () -> swerve.getCurrentPose(), true);
+        leftTurret = new TurretSubsystem(kLeftTurretConfigs, () -> swerve.getCurrentPose(), () -> swerve.getFieldRelativeChassisSpeeds(), true);
+        rightTurret = new TurretSubsystem(kRightTurretConfigs, () -> swerve.getCurrentPose(), () -> swerve.getFieldRelativeChassisSpeeds(), true);
 
         indexer = new IndexerSubsystem(true);
         pivot = new IntakePivotSubsystem(true);
@@ -166,7 +166,7 @@ public class RobotContainer {
         indexer.setDefaultCommand(indexer.stop());
 
         leftTurret.setDefaultCommand(leftTurret.trackHub());
-        rightTurret.setDefaultCommand(rightTurret.trackHub());
+        // rightTurret.setDefaultCommand(rightTurret.trackHub());
 
         leftHood.setDefaultCommand(leftHood.stow());
         rightHood.setDefaultCommand(rightHood.stow());

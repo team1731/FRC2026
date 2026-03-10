@@ -5,6 +5,7 @@ import static frc.robot.subsystems.shooter.turret.TurretConstants.*;
 import java.util.function.*;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.lib.frc1731.Utils;
 import frc.lib.frc1731.hardware.motor.ctre.MotorIOTalonFX;
@@ -15,17 +16,19 @@ public class TurretSubsystem extends BaseSubsystem {
     private MotorIOTalonFX motor;
     private Translation2d robotToTurret;
     private Supplier<Pose2d> swervePoseSupplier;
+    private Supplier<ChassisSpeeds> swerveSpeedsSupplier;
 
     private double targetDegrees = 0;
     private double minDegrees, maxDegrees;
 
-    public TurretSubsystem(TurretConfiguration configs, Supplier<Pose2d> swervePoseSupplier, boolean enabled) {
+    public TurretSubsystem(TurretConfiguration configs, Supplier<Pose2d> swervePoseSupplier, Supplier<ChassisSpeeds> swerveSpeedsSupplier, boolean enabled) {
         super(configs.name(), enabled);
         if (!isEnabled()) return;
         initializeHardware(configs);
 
         this.robotToTurret = configs.robotToTurret().getTranslation().toTranslation2d();
         this.swervePoseSupplier = swervePoseSupplier;
+        this.swerveSpeedsSupplier = swerveSpeedsSupplier;
         this.minDegrees = configs.minDegrees();
         this.maxDegrees = configs.maxDegrees();
     }
