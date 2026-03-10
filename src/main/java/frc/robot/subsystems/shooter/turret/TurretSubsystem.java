@@ -52,17 +52,6 @@ public class TurretSubsystem extends BaseSubsystem {
         return Utils.isWithin(motor.getRotations() * 360.0, targetDegrees, kEpsilon);
     }
 
-    private double processTarget(double targetDegrees) {
-        if (!isEnabled()) return targetDegrees;
-        double yaw = swervePoseSupplier.get().getRotation().getDegrees();
-        double output = (targetDegrees - yaw + 180) % 360;
-        // output -= 360;
-        if (output > maxDegrees) output -= 360;
-        if (output < minDegrees) output += 360;
-        // output = Utils.clamp(output, minDegrees, maxDegrees);
-        return output;
-    }
-
     @Override
     public void periodicTelemetry() {
         logger.log("Pose", getTurretPose());
@@ -76,14 +65,9 @@ public class TurretSubsystem extends BaseSubsystem {
     }
 
     public Command track(Supplier<Translation2d> target) {
-        // return run(() -> {
-        //    Translation2d turretToTarget = target.get().minus(getTurretPose().getTranslation());
-        //    targetDegrees = calculateTurretOutput(Math.atan(turretToTarget.getY() / turretToTarget.getX()));
-        //    motor.setPosition(targetDegrees / 360.0);
-        // }).withName("Track");
         return this.setDegrees(() -> {
             Translation2d turretToTarget = target.get().minus(getTurretPose().getTranslation());
-            return processTarget(Math.toDegrees(Math.atan2(turretToTarget.getY(), turretToTarget.getX())));
+            return Math.atan(turretToTarget.getY() / turretToTarget.getX());
         });
     }
 
@@ -93,7 +77,9 @@ public class TurretSubsystem extends BaseSubsystem {
 
     public Command setDegrees(DoubleSupplier degrees) {
         return run(() -> {
-            targetDegrees = processTarget(degrees.getAsDouble());
+            targetDegrees = degrees.getAsDouble() - (swervePoseSupplier.get().getRotation().getDegrees() + 180 % 360);
+            if (targetDegrees <= minDegrees) targetDegrees += 360;
+            if (targetDegrees >= maxDegrees) targetDegrees -= 360;
             motor.setPosition(targetDegrees / 360.0);
         }).withName("SetDegrees");
     }
