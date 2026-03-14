@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.5290875598118916,
-        "y": 7.4181688995285855
+        "x": 4.440156918687589,
+        "y": 7.379643366619116
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.529087559811892,
-        "y": 7.4181688995285855
+        "x": 5.440156918687589,
+        "y": 7.379643366619116
       },
       "isLocked": false,
       "linkedName": "LGate"
@@ -76,7 +76,7 @@
       "minWaypointRelativePos": 1.9331550802139037,
       "maxWaypointRelativePos": 3.0,
       "constraints": {
-        "maxVelocity": 0.5,
+        "maxVelocity": 1.0,
         "maxAcceleration": 4.0,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
@@ -103,7 +103,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 0.01936569868183932
   },
   "useDefaultConstraints": true
 }

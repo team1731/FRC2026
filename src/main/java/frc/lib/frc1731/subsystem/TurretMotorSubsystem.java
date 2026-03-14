@@ -9,7 +9,9 @@ import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.lib.frc1731.hardware.motor.MotorIO;
 import frc.robot.Robot;
+import frc.robot.subsystems.BaseSubsystem;
 
+@Deprecated
 public abstract class TurretMotorSubsystem<M extends MotorIO> extends BaseSubsystem {
     protected M motor = null; // The primary motor controller
     private DCMotorSim sim = null; // The simulated model of the turret subsystem

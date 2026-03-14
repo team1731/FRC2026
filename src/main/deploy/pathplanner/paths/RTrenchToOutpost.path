@@ -1,0 +1,54 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 2.8875178316690437,
+        "y": 2.074793152639087
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 2.6416833095577745,
+        "y": 0.8456205420827394
+      },
+      "isLocked": false,
+      "linkedName": "RTrench"
+    },
+    {
+      "anchor": {
+        "x": 0.7080240963855422,
+        "y": 0.6364819277108438
+      },
+      "prevControl": {
+        "x": 1.8265477888730377,
+        "y": 0.6256633380884444
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "ROutpost"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 4.0,
+    "maxAcceleration": 4.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 180.0
+  },
+  "reversed": false,
+  "folder": "RTrenchMidline",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 0.4250395306428823
+  },
+  "useDefaultConstraints": true
+}

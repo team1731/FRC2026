@@ -1,10 +1,10 @@
 package frc.lib.frc1731.hardware.motor;
 
 import frc.lib.frc1731.PIDGains;
-import frc.lib.frc1731.hardware.MotorIOTalonFX;
 import frc.lib.frc1731.hardware.motor.ctre.*;
 import frc.lib.frc1731.hardware.motor.rev.*;
 import frc.lib.frc1731.log.SmartLogger;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 
 /**
@@ -16,6 +16,8 @@ public class MotorIOTest extends SubsystemBase {
     private SmartLogger logger;
     private OutputType outputType = OutputType.kNone;
 
+    private String dashboardTab;
+
     private enum OutputType {
         kPercentOutput,
         kVelocity,
@@ -24,33 +26,38 @@ public class MotorIOTest extends SubsystemBase {
     }
 
     public MotorIOTest(PortConfig config, Class<? extends MotorIO> cls) {
-        if (cls.getSimpleName().equals(OLD_MotorIOSparkFlex.class.getSimpleName())) {
-            // this.testMotor = new OLD_MotorIOSparkFlex(config);
-        } else if (cls.getSimpleName().equals(OLD_MotorIOSparkMax.class.getSimpleName())) {
-            // this.testMotor = new OLD_MotorIOSparkMax(config);
+        if (cls.getSimpleName().equals(MotorIOSparkFlex.class.getSimpleName())) {
+            this.testMotor = new MotorIOSparkFlex(config);
+        } else if (cls.getSimpleName().equals(MotorIOSparkMax.class.getSimpleName())) {
+            this.testMotor = new MotorIOSparkMax(config);
         } else if (cls.getSimpleName().equals(MotorIOTalonFX.class.getSimpleName())) {
             this.testMotor = new MotorIOTalonFX(config);
-        } else if (cls.getSimpleName().equals(OLD_MotorIOTalonFXS.class.getSimpleName())) {
-            // this.testMotor = new OLD_MotorIOTalonFXS(config);
+        } else if (cls.getSimpleName().equals(MotorIOTalonFXS.class.getSimpleName())) {
+            this.testMotor = new MotorIOTalonFXS(config);
         }
 
-        this.logger = new SmartLogger("TestMotor/" + cls.getSimpleName() + "[" + config.kPort + "]");
+        dashboardTab = "TestMotor/" + cls.getSimpleName() + "[" + config.kPort + "]";
+
+        this.logger = new SmartLogger(dashboardTab);
         this.logger.log("Class Type", cls.getSimpleName());
+
+        SmartDashboard.putNumber(dashboardTab + "/Tuneable Output", desiredOutput);
+    }
+
+    /**
+     * Sets the maximum and minimum values that the motor can rotate to in rotations
+     */
+    public MotorIOTest setSoftLimits(double min, double max) {
+        this.testMotor.setSoftLimits(min, max);
+        return this;
     }
 
     /**
      * Adds an inverted follower motor to this test motor
      */
-    public MotorIOTest withFollower(MotorIOTest other, boolean inverted) {
-        other.testMotor.follow(this.testMotor, inverted);
-        return this;
-    }
-
-    /**
-     * Adds a follower motor to this test motor
-     */
     public MotorIOTest withFollower(MotorIOTest other) {
-        return this.withFollower(other, false);
+        other.testMotor.follow(this.testMotor);
+        return this;
     }
 
     /**
@@ -86,7 +93,16 @@ public class MotorIOTest extends SubsystemBase {
      * Set the desired output of the motor to a percentage of maximum output
      */
     public Command setPercentOutput(double percent) {
-        return new InstantCommand(() -> {
+        return run(() -> {
+            this.desiredOutput = percent;
+            this.testMotor.setPercentOutput(percent);
+            this.outputType = OutputType.kPercentOutput;
+        });
+    }
+
+    public Command setTuneablePercentOutput(double defaultValue) {
+        return run(() -> {
+            double percent = SmartDashboard.getNumber(dashboardTab + "/Tuneable Output", 0.0);
             this.desiredOutput = percent;
             this.testMotor.setPercentOutput(percent);
             this.outputType = OutputType.kPercentOutput;
@@ -97,7 +113,7 @@ public class MotorIOTest extends SubsystemBase {
      * Set the velocity of the motor in RPM
      */
     public Command setVelocityRPS(double velocityRPS) {
-        return new InstantCommand(() -> {
+        return run(() -> {
             this.desiredOutput = velocityRPS;
             this.testMotor.setVelocityRPS(velocityRPS);
             this.outputType = OutputType.kVelocity;
@@ -108,7 +124,7 @@ public class MotorIOTest extends SubsystemBase {
      * Set the position of the motor in rotations
      */
     public Command setPosition(double rotations) {
-        return new InstantCommand(() -> {
+        return run(() -> {
             this.desiredOutput = rotations;
             this.testMotor.setPosition(rotations);
             this.outputType = OutputType.kPosition;

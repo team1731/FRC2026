@@ -2,26 +2,25 @@ package frc.lib.frc1731.subsystem;
 
 import static edu.wpi.first.units.Units.*;
 
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.wpilibj.RobotController;
+import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
+
+import edu.wpi.first.units.measure.*;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.lib.frc1678.sim.RollerSim;
-import frc.lib.frc1678.sim.RollerSim.RollerSimConstants;
 import frc.lib.frc1731.PIDGains;
 import frc.lib.frc1731.hardware.motor.MotorIO;
+import frc.lib.frc1731.sim.SimpleVelocitySim;
+import frc.lib.frc1731.sim.SimpleVelocitySim.SimConstants;
 import frc.robot.Robot;
+import frc.robot.subsystems.BaseSubsystem;
 
 public abstract class VelocitySubsystem<M extends MotorIO> extends BaseSubsystem {
     protected M motor; // The primary motor controller
-
-    private AngularVelocity targetVelocity = RotationsPerSecond.zero();
-
-    private RollerSim sim = null; // The simulated model of the subsystem
-    private PIDGains simPIDGains; // The active PIDController for simulating the subsystem
-    private SimpleMotorFeedforward simFF; // The feedforward component for the sim PID controller
-
+    private AngularVelocity targetVelocity = RotationsPerSecond.zero(); // The setpoint velocity for the motor
+    private SimpleVelocitySim sim = null; // The simulated model of the subsystem
+    private AngularVelocity epsilon = RotationsPerSecond.of(1); // The velocity tolerance to be considered "at target speed"
     private double mechanismRatio = 1d; // Mechanism input:output reduction ratio (i.e 2:1 ratio means 2 motor rotations per mechanism rotation)
+    private AngularVelocity kMaxVelocity = RotationsPerSecond.of(100); // The maximum velocity of the mechanism, used for percent output commands
 
     protected VelocitySubsystem(boolean enabled) {
         super(enabled);
@@ -34,89 +33,84 @@ public abstract class VelocitySubsystem<M extends MotorIO> extends BaseSubsystem
     @Override
     public void periodic() {
         super.periodic();
-        sim.simulate();
+        if (sim != null) sim.periodic();
     }
 
-    protected void withSimulation(RollerSimConstants constants, PIDGains simGains) {
-        this.sim = new RollerSim(constants);
-        this.simPIDGains = simGains;
-        this.simFF = new SimpleMotorFeedforward(
-            simGains.kS,
-            simGains.kV,
-            simGains.kA
+    protected void withTolerance(AngularVelocity epsilon) {
+        this.epsilon = epsilon;
+    }
+
+    protected void withMaxVelocity(AngularVelocity maxVelocity) {
+        this.kMaxVelocity = maxVelocity;
+    }
+
+    protected void withSysId(double quasistaticRampRate, double dynamicStepRate, double timeout) {
+        super.initSysId(quasistaticRampRate, dynamicStepRate, timeout,
+            volts -> setVoltage(volts),
+            () -> getMotorAngle(), 
+            () -> getVelocity(), 
+            () -> getVoltage()
         );
     }
 
-    protected void setVelocity(AngularVelocity velocity) {
-        this.setVelocity(velocity, 0);
+    protected void withSimulation(SimConstants constants, PIDGains simGains) {
+        this.sim = new SimpleVelocitySim(constants.motor, constants.gearing, constants.radius, constants.weight, simGains);
     }
 
-    protected void setVelocity(AngularVelocity velocity, int pidSlot) {
-        this.targetVelocity = velocity.times(mechanismRatio);
-        this.motor.setVelocityRPS(targetVelocity.in(RotationsPerSecond), pidSlot);
-
-        if (sim == null || simPIDGains == null) return;
-        double curVelocity = getVelocity().in(RotationsPerSecond);
-        double tarVelocity = targetVelocity.in(RotationsPerSecond);
-
-        double desiredVoltage = simPIDGains.toPIDController().calculate(curVelocity, tarVelocity) + simFF.calculate(curVelocity);
-        sim.setVoltage(Volts.of(desiredVoltage));
+    public Angle getMotorAngle() {
+        if (Robot.isSimulation() && sim != null) return sim.getPosition().div(mechanismRatio);
+        return motor != null ? Rotations.of(motor.getRotations()) : Degrees.zero();
     }
 
-    protected void setPercentOutput(double targetPercent) {
-        this.targetVelocity = RotationsPerSecond.of(targetPercent * 6380d / 60d); // TODO - Adjust max velocity based on motor
-        this.motor.setPercentOutput(targetPercent);
-
-        if (sim == null) return;
-        this.sim.setVoltage(Volts.of(targetPercent * RobotController.getBatteryVoltage()));
+    public AngularVelocity getVelocity() {
+        if (Robot.isSimulation() && sim != null) return sim.getVelocity().div(mechanismRatio);
+        return motor != null ? RotationsPerSecond.of(motor.getVelocityRPS()) : RotationsPerSecond.zero();
     }
 
-    protected void setVoltage(double targetVoltage) {
-        this.targetVelocity = RotationsPerSecond.of(targetVoltage * 531.67 / 60d); // TODO - Adjust Kv based on motor
-        this.motor.setVoltage(targetVoltage);
-
-        if (sim == null) return;
-        this.sim.setVoltage(Volts.of(targetVoltage));
+    public Voltage getVoltage() {
+        if (Robot.isSimulation() && sim != null) return sim.getAppliedVoltage();
+        return Volts.of(motor.getAppliedVoltage());
     }
 
-    protected AngularVelocity getVelocity() {
-        return Robot.isSimulation() ? sim.getVelocity():
-        RotationsPerSecond.of(motor.getVelocityRPS());
+    public AngularVelocity getTargetVelocity() {
+        return targetVelocity;
     }
 
-    protected double getVelocityRPS() {
-        return getVelocity().in(RotationsPerSecond);
+    public boolean atTargetVelocity() {
+        return getVelocity().isNear(getTargetVelocity(), epsilon);
     }
 
-    protected AngularVelocity getTargetVelocity() {
-        return this.targetVelocity;
+    protected void setVoltage(Voltage volts) {
+        if (motor != null)  motor.setVoltage(volts.in(Volts));
+        if (Robot.isSimulation() && sim != null) sim.setVoltage(volts); 
     }
 
-    protected double getTargetVelocityRPS() {
-        return getTargetVelocity().in(RotationsPerSecond);
+    public Command setPercentOutputCommand(DoubleSupplier percent) {
+        return run(() -> {
+            this.targetVelocity = kMaxVelocity.times(percent.getAsDouble());
+            if (motor != null)  motor.setPercentOutput(percent.getAsDouble());
+            if (motor != null && sim != null) sim.setVoltage(Volts.of(percent.getAsDouble() * 12d));
+        }).withName("SetPercent");
     }
 
-    protected Command setVelocityCommand(AngularVelocity velocity) {
-        return this.run(() -> this.setVelocity(velocity));
+    public Command setPercentOutputCommand(double percent) {
+        return this.setPercentOutputCommand(() -> percent);
     }
 
-    protected Command setVelocityCommand(double velocityRPS) {
-        return this.setVelocityCommand(RotationsPerSecond.of(velocityRPS));
+    public Command setVelocityCommand(Supplier<AngularVelocity> velocity) {
+        return run(() -> {
+            this.targetVelocity = velocity.get();
+            if (motor != null) motor.setVelocityRPS(targetVelocity.in(RotationsPerSecond) / mechanismRatio);
+            if (sim != null) sim.setVelocity(targetVelocity);
+        }).withName("SetVelocity");
     }
 
-    protected Command setPercentOutputCommand(double desiredPercent) {
-        return this.run(() -> this.setPercentOutput(desiredPercent));
+    public Command setVelocityCommand(AngularVelocity velocity) {
+        return this.setVelocityCommand(() -> velocity);
     }
 
-    protected Command setVoltageCommand(double desiredVoltage) {
-        return this.run(() -> this.setVoltage(desiredVoltage));
-    }
-
-    protected Command stopCommand() {
-        return this.runOnce(() -> {
-            this.motor.brake();
-            this.targetVelocity = RotationsPerSecond.zero();
-            this.sim.setVoltage(Volts.of(0d));
-        });
+    public Command stopCommand() {
+        return setPercentOutputCommand(0.0)
+        .withName("Stop");
     }
 }

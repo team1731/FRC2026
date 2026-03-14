@@ -12,7 +12,6 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 
 import frc.lib.frc1731.PIDGains;
 import frc.robot.subsystems.drive.generated.TunerConstants;
-import frc.robot.subsystems.vision.VisionConstants;
 
 public class SwerveConstants {
     public static final double kMaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // Max robot speed
@@ -39,18 +38,18 @@ public class SwerveConstants {
     public static final SwerveRequest.FieldCentric kFieldCentricControl = new SwerveRequest.FieldCentric()
         .withDeadband(kMaxSpeed * kDeadband) // Add a 5% deadband
         .withRotationalDeadband(kMaxAngularRate * kDeadband) // Add a 5% deadband
-        .withDriveRequestType(DriveRequestType.Velocity); // Use open-loop control for drive motors
+        .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
 
     public static final SwerveRequest.RobotCentric kRobotCentricControl = new SwerveRequest.RobotCentric()
         .withDeadband(kMaxSpeed * kDeadband) // Add a 5% deadband
         .withRotationalDeadband(kMaxAngularRate * kDeadband) // Add a 5% deadband
-        .withDriveRequestType(DriveRequestType.Velocity);
+        .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
     private static final double kDriveToTargetMaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
     private static final double kDriveToTargetDeadband = 0.01; // Add a 1% deadband
 
     public static final SwerveRequest.FieldCentricFacingAngle driveAtTargetControl = new SwerveRequest.FieldCentricFacingAngle()
-        .withRotationalDeadband(VisionConstants.MAX_ANGULAR_SPEED * kDriveToTargetDeadband) // Add a 1% deadband
+        .withRotationalDeadband(SwerveConstants.kMaxAngularRate * kDriveToTargetDeadband) // Add a 1% deadband
 		.withDriveRequestType(DriveRequestType.OpenLoopVoltage)
         .withDeadband((kDriveToTargetMaxSpeed * kDeadband));
     
