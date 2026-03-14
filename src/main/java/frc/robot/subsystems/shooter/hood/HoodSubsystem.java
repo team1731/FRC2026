@@ -14,19 +14,17 @@ public class HoodSubsystem extends BaseSubsystem {
     private double targetRotations = 0;
 
     public HoodSubsystem(HoodConfiguration config, boolean enabled) {
-        super(config.name(), enabled);
-        if (!isEnabled()) return;
-        initializeHardware(config);
+        super(config.name(), config, enabled);
     }
 
-    private void initializeHardware(HoodConfiguration config) {
-        motor = new MotorIOTalonFXS(config.portConfig());
+    @Override
+    protected void initializeHardware() {
+        motor = new MotorIOTalonFXS(((HoodConfiguration)config.get()).portConfig());
         motor.withPIDGains(kPositionGains);
         motor.withStatorCurrentLimit(kCurrentLimit);
         motor.withMotionProfile(kMaxVelocity, kMaxAcceleration);
         motor.setSoftLimits(kMinRotations, kMaxRotations);
         motor.resetEncoderPosition(0);
-        // TODO - SET FEEDBACK CONFIGS AND MAYBE CANCODER DEPENDING ON IF WE EVEN WANT IT
     }
 
     public boolean atTarget() {
@@ -53,7 +51,7 @@ public class HoodSubsystem extends BaseSubsystem {
     }
 
     public Command stow() {
-        return setRotations(0)
+        return setRotations(kMinRotations)
         .withName("Stow");
     }
 }

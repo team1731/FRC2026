@@ -15,6 +15,7 @@ import java.nio.file.Path;
  * <p>NOTE: All constants are defined relative to the field coordinate system, and from the
  * perspective of the blue alliance station
  */
+@Deprecated
 public class FieldConstants {
   public static final FieldType fieldType = FieldType.ANDYMARK;
 

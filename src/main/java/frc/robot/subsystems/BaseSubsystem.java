@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.*;
 
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -17,21 +18,33 @@ import frc.lib.frc1731.log.SmartLogger;
 import frc.robot.RobotConstants;
 
 public abstract class BaseSubsystem extends SubsystemBase {
+    private SysIdRoutine sysIdRoutine = null;
     private boolean enabled = false;
     protected SmartLogger logger = null;
 
-    private SysIdRoutine sysIdRoutine = null;
+    protected Optional<SubsystemConfiguration> config = Optional.empty();
 
-    protected BaseSubsystem(String nameModifier, boolean enabled) {
+    protected <T extends SubsystemConfiguration> BaseSubsystem(String nameModifier, SubsystemConfiguration config, boolean enabled) {
         this.enabled = enabled;
         this.setName(nameModifier + getName());
-        this.logger = new SmartLogger(getName());
+        this.logger = new SmartLogger(getName(), () -> RobotConstants.kShouldLog);
+        if (isEnabled()){
+            this.config = Optional.of(config);
+            initializeHardware();
+        }
+    }
+
+    protected BaseSubsystem(SubsystemConfiguration config, boolean enabled) {
+        this("", null, enabled);
+    }
+
+    protected BaseSubsystem(String nameModifier, boolean enabled) {
+        this(nameModifier, null, enabled);
     }
 
     protected BaseSubsystem(boolean enabled) {
         this("", enabled);
     }
-
 
     /**
      * Whether we want the subsystem's hardware to be commandable
@@ -172,6 +185,8 @@ public abstract class BaseSubsystem extends SubsystemBase {
         return Commands.either(super.runEnd(runnable, end), Commands.none(), () -> isEnabled());
     }
 
+    protected abstract void initializeHardware();
+
     public abstract void periodicTelemetry(); // Periodic logging
 
     public void periodicOutput() {} // If needed, periodic output to hardware
@@ -180,13 +195,13 @@ public abstract class BaseSubsystem extends SubsystemBase {
     public void periodic() {
         if (isEnabled()) {
             periodicOutput();
-            if (!RobotConstants.kShouldLog) return;
-
             periodicTelemetry();
-            logger.log("Command/Actively Commanded", isCurrentlyCommanded());
-            logger.log("Command/Has Default Command", !getDefaultCommand().equals(Commands.none()));
-            logger.log("Command/Active Command", getCurrentCommand().getName());
-            logger.log("Command/Default Command", getDefaultCommand().getName());
+            if (RobotConstants.kShouldLog) {
+                logger.log("Command/Actively Commanded", isCurrentlyCommanded());
+                logger.log("Command/Has Default Command", !getDefaultCommand().equals(Commands.none()));
+                logger.log("Command/Active Command", getCurrentCommand().getName());
+                logger.log("Command/Default Command", getDefaultCommand().getName());
+            }
         }
     }
 }

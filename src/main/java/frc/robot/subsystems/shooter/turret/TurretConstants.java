@@ -14,18 +14,16 @@ public class TurretConstants {
     public static final double kSensorToMech = 28.44 / 35.555; // 4.00 : 5.00 overall reduction
     public static final double kEpsilon = 1d; // Degrees;
 
-    public static final Transform3d kLeftTurretToRobot = new Transform3d(
+    public static final Translation3d kRobotToLeftTurret = new Translation3d(
         Units.inchesToMeters(-5.75d), 
         Units.inchesToMeters(7.25d), 
-        Units.inchesToMeters(11.4125d),
-        new Rotation3d()
+        Units.inchesToMeters(11.4125d)
     );
 
-    public static final Transform3d kRightTurretToRobot = new Transform3d(
+    public static final Translation3d kRobotToRightTurret = new Translation3d(
         Units.inchesToMeters(-5.75d), 
         Units.inchesToMeters(-7.25d), 
-        Units.inchesToMeters(11.4125d),
-        new Rotation3d()
+        Units.inchesToMeters(11.4125d)
     );
 
     public static final PIDGains kPositionGains = new PIDGains()
@@ -74,7 +72,7 @@ public class TurretConstants {
         kLeftCANCoderConfigs,
         93.0,
         -303.92,
-        kLeftTurretToRobot
+        kRobotToLeftTurret
     );
 
     public static final TurretConfiguration kRightTurretConfigs = new TurretConfiguration(
@@ -85,6 +83,6 @@ public class TurretConstants {
         kRightCANCoderConfigs,
         319.7,
         -92.5,
-        kRightTurretToRobot
+        kRobotToRightTurret
     );
 }

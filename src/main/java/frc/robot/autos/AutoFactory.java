@@ -12,7 +12,7 @@ public class AutoFactory {
 
     public static boolean isFlipRedBlue() {
         return flipRedBlue;
-      }
+    }
     
     public static Command getAutonomousCommand(String autoName, boolean redAlliance) {
         HashMap<String, String> autoPaths = AutoLoader.getAutoPaths();

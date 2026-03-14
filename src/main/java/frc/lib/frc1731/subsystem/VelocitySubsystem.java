@@ -28,8 +28,6 @@ public abstract class VelocitySubsystem<M extends MotorIO> extends BaseSubsystem
         initializeHardware();
     }
 
-    protected abstract void initializeHardware();
-
     @Override
     public void periodic() {
         super.periodic();

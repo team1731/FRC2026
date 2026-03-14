@@ -6,12 +6,6 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.path.PathConstraints;
 
-import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform3d;
-import edu.wpi.first.math.numbers.N1;
-import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 
 import com.ctre.phoenix6.swerve.SwerveRequest;
@@ -25,9 +19,7 @@ public class SwerveConstants {
     public static final double kMaxAngularAcceleration = 540; // deg/s^2 max acceleration
     public static final double kDeadband = 0.05; // 5% joystick deadband
 
-    public static final boolean kUseVSLAM = true;
     public static final boolean kShouldTelemetrize = true;
-    public static final boolean kUseAprilTags = true;
 
     public static final PIDConstants kPPConstants = new PIDConstants(10d, 0d, 0d); // PID constants for PathPlanner path following
 
@@ -68,36 +60,4 @@ public class SwerveConstants {
     
     public static final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     public static final SwerveRequest.ApplyRobotSpeeds autoRequest = new SwerveRequest.ApplyRobotSpeeds();
-
-    public static final String kLimelightName = "limelight-main";
-
-    public static final Transform3d kRobotToOculus = new Transform3d(
-        Units.inchesToMeters(-12.5),
-        Units.inchesToMeters(-7.5),
-        Units.inchesToMeters(14.5),
-        new Rotation3d(
-            Units.degreesToRadians(0.0),
-            Units.degreesToRadians(0.0),
-            Units.degreesToRadians(180.0)
-        )
-    );
-
-    public static final Transform3d kLimelightToRobot = new Transform3d(
-        Units.inchesToMeters(-11.25),
-        Units.inchesToMeters(9.5),
-        Units.inchesToMeters(13.25),
-        new Rotation3d(
-            Units.degreesToRadians(0.0),
-            Units.degreesToRadians(110.0),
-            Units.degreesToRadians(180.0)
-        )
-    );
-
-    public static final Matrix<N3, N1> kQuestnavStdev = VecBuilder.fill(
-        0.02, // Trust down to 2cm in X direction
-        0.02, // Trust down to 2cm in Y direction
-        0.035 // Trust down to 2 degrees rotational
-    );
-
-    public static final Matrix<N3, N1> kLimelightStdev = VecBuilder.fill(.5,.5,999999);
 }

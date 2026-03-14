@@ -1,9 +1,5 @@
 package frc.robot.subsystems;
 
-import static frc.robot.subsystems.shooter.flywheel.FlywheelConstants.*;
-import static frc.robot.subsystems.shooter.hood.HoodConstants.*;
-import static frc.robot.subsystems.shooter.turret.TurretConstants.*;
-
 import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
@@ -12,9 +8,8 @@ import java.util.function.Supplier;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.*;
-import frc.lib.frc1731.Utils;
-import frc.lib.frc6328.FieldConstants;
-import frc.robot.Robot;
+
+import frc.lib.frc1731.field.FieldPositions;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.indexer.*;
 import frc.robot.subsystems.intake.*;
@@ -22,6 +17,8 @@ import frc.robot.subsystems.shooter.*;
 import frc.robot.subsystems.shooter.flywheel.*;
 import frc.robot.subsystems.shooter.hood.*;
 import frc.robot.subsystems.shooter.turret.*;
+
+import static frc.robot.subsystems.shooter.turret.TurretConstants.*;
 
 public class Superstructure {
     private SwerveSubsystem swerve;
@@ -33,13 +30,6 @@ public class Superstructure {
     private IntakeRollerSubsystem intake;
 
     private ShotTable shotTable = new ShotTable();
-
-    // Targets
-    // private final Translation2d BLUE_TARGET = new Translation2d(4.625594, 4.034536);
-    // private final Translation2d RED_TARGET = new Translation2d(11.915394, 4.034536);
-
-    private static Supplier<Translation2d> hubSupplier = () -> Utils.flip(FieldConstants.Hub.topCenterPoint.toTranslation2d());
-    // private static Supplier<Pose2d> passSupplier = () -> new Pose2d(Utils.flip(new Pose2d(1, 1, new Rotation2d()).getTranslation()), new Rotation2d());
 
     public Superstructure(SwerveSubsystem swerve, FlywheelSubsystem leftFlywheel, FlywheelSubsystem rightFlywheel, 
                             HoodSubsystem leftHood, HoodSubsystem rightHood, IndexerSubsystem indexer, 
@@ -71,8 +61,8 @@ public class Superstructure {
 
     public Command runIntake(BooleanSupplier deployed) {
         return Commands.either(
-            pivot.deploy().alongWith(intake.setPercentOutput(1d)), 
-            pivot.retract().alongWith(intake.setPercentOutput(0.25)), 
+            pivot.deploy().alongWith(intake.setPercentOutput(1d)),
+            pivot.retract().alongWith(intake.setPercentOutput(0.25)),
             deployed
         );
     }
@@ -101,7 +91,7 @@ public class Superstructure {
     }
 
     public Command stowHoods() {
-        return setHoods(kMinRotations, kMinRotations);
+        return leftHood.stow().alongWith(rightHood.stow());
     }
 
     public Command setTurrets(double left, double right) {
@@ -109,11 +99,11 @@ public class Superstructure {
     }
 
     public Command warmup() {
-        return setFlywheels(kWarmupVelocity, kWarmupVelocity);
+        return leftFlywheel.warmup().alongWith(rightFlywheel.warmup());
     }
 
     public Command trackHub() {
-        return leftTurret.trackHub().alongWith(/*rightTurret.trackHub()*/);
+        return leftTurret.trackHub().alongWith(rightTurret.trackHub());
     }
 
     public Command stopShooters() {
@@ -125,18 +115,14 @@ public class Superstructure {
     }
 
     public boolean rightShooterReady() {
-        return rightHood.atTarget() && rightFlywheel.atTargetVelocity()/*&& rightTurret.atTarget() */ ;
-    }
-    
-    public Command wrapShot(Command shotCommand, boolean feedthrough) {
-        return shotCommand.alongWith(Commands.either(runIntake(() -> true), runIntake(() -> false), () -> feedthrough));
+        return rightHood.atTarget() && rightFlywheel.atTargetVelocity() && rightTurret.atTarget();
     }
 
     public Command shoot(Supplier<Translation2d> target) {
         return new DeferredCommand(() -> {
             Translation2d swervePose = swerve.getCurrentPose().getTranslation();
-            Translation2d leftPose = swervePose.plus(kLeftTurretToRobot.getTranslation().toTranslation2d().rotateBy(swerve.getCurrentPose().getRotation()));
-            Translation2d rightPose = swervePose.plus(kRightTurretToRobot.getTranslation().toTranslation2d().rotateBy(swerve.getCurrentPose().getRotation()));
+            Translation2d leftPose = swervePose.plus(kRobotToLeftTurret.toTranslation2d().rotateBy(swerve.getCurrentPose().getRotation()));
+            Translation2d rightPose = swervePose.plus(kRobotToRightTurret.toTranslation2d().rotateBy(swerve.getCurrentPose().getRotation()));
 
             double[] leftParameters = shotTable.getShotParameters(leftPose.minus(target.get()).getNorm());
             double[] rightParameters = shotTable.getShotParameters(rightPose.minus(target.get()).getNorm());
@@ -155,32 +141,27 @@ public class Superstructure {
                 .andThen(index(true))
             );
 
-            // if (leftShooterReady() && rightShooterReady()) shootCommand.alongWith(index(true));
             return shootCommand;
         }, Set.of(leftFlywheel, rightFlywheel, leftHood, rightHood, leftTurret, rightTurret, indexer));
     }
 
     public Command shoot() {
-        return this.shoot(hubSupplier);
+        return this.shoot(() -> FieldPositions.kHub.get());
     }
 
     public Command pass() {
         return this.shoot(() -> {
-            double targetX = 1;
-            double targetY = 1;
-
-            if (Robot.isRedAlliance()) targetX = FieldConstants.fieldLength - targetX;
-            if (swerve.getCurrentPose().getY() > FieldConstants.fieldWidth / 2.0) targetY = FieldConstants.fieldWidth - targetY;
-
-            return new Translation2d(targetX, targetY);
+            return swerve.getCurrentPose().getY() > FieldPositions.kFieldWidth / 2.0 ? 
+                FieldPositions.kLeftPass.get() : 
+                FieldPositions.kRightPass.get();
         });
     }
 
     public Command forceShoot(Supplier<Translation2d> target, double indexDelay) {
         return new DeferredCommand(() -> {
             Translation2d swervePose = swerve.getCurrentPose().getTranslation();
-            Translation2d leftPose = swervePose.plus(kLeftTurretToRobot.getTranslation().toTranslation2d().rotateBy(swerve.getCurrentPose().getRotation()));
-            Translation2d rightPose = swervePose.plus(kRightTurretToRobot.getTranslation().toTranslation2d().rotateBy(swerve.getCurrentPose().getRotation()));
+            Translation2d leftPose = swervePose.plus(kRobotToLeftTurret.toTranslation2d().rotateBy(swerve.getCurrentPose().getRotation()));
+            Translation2d rightPose = swervePose.plus(kRobotToRightTurret.toTranslation2d().rotateBy(swerve.getCurrentPose().getRotation()));
 
             double[] leftParameters = shotTable.getShotParameters(leftPose.minus(target.get()).getNorm());
             double[] rightParameters = shotTable.getShotParameters(rightPose.minus(target.get()).getNorm());
@@ -203,7 +184,7 @@ public class Superstructure {
     }
 
     public Command forceShoot(double indexDelay) {
-        return this.forceShoot(hubSupplier, indexDelay);
+        return this.forceShoot(() -> FieldPositions.kHub.get(), indexDelay);
     }
 
     public Command shoot(double flywheel, double hood, boolean zeroTurret) {

@@ -5,43 +5,40 @@ import static frc.robot.subsystems.shooter.turret.TurretConstants.*;
 import java.util.function.*;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.geometry.*;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.lib.frc1731.Utils;
+import frc.lib.frc1731.field.FieldPositions;
 import frc.lib.frc1731.hardware.motor.ctre.MotorIOTalonFX;
-import frc.lib.frc6328.FieldConstants;
 import frc.robot.subsystems.BaseSubsystem;
 
 public class TurretSubsystem extends BaseSubsystem {
     private MotorIOTalonFX motor;
     private Translation2d robotToTurret;
     private Supplier<Pose2d> swervePoseSupplier;
-    private Supplier<ChassisSpeeds> swerveSpeedsSupplier;
 
     private double targetDegrees = 0;
     private double minDegrees, maxDegrees;
 
-    public TurretSubsystem(TurretConfiguration configs, Supplier<Pose2d> swervePoseSupplier, Supplier<ChassisSpeeds> swerveSpeedsSupplier, boolean enabled) {
-        super(configs.name(), enabled);
-        if (!isEnabled()) return;
-        initializeHardware(configs);
-
-        this.robotToTurret = configs.robotToTurret().getTranslation().toTranslation2d();
+    public TurretSubsystem(TurretConfiguration config, Supplier<Pose2d> swervePoseSupplier, boolean enabled) {
+        super(config.name(), config, enabled);
         this.swervePoseSupplier = swervePoseSupplier;
-        this.swerveSpeedsSupplier = swerveSpeedsSupplier;
-        this.minDegrees = configs.minDegrees();
-        this.maxDegrees = configs.maxDegrees();
     }
 
-    private void initializeHardware(TurretConfiguration configs) {
-        motor = new MotorIOTalonFX(configs.motorConfigs());
+    @Override
+    protected void initializeHardware() {
+        TurretConfiguration turretConfig = (TurretConfiguration)config.get();
+        motor = new MotorIOTalonFX(turretConfig.motorConfigs());
         motor.withPIDGains(kPositionGains);
-        motor.withCANCoder(configs.feedbackConfigs().FeedbackRemoteSensorID, configs.motorConfigs().kBus, configs.cancoderConfigs());
-        motor.withFeedbackConfigs(configs.feedbackConfigs());
+        motor.withCANCoder(turretConfig.feedbackConfigs().FeedbackRemoteSensorID, turretConfig.motorConfigs().kBus, turretConfig.cancoderConfigs());
+        motor.withFeedbackConfigs(turretConfig.feedbackConfigs());
         motor.withMotionProfile(kMaxTurretVelocity, kMaxTurretAcceleration);
         motor.withStatorCurrentLimit(kCurrentLimit);
-        motor.setSoftLimits(configs.minDegrees() / 360.0, configs.maxDegrees() / 360.0);
+        motor.setSoftLimits(turretConfig.minDegrees() / 360.0, turretConfig.maxDegrees() / 360.0);
         motor.setNeutralMode(NeutralModeValue.Brake);
+
+        this.robotToTurret = turretConfig.robotToTurret().toTranslation2d();
+        this.minDegrees = turretConfig.minDegrees();
+        this.maxDegrees = turretConfig.maxDegrees();
     }
 
     public Pose2d getTurretPose() {
@@ -64,7 +61,7 @@ public class TurretSubsystem extends BaseSubsystem {
     }
 
     public Command trackHub() {
-        return track(() -> FieldConstants.Hub.topCenterPoint.toTranslation2d());
+        return track(FieldPositions.kHub.get());
     }
 
     public Command track(Supplier<Translation2d> target) {

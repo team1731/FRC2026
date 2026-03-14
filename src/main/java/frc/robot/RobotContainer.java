@@ -17,7 +17,6 @@ import frc.robot.subsystems.intake.IntakePivotSubsystem;
 import frc.robot.subsystems.intake.IntakeRollerSubsystem;
 import frc.robot.subsystems.leds.LEDSubsystem;
 import frc.robot.subsystems.shooter.turret.TurretSubsystem;
-
 public class RobotContainer {
     public enum TestShotCondition {
         kNone,
@@ -32,14 +31,14 @@ public class RobotContainer {
     private IndexerSubsystem indexer;
     private IntakeRollerSubsystem intake;
     private IntakePivotSubsystem pivot;
+    private LEDSubsystem led;
 
     private TurretSubsystem leftTurret, rightTurret;
     private FlywheelSubsystem leftFlywheel, rightFlywheel;
     private HoodSubsystem leftHood, rightHood;
 
-    private Superstructure superstructure;
 
-    private LEDSubsystem led;
+    private Superstructure superstructure;
 
     /* Driver Buttons */
     private final CommandXboxController driver = new CommandXboxController(0);
@@ -73,7 +72,6 @@ public class RobotContainer {
 
     public RobotContainer(SwerveSubsystem swerve) {
         this.swerve = swerve;
-
         configureSubsystems();
         configureButtonBindings();
         configureDefaultCommands();
@@ -90,14 +88,14 @@ public class RobotContainer {
         leftHood = new HoodSubsystem(kLeftHoodConfig, true);
         rightHood = new HoodSubsystem(kRightHoodConfig, true);
 
-        leftTurret = new TurretSubsystem(kLeftTurretConfigs, () -> swerve.getCurrentPose(), () -> swerve.getFieldRelativeChassisSpeeds(), true);
-        rightTurret = new TurretSubsystem(kRightTurretConfigs, () -> swerve.getCurrentPose(), () -> swerve.getFieldRelativeChassisSpeeds(), true);
+        leftTurret = new TurretSubsystem(kLeftTurretConfigs, () -> swerve.getCurrentPose(), true);
+        rightTurret = new TurretSubsystem(kRightTurretConfigs, () -> swerve.getCurrentPose(), false);
 
         indexer = new IndexerSubsystem(true);
         pivot = new IntakePivotSubsystem(true);
         intake = new IntakeRollerSubsystem(true);
 
-        led = new LEDSubsystem(8, true);
+        led = new LEDSubsystem(false);
 
         superstructure = new Superstructure(swerve, leftFlywheel, rightFlywheel, 
                                                 leftHood, rightHood, 
@@ -124,20 +122,11 @@ public class RobotContainer {
         // Reset robot pose and heading
         dResetSwerve.onTrue(superstructure.resetGyro());
 
-        // dShoot.whileTrue(new ContinuousConditionalCommand(
-        //     superstructure.runIntake(true),
-        //     superstructure.runIntake(false),
-        //     dIntake
-        // ).alongWith(superstructure.shoot()));
-
         dIntake.whileTrue(superstructure.runIntake(() -> true));
         dShoot.whileTrue(superstructure.shoot().alongWith(superstructure.runIntake(() -> false)));
         dPass.whileTrue(superstructure.pass().alongWith(superstructure.runIntake(() -> false)));
         dFeedthrough.whileTrue(superstructure.shoot().alongWith(superstructure.runIntake(() -> true)));
         dPassthrough.whileTrue(superstructure.pass().alongWith(superstructure.runIntake(() -> true)));
-        // dShoot.whileTrue(superstructure.shoot().alongWith(superstructure.runIntake(false)));
-
-        // dShoot.whileTrue(superstructure.wrapShot(superstructure.shoot(), dIntake.getAsBoolean()));
 
         dHubShot.whileTrue(superstructure.shoot(1.8, true));
         dTowerShot.whileTrue(superstructure.shoot(2.5, true));

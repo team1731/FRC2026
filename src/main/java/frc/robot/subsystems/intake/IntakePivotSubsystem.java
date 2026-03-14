@@ -17,11 +17,14 @@ public class IntakePivotSubsystem extends BaseSubsystem {
 
     public IntakePivotSubsystem(boolean enabled) {
         super(enabled);
-        if (!isEnabled()) return;
+    }
+
+    @Override
+    public void initializeHardware() {
         motor = new MotorIOTalonFX(Ports.kIntakePivotConfig);
         motor.getMotor().clearStickyFaults();
         motor.withPIDGains(kPivotGains);
-        motor.withStatorCurrentLimit(40d);
+        motor.withStatorCurrentLimit(kPivotCurrentLimit);
         motor.setSoftLimits(kPivotIntakeRotations, kPivotStowRotations);
         motor.withFeedbackConfigs(new FeedbackConfigs()
             .withFeedbackRemoteSensorID(Ports.kPivotCANcoderId)

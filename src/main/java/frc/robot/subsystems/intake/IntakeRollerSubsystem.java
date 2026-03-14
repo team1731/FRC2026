@@ -10,14 +10,13 @@ import frc.robot.Ports;
 public class IntakeRollerSubsystem extends VelocitySubsystem<MotorIOTalonFX>{
     public IntakeRollerSubsystem(boolean enabled){
         super(enabled);
-        // this.withSimulation(new SimConstants(DCMotor.getKrakenX60(1), 1.5, Inches.of(1), Pounds.of(0.1)), kPIDGains);
     }
 
     @Override
     protected void initializeHardware() {
         motor = new MotorIOTalonFX(Ports.kIntakeRollerConfig);
         motor.withPIDGains(kRollerGains);
-        motor.withStatorCurrentLimit(40);
+        motor.withStatorCurrentLimit(kRollerCurrentLimit);
     }
 
     @Override
