@@ -22,4 +22,8 @@ public enum FieldPositions {
             new Translation2d(kFieldLength, kFieldWidth).minus(position) : 
             position;
     }
+
+    public Translation2d getRaw() {
+        return position;
+    }
 }

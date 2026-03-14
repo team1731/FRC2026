@@ -77,10 +77,10 @@ public class SwerveSubsystem extends BaseSubsystem {
     private void configureInitialPosition() {
         System.out.println("CommandSwerveDrivetrain: configuring a new position");
 
-        Rotation2d operatorPerspective = Robot.isRedAlliance() ? 
-                new Rotation2d(Math.toRadians(180)) : 
-                new Rotation2d(Math.toRadians(0));
-        drivetrain.setOperatorPerspectiveForward(operatorPerspective);
+        // Rotation2d operatorPerspective = Robot.isRedAlliance() ? 
+        //         new Rotation2d(Math.toRadians(180)) : 
+        //         new Rotation2d(Math.toRadians(0));
+        // drivetrain.setOperatorPerspectiveForward(operatorPerspective);
     }
 
     public void addVisionMeasurement(Pose2d pose, double timestamp, Matrix<N3,N1> visionMeasurementStdDevs) {
@@ -89,7 +89,6 @@ public class SwerveSubsystem extends BaseSubsystem {
 
     public void resetPose(Pose2d pose) {
         drivetrain.resetPose(pose);
-        drivetrain.getPigeon2().setYaw(pose.getRotation().getDegrees());
     }
 
     /**

@@ -6,6 +6,7 @@ import static frc.robot.subsystems.shooter.turret.TurretConstants.*;
 
 import com.pathplanner.lib.auto.NamedCommands;
 
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.*;
 import frc.lib.frc1731.math.LoggedTunableNumber;
 import frc.robot.subsystems.Superstructure;
@@ -15,7 +16,6 @@ import frc.robot.subsystems.shooter.flywheel.FlywheelSubsystem;
 import frc.robot.subsystems.shooter.hood.HoodSubsystem;
 import frc.robot.subsystems.intake.IntakePivotSubsystem;
 import frc.robot.subsystems.intake.IntakeRollerSubsystem;
-import frc.robot.subsystems.leds.LEDSubsystem;
 import frc.robot.subsystems.shooter.turret.TurretSubsystem;
 public class RobotContainer {
     public enum TestShotCondition {
@@ -24,14 +24,13 @@ public class RobotContainer {
         kParameters,
     }
 
-    private static TestShotCondition testCondition = TestShotCondition.kNone;
+    private static TestShotCondition testCondition = TestShotCondition.kDistance;
 
     /* Subsystems */
     private SwerveSubsystem swerve;
     private IndexerSubsystem indexer;
     private IntakeRollerSubsystem intake;
     private IntakePivotSubsystem pivot;
-    private LEDSubsystem led;
 
     private TurretSubsystem leftTurret, rightTurret;
     private FlywheelSubsystem leftFlywheel, rightFlywheel;
@@ -56,7 +55,6 @@ public class RobotContainer {
     private final Trigger dHubShot = driver.x();
     
     private final Trigger dTestSetShot = driver.back();
-    // private final Trigger isShooting = dShoot.or(dTrenchShot).or(dTowerShot).or(dHubShot).or(dPass);
 
     private final Trigger dRetractIntake = driver.leftBumper();
     private final Trigger dUnjam = driver.rightBumper();
@@ -95,8 +93,6 @@ public class RobotContainer {
         pivot = new IntakePivotSubsystem(true);
         intake = new IntakeRollerSubsystem(true);
 
-        led = new LEDSubsystem(false);
-
         superstructure = new Superstructure(swerve, leftFlywheel, rightFlywheel, 
                                                 leftHood, rightHood, 
                                                 indexer, pivot, intake, 
@@ -106,8 +102,8 @@ public class RobotContainer {
     private void configureNamedCommands() {
         // Named commands useful for PathPlanner events
         // ex. NamedCommands.registerCommand("Example", new ExampleCommand());
-        NamedCommands.registerCommand("StopShoot", superstructure.stopShooters());
         NamedCommands.registerCommand("Shoot", superstructure.autoShoot());
+        NamedCommands.registerCommand("StopShoot", Commands.deadline(Commands.waitSeconds(0.1), superstructure.stopShooters()));
         NamedCommands.registerCommand("Intake", superstructure.runIntake(() -> true));
         NamedCommands.registerCommand("Pass", superstructure.pass());
         NamedCommands.registerCommand("Stow Hood", superstructure.stowHoods());
@@ -155,15 +151,13 @@ public class RobotContainer {
         indexer.setDefaultCommand(indexer.stop());
 
         leftTurret.setDefaultCommand(leftTurret.trackHub());
-        // rightTurret.setDefaultCommand(rightTurret.trackHub());
+        rightTurret.setDefaultCommand(rightTurret.trackHub());
 
         leftHood.setDefaultCommand(leftHood.stow());
         rightHood.setDefaultCommand(rightHood.stow());
 
         leftFlywheel.setDefaultCommand(leftFlywheel.stop());
         rightFlywheel.setDefaultCommand(rightFlywheel.stop());
-
-        led.setDefaultCommand(led.setFireCommand());
     }
 
     public void periodic() {

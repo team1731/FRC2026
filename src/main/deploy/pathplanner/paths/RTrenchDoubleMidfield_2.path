@@ -3,32 +3,37 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 0.7080240963855422,
-        "y": 0.6364819277108438
+        "x": 7.9917159090909085,
+        "y": 2.5920454545454548
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.4418144654633058,
-        "y": 1.1234844339869419
+        "x": 7.229011363636363,
+        "y": 0.7368181818181825
       },
       "isLocked": false,
-      "linkedName": "ROutpost"
+      "linkedName": "RMidIntake1"
     },
     {
       "anchor": {
-        "x": 2.8875178316690437,
-        "y": 2.074793152639087
+        "x": 4.023590909090909,
+        "y": 0.6852840909090911
       },
       "prevControl": {
-        "x": 2.6478055910486167,
-        "y": 1.905519571165927
+        "x": 6.043727272727272,
+        "y": 0.6749772727272727
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "RTrench"
+      "linkedName": "RTrenchScore"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.8666666666666665,
+      "rotationDegrees": 0.0
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
@@ -42,13 +47,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0.4250395306428823
+    "rotation": 0.0
   },
   "reversed": false,
-  "folder": "RTrenchMidline",
+  "folder": "RTrenchDoubleMidfield",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 90.0
   },
   "useDefaultConstraints": true
 }

@@ -19,6 +19,8 @@ public class TurretSubsystem extends BaseSubsystem {
     private double targetDegrees = 0;
     private double minDegrees, maxDegrees;
 
+    private Translation2d targetTranslation;
+
     public TurretSubsystem(TurretConfiguration config, Supplier<Pose2d> swervePoseSupplier, boolean enabled) {
         super(config.name(), config, enabled);
         this.swervePoseSupplier = swervePoseSupplier;
@@ -58,6 +60,8 @@ public class TurretSubsystem extends BaseSubsystem {
         logger.log("Current Degrees", motor.getRotations() * 360.0);
         logger.log("Target Degrees", targetDegrees);
         logger.log("At Target", atTarget());
+
+        if (targetTranslation != null) logger.log("TargetDistance", targetTranslation.minus(getTurretPose().getTranslation()).getNorm());
     }
 
     public Command trackHub() {
@@ -66,6 +70,7 @@ public class TurretSubsystem extends BaseSubsystem {
 
     public Command track(Supplier<Translation2d> target) {
         return this.setDegrees(() -> {
+            this.targetTranslation = target.get();
             Translation2d turretToTarget = target.get().minus(getTurretPose().getTranslation());
             return Math.atan(turretToTarget.getY() / turretToTarget.getX());
         });

@@ -11,8 +11,8 @@ import frc.robot.Ports;
 public class FlywheelConstants {
     public static final double kGearRatio = 1d; // 1:1 input:output ratio
     public static final double kMaxVelocity = 100; // Max velocity
-    public static final double kWarmupVelocity = 30; // Warmup velocity
-    public static final double kEpsilon = 1; // 1 RPS tolerance
+    public static final double kWarmupVelocity = 40; // Warmup velocity
+    public static final double kEpsilon = 2; // 2 RPS tolerance
 
     public static final Distance kFlywheelRadius = Inches.of(2d); // 4 inch diameter
     public static final Mass kFlywheelMass = Pounds.of(1d); // 1 lb flywheel

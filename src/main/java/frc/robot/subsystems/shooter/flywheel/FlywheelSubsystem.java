@@ -11,17 +11,15 @@ import frc.robot.subsystems.BaseSubsystem;
 
 public class FlywheelSubsystem extends BaseSubsystem {
     private MotorIOTalonFX motor;
-    private FlywheelConfiguration config;
     private double targetVelocity = 0;
 
     public FlywheelSubsystem(FlywheelConfiguration config, boolean enabled) {
         super(config.name(), config, enabled);
-        this.config = config;
     }
 
     @Override
     protected void initializeHardware() {
-        motor = new MotorIOTalonFX(config.portConfig());
+        motor = new MotorIOTalonFX(((FlywheelConfiguration)config.get()).portConfig());
         motor.withPIDGains(kVelocityGains);
         motor.withStatorCurrentLimit(kCurrentLimit);
     }

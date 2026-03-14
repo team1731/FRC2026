@@ -29,7 +29,8 @@ public abstract class BaseSubsystem extends SubsystemBase {
         this.setName(nameModifier + getName());
         this.logger = new SmartLogger(getName(), () -> RobotConstants.kShouldLog);
         if (isEnabled()){
-            this.config = Optional.of(config);
+            // this.config = config == null ? Optional.empty() : Optional.of(config);
+            if (config != null) this.config = Optional.of(config);
             initializeHardware();
         }
     }
