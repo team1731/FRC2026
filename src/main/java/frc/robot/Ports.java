@@ -24,7 +24,7 @@ public class Ports {
     public static final PortConfig kRightHoodConfig = new PortConfig(RobotConstants.kMainCANBus, 19, false);
     public static final PortConfig kRightFlywheelConfig = new PortConfig(RobotConstants.kMainCANBus, 20, true);
 
-    public static final PortConfig kLeftTurretConfigs = new PortConfig(RobotConstants.kSecondCANBus, 22, false);
+    public static final PortConfig kLeftTurretConfigs = new PortConfig(RobotConstants.kSecondCANBus, 22, true);
     public static final PortConfig kLeftHoodConfig = new PortConfig(RobotConstants.kSecondCANBus, 23, true);
     public static final PortConfig kLeftFlywheelConfig = new PortConfig(RobotConstants.kSecondCANBus, 24, false);
 }

@@ -8,11 +8,16 @@ import frc.robot.subsystems.BaseSubsystem;
 
 import static frc.robot.subsystems.intake.IntakeConstants.*;
 
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
+import com.ctre.phoenix6.configs.MagnetSensorConfigs;
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.core.CoreCANcoder;
 
 public class IntakePivotSubsystem extends BaseSubsystem {
     private MotorIOTalonFX motor;
+    private CANcoder cancoder;
     private double targetPosition = 0;
 
     public IntakePivotSubsystem(boolean enabled) {
@@ -24,16 +29,40 @@ public class IntakePivotSubsystem extends BaseSubsystem {
         motor = new MotorIOTalonFX(Ports.kIntakePivotConfig);
         motor.getMotor().clearStickyFaults();
         motor.withPIDGains(kPivotGains);
-        motor.withStatorCurrentLimit(kPivotCurrentLimit);
+        motor.withStatorCurrentLimit(40d);
         motor.setSoftLimits(kPivotIntakeRotations, kPivotStowRotations);
         motor.withFeedbackConfigs(new FeedbackConfigs()
-            .withFeedbackRemoteSensorID(Ports.kPivotCANcoderId)
-            .withRemoteCANcoder(new CoreCANcoder(Ports.kPivotCANcoderId))
-            .withRotorToSensorRatio(kPivotGearRatio)
+            .withFeedbackRemoteSensorID(15)
+            .withRemoteCANcoder(new CoreCANcoder(15, "Left CANivore"))
+            .withRotorToSensorRatio(48d)
         );
 
-        motor.withMotionProfile(3, 2);
-        motor.setDynamicMotionMagicSpeeds(3, 2);
+        motor.withMotionMagicConfigs(
+            new MotionMagicConfigs().withMotionMagicCruiseVelocity(3)
+            .withMotionMagicAcceleration(2)
+        );
+
+        motor.setDynamicMotionMagicSpeeds(2, 2);  
+        // motor = new MotorIOTalonFX(Ports.kIntakePivotConfig);
+        cancoder = new CANcoder(Ports.kPivotCANcoderId);
+
+        CANcoderConfiguration coderConfig = new CANcoderConfiguration()
+        .withMagnetSensor(new MagnetSensorConfigs().withMagnetOffset(-0.04833984375));
+        cancoder.getConfigurator().apply(coderConfig);
+
+        // motor.getMotor().clearStickyFaults();
+        // motor.withPIDGains(kPivotGains);
+        // motor.withStatorCurrentLimit(kPivotCurrentLimit);
+        // motor.setSoftLimits(kPivotIntakeRotations, kPivotStowRotations);
+        // motor.withFeedbackConfigs(new FeedbackConfigs()
+        //     .withFeedbackRemoteSensorID(Ports.kPivotCANcoderId)
+        //     .withRemoteCANcoder(new CoreCANcoder(Ports.kPivotCANcoderId))
+        //     .withRotorToSensorRatio(kPivotGearRatio)
+        // );
+
+        // motor.withMotionProfile(3, 2);
+        // motor.setDynamicMotionMagicSpeeds(3, 2);
+        motor.getMotor().setPosition(cancoder.getAbsolutePosition().waitForUpdate(0.2).getValueAsDouble());
     }
 
     public boolean atTargetPosition() {

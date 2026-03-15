@@ -101,11 +101,12 @@ public class SwerveSubsystem extends BaseSubsystem {
 
     public void resetHeadingButtonPressed() {
         drivetrain.seedFieldCentric();
-        drivetrain.getPigeon2().reset();
+        drivetrain.getPigeon2().setYaw(drivetrain.getOperatorForwardDirection().getDegrees());
     }
 
     public void resetJustHeading(Pose2d autoStartPose) {  // this is called from auto preloads
         resetPose(new Pose2d(getCurrentPose().getX(), getCurrentPose().getY(), autoStartPose.getRotation()));
+        drivetrain.getPigeon2().setYaw(autoStartPose.getRotation().getDegrees());
     }
 
     public double getYaw() {
@@ -140,6 +141,9 @@ public class SwerveSubsystem extends BaseSubsystem {
 
     public Command driveCommand(CommandXboxController m_xboxController, BooleanSupplier isFieldCentric) {
         return run(() -> {
+            double speedScalar = kMaxSpeed;
+            speedScalar *= m_xboxController.rightTrigger().getAsBoolean() ? 0.5 : 1;
+
             if ((Math.abs(m_xboxController.getLeftY()) < kDeadband) && 
                 (Math.abs(m_xboxController.getLeftX()) < kDeadband) &&
                 (Math.abs(m_xboxController.getRightX()) < kDeadband)){
@@ -148,16 +152,16 @@ public class SwerveSubsystem extends BaseSubsystem {
                 if (isFieldCentric.getAsBoolean()) {
                     drivetrain.setControl(
                         kFieldCentricControl
-                            .withVelocityX(-(Math.abs(m_xboxController.getLeftY()) * m_xboxController.getLeftY()) * kMaxSpeed)
-                            .withVelocityY(-(Math.abs(m_xboxController.getLeftX()) * m_xboxController.getLeftX()) * kMaxSpeed)
+                            .withVelocityX(-(Math.abs(m_xboxController.getLeftY()) * m_xboxController.getLeftY()) * speedScalar)
+                            .withVelocityY(-(Math.abs(m_xboxController.getLeftX()) * m_xboxController.getLeftX()) * speedScalar)
                             .withRotationalRate(-m_xboxController.getRightX() * kMaxAngularRate)
                     );
                 } 
                  else {
                      drivetrain.setControl(
                          kRobotCentricControl
-                             .withVelocityX(-(Math.abs(m_xboxController.getLeftY()) * m_xboxController.getLeftY()) * kMaxSpeed)
-                             .withVelocityY(-(Math.abs(m_xboxController.getLeftX()) * m_xboxController.getLeftX()) * kMaxSpeed)
+                             .withVelocityX(-(Math.abs(m_xboxController.getLeftY()) * m_xboxController.getLeftY()) * speedScalar)
+                             .withVelocityY(-(Math.abs(m_xboxController.getLeftX()) * m_xboxController.getLeftX()) * speedScalar)
                              .withRotationalRate(-m_xboxController.getRightX() * kMaxAngularRate)
                      );
                  }

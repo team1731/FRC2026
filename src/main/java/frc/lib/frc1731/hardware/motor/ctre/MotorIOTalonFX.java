@@ -255,6 +255,12 @@ public class MotorIOTalonFX extends MotorIO {
         this.configurator.apply(configs);
     }
 
+    public void withCANCoder(int deviceID, String bus, CANcoderConfiguration configuration) {
+        this.cancoder = new CANcoder(deviceID, bus);
+        this.cancoder.getConfigurator().apply(configuration);
+        motor.setPosition(cancoder.getAbsolutePosition().getValueAsDouble());
+    }
+
     public StatusSignal<ForwardLimitValue> getForwardLimit() {
         return this.motor.getForwardLimit();
     }

@@ -16,6 +16,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -51,6 +52,8 @@ public class Robot extends LoggedRobot {
 	private Pose2d currentAutoPose;
 	private Pose2d targetAutoPose;
 
+	private SendableChooser<String> autoChooser;
+
 	public static final Trigger IS_ENABLED = new Trigger(() -> DriverStation.isEnabled());
 	public static final Trigger IS_TELEOP = new Trigger(() -> DriverStation.isTeleop());
 	public static final Trigger IS_AUTONOMOUS = new Trigger(() -> DriverStation.isAutonomous());
@@ -76,6 +79,7 @@ public class Robot extends LoggedRobot {
 		swerve = new SwerveSubsystem(true); 
 		vision = new VisionSubsystem(swerve, true);
 		container = new RobotContainer(swerve);  // passed in swerve because we needed it here for auto
+		autoChooser = AutoLoader.loadAutoChooser();
 		autoPreload();
 		
 		SmartDashboard.putData(RobotConstants.kAutoCodeKey, AutoLoader.loadAutoChooser()); // Puts the auto selector in smartdashboard
@@ -142,7 +146,7 @@ public class Robot extends LoggedRobot {
 		 */
 		String selectedAutoCode = null;
 		boolean autoCodeChanged = false;
-		selectedAutoCode = AutoLoader.loadAutoChooser().getSelected();
+		selectedAutoCode = autoChooser.getSelected();
 		if(selectedAutoCode == null) {
 			selectedAutoCode = autoCode == null ? RobotConstants.kAutoDefault : autoCode;
 		}

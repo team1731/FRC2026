@@ -6,8 +6,8 @@ import edu.wpi.first.math.numbers.*;
 import edu.wpi.first.math.util.Units;
 
 public class VisionConstants {
-    public static final boolean kUseVSLAM = true;
-    public static final boolean kUseAprilTags = true;
+    public static final boolean kUseVSLAM = false;
+    public static final boolean kUseAprilTags = false;
     
     public static final String kLimelightName = "limelight-main";
 

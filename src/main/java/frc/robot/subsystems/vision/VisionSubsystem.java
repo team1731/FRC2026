@@ -46,14 +46,19 @@ public class VisionSubsystem extends BaseSubsystem {
     }
 
     public void resetOculusPose(Pose3d pose) {
-        this.oculus.setPose(pose);
+        if (kUseVSLAM) {
+            this.oculus.setPose(pose);
+        }
     }
 
     public boolean isVSLAMConnected() {
+        if (!kUseAprilTags) return false;
         return oculus.isConnected() && oculus.isTracking();
     }
 
     private void addQuestVisionMeasurement() {
+        if (!kUseVSLAM) return;
+        
         questPoseResetTimer.start();
 
         // Get the latest pose data frames from the Quest
@@ -97,7 +102,7 @@ public class VisionSubsystem extends BaseSubsystem {
                 goodLimelightTimer.restart();
             }
 
-            baselinePose = estimate.pose;
+            baselinePose = estimate.pose.rotateBy(Rotation2d.k180deg);
         }
         
         if (kUseVSLAM) {

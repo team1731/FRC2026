@@ -3,7 +3,15 @@ package frc.robot.subsystems.shooter.turret;
 import static frc.robot.subsystems.shooter.turret.TurretConstants.*;
 
 import java.util.function.*;
+
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.hardware.CANcoder;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.signals.SensorDirectionValue;
+
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.lib.frc1731.Utils;
@@ -13,6 +21,7 @@ import frc.robot.subsystems.BaseSubsystem;
 
 public class TurretSubsystem extends BaseSubsystem {
     private MotorIOTalonFX motor;
+    private CANcoder cancoder;
     private Translation2d robotToTurret;
     private Supplier<Pose2d> swervePoseSupplier;
 
@@ -30,13 +39,39 @@ public class TurretSubsystem extends BaseSubsystem {
     protected void initializeHardware() {
         TurretConfiguration turretConfig = (TurretConfiguration)config.get();
         motor = new MotorIOTalonFX(turretConfig.motorConfigs());
-        motor.withPIDGains(kPositionGains);
-        motor.withCANCoder(turretConfig.feedbackConfigs().FeedbackRemoteSensorID, turretConfig.motorConfigs().kBus, turretConfig.cancoderConfigs());
-        motor.withFeedbackConfigs(turretConfig.feedbackConfigs());
-        motor.withMotionProfile(kMaxTurretVelocity, kMaxTurretAcceleration);
-        motor.withStatorCurrentLimit(kCurrentLimit);
-        motor.setSoftLimits(turretConfig.minDegrees() / 360.0, turretConfig.maxDegrees() / 360.0);
-        motor.setNeutralMode(NeutralModeValue.Brake);
+
+        cancoder = new CANcoder(turretConfig.cancoderID());
+
+        CANcoderConfiguration coderConfig = new CANcoderConfiguration();
+        coderConfig.MagnetSensor.MagnetOffset = turretConfig.cancoderConfigs().MagnetSensor.MagnetOffset;
+        coderConfig.MagnetSensor.AbsoluteSensorDiscontinuityPoint = turretConfig.cancoderConfigs().MagnetSensor.AbsoluteSensorDiscontinuityPoint;
+        coderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
+        cancoder.getConfigurator().apply(coderConfig);
+
+        TalonFXConfiguration motorConfig = new TalonFXConfiguration();
+        motorConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
+        motorConfig.Feedback.FeedbackRemoteSensorID = cancoder.getDeviceID();
+        motorConfig.Feedback.RotorToSensorRatio = turretConfig.feedbackConfigs().RotorToSensorRatio;
+        motorConfig.Feedback.SensorToMechanismRatio = turretConfig.feedbackConfigs().SensorToMechanismRatio;
+
+        motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+        motorConfig.MotorOutput.Inverted = turretConfig.motorConfigs().kInverted ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
+        motorConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = turretConfig.maxDegrees() / 360.0;
+        motorConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = turretConfig.minDegrees() / 360.0;
+        motorConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+        motorConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+        motorConfig.CurrentLimits.StatorCurrentLimit = 30d;
+
+        motorConfig.Slot0.kP = 60.0; 
+        motorConfig.Slot0.kS = 0.2;
+        motorConfig.Slot0.kA = 0.01;
+        motorConfig.Slot0.kI = 0;
+        motorConfig.Slot0.kD = 0.5;
+        motorConfig.MotionMagic.MotionMagicCruiseVelocity = 4;
+        motorConfig.MotionMagic.MotionMagicAcceleration = 4;
+
+        motor.getMotor().getConfigurator().apply(motorConfig);
+        motor.getMotor().setPosition(cancoder.getAbsolutePosition().waitForUpdate(0.2).getValueAsDouble());
 
         this.robotToTurret = turretConfig.robotToTurret().toTranslation2d();
         this.minDegrees = turretConfig.minDegrees();
@@ -60,6 +95,8 @@ public class TurretSubsystem extends BaseSubsystem {
         logger.log("Current Degrees", motor.getRotations() * 360.0);
         logger.log("Target Degrees", targetDegrees);
         logger.log("At Target", atTarget());
+        logger.log("Min Degrees", minDegrees);
+        logger.log("Max Degrees", maxDegrees);
 
         if (targetTranslation != null) logger.log("TargetDistance", targetTranslation.minus(getTurretPose().getTranslation()).getNorm());
     }
@@ -72,7 +109,7 @@ public class TurretSubsystem extends BaseSubsystem {
         return this.setDegrees(() -> {
             this.targetTranslation = target.get();
             Translation2d turretToTarget = target.get().minus(getTurretPose().getTranslation());
-            return Math.atan(turretToTarget.getY() / turretToTarget.getX());
+            return Math.atan(turretToTarget.getY() / turretToTarget.getX()) * 180 / Math.PI;
         });
     }
 

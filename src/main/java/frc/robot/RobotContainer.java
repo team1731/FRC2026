@@ -81,10 +81,10 @@ public class RobotContainer {
      */
     private void configureSubsystems() {
         leftFlywheel = new FlywheelSubsystem(kLeftFlywheelConfig, true);
-        rightFlywheel = new FlywheelSubsystem(kRightFlywheelConfig, true);
+        rightFlywheel = new FlywheelSubsystem(kRightFlywheelConfig, false);
 
         leftHood = new HoodSubsystem(kLeftHoodConfig, true);
-        rightHood = new HoodSubsystem(kRightHoodConfig, true);
+        rightHood = new HoodSubsystem(kRightHoodConfig, false);
 
         leftTurret = new TurretSubsystem(kLeftTurretConfigs, () -> swerve.getCurrentPose(), true);
         rightTurret = new TurretSubsystem(kRightTurretConfigs, () -> swerve.getCurrentPose(), false);
