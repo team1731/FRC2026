@@ -73,6 +73,7 @@ public class MotorIOTalonFX extends MotorIO {
     @Override
     public void withMotionProfile(double velocity, double acceleration) {
         this.mmOutput = new DynamicMotionMagicVoltage(0d, velocity, acceleration);
+        this.mmVoltage = new MotionMagicVoltage(0);
 
         MotionMagicConfigs mm = cfg.MotionMagic;
         mm.MotionMagicCruiseVelocity = velocity; 
@@ -252,6 +253,12 @@ public class MotorIOTalonFX extends MotorIO {
 
     public void withVoltageConfigs(VoltageConfigs configs) {
         this.configurator.apply(configs);
+    }
+
+    public void withCANCoder(int deviceID, String bus, CANcoderConfiguration configuration) {
+        this.cancoder = new CANcoder(deviceID, bus);
+        this.cancoder.getConfigurator().apply(configuration);
+        motor.setPosition(cancoder.getAbsolutePosition().getValueAsDouble());
     }
 
     public StatusSignal<ForwardLimitValue> getForwardLimit() {

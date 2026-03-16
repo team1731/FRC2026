@@ -2,17 +2,31 @@ package frc.robot;
 
 import java.util.*;
 
+import static frc.robot.subsystems.vision.VisionConstants.kUseVSLAM;
+
+import edu.wpi.first.wpilibj.Timer;
+
 import org.littletonrobotics.junction.LoggedRobot;
+
+import com.pathplanner.lib.commands.FollowPathCommand;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.util.PathPlannerLogging;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.lib.frc1731.field.FieldLayout;
-import frc.lib.frc1731.field.ReefscapeFieldLayout;
-import frc.lib.frc1731.log.AKLogger;
-import frc.lib.frc1731.log.MessageLog;
+import frc.lib.frc1731.field.FieldPositions;
+import frc.lib.frc1731.log.FrestaLogger;
+import frc.robot.autos.AutoFactory;
+import frc.robot.autos.AutoLoader;
+import frc.robot.subsystems.drive.SwerveSubsystem;
+import frc.robot.subsystems.vision.VisionSubsystem;
+
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -21,23 +35,30 @@ import frc.lib.frc1731.log.MessageLog;
  * project.
  */
 public class Robot extends LoggedRobot {
+	private SwerveSubsystem swerve;
+	private VisionSubsystem vision;
+	private RobotContainer container;
+
+	private PathPlannerAuto m_autonomousCommand;
+	private String autoCode;
 	private String currentKeypadCommand = "";
 	private int stationNumber = 0;
-	public static long millis = System.currentTimeMillis();
 
-	private RobotContainer container;
-	private Command m_autonomousCommand = null;
-	private AutoLoader loader = new AutoLoader();
+	private boolean redAlliance = false;
+	private boolean vslamConnected = false;
 
-	public static final FieldLayout kFieldLayout = new ReefscapeFieldLayout();
+	private double autoStartTime;
 	
+	private Pose2d currentAutoPose;
+	private Pose2d targetAutoPose;
+
+	private SendableChooser<String> autoChooser;
+
 	public static final Trigger IS_ENABLED = new Trigger(() -> DriverStation.isEnabled());
 	public static final Trigger IS_TELEOP = new Trigger(() -> DriverStation.isTeleop());
 	public static final Trigger IS_AUTONOMOUS = new Trigger(() -> DriverStation.isAutonomous());
 	public static final Trigger IS_DISABLED = new Trigger(() -> DriverStation.isDisabled());
 	public static final Trigger IS_TEST = new Trigger(() -> DriverStation.isTest());
-
-	// public static final RobotClock CLOCK = new RobotClock();
 
 	public Robot() {}
 
@@ -54,22 +75,27 @@ public class Robot extends LoggedRobot {
 //   ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 	@Override
 	public void robotInit() {
-		// DataLogManager.start();
-		// MessageLog.start();
-		AKLogger.start();
-		// SignalLogger.start();
-		// LiveWindow.disableAllTelemetry();
-
 		// Instantiate our robot container. This will perform all of our button bindings,
-		container = new RobotContainer();
-		loader = new AutoLoader();
-		// SmartDashboard.updateValues();
-		// Logger.start();
-		// Logger.addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables
+		swerve = new SwerveSubsystem(true); 
+		vision = new VisionSubsystem(swerve, true);
+		container = new RobotContainer(swerve);  // passed in swerve because we needed it here for auto
+		autoChooser = AutoLoader.loadAutoChooser();
+		autoPreload();
+		
+		SmartDashboard.putData(RobotConstants.kAutoCodeKey, AutoLoader.loadAutoChooser()); // Puts the auto selector in smartdashboard
+		FrestaLogger.start(); // Starts the logging process
 
-		// FollowPathCommand.warmupCommand().schedule();
+		PathPlannerLogging.setLogCurrentPoseCallback((pose) -> {
+			currentAutoPose = pose;
+			// Logger.recordOutput("SmartLogs/PathPlanner/CurrentPose", pose);
+		});
 
-		// kFieldLayout.logToShuffleboard(isSimulation());
+		PathPlannerLogging.setLogTargetPoseCallback((pose) -> {
+			targetAutoPose = pose;
+			// Logger.recordOutput("SmartLogs/PathPlanner/TargetPose", pose);
+		});
+
+		FollowPathCommand.warmupCommand().schedule();
 	}
 
 //   ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
@@ -105,8 +131,76 @@ public class Robot extends LoggedRobot {
 		// block in order for anything in the Command-based framework to work.
 		CommandScheduler.getInstance().run();
 		container.periodic();
-		// CLOCK.update();
 	}
+	
+//   ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+//   █ ▄▄▀██ ██ █▄▄ ▄▄██ ▄▄▄ ███▄ ▄██ ▀██ █▄ ▄█▄▄ ▄▄████ ▄▄ ██ ▄▄▀██ ▄▄▄██ █████ ▄▄▄ █ ▄▄▀██ ▄▄▀
+//   █ ▀▀ ██ ██ ███ ████ ███ ████ ███ █ █ ██ ████ ██████ ▀▀ ██ ▀▀▄██ ▄▄▄██ █████ ███ █ ▀▀ ██ ██ 
+//   █ ██ ██▄▀▀▄███ ████ ▀▀▀ ███▀ ▀██ ██▄ █▀ ▀███ ██████ █████ ██ ██ ▀▀▀██ ▀▀ ██ ▀▀▀ █ ██ ██ ▀▀ 
+//   ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+	private void autoPreload() {
+		/*
+		 * Check for conditions that could require a change to the auto command
+		 * 1. Different auto selected by the drive team
+		 * 2. Alliance changed
+		 */
+		String selectedAutoCode = null;
+		boolean autoCodeChanged = false;
+		selectedAutoCode = autoChooser.getSelected();
+		if(selectedAutoCode == null) {
+			selectedAutoCode = autoCode == null ? RobotConstants.kAutoDefault : autoCode;
+		}
+		if(!selectedAutoCode.equals(autoCode)) {
+			System.out.println("New Auto Code read from dashboard. OLD: " + autoCode + ", NEW: " + selectedAutoCode);
+			System.out.println("\nPreloading AUTO CODE --> " + selectedAutoCode);
+			autoCodeChanged = true;
+		}
+
+		boolean allianceChanged = false;
+		boolean isRedAlliance = Robot.isRedAlliance();
+		if(redAlliance != isRedAlliance) {
+			System.out.println("\n\n===============>>>>>>>>>>>>>>  WE ARE " + (isRedAlliance ? "RED" : "BLUE")
+					+ " ALLIANCE  <<<<<<<<<<<<=========================");
+			redAlliance = isRedAlliance;
+			allianceChanged = true;
+		}
+		
+		boolean vslamConnectionStatusChanged = false;
+		boolean isVSLAMConnected = (kUseVSLAM) ? vision.isVSLAMConnected() : false;
+		if(isVSLAMConnected && !vslamConnected) {
+			System.out.println("VSLAM went from not connected to Connected so we will reset the pose");
+			vslamConnectionStatusChanged = true;
+			vslamConnected = true;
+		} else if (!vision.isVSLAMConnected()) {
+			vslamConnected = false;
+		}
+
+		/*
+		 * If any of these above conditions changed, kick off creation of a new auto command
+		 */
+		if(autoCodeChanged || allianceChanged || vslamConnectionStatusChanged) {
+			vslamConnectionStatusChanged = false;
+			m_autonomousCommand = null;
+			m_autonomousCommand = (PathPlannerAuto) AutoFactory.getAutonomousCommand(selectedAutoCode, redAlliance);
+			
+			if (m_autonomousCommand.getStartingPose() != null) {
+				Pose2d startingPose = isRedAlliance ? new Pose2d(
+					FieldPositions.kFieldLength - m_autonomousCommand.getStartingPose().getX(), 
+					FieldPositions.kFieldWidth - m_autonomousCommand.getStartingPose().getY(),
+					m_autonomousCommand.getStartingPose().getRotation().rotateBy(Rotation2d.k180deg)
+				) : m_autonomousCommand.getStartingPose();
+            	swerve.resetPose(startingPose);
+			}
+
+			if (m_autonomousCommand != null){
+				autoCode = selectedAutoCode;
+				System.out.println("\n\n=====>>>>>>>>>> PRELOADED AUTONOMOUS COMMAND: " + m_autonomousCommand + "<<<<<<<<<<<<=====/n/n");
+			} else {
+				System.out.println("\nAUTO CODE " + selectedAutoCode + " IS NOT IMPLEMENTED -- STAYING WITH AUTO CODE " + autoCode);
+			}
+		}
+	}
+
 
 	/** This function is called once each time the robot enters Disabled mode. */
 //   ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
@@ -124,7 +218,8 @@ public class Robot extends LoggedRobot {
 //   ██ ▀▀ █▀ ▀██ ▀▀▀ █ ██ ██ ▀▀ ██ ▀▀ ██ ▀▀▀██ ▀▀ ████ █████ ▀▀▀██ ██ █▀ ▀██ ▀▀▀ ██ ▀▀ █▀ ▀██ ▀▀▄
 //   ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 	@Override
-	public void disabledPeriodic() {		
+	public void disabledPeriodic() {	
+		autoPreload();
 		if (Robot.isReal()) {
 			try {
 				OptionalInt stationNumberInt = DriverStation.getLocation();
@@ -151,14 +246,18 @@ public class Robot extends LoggedRobot {
 //   ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 	@Override
 	public void autonomousInit() {
+		System.out.println("AUTO INIT");
 		CommandScheduler.getInstance().cancelAll();
-		// CLOCK.setAutoStartTime(Timer.getFPGATimestamp());
-		m_autonomousCommand = loader.getSelectedAutoMode();
-		if (m_autonomousCommand != null) {
-			m_autonomousCommand.schedule();
+
+		autoStartTime = Timer.getFPGATimestamp();
+
+		if (m_autonomousCommand == null) {
+			System.out.println("SOMETHING WENT WRONG - UNABLE TO RUN AUTONOMOUS! CHECK SOFTWARE!");
 		} else {
-			System.err.println("SOMETHING WENT WRONG - UNABLE TO RUN AUTONOMOUS! CHECK SOFTWARE!");
+			System.out.println("------------> RUNNING AUTONOMOUS COMMAND: " + m_autonomousCommand + " <----------");
+			m_autonomousCommand.schedule();
 		}
+		System.out.println("autonomousInit: End");
 	}
 
 
@@ -167,20 +266,19 @@ public class Robot extends LoggedRobot {
 //   █ ▀▀ ██ ██ ███ ████ ███ ██ █ █ ██ ███ ██ █ █ ██ ███ ██ ██ ██▄▄▄▀▀████ ▀▀ ██ ▄▄▄██ ▀▀▄██ ███ ███ ██ ██ ██ ███ ███
 //   █ ██ ██▄▀▀▄███ ████ ▀▀▀ ██ ██▄ ██ ▀▀▀ ██ ███ ██ ▀▀▀ ██▄▀▀▄██ ▀▀▀ ████ █████ ▀▀▀██ ██ █▀ ▀██ ▀▀▀ ██ ▀▀ █▀ ▀██ ▀▀▄
 //   ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
-	@Override
-	public void autonomousPeriodic() {
-		if (doSD()) {
-			System.out.println("AUTO PERIODIC");
-		}
+@Override
+public void autonomousPeriodic() {
+	// if (doSD()) {
+	// 	System.out.println("AUTO PERIODIC");
+	// }
 
-		// SmartDashboard.putString("Path running", PathPlannerAuto.currentPathName);
-		//SmartDashboard.putNumber("current Pose X", currentPose.getX());
-		//SmartDashboard.putNumber ("current Pose Y", currentPose.getY());
-		//SmartDashboard.putNumber("target pose X",targetPose.getX());
-		//SmartDashboard.putNumber("target Pose Y", targetPose.getY());
-		//SmartDashboard.putNumber("PP Error", currentPose.getTranslation().getDistance(targetPose.getTranslation()));
-		//SmartDashboard.putNumber("AutoRunningTime", Timer.getFPGATimestamp()- autoStartTime);
+	if (m_autonomousCommand != null && (Timer.getFPGATimestamp() - autoStartTime) >= 0.25
+			&& (currentAutoPose.getTranslation().getDistance(targetAutoPose.getTranslation()) > 1.0)) {
+		System.out.println("distance is" + currentAutoPose.getTranslation().getDistance(targetAutoPose.getTranslation()));
+		m_autonomousCommand.cancel();
+		System.out.println("Had to Kill the auto because the target pose and current pose were apart by more than a foot");
 	}
+}
 
 //   ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
 //   █▄▄ ▄▄██ ▄▄▄██ █████ ▄▄▄██ ▄▄▄ ██ ▄▄ ███▄ ▄██ ▀██ █▄ ▄█▄▄ ▄▄
@@ -189,9 +287,6 @@ public class Robot extends LoggedRobot {
 //   ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 	@Override
 	public void teleopInit() {
-		// Record both DS control and joystick data in TELEOP
-		MessageLog.getLogger();
-
 		// Cancel any outstanding auto commands
 		CommandScheduler.getInstance().cancelAll();
 
@@ -222,9 +317,9 @@ public class Robot extends LoggedRobot {
 //   ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 	@Override
 	public void teleopPeriodic() {
-		if(doSD()){
-			System.out.println("TELEOP PERIODIC");
-		}
+		// if(doSD()){
+		// 	System.out.println("TELEOP PERIODIC");
+		// }
 	}
 
 //   ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄

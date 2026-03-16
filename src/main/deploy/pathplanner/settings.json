@@ -1,8 +1,12 @@
 {
-  "robotWidth": 0.9,
-  "robotLength": 0.9,
+  "robotWidth": 0.908,
+  "robotLength": 0.853,
   "holonomicMode": true,
-  "pathFolders": [],
+  "pathFolders": [
+    "HubPreloadDepot",
+    "LTrenchDoubleMidfield",
+    "RTrenchDoubleMidfield"
+  ],
   "autoFolders": [],
   "defaultMaxVel": 4.0,
   "defaultMaxAccel": 4.0,

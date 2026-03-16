@@ -1,9 +1,14 @@
 package frc.robot;
 
+import static frc.robot.subsystems.shooter.flywheel.FlywheelConstants.*;
+import static frc.robot.subsystems.shooter.hood.HoodConstants.*;
+import static frc.robot.subsystems.shooter.turret.TurretConstants.*;
+
 import com.pathplanner.lib.auto.NamedCommands;
 
-import edu.wpi.first.wpilibj2.command.*;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.*;
+import frc.lib.frc1731.math.LoggedTunableNumber;
 import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.drive.SwerveSubsystem;
 import frc.robot.subsystems.indexer.IndexerSubsystem;
@@ -13,80 +18,99 @@ import frc.robot.subsystems.intake.IntakePivotSubsystem;
 import frc.robot.subsystems.intake.IntakeRollerSubsystem;
 import frc.robot.subsystems.leds.LEDSubsystem;
 import frc.robot.subsystems.shooter.turret.TurretSubsystem;
-import frc.robot.subsystems.vision.QuestNavSubsystem;
-
 public class RobotContainer {
+    public enum TestShotCondition {
+        kNone,
+        kDistance,
+        kParameters,
+    }
+
+    private static TestShotCondition testCondition = TestShotCondition.kDistance;
+
     /* Subsystems */
-    protected static QuestNavSubsystem vslam;
+    private SwerveSubsystem swerve;
+    private IndexerSubsystem indexer;
+    private IntakeRollerSubsystem intake;
+    private IntakePivotSubsystem pivot;
 
-    protected static SwerveSubsystem swerve;
-    protected static FlywheelSubsystem flywheel;
-    protected static HoodSubsystem hood;
-    protected static TurretSubsystem turret;
-    protected static IndexerSubsystem indexer;
-    protected static IntakeRollerSubsystem intake;
-    protected static IntakePivotSubsystem pivot;
-    protected static LEDSubsystem led;
+    private TurretSubsystem leftTurret, rightTurret;
+    private FlywheelSubsystem leftFlywheel, rightFlywheel;
+    private HoodSubsystem leftHood, rightHood;
 
-    protected static Superstructure superstructure;
+
+    private Superstructure superstructure;
 
     /* Driver Buttons */
     private final CommandXboxController driver = new CommandXboxController(0);
-    private final Trigger dResetSwerve = driver.povRight();
-    private final Trigger dShoot = driver.rightTrigger();
+    private final Trigger dResetSwerve = driver.start();
+
     private final Trigger dIntake = driver.leftTrigger();
-    private final Trigger dFeedthrough = driver.leftTrigger().and(driver.rightTrigger());
+    private final Trigger dShoot = driver.rightTrigger();
+    private final Trigger dPass = driver.y();
 
-    // private static final LoggedTunableNumber flywheelSetpoint = new LoggedTunableNumber("FlywheelSetpoint", () -> true);
-    // private static final LoggedTunableNumber hoodSetpoint = new LoggedTunableNumber("HoodAngle", () -> true);
+    private final Trigger dFeedthrough = dIntake.and(dShoot);
+    private final Trigger dPassthrough = dIntake.and(dShoot);
 
-    /* Operator Buttons */
+    private final Trigger dTrenchShot = driver.b();
+    private final Trigger dTowerShot = driver.a();
+    private final Trigger dHubShot = driver.x();
+    
+    private final Trigger dTestSetShot = driver.back();
 
-    public RobotContainer() {
+    private final Trigger dRetractIntake = driver.leftBumper();
+    private final Trigger dUnjam = driver.rightBumper();
+
+    private final Trigger dLeftTurretLeft = driver.povLeft();
+    private final Trigger dLeftTurretRight = driver.povRight();
+    private final Trigger dRightTurretLeft = driver.povDown();
+    private final Trigger dRightTurretRight = driver.povUp();
+
+    private LoggedTunableNumber tuneableFlywheelRPS = new LoggedTunableNumber("TunedFlywheelRPS", 0, () -> testCondition.equals(TestShotCondition.kParameters));
+    private LoggedTunableNumber tuneableHoodRotations = new LoggedTunableNumber("TunedHoodRotations", 0, () -> testCondition.equals(TestShotCondition.kParameters));
+    private LoggedTunableNumber tuneableDistanceShot = new LoggedTunableNumber("TunedDistanceShot", 1.8, () -> testCondition.equals(TestShotCondition.kDistance));
+
+    public RobotContainer(SwerveSubsystem swerve) {
+        this.swerve = swerve;
         configureSubsystems();
-        configureNamedCommands();
         configureButtonBindings();
+        configureDefaultCommands();
+        configureNamedCommands();
     }
 
     /**
      * Configure all active subsystems on the robot and set default commands
      */
     private void configureSubsystems() {
-        swerve = new SwerveSubsystem(true);
-        flywheel = new FlywheelSubsystem(true);
-        hood = new HoodSubsystem(true);
-        turret = new TurretSubsystem(true);
+        leftFlywheel = new FlywheelSubsystem(kLeftFlywheelConfig, true);
+        rightFlywheel = new FlywheelSubsystem(kRightFlywheelConfig, false);
+
+        leftHood = new HoodSubsystem(kLeftHoodConfig, true);
+        rightHood = new HoodSubsystem(kRightHoodConfig, false);
+
+        leftTurret = new TurretSubsystem(kLeftTurretConfigs, () -> swerve.getCurrentPose(), true);
+        rightTurret = new TurretSubsystem(kRightTurretConfigs, () -> swerve.getCurrentPose(), false);
+
         indexer = new IndexerSubsystem(true);
         pivot = new IntakePivotSubsystem(true);
         intake = new IntakeRollerSubsystem(true);
         led = new LEDSubsystem(false);
 
-        superstructure = new Superstructure(swerve, flywheel, hood, turret, indexer, pivot, intake);
-
-        // Drivetrain will execute this command periodically 
-        // if no other command is active on the drivetrain
-        swerve.setDefaultCommand(swerve.drive(driver, () -> true));
-
-        flywheel.setDefaultCommand(flywheel.stop());
-        intake.setDefaultCommand(intake.stop());
-        indexer.setDefaultCommand(indexer.stop());
-        hood.setDefaultCommand(hood.stow());
-        turret.setDefaultCommand(superstructure.aimTurret());
-        // turret.setDefaultCommand(superstructure.aimTurret());
-        // turret.setDefaultCommand(turret.setRightTurretCommand(() -> -swerve.getYaw() % 360d));
+        superstructure = new Superstructure(swerve, leftFlywheel, rightFlywheel, 
+                                                leftHood, rightHood, 
+                                                indexer, pivot, intake, 
+                                                    leftTurret, rightTurret);
     }
 
     private void configureNamedCommands() {
         // Named commands useful for PathPlanner events
         // ex. NamedCommands.registerCommand("Example", new ExampleCommand());
-        NamedCommands.registerCommand("Warmup", superstructure.warmup());
-        NamedCommands.registerCommand("Shoot", superstructure.shoot());
-        NamedCommands.registerCommand("Intake", superstructure.intake());
-        NamedCommands.registerCommand("Feedthrough", superstructure.feedthrough());
+        NamedCommands.registerCommand("Shoot", superstructure.autoShoot());
+        NamedCommands.registerCommand("StopShoot", Commands.deadline(Commands.waitSeconds(0.1), superstructure.stopShooters()));
+        NamedCommands.registerCommand("Intake", superstructure.runIntake(() -> true));
         NamedCommands.registerCommand("Pass", superstructure.pass());
-        NamedCommands.registerCommand("Stow Hood", hood.stow());
-        NamedCommands.registerCommand("Init Climb", Commands.print("Starting Climb!!!"));
-        NamedCommands.registerCommand("Climb", Commands.print("Climbing!!!"));
+        NamedCommands.registerCommand("Stow Hood", superstructure.stowHoods());
+        NamedCommands.registerCommand("Stow Pivot", superstructure.stowIntake());
+        NamedCommands.registerCommand("Warmup", superstructure.warmup());
     }
 
     /**
@@ -94,49 +118,48 @@ public class RobotContainer {
      */
     private void configureButtonBindings() {
         // Reset robot pose and heading
-        dResetSwerve.onTrue(swerve.resetGyro());
-        dIntake.whileTrue(superstructure.intake());
-        dShoot.whileTrue(superstructure.shoot());
-        dFeedthrough.whileTrue(superstructure.feedthrough());
-        // dPass.whileTrue(superstructure.passCommand());
+        dResetSwerve.onTrue(superstructure.resetGyro());
 
-        // dInitClimb.onTrue(Commands.print("Pivotting to climb position").alongWith(pivot.retractCommand()));
-        // dClimb.onTrue(Commands.print("Running climb sequence").alongWith(pivot.retractCommand()));
+        dIntake.whileTrue(superstructure.runIntake(() -> true));
+        dShoot.whileTrue(superstructure.shoot().alongWith(superstructure.runIntake(() -> false)));
+        dPass.whileTrue(superstructure.pass().alongWith(superstructure.runIntake(() -> false)));
+        dFeedthrough.whileTrue(superstructure.shoot().alongWith(superstructure.runIntake(() -> true)));
+        dPassthrough.whileTrue(superstructure.pass().alongWith(superstructure.runIntake(() -> true)));
 
-        // dHubShot.whileTrue(Commands.print("Shooting static shot from from HUB"));
-        // dTowerShot.whileTrue(Commands.print("Shooting static shot from from TOWER"));
-        // dLeftCornerShot.whileTrue(Commands.print("Shooting static shot from from the left corner"));
-        // dRightCornerShot.whileTrue(Commands.print("Shooting static shot from from the right corner"));
+        dHubShot.whileTrue(superstructure.shoot(1.8, true));
+        dTowerShot.whileTrue(superstructure.shoot(2.5, true));
+        dTrenchShot.whileTrue(superstructure.shoot(4, true));
 
-        // driver.y().whileTrue(
-        //     flywheel.setFlywheelVelocityCommand(
-        //         SmartDashboard.getNumber("Flywheel Set Point", 0), 
-        //         SmartDashboard.getNumber("Flywheel Set Point", 0)
-        //     ));
+        (dTestSetShot.and(() -> testCondition.equals(TestShotCondition.kDistance)))
+            .whileTrue(superstructure.shoot(tuneableDistanceShot, true));
+        (dTestSetShot.and(() -> testCondition.equals(TestShotCondition.kParameters)))
+            .whileTrue(superstructure.shoot(tuneableFlywheelRPS.get(), tuneableHoodRotations.get(), true));
 
-        // driver.a().whileTrue(
-        //     hood.setHoodCommand(
-        //         SmartDashboard.getNumber("Hood Angle", 0),
-        //         SmartDashboard.getNumber("Hood Angle", 0)
-        //     ));
+        dRetractIntake.onTrue(pivot.retract());
+        dUnjam.whileTrue(superstructure.reverseFeeder());
 
-        // driver.leftBumper().whileTrue(
-        //     turret.driveManualCommand(0.05, 0.05)
-        // ).onFalse(
-        //     turret.driveManualCommand(0, 0)
-        // );
+        dLeftTurretLeft.whileTrue(leftTurret.setDegrees(-200));
+        dLeftTurretRight.whileTrue(leftTurret.setDegrees(80));
+        dRightTurretLeft.whileTrue(rightTurret.setDegrees(-80));
+        dRightTurretRight.whileTrue(rightTurret.setDegrees(200));
+    }
 
-        // driver.rightBumper().whileTrue(
-        //     turret.driveManualCommand(-0.05, -0.05)
-        // ).onFalse(
-        //     turret.driveManualCommand(0, 0)
-        // );
+    public void configureDefaultCommands() {
+        // Drivetrain will execute this command periodically 
+        // if no other command is active on the drivetrain
+        swerve.setDefaultCommand(swerve.driveCommand(driver, () -> true));
 
-        // driver.y().whileTrue(flywheel.setFlywheelCommand(() -> SmartDashboard.getNumber("Flywheel RPS", 0)));
-        // // driver.y().whileTrue(flywheel.setFlywheelPercentCommand(0, 1));
-        // driver.a().whileTrue(hood.setHoodCommand(() -> SmartDashboard.getNumber("Hood Rotations", 0)));
-        // driver.x().whileTrue(indexer.setPercentOutputCommand(1.0));
-        // driver.a().whileTrue(hood.setHoodCommand(6, 6));
+        intake.setDefaultCommand(intake.stop());
+        indexer.setDefaultCommand(indexer.stop());
+
+        leftTurret.setDefaultCommand(leftTurret.trackHub());
+        rightTurret.setDefaultCommand(rightTurret.trackHub());
+
+        leftHood.setDefaultCommand(leftHood.stow());
+        rightHood.setDefaultCommand(rightHood.stow());
+
+        leftFlywheel.setDefaultCommand(leftFlywheel.stop());
+        rightFlywheel.setDefaultCommand(rightFlywheel.stop());
     }
 
     public void periodic() {

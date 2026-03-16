@@ -23,9 +23,7 @@ public class SwerveConstants {
     public static final double kDeadband = 0.05; // 5% joystick deadband
     public static final double kMaxVisionAngularRate = 720d; // degrees per second
 
-    public static final boolean kUseVSLAM = true;
-    public static final boolean kUseLimelight = true;
-    public static final boolean kTelemetrize = false;
+    public static final boolean kShouldTelemetrize = true;
 
     public static final PIDConstants kPPConstants = new PIDConstants(10d, 0d, 0d); // PID constants for PathPlanner path following
 
@@ -36,7 +34,7 @@ public class SwerveConstants {
 
     public static final PIDGains kHeadingGains = new PIDGains()
         // .setP(4d/180d); // 4 m/s when 180 degrees of error
-        .setP(1d)
+        .setP(0.01d)
         // .setD(0.0001d)
         .setContinuousInput(-180, 180); // 4 m/s when 180 degrees of error
 
@@ -63,6 +61,11 @@ public class SwerveConstants {
         .withRotationalDeadband(SwerveConstants.kMaxAngularRate * kDriveToTargetDeadband) // Add a 1% deadband
 		.withDriveRequestType(DriveRequestType.OpenLoopVoltage)
         .withDeadband((kDriveToTargetMaxSpeed * kDeadband));
+
+    static {
+        driveAtTargetControl.HeadingController.setPID(10, 0, 0);
+        driveAtTargetControl.HeadingController.enableContinuousInput(-Math.PI/2, Math.PI/2);
+    }
     
     public static final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     public static final SwerveRequest.ApplyRobotSpeeds autoRequest = new SwerveRequest.ApplyRobotSpeeds();

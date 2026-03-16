@@ -1,40 +1,74 @@
 package frc.robot.subsystems.shooter;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
-import frc.lib.frc1731.math.regression.LinearRegression;
-import frc.lib.frc1731.math.regression.Regression;
+import edu.wpi.first.math.util.Units;
+import frc.lib.frc1731.math.regression.*;
 
 public class ShotTable {
-    private HashMap<Double, Double> kHoodAngleTable = new HashMap<>();
-    private HashMap<Double, Double> kFlywheelSpeedTable = new HashMap<>();
     private Regression hoodModel;
     private Regression flywheelModel;
+    private Regression tofModel;
+
+    private List<ShotEntry> entries = List.of(
+        new ShotEntry(Units.inchesToMeters(45.5), 0, 28, 0.56),
+        new ShotEntry(Units.inchesToMeters(72.5), 0.5, 30, 0.71),
+        new ShotEntry(Units.inchesToMeters(91), 1, 38, 0.89),
+        new ShotEntry(Units.inchesToMeters(128), 2, 43, 1.26),
+        new ShotEntry(Units.inchesToMeters(150), 2.5, 50, 1.45),
+        new ShotEntry(Units.inchesToMeters(180), 3.5, 58, 1.6)
+    );
+
+    private List<ShotEntry> interpolatingEntries = List.of(
+        new ShotEntry(1, 0, 28, 0.5),
+        new ShotEntry(2, 1.75, 30, 0.75),
+        new ShotEntry(3, 3, 35, 0.85),
+        new ShotEntry(4, 5.5, 45, 1.25),
+        new ShotEntry(5, 6, 50, 1.4),
+        new ShotEntry(6, 6, 55, 1.6),
+        new ShotEntry(7, 6, 60, 1.8),
+        new ShotEntry(8, 6, 65, 2.0)
+    );
 
     public ShotTable() {
-        List<Double> hoodDistances = List.of(0d, 1d, 2d, 4d);
-        List<Double> hoodAngles = List.of(18d, 20d, 25d, 30d);
+        List<Double> distances = new ArrayList<>();
+        List<Double> hoodAngles = new ArrayList<>();
+        List<Double> flywheelSpeeds = new ArrayList<>();
+        List<Double> tofs = new ArrayList<>();
 
-        ArrayList<Double> flywheelDistances = new ArrayList<>();
-        ArrayList<Double> flywheelSpeeds = new ArrayList<>();
-        for (double distance : kHoodAngleTable.keySet()) {
-            hoodDistances.add(distance);
-            hoodAngles.add(kHoodAngleTable.get(distance));
+        for (ShotEntry entry : entries) {
+            distances.add(entry.distance);
+            hoodAngles.add(entry.hoodRotations);
+            flywheelSpeeds.add(entry.flywheelRPS);
+            tofs.add(entry.timeOfFlight);
         }
 
-        for (double distance : kFlywheelSpeedTable.keySet()) {
-            flywheelDistances.add(distance);
-            flywheelSpeeds.add(kFlywheelSpeedTable.get(distance));
+        hoodModel = new LinearRegression(distances.toArray(new Double[0]), hoodAngles.toArray(new Double[0]));
+        flywheelModel = new LinearRegression(distances.toArray(new Double[0]), flywheelSpeeds.toArray(new Double[0]));
+        tofModel = new LinearRegression(distances.toArray(new Double[0]), tofs.toArray(new Double[0]));
+    }
+
+    public ShotTable backup() {
+        List<Double> distances = new ArrayList<>();
+        List<Double> hoodAngles = new ArrayList<>();
+        List<Double> flywheelSpeeds = new ArrayList<>();
+        List<Double> tofs = new ArrayList<>();
+
+        for (ShotEntry entry : interpolatingEntries) {
+            distances.add(entry.distance);
+            hoodAngles.add(entry.hoodRotations);
+            flywheelSpeeds.add(entry.flywheelRPS);
+            tofs.add(entry.timeOfFlight);
         }
 
-
-        hoodModel = new LinearRegression(hoodDistances.toArray(new Double[0]), hoodAngles.toArray(new Double[0]));
-        flywheelModel = new LinearRegression(flywheelDistances.toArray(new Double[0]), flywheelSpeeds.toArray(new Double[0]));
+        hoodModel = new PiecewiseRegression(hoodAngles.toArray(new Double[0]), 1d);
+        flywheelModel = new PiecewiseRegression(flywheelSpeeds.toArray(new Double[0]), 1d);
+        tofModel = new PiecewiseRegression(tofs.toArray(new Double[0]), 1d);
+        return this;
     }
 
     public double[] getShotParameters(double distance) {
-        return new double[] {hoodModel.getInterpolation(distance), flywheelModel.getInterpolation(distance)};
+        return new double[] {hoodModel.getInterpolation(distance), flywheelModel.getInterpolation(distance), tofModel.getInterpolation(distance)};
     }
 }

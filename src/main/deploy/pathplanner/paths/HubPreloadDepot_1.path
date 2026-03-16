@@ -1,0 +1,70 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 3.5273734939759036,
+        "y": 4.045927710843373
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 2.1477755547374784,
+        "y": 5.292026189756708
+      },
+      "isLocked": false,
+      "linkedName": "Hub"
+    },
+    {
+      "anchor": {
+        "x": 1.3232045454554764,
+        "y": 5.962374999996823
+      },
+      "prevControl": {
+        "x": 1.563679204253016,
+        "y": 5.8940234200867225
+      },
+      "nextControl": {
+        "x": 1.0827298866579367,
+        "y": 6.030726579906923
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 0.447125000000931,
+        "y": 5.962374999996823
+      },
+      "prevControl": {
+        "x": 1.0277448676122818,
+        "y": 5.979360006159127
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "Depot"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 4.0,
+    "maxAcceleration": 4.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -179.63713588643614
+  },
+  "reversed": false,
+  "folder": "HubPreloadDepot",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": -179.9175363558567
+  },
+  "useDefaultConstraints": true
+}

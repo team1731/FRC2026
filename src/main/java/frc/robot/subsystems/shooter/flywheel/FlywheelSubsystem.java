@@ -1,95 +1,70 @@
 package frc.robot.subsystems.shooter.flywheel;
 
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import frc.lib.frc1731.Utils;
-import frc.lib.frc1731.hardware.motor.ctre.MotorIOTalonFX;
-import frc.lib.frc1731.math.LoggedTunableNumber;
-import frc.robot.Ports;
-import frc.robot.Robot;
-import frc.robot.subsystems.BaseSubsystem;
-
 import static frc.robot.subsystems.shooter.flywheel.FlywheelConstants.*;
 
 import java.util.function.DoubleSupplier;
+
+import edu.wpi.first.wpilibj2.command.Command;
+import frc.lib.frc1731.Utils;
+import frc.lib.frc1731.hardware.motor.ctre.MotorIOTalonFX;
+import frc.robot.subsystems.BaseSubsystem;
+
 public class FlywheelSubsystem extends BaseSubsystem {
-    private MotorIOTalonFX leftMotor, rightMotor;
-    private LoggedTunableNumber leftSetpoint = new LoggedTunableNumber("Flywheel Setpoint Left", 50, () -> !DriverStation.isFMSAttached());
-    private LoggedTunableNumber rightSetpoint = new LoggedTunableNumber("Flywheel Setpoint Right", 50, () -> !DriverStation.isFMSAttached());
+    private MotorIOTalonFX motor;
+    private double targetVelocity = 0;
 
-    private double leftTargetRPS = 0d;
-    private double rightTargetRPS = 0d;
-
-    private double leftRPS = 0d;
-    private double rightRPS = 0d;
-
-    public FlywheelSubsystem(boolean enabled) {
-        super(enabled);
-        if (!isEnabled()) return;
-        
-        leftMotor = new MotorIOTalonFX(Ports.kLeftFlywheelConfig);
-        leftMotor.withPIDGains(kVelocityGains);
-        leftMotor.withStatorCurrentLimit(kCurrentLimit);
-
-        rightMotor = new MotorIOTalonFX(Ports.kRightFlywheelConfig);
-        rightMotor.withPIDGains(kVelocityGains);
-        rightMotor.withStatorCurrentLimit(kCurrentLimit);
-
-        Robot.IS_ENABLED.onTrue(new InstantCommand(() -> {
-            leftMotor.setPercentOutput(0);
-            rightMotor.setPercentOutput(0);
-        }));
+    public FlywheelSubsystem(FlywheelConfiguration config, boolean enabled) {
+        super(config.name(), config, enabled);
     }
 
-    public boolean atLeftTargetVelocity() {
-        return Utils.isWithin(leftRPS, leftTargetRPS, kEpsilon);
+    @Override
+    protected void initializeHardware() {
+        motor = new MotorIOTalonFX(((FlywheelConfiguration)config.get()).portConfig());
+        motor.withPIDGains(kVelocityGains);
+        motor.withStatorCurrentLimit(kCurrentLimit);
     }
 
-    public boolean atRightTargetVelocity() {
-        return Utils.isWithin(rightRPS, rightTargetRPS, kEpsilon);
-    }
-
-    public boolean atBothTargetVelocity() {
-        return atLeftTargetVelocity() && atRightTargetVelocity();
+    public boolean atTargetVelocity() {
+        if (!isEnabled()) return true;
+        return Utils.isWithin(motor.getVelocityRPS(), targetVelocity, kEpsilon);
     }
 
     @Override
     public void periodicTelemetry() {
-        leftRPS = leftMotor.getVelocityRPS();
-        rightRPS = rightMotor.getVelocityRPS();
-
-        logger.log("Left/Velocity", leftRPS);
-        logger.log("Left/Target Velocity", leftTargetRPS);
-        logger.log("Left/At Target", atLeftTargetVelocity());
-
-        logger.log("Right Velocity", rightRPS);
-        logger.log("Right Target Velocity", rightTargetRPS);
-        logger.log("At Right Target Velocity", atRightTargetVelocity());
-
-        logger.log("Both At Target", atBothTargetVelocity());
+        logger.log("Current Velocity", motor.getVelocityRPS());
+        logger.log("Target Velocity", targetVelocity);
+        logger.log("At Target Velocity", atTargetVelocity());
     }
 
-    public Command setLeft(DoubleSupplier rps) {
+    public Command setVelocity(DoubleSupplier target) {
         return run(() -> {
-            this.leftTargetRPS = rps.getAsDouble();
-            leftMotor.setVelocityRPS(leftRPS);
-        });
+            this.targetVelocity = Utils.clamp(target.getAsDouble(), kMaxVelocity);
+            motor.setVelocityRPS(targetVelocity);
+        }).withName("SetVelocity");
     }
 
-    public Command setLeft(double rps) {
-        return setLeft(() -> rps);
+    public Command setVelocity(double target) {
+        return this.setVelocity(() -> target);
     }
 
-    public Command setRight(DoubleSupplier rps) {
+    public Command setPercent(DoubleSupplier percent) {
         return run(() -> {
-            this.rightTargetRPS = rps.getAsDouble();
-            rightMotor.setVelocityRPS(rightRPS);
-        });
+            this.targetVelocity = Utils.clamp(percent.getAsDouble(), 1.0) * kMaxVelocity;
+            motor.setPercentOutput(percent.getAsDouble());
+        }).withName("SetPercent");
     }
 
-    public Command setRight(double rps) {
-        return setRight(() -> rps);
+    public Command setPercent(double percent) {
+        return this.setPercent(() -> percent);
+    }
+
+    public Command warmup() {
+        return this.setVelocity(kWarmupVelocity);
+    }
+
+    public Command stop() {
+        return this.setPercent(0)
+        .withName("Stop");
     }
     
     public Command setVelocity(DoubleSupplier left, DoubleSupplier right) {
@@ -97,30 +72,9 @@ public class FlywheelSubsystem extends BaseSubsystem {
             this.leftTargetRPS = left.getAsDouble();
             this.rightTargetRPS = right.getAsDouble();
 
-            leftMotor.setVelocityRPS(leftRPS);
-            rightMotor.setVelocityRPS(rightRPS);
+    public Command stopOnce() {
+        return runOnce(() -> {
+            motor.setPercentOutput(0d);
         });
-    }
-
-    public Command setVelocity(double left, double right) {
-        return setVelocity(() -> left, () -> right);
-    }
-
-    public Command setTunedVelocity() {
-        return setVelocity(leftSetpoint.get(), rightSetpoint.get());
-    }
-
-    public Command setPercent(double left, double right) {
-        return run(() -> {
-            leftMotor.setPercentOutput(left);
-            leftMotor.setPercentOutput(right);
-        });
-    }
-
-    public Command stop() {
-        return this.run(() -> {
-            leftMotor.setPercentOutput(0);
-            rightMotor.setPercentOutput(0);
-        }).withTimeout(0);
     }
 }

@@ -1,0 +1,14 @@
+package frc.lib.frc1731.hardware.camera.photonvision;
+
+import java.util.List;
+
+import org.photonvision.PhotonCamera;
+import org.photonvision.targeting.PhotonPipelineResult;
+
+public interface Camera {
+    public String getName();
+    public PhotonCamera getCamera();
+    public void initialize();
+    public boolean isInitialized();
+    public List<PhotonPipelineResult> getAllUnreadResults();
+}

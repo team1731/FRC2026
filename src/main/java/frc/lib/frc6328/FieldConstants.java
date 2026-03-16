@@ -3,6 +3,7 @@ package frc.lib.frc6328;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.util.Units;
+import frc.robot.Robot;
 import edu.wpi.first.math.geometry.*;
 
 import java.io.IOException;
@@ -14,8 +15,9 @@ import java.nio.file.Path;
  * <p>NOTE: All constants are defined relative to the field coordinate system, and from the
  * perspective of the blue alliance station
  */
+@Deprecated
 public class FieldConstants {
-  public static final FieldType fieldType = FieldType.WELDED;
+  public static final FieldType fieldType = FieldType.ANDYMARK;
 
   // AprilTag related constants
   public static final int aprilTagCount = AprilTagLayoutType.OFFICIAL.getLayout().getTags().size();
@@ -327,11 +329,9 @@ public class FieldConstants {
         synchronized (this) {
           if (layout == null) {
             try {
-              Path p = Path.of(
-                          "src",
-                          "main",
+                String directory = (Robot.isReal() ? "home/lvuser" : "src/main");
+              Path p = Path.of(directory,
                           "deploy",
-                          "apriltags",
                           fieldType.json(),
                           name + ".json");
               layout = new AprilTagFieldLayout(p);

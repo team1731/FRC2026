@@ -1,0 +1,68 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 4.466784090909091,
+        "y": 7.425943181818181
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 6.043727272727272,
+        "y": 7.425943181818181
+      },
+      "isLocked": false,
+      "linkedName": "LTrench"
+    },
+    {
+      "anchor": {
+        "x": 8.022636363636364,
+        "y": 5.766545454545455
+      },
+      "prevControl": {
+        "x": 7.981409090909091,
+        "y": 7.467170454545454
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "LMidIntake1"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 0.5548780487804879,
+      "maxWaypointRelativePos": 1.0,
+      "constraints": {
+        "maxVelocity": 2.3,
+        "maxAcceleration": 3.0,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 720.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    }
+  ],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 4.0,
+    "maxAcceleration": 4.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -90.74405920288878
+  },
+  "reversed": false,
+  "folder": "LTrenchDoubleMidfield",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 0.0
+  },
+  "useDefaultConstraints": true
+}

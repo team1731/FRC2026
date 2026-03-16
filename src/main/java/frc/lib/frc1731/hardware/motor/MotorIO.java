@@ -23,11 +23,6 @@ public abstract class MotorIO {
 
     public abstract void withMotionProfile(double velocity, double acceleration);
 
-    public void withCANCoder(int deviceID, String bus, CANcoderConfiguration configuration) {
-        this.cancoder = new CANcoder(deviceID, bus);
-        this.cancoder.getConfigurator().apply(configuration);
-    }
-
     public abstract void withPIDGains(PIDGains gains);
 
     public abstract void setSoftLimits(double min, double max);

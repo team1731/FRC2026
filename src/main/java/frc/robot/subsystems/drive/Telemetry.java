@@ -1,6 +1,5 @@
 package frc.robot.subsystems.drive;
 
-import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -32,7 +31,7 @@ public class Telemetry {
         MaxSpeed = maxSpeed;
       //  SignalLogger.setPath("/media/sda1/");
 
-        SignalLogger.start();
+      //  SignalLogger.start();
     }
 
     /* What to publish over networktables for telemetry */
