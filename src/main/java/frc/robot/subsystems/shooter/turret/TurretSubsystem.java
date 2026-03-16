@@ -89,6 +89,30 @@ public class TurretSubsystem extends BaseSubsystem {
         return Utils.isWithin(motor.getRotations() * 360.0, targetDegrees, kEpsilon);
     }
 
+    public boolean atTarget(double epsilon) {
+        if (!isEnabled()) return true;
+        return Utils.isWithin(motor.getRotations() * 360.0, targetDegrees, epsilon);
+    }
+
+    private double calculateBestTurretAngle(double robotHeading, double targetHeading, double current) {
+        double desired = (targetHeading - robotHeading) % 360;
+        if (desired < 0) desired += 360;
+        desired -= 180;
+
+        double path1 = desired;
+        double path2 = (desired > 0) ? (desired - 360) : (desired + 360);
+
+        boolean reach1 = (path1 >= minDegrees && path1 <= maxDegrees);
+        boolean reach2 = (path2 >= minDegrees && path2 <= maxDegrees);
+
+        if (reach1 && reach2) {
+            return (Math.abs(path1 - current) <= Math.abs(path2 - current)) ? path1 : path2;
+        } else if (reach1) return path1;
+        else if (reach2) return path2;
+
+        return Math.max(minDegrees, Math.min(maxDegrees, path1));
+    }
+
     @Override
     public void periodicTelemetry() {
         logger.log("Pose", getTurretPose());
@@ -119,9 +143,15 @@ public class TurretSubsystem extends BaseSubsystem {
 
     public Command setDegrees(DoubleSupplier degrees) {
         return run(() -> {
-            targetDegrees = degrees.getAsDouble() - (swervePoseSupplier.get().getRotation().getDegrees() + 180 % 360);
-            if (targetDegrees <= minDegrees) targetDegrees += 360;
-            if (targetDegrees >= maxDegrees) targetDegrees -= 360;
+            // targetDegrees = degrees.getAsDouble() - (swervePoseSupplier.get().getRotation().getDegrees() + 180 % 360);
+            // if (targetDegrees <= minDegrees) targetDegrees += 360;
+            // if (targetDegrees >= maxDegrees) targetDegrees -= 360;
+            // motor.setPosition(targetDegrees / 360.0);
+            targetDegrees = calculateBestTurretAngle(
+                swervePoseSupplier.get().getRotation().getDegrees(), 
+                degrees.getAsDouble(), 
+                motor.getRotations()*360.0
+            );
             motor.setPosition(targetDegrees / 360.0);
         }).withName("SetDegrees");
     }

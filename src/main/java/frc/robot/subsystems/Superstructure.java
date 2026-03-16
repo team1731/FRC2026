@@ -136,8 +136,8 @@ public class Superstructure extends SubsystemBase {
         return rightHood.atTarget() && rightFlywheel.atTargetVelocity() && rightTurret.atTarget();
     }
 
-    public boolean turretsReady() {
-        return leftTurret.atTarget() && rightTurret.atTarget();
+    public boolean turretsCanShoot() {
+        return leftTurret.atTarget(3) && rightTurret.atTarget(3);
     }
 
     public boolean shootersReady() {
@@ -153,7 +153,7 @@ public class Superstructure extends SubsystemBase {
                 setHoods(() -> targetLeftHood, () -> targetRightHood),
                 track(targetTranslation),
                 (Commands.waitUntil(() -> shootersReady())
-                .andThen(index(true).until(() -> !turretsReady()))
+                .andThen(index(true).until(() -> !turretsCanShoot()))
                 ).repeatedly()
             );
 
