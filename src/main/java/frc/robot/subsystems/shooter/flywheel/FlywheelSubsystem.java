@@ -67,11 +67,6 @@ public class FlywheelSubsystem extends BaseSubsystem {
         .withName("Stop");
     }
     
-    public Command setVelocity(DoubleSupplier left, DoubleSupplier right) {
-        return run(() -> {
-            this.leftTargetRPS = left.getAsDouble();
-            this.rightTargetRPS = right.getAsDouble();
-
     public Command stopOnce() {
         return runOnce(() -> {
             motor.setPercentOutput(0d);

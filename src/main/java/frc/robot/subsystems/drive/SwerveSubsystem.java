@@ -27,7 +27,7 @@ import frc.robot.subsystems.drive.generated.CommandSwerveDrivetrain;
 import frc.robot.subsystems.drive.generated.TunerConstants;
 
 import static frc.robot.subsystems.drive.SwerveConstants.*;
-import static frc.robot.subsystems.vision.VisionConstants.*;
+
 public class SwerveSubsystem extends BaseSubsystem {
     private CommandSwerveDrivetrain drivetrain;
     private Telemetry telemetry;

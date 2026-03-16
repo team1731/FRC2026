@@ -4,8 +4,6 @@ import com.ctre.phoenix6.configs.*;
 import com.ctre.phoenix6.signals.*;
 
 import com.ctre.phoenix6.configs.FeedbackConfigs;
-import com.ctre.phoenix6.configs.MotionMagicConfigs;
-import com.ctre.phoenix6.hardware.core.CoreCANcoder;
 
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.util.Units;

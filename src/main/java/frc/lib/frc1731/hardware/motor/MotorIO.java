@@ -3,14 +3,10 @@ package frc.lib.frc1731.hardware.motor;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ctre.phoenix6.configs.CANcoderConfiguration;
-import com.ctre.phoenix6.hardware.CANcoder;
-
 import frc.lib.frc1731.PIDGains;
 
 public abstract class MotorIO {
     protected List<PIDGains> pidGains = new ArrayList<>();
-    protected CANcoder cancoder = null; // Null on default
     protected PortConfig portConfig = null;
 
     protected MotorIO(PortConfig config) {}

@@ -76,10 +76,10 @@ public class Robot extends LoggedRobot {
 	@Override
 	public void robotInit() {
 		// Instantiate our robot container. This will perform all of our button bindings,
-		swerve = new SwerveSubsystem(true); 
-		vision = new VisionSubsystem(swerve, true);
-		container = new RobotContainer(swerve);  // passed in swerve because we needed it here for auto
-		autoChooser = AutoLoader.loadAutoChooser();
+		this.swerve = new SwerveSubsystem(true); 
+		this.vision = new VisionSubsystem(swerve, true);
+		this.container = new RobotContainer(swerve);  // passed in swerve because we needed it here for auto
+		this.autoChooser = AutoLoader.loadAutoChooser();
 		autoPreload();
 		
 		SmartDashboard.putData(RobotConstants.kAutoCodeKey, AutoLoader.loadAutoChooser()); // Puts the auto selector in smartdashboard
@@ -87,12 +87,10 @@ public class Robot extends LoggedRobot {
 
 		PathPlannerLogging.setLogCurrentPoseCallback((pose) -> {
 			currentAutoPose = pose;
-			// Logger.recordOutput("SmartLogs/PathPlanner/CurrentPose", pose);
 		});
 
 		PathPlannerLogging.setLogTargetPoseCallback((pose) -> {
 			targetAutoPose = pose;
-			// Logger.recordOutput("SmartLogs/PathPlanner/TargetPose", pose);
 		});
 
 		FollowPathCommand.warmupCommand().schedule();

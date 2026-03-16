@@ -1,9 +1,5 @@
 package frc.robot.subsystems.intake;
 
-import com.ctre.phoenix6.configs.FeedbackConfigs;
-import com.ctre.phoenix6.configs.MotionMagicConfigs;
-import com.ctre.phoenix6.hardware.core.CoreCANcoder;
-
 import frc.lib.frc1731.PIDGains;
 
 public class IntakeConstants {

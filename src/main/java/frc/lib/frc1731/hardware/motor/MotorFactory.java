@@ -22,33 +22,6 @@ public class MotorFactory {
         return (MotorIOTalonFX) motors.get(port);
     }
 
-    // public static OLD_MotorIOSparkMax createDefaultSparkMax(PortConfig config) {
-    //     int port = config.kPort;
-    //     if (motors.get(port) == null) {
-    //         motors.add(port, new OLD_MotorIOSparkMax(config));
-    //     }
-
-    //     return (OLD_MotorIOSparkMax) motors.get(port);
-    // }
-
-    // public static OLD_MotorIOSparkFlex createDefaultSparkFlex(PortConfig config) {
-    //     int port = config.kPort;
-    //     if (motors.get(port) == null) {
-    //         motors.add(port, new OLD_MotorIOSparkFlex(config));
-    //     }
-
-    //     return (OLD_MotorIOSparkFlex) motors.get(port);
-    // }
-
-    // public static OLD_MotorIOTalonFXS createDefaultTalonFXS(PortConfig config) {
-    //     int port = config.kPort;
-    //     if (motors.get(port) == null) {
-    //         motors.add(port, new OLD_MotorIOTalonFXS(config));
-    //     }
-        
-    //     return (OLD_MotorIOTalonFXS) motors.get(port);
-    // }
-
     public static <M extends MotorIO> boolean isOfMotorType(int port, Class<M> cls) {
         return motors.get(port) != null && motors.get(port).getClass().equals(cls);
     }

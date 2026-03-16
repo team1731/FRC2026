@@ -35,9 +35,9 @@ public class IntakePivotSubsystem extends BaseSubsystem {
         motor.withStatorCurrentLimit(kPivotCurrentLimit);
         motor.setSoftLimits(kPivotIntakeRotations, kPivotStowRotations);
         motor.withFeedbackConfigs(new FeedbackConfigs()
-            .withFeedbackRemoteSensorID(15)
-            .withRemoteCANcoder(new CoreCANcoder(15, "Left CANivore"))
-            .withRotorToSensorRatio(48d)
+            .withFeedbackRemoteSensorID(Ports.kPivotCANcoderId)
+            .withRemoteCANcoder(new CoreCANcoder(Ports.kPivotCANcoderId, "Left CANivore"))
+            .withRotorToSensorRatio(kPivotGearRatio)
         );
 
         motor.withMotionMagicConfigs(
@@ -46,25 +46,12 @@ public class IntakePivotSubsystem extends BaseSubsystem {
         );
 
         motor.setDynamicMotionMagicSpeeds(2, 2);  
-        // motor = new MotorIOTalonFX(Ports.kIntakePivotConfig);
         cancoder = new CANcoder(Ports.kPivotCANcoderId);
 
         CANcoderConfiguration coderConfig = new CANcoderConfiguration()
         .withMagnetSensor(new MagnetSensorConfigs().withMagnetOffset(-0.04833984375));
         cancoder.getConfigurator().apply(coderConfig);
-
-        // motor.getMotor().clearStickyFaults();
-        // motor.withPIDGains(kPivotGains);
-        // motor.withStatorCurrentLimit(kPivotCurrentLimit);
-        // motor.setSoftLimits(kPivotIntakeRotations, kPivotStowRotations);
-        // motor.withFeedbackConfigs(new FeedbackConfigs()
-        //     .withFeedbackRemoteSensorID(Ports.kPivotCANcoderId)
-        //     .withRemoteCANcoder(new CoreCANcoder(Ports.kPivotCANcoderId))
-        //     .withRotorToSensorRatio(kPivotGearRatio)
-        // );
-
-        // motor.withMotionProfile(3, 2);
-        // motor.setDynamicMotionMagicSpeeds(3, 2);
+        
         motor.getMotor().setPosition(cancoder.getAbsolutePosition().waitForUpdate(0.2).getValueAsDouble());
     }
 

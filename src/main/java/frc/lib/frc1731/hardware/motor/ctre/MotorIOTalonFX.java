@@ -19,7 +19,8 @@ import frc.lib.frc1731.hardware.motor.MotorIO;
 import frc.lib.frc1731.hardware.motor.PortConfig;
 
 public class MotorIOTalonFX extends MotorIO {
-    protected TalonFX motor;
+    protected TalonFX motor = null;
+    protected CANcoder cancoder = null;
     private TalonFXConfiguration cfg = new TalonFXConfiguration();
     private TalonFXConfigurator configurator;
     private TalonFXSimState simState;
