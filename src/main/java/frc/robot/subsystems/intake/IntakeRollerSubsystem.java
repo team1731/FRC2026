@@ -4,10 +4,10 @@ import static edu.wpi.first.units.Units.*;
 import static frc.robot.subsystems.intake.IntakeConstants.*;
 
 import frc.lib.frc1731.hardware.motor.ctre.MotorIOTalonFX;
-import frc.lib.frc1731.subsystem.VelocitySubsystem;
+import frc.lib.frc1731.subsystem.BaseVelocitySubsystem;
 import frc.robot.Ports;
 
-public class IntakeRollerSubsystem extends VelocitySubsystem<MotorIOTalonFX>{
+public class IntakeRollerSubsystem extends BaseVelocitySubsystem<MotorIOTalonFX>{
     public IntakeRollerSubsystem(boolean enabled){
         super(enabled);
     }

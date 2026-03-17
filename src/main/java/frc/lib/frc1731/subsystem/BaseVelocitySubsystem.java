@@ -14,7 +14,8 @@ import frc.lib.frc1731.sim.SimpleVelocitySim.SimConstants;
 import frc.robot.Robot;
 import frc.robot.subsystems.BaseSubsystem;
 
-public abstract class VelocitySubsystem<M extends MotorIO> extends BaseSubsystem {
+// TODO - CHANGE THIS LIKE A LOT
+public abstract class BaseVelocitySubsystem<M extends MotorIO> extends BaseSubsystem {
     protected M motor; // The primary motor controller
     private AngularVelocity targetVelocity = RotationsPerSecond.zero(); // The setpoint velocity for the motor
     private SimpleVelocitySim sim = null; // The simulated model of the subsystem
@@ -22,7 +23,7 @@ public abstract class VelocitySubsystem<M extends MotorIO> extends BaseSubsystem
     private double mechanismRatio = 1d; // Mechanism input:output reduction ratio (i.e 2:1 ratio means 2 motor rotations per mechanism rotation)
     private AngularVelocity kMaxVelocity = RotationsPerSecond.of(100); // The maximum velocity of the mechanism, used for percent output commands
 
-    protected VelocitySubsystem(boolean enabled) {
+    protected BaseVelocitySubsystem(boolean enabled) {
         super(enabled);
         if (!isEnabled()) return;
         initializeHardware();
