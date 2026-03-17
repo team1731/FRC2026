@@ -28,4 +28,11 @@ public class FlywheelConstants {
         .setP(0.1)
         .setV(0.15)
         ;
+
+    // Use with VelocityTorqueCurrentFOC
+    public static final PIDGains kBackupGains = new PIDGains()
+        .setP(1)
+        .setV(0.12)
+        .setD(0.005)
+        .setS(0.2);
 }

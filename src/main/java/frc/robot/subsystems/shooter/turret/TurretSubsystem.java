@@ -39,8 +39,7 @@ public class TurretSubsystem extends BaseSubsystem {
     protected void initializeHardware() {
         TurretConfiguration turretConfig = (TurretConfiguration)config.get();
         motor = new MotorIOTalonFX(turretConfig.motorConfigs());
-
-        cancoder = new CANcoder(turretConfig.cancoderID());
+        cancoder = new CANcoder(turretConfig.cancoderID(), turretConfig.motorConfigs().kBus);
 
         CANcoderConfiguration coderConfig = new CANcoderConfiguration();
         coderConfig.MagnetSensor.MagnetOffset = turretConfig.cancoderConfigs().MagnetSensor.MagnetOffset;

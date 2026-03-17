@@ -6,9 +6,11 @@ import java.util.Scanner;
 
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
+import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.Robot;
 import frc.robot.RobotConstants;
 
 /**
@@ -50,9 +52,13 @@ public class FrestaLogger {
 			fnf.printStackTrace();
 		}
 		SmartDashboard.updateValues();
-		if (RobotConstants.kShouldLog) {
+		if (RobotConstants.kLogToAdvantageScope) {
 			Logger.addDataReceiver(new NT4Publisher());
-			Logger.start();
 		}
+		
+		if (Robot.isReal()) {
+			Logger.addDataReceiver(new WPILOGWriter("/home/lvuser/logs"));
+		}
+		Logger.start();
     }
 }

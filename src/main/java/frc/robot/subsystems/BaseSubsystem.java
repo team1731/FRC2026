@@ -27,7 +27,7 @@ public abstract class BaseSubsystem extends SubsystemBase {
     protected <T extends SubsystemConfiguration> BaseSubsystem(String nameModifier, SubsystemConfiguration config, boolean enabled) {
         this.enabled = enabled;
         this.setName(nameModifier + getName());
-        this.logger = new SmartLogger(getName(), () -> RobotConstants.kShouldLog);
+        this.logger = new SmartLogger(getName(), () -> RobotConstants.kLogToAdvantageScope);
         if (isEnabled()){
             // this.config = config == null ? Optional.empty() : Optional.of(config);
             if (config != null) this.config = Optional.of(config);
@@ -197,7 +197,7 @@ public abstract class BaseSubsystem extends SubsystemBase {
         if (isEnabled()) {
             periodicOutput();
             periodicTelemetry();
-            if (RobotConstants.kShouldLog) {
+            if (RobotConstants.kLogToAdvantageScope) {
                 logger.log("Command/Actively Commanded", isCurrentlyCommanded());
                 logger.log("Command/Has Default Command", !getDefaultCommand().equals(Commands.none()));
                 logger.log("Command/Active Command", getCurrentCommand().getName());
