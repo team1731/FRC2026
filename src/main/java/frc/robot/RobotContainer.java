@@ -36,7 +36,6 @@ public class RobotContainer {
     private FlywheelSubsystem leftFlywheel, rightFlywheel;
     private HoodSubsystem leftHood, rightHood;
 
-
     private Superstructure superstructure;
 
     /* Driver Buttons */
@@ -145,7 +144,7 @@ public class RobotContainer {
     public void configureDefaultCommands() {
         // Drivetrain will execute this command periodically 
         // if no other command is active on the drivetrain
-        swerve.setDefaultCommand(swerve.drive(driver, () -> true));
+        swerve.setDefaultCommand(swerve.driveCommand(driver, () -> true));
 
         intake.setDefaultCommand(intake.stop());
         indexer.setDefaultCommand(indexer.stop());
