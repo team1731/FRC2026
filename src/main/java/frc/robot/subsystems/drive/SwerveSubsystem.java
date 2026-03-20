@@ -141,6 +141,11 @@ public class SwerveSubsystem extends BaseSubsystem {
 
     @Override
     public void periodicTelemetry() {
+        // drivetrain.periodic();
+    }
+
+    @Override
+    public void periodicOutput() {
         drivetrain.periodic();
     }
 

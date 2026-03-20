@@ -24,7 +24,7 @@ public class RobotContainer {
         kParameters,
     }
 
-    private static TestShotCondition testCondition = TestShotCondition.kDistance;
+    private static TestShotCondition testCondition = TestShotCondition.kParameters;
 
     /* Subsystems */
     private SwerveSubsystem swerve;
@@ -81,13 +81,13 @@ public class RobotContainer {
      */
     private void configureSubsystems() {
         leftFlywheel = new FlywheelSubsystem(kLeftFlywheelConfig, true);
-        rightFlywheel = new FlywheelSubsystem(kRightFlywheelConfig, false);
+        rightFlywheel = new FlywheelSubsystem(kRightFlywheelConfig, true);
 
         leftHood = new HoodSubsystem(kLeftHoodConfig, true);
-        rightHood = new HoodSubsystem(kRightHoodConfig, false);
+        rightHood = new HoodSubsystem(kRightHoodConfig, true);
 
         leftTurret = new TurretSubsystem(kLeftTurretConfigs, () -> swerve.getCurrentPose(), true);
-        rightTurret = new TurretSubsystem(kRightTurretConfigs, () -> swerve.getCurrentPose(), false);
+        rightTurret = new TurretSubsystem(kRightTurretConfigs, () -> swerve.getCurrentPose(), true);
 
         indexer = new IndexerSubsystem(true);
         pivot = new IntakePivotSubsystem(true);
@@ -118,11 +118,11 @@ public class RobotContainer {
         // Reset robot pose and heading
         dResetSwerve.onTrue(superstructure.resetGyro());
 
-        dIntake.whileTrue(superstructure.runIntake(() -> true));
-        dShoot.whileTrue(superstructure.shoot().alongWith(superstructure.runIntake(() -> false)));
-        dPass.whileTrue(superstructure.pass().alongWith(superstructure.runIntake(() -> false)));
-        dFeedthrough.whileTrue(superstructure.shoot().alongWith(superstructure.runIntake(() -> true)));
-        dPassthrough.whileTrue(superstructure.pass().alongWith(superstructure.runIntake(() -> true)));
+        dIntake.and(() -> !dShoot.getAsBoolean() || !dPass.getAsBoolean()).whileTrue(superstructure.intake());
+        dShoot.whileTrue(superstructure.shoot());
+        dPass.whileTrue(superstructure.pass());
+        dFeedthrough.whileTrue(superstructure.feedthrough());
+        dPassthrough.whileTrue(superstructure.passFeedthrough());
 
         dHubShot.whileTrue(superstructure.shoot(1.8, true));
         dTowerShot.whileTrue(superstructure.shoot(2.5, true));

@@ -20,7 +20,8 @@ public class FlywheelSubsystem extends BaseSubsystem {
     @Override
     protected void initializeHardware() {
         motor = new MotorIOTalonFX(((FlywheelConfiguration)config.get()).portConfig());
-        motor.withPIDGains(kVelocityGains);
+        motor.withPIDGains(kBackupGains);
+        // motor.withPIDGains(kVelocityGains);
         motor.withStatorCurrentLimit(kCurrentLimit);
     }
 

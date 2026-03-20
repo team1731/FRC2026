@@ -10,7 +10,7 @@ public class IntakeConstants {
         .setV(0.144)
         .setA(0.01);
 
-    public static final PIDGains kRollerGains = new PIDGains().setP(0.01).setV(0.12);
+    public static final PIDGains kRollerGains = new PIDGains().setP(0.25).setV(0.12);
 
     public static final double kRollerCurrentLimit = 40.0;
     public static final double kPivotCurrentLimit = 40.0;

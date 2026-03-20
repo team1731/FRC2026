@@ -13,6 +13,7 @@ import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.util.PathPlannerLogging;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -187,6 +188,7 @@ public class Robot extends LoggedRobot {
 					FieldPositions.kFieldWidth - m_autonomousCommand.getStartingPose().getY(),
 					m_autonomousCommand.getStartingPose().getRotation().rotateBy(Rotation2d.k180deg)
 				) : m_autonomousCommand.getStartingPose();
+				vision.resetOculusPose(new Pose3d(startingPose));
             	swerve.resetPose(startingPose);
 			}
 

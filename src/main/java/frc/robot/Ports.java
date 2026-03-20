@@ -20,7 +20,7 @@ public class Ports {
 
     public static final PortConfig kIndexerConfig = new PortConfig(RobotConstants.kMainCANBus, 17, true);
 
-    public static final PortConfig kRightTurretConfigs = new PortConfig(RobotConstants.kMainCANBus, 18, false);
+    public static final PortConfig kRightTurretConfigs = new PortConfig(RobotConstants.kMainCANBus, 18, true);
     public static final PortConfig kRightHoodConfig = new PortConfig(RobotConstants.kMainCANBus, 19, false);
     public static final PortConfig kRightFlywheelConfig = new PortConfig(RobotConstants.kMainCANBus, 20, true);
 

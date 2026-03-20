@@ -13,6 +13,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 
 import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.lib.frc1731.Utils;
 import frc.lib.frc1731.field.FieldPositions;
@@ -30,9 +31,12 @@ public class TurretSubsystem extends BaseSubsystem {
 
     private Translation2d targetTranslation;
 
+    private String name;
+
     public TurretSubsystem(TurretConfiguration config, Supplier<Pose2d> swervePoseSupplier, boolean enabled) {
         super(config.name(), config, enabled);
         this.swervePoseSupplier = swervePoseSupplier;
+        this.name = config.name();
     }
 
     @Override
@@ -80,7 +84,7 @@ public class TurretSubsystem extends BaseSubsystem {
     public Pose2d getTurretPose() {
         if (!isEnabled()) return new Pose2d();
         Translation2d swerve = swervePoseSupplier.get().getTranslation();
-        return new Pose2d(swerve.plus(robotToTurret.rotateBy(swervePoseSupplier.get().getRotation())), swervePoseSupplier.get().getRotation());
+        return new Pose2d(swerve.plus(robotToTurret.rotateBy(swervePoseSupplier.get().getRotation())), new Rotation2d());
     }
 
     public boolean atTarget() {
@@ -93,8 +97,22 @@ public class TurretSubsystem extends BaseSubsystem {
         return Utils.isWithin(motor.getRotations() * 360.0, targetDegrees, epsilon);
     }
 
+    public double getTarget() {
+        if (!isEnabled()) return 0;
+        return targetDegrees;
+    }
+
+    public double getDegrees() {
+        if (!isEnabled()) return 0;
+        return motor.getRotations() * 360;
+    }
+
     private double calculateBestTurretAngle(double robotHeading, double targetHeading, double current) {
-        double desired = (targetHeading - robotHeading) % 360;
+        // double desired = (targetHeading - robotHeading) % 360;
+        // if (desired > maxDegrees) desired -= 360;
+        // if (desired < minDegrees) desired += 360;
+        // return Math.max(minDegrees, Math.min(maxDegrees, desired));
+        double desired = (targetHeading - robotHeading + 180) % 360;
         if (desired < 0) desired += 360;
         desired -= 180;
 
@@ -110,6 +128,11 @@ public class TurretSubsystem extends BaseSubsystem {
         else if (reach2) return path2;
 
         return Math.max(minDegrees, Math.min(maxDegrees, path1));
+    }
+
+    @Override
+    public void periodic() {
+        SmartDashboard.putNumber(name + " Turret Distance", FieldPositions.kHub.get().minus(getTurretPose().getTranslation()).getNorm());
     }
 
     @Override
@@ -129,10 +152,54 @@ public class TurretSubsystem extends BaseSubsystem {
     }
 
     public Command track(Supplier<Translation2d> target) {
-        return this.setDegrees(() -> {
-            this.targetTranslation = target.get();
-            Translation2d turretToTarget = target.get().minus(getTurretPose().getTranslation());
-            return Math.atan(turretToTarget.getY() / turretToTarget.getX()) * 180 / Math.PI;
+        return this.run(() -> {
+            // this.targetTranslation = target.get();
+            // Translation2d turretToTarget = target.get().minus(getTurretPose().getTranslation());
+            // return Math.toDegrees(Math.atan(turretToTarget.getY() / turretToTarget.getX()));
+            double currentPosDeg = motor.getRotations() * 360.0;
+            Pose2d robotPose = swervePoseSupplier.get();
+            
+            // Translation2d actualGoal = (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red) 
+            //     ? RED_TARGET : BLUE_TARGET;
+
+            // 1. Calculate turret's current field position
+            Translation2d turretFieldPos = robotPose.getTranslation().plus(
+                robotToTurret.rotateBy(robotPose.getRotation())
+            );
+
+            // 2. Iterative Solver for Time of Flight (TOF)
+            // double timeOfFlight = turretFieldPos.getDistance(actualGoal) / NOTE_VELOCITY_MPS;
+            
+            // // Second pass: Adjust TOF based on the virtual goal's distance
+            // for (int i = 0; i < 2; i++) {
+            //     Translation2d virtualGoal = new Translation2d(
+            //         actualGoal.getX() - (0* timeOfFlight),
+            //         actualGoal.getY() - (0 * timeOfFlight)
+            //     );
+            //     timeOfFlight = turretFieldPos.getDistance(virtualGoal) / NOTE_VELOCITY_MPS;
+            // }
+
+            // // 3. Final Virtual Goal Calculation
+            // Translation2d finalVirtualGoal = new Translation2d(
+            //     actualGoal.getX() - (0 * timeOfFlight),
+            //     actualGoal.getY() - (0 * timeOfFlight)
+            // );
+
+            // 4. Calculate Heading to the Virtual Goal
+            double fieldTargetHeading = Math.toDegrees(Math.atan2(
+                target.get().getY() - turretFieldPos.getY(),
+                target.get().getX() - turretFieldPos.getX()
+            ));
+
+            double output = calculateBestTurretAngle(
+                robotPose.getRotation().getDegrees(), 
+                fieldTargetHeading, 
+                currentPosDeg
+            );
+
+            this.targetDegrees = output;
+
+            motor.setPosition(output / 360.0);
         });
     }
 
@@ -142,17 +209,15 @@ public class TurretSubsystem extends BaseSubsystem {
 
     public Command setDegrees(DoubleSupplier degrees) {
         return run(() -> {
-            // targetDegrees = degrees.getAsDouble() - (swervePoseSupplier.get().getRotation().getDegrees() + 180 % 360);
-            // if (targetDegrees <= minDegrees) targetDegrees += 360;
-            // if (targetDegrees >= maxDegrees) targetDegrees -= 360;
-            // motor.setPosition(targetDegrees / 360.0);
-            targetDegrees = calculateBestTurretAngle(
-                swervePoseSupplier.get().getRotation().getDegrees(), 
-                degrees.getAsDouble(), 
-                motor.getRotations()*360.0
-            );
-            motor.setPosition(targetDegrees / 360.0);
-        }).withName("SetDegrees");
+            double output = degrees.getAsDouble();
+            if (degrees.getAsDouble() >= maxDegrees) {
+                output -= 360;
+            } else if (degrees.getAsDouble() <= minDegrees) {
+                output += 360;
+            }
+            this.targetDegrees = output;
+            motor.setPosition(output / 360.0);
+        });
     }
 
     public Command setDegrees(double degrees) {

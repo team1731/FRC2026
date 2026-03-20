@@ -12,6 +12,7 @@ import static frc.robot.subsystems.vision.VisionConstants.*;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class VisionSubsystem extends BaseSubsystem {
     private Limelight limelight;
@@ -47,12 +48,12 @@ public class VisionSubsystem extends BaseSubsystem {
 
     public void resetOculusPose(Pose3d pose) {
         if (kUseVSLAM) {
-            this.oculus.setPose(pose);
+            this.oculus.setPose(pose.transformBy(kRobotToOculus));
         }
     }
 
     public boolean isVSLAMConnected() {
-        if (!kUseAprilTags) return false;
+        if (!kUseVSLAM) return false;
         return oculus.isConnected() && oculus.isTracking();
     }
 
@@ -81,6 +82,11 @@ public class VisionSubsystem extends BaseSubsystem {
                 }
             }
         }
+    }
+
+    @Override
+    public void periodic() {
+        periodicTelemetry();
     }
 
     @Override
@@ -123,5 +129,10 @@ public class VisionSubsystem extends BaseSubsystem {
                 addQuestVisionMeasurement();
             }
         }
+
+        SmartDashboard.putBoolean("Is Connected", isVSLAMConnected());
+        SmartDashboard.putBoolean("Is Seeded", isQuestSeeded);
+        SmartDashboard.putBoolean("Is Tracking", oculus.isTracking());
+        SmartDashboard.putBoolean("Is Oculus", oculus.isConnected());
     }
 }

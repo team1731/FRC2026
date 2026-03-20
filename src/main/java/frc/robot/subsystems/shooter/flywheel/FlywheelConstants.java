@@ -12,7 +12,7 @@ public class FlywheelConstants {
     public static final double kGearRatio = 1d; // 1:1 input:output ratio
     public static final double kMaxVelocity = 100; // Max velocity
     public static final double kWarmupVelocity = 40; // Warmup velocity
-    public static final double kEpsilon = 2; // 2 RPS tolerance
+    public static final double kEpsilon = 3; // 3 RPS tolerance
 
     public static final Distance kFlywheelRadius = Inches.of(2d); // 4 inch diameter
     public static final Mass kFlywheelMass = Pounds.of(1d); // 1 lb flywheel
@@ -31,8 +31,7 @@ public class FlywheelConstants {
 
     // Use with VelocityTorqueCurrentFOC
     public static final PIDGains kBackupGains = new PIDGains()
-        .setP(1)
-        .setV(0.12)
+        .setP(1.0)
         .setD(0.005)
-        .setS(0.2);
+        .setV(0.175);
 }

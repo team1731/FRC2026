@@ -8,6 +8,8 @@ import frc.robot.subsystems.BaseSubsystem;
 
 import static frc.robot.subsystems.intake.IntakeConstants.*;
 
+import java.util.function.DoubleSupplier;
+
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
@@ -20,9 +22,6 @@ public class IntakePivotSubsystem extends BaseSubsystem {
     private CANcoder cancoder;
     private double targetPosition = 0;
 
-    private double rotations = 0;
-    private double targetRotations = 0;
-
     public IntakePivotSubsystem(boolean enabled) {
         super(enabled);
     }
@@ -33,6 +32,7 @@ public class IntakePivotSubsystem extends BaseSubsystem {
         motor.getMotor().clearStickyFaults();
         motor.withPIDGains(kPivotGains);
         motor.withStatorCurrentLimit(kPivotCurrentLimit);
+        // motor.setSoftLimits(kPivotStowRotations, kPivotIntakeRotations);
         motor.setSoftLimits(kPivotIntakeRotations, kPivotStowRotations);
         motor.withFeedbackConfigs(new FeedbackConfigs()
             .withFeedbackRemoteSensorID(Ports.kPivotCANcoderId)
@@ -67,10 +67,10 @@ public class IntakePivotSubsystem extends BaseSubsystem {
         logger.log("At Target Position", atTargetPosition());
     }
     
-    private Command setPosition(double position) {
+    private Command setPosition(DoubleSupplier position) {
         return run(() -> {
-            targetRotations = rotations;
-            motor.setPosition(targetRotations);
+            targetPosition = position.getAsDouble();
+            motor.setPosition(position.getAsDouble());
         });
     }
 
@@ -79,10 +79,10 @@ public class IntakePivotSubsystem extends BaseSubsystem {
     }
 
     public Command deploy() {
-        return this.setPosition(kPivotIntakeRotations);
+        return this.setPosition(() -> kPivotIntakeRotations);
     }
 
     public Command retract() {
-        return this.setPosition(kPivotStowRotations);
+        return this.setPosition(() -> kPivotStowRotations);
     }
 }
