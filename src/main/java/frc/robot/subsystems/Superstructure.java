@@ -8,11 +8,14 @@ import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.lib.frc1731.field.FieldPositions;
+import frc.robot.Robot;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.indexer.*;
 import frc.robot.subsystems.intake.*;
@@ -316,12 +319,17 @@ public class Superstructure extends SubsystemBase {
         this.appliedLeftTargetSupplier = () -> adjustTargetForMovingShots ? newerLeftTarget : targetSupplier.get();
         this.appliedLeftTargetSupplier = () -> adjustTargetForMovingShots ? newerRightTarget : targetSupplier.get();
 
-        SmartDashboard.putBoolean("SS/Shooters Ready", shootersReady());
-        SmartDashboard.putBoolean("SS/Flywheel At Target", leftFlywheel.atTargetVelocity());
-        SmartDashboard.putBoolean("SS/Hood At Target", leftHood.atTarget());
-        SmartDashboard.putBoolean("SS/Turret At Target", leftTurret.atTarget());
-        SmartDashboard.putNumber("SS/Turret Target", leftTurret.getTarget());
-        SmartDashboard.putNumber("SS/Turret", leftTurret.getDegrees());
+        if (Robot.isSimulation()) {
+            SmartDashboard.putBoolean("SS/Shooters Ready", shootersReady());
+            SmartDashboard.putBoolean("SS/Flywheel At Target", leftFlywheel.atTargetVelocity());
+            SmartDashboard.putBoolean("SS/Hood At Target", leftHood.atTarget());
+            SmartDashboard.putBoolean("SS/Turret At Target", leftTurret.atTarget());
+            SmartDashboard.putNumber("SS/Turret Target", leftTurret.getTarget());
+            SmartDashboard.putNumber("SS/Turret", leftTurret.getDegrees());
+
+            Logger.recordOutput("SmartLogs/LeftTargetPose", new Pose2d(appliedLeftTargetSupplier.get(), new Rotation2d()));
+            Logger.recordOutput("SmartLogs/RightTargetPose", new Pose2d(appliedRightTargetSupplier.get(), new Rotation2d()));
+        }
 
         targetLeftHood = appliedLeftParameters[0];
         targetRightHood = appliedRightParameters[0];

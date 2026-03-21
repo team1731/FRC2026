@@ -70,6 +70,6 @@ public class ShotTable {
     }
 
     public double[] getShotParameters(double distance) {
-        return new double[] {hoodModel.getInterpolation(distance), flywheelModel.getInterpolation(distance), 2 * tofModel.getInterpolation(distance)};
+        return new double[] {hoodModel.getInterpolation(distance), flywheelModel.getInterpolation(distance), tofModel.getInterpolation(distance)};
     }
 }

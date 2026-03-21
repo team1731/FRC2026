@@ -47,7 +47,7 @@ public class RobotContainer {
     private final Trigger dPass = driver.y();
 
     private final Trigger dFeedthrough = dIntake.and(dShoot);
-    private final Trigger dPassthrough = dIntake.and(dShoot);
+    private final Trigger dPassthrough = dIntake.and(dPass);
 
     private final Trigger dTrenchShot = driver.b();
     private final Trigger dTowerShot = driver.a();

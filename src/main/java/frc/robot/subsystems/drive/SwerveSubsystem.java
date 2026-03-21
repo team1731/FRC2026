@@ -227,6 +227,7 @@ public class SwerveSubsystem extends BaseSubsystem {
         //         resetPose(resetPosition);
         // }
 
+        drivetrain.periodic();
         updateVisionOdometry();
         questNav.commandPeriodic();
         SmartDashboard.putBoolean("isSeeded", isQuestSeeded);
