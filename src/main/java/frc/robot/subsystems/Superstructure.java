@@ -39,6 +39,9 @@ public class Superstructure extends SubsystemBase {
             FieldPositions.kRightPass.get();
     };
 
+    private Supplier<Translation2d> appliedLeftTargetSupplier = targetSupplier;
+    private Supplier<Translation2d> appliedRightTargetSupplier = targetSupplier;
+
     private double targetLeftHood = 0;
     private double targetRightHood = 0;
     private double targetLeftFlywheel = 0;
@@ -129,6 +132,14 @@ public class Superstructure extends SubsystemBase {
         return leftTurret.track(target).alongWith(rightTurret.track(target));
     }
 
+    public Command track(Supplier<Translation2d> left, Supplier<Translation2d> right) {
+        return leftTurret.track(left).alongWith(rightTurret.track(right));
+    }
+
+    public Command trackAppliedTarget() {
+        return this.track(appliedLeftTargetSupplier, appliedRightTargetSupplier);
+    }
+
     public Command stopShooters() {
         return leftFlywheel.stopOnce().andThen(rightFlywheel.stopOnce());
     }
@@ -160,7 +171,7 @@ public class Superstructure extends SubsystemBase {
             Command shootCommand = new ParallelCommandGroup(
                 setFlywheels(() -> targetLeftFlywheel, () -> targetRightFlywheel),
                 setHoods(() -> targetLeftHood, () -> targetRightHood),
-                track(targetSupplier),
+                trackAppliedTarget(),
                 runIntake(() -> false),
                 // Commands.waitSeconds(1.5).andThen(index(true))
                 // Commands.waitUntil(() -> shootersReady()).andThen(index(true))
@@ -301,6 +312,9 @@ public class Superstructure extends SubsystemBase {
 
         double[] appliedLeftParameters = adjustTargetForMovingShots ? newerLeftParameters : leftParameters;
         double[] appliedRightParameters = adjustTargetForMovingShots ? newerRightParameters : rightParameters;
+
+        this.appliedLeftTargetSupplier = () -> adjustTargetForMovingShots ? newerLeftTarget : targetSupplier.get();
+        this.appliedLeftTargetSupplier = () -> adjustTargetForMovingShots ? newerRightTarget : targetSupplier.get();
 
         SmartDashboard.putBoolean("SS/Shooters Ready", shootersReady());
         SmartDashboard.putBoolean("SS/Flywheel At Target", leftFlywheel.atTargetVelocity());
