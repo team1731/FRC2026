@@ -5,7 +5,6 @@ import static frc.robot.subsystems.shooter.hood.HoodConstants.*;
 import static frc.robot.subsystems.shooter.turret.TurretConstants.*;
 
 import com.pathplanner.lib.auto.NamedCommands;
-
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.*;
 import frc.lib.frc6328.LoggedTunableNumber;
@@ -56,7 +55,7 @@ public class RobotContainer {
     private final Trigger dTestSetShot = driver.back();
 
     private final Trigger dRetractIntake = driver.leftBumper();
-    private final Trigger dUnjam = driver.rightBumper();
+    private final Trigger dForceShoot = driver.rightBumper();
 
     private final Trigger dLeftTurretLeft = driver.povLeft();
     private final Trigger dLeftTurretRight = driver.povRight();
@@ -101,13 +100,14 @@ public class RobotContainer {
     private void configureNamedCommands() {
         // Named commands useful for PathPlanner events
         // ex. NamedCommands.registerCommand("Example", new ExampleCommand());
-        NamedCommands.registerCommand("Shoot", superstructure.autoShoot());
+        NamedCommands.registerCommand("Shoot", superstructure.autoShoot().andThen(Commands.deadline(Commands.waitSeconds(0.1), superstructure.stopShooters())));
         NamedCommands.registerCommand("StopShoot", Commands.deadline(Commands.waitSeconds(0.1), superstructure.stopShooters()));
         NamedCommands.registerCommand("Intake", superstructure.runIntake(() -> true));
         NamedCommands.registerCommand("Pass", superstructure.pass());
-        NamedCommands.registerCommand("Stow Hood", superstructure.stowHoods());
+        NamedCommands.registerCommand("StowHood", Commands.deadline(Commands.waitSeconds(0.1), superstructure.stowHoodsOnce()));
         NamedCommands.registerCommand("Stow Pivot", superstructure.stowIntake());
         NamedCommands.registerCommand("Warmup", superstructure.warmup());
+        NamedCommands.registerCommand("Feedthrough", superstructure.feedthrough());
     }
 
     /**
@@ -126,14 +126,14 @@ public class RobotContainer {
         dHubShot.whileTrue(superstructure.shoot(1.8, true));
         dTowerShot.whileTrue(superstructure.shoot(2.5, true));
         dTrenchShot.whileTrue(superstructure.shoot(4, true));
-
+        
         (dTestSetShot.and(() -> testCondition.equals(TestShotCondition.kDistance)))
             .whileTrue(superstructure.shoot(tuneableDistanceShot, true));
         (dTestSetShot.and(() -> testCondition.equals(TestShotCondition.kParameters)))
             .whileTrue(superstructure.shoot(tuneableFlywheelRPS.get(), tuneableHoodRotations.get(), true));
 
         dRetractIntake.onTrue(pivot.retract());
-        dUnjam.whileTrue(superstructure.reverseFeeder());
+        dForceShoot.whileTrue(superstructure.forceShoot(0.25));
 
         dLeftTurretLeft.whileTrue(leftTurret.setDegrees(-200));
         dLeftTurretRight.whileTrue(leftTurret.setDegrees(80));
@@ -149,8 +149,8 @@ public class RobotContainer {
         intake.setDefaultCommand(intake.stop());
         indexer.setDefaultCommand(indexer.stop());
 
-        leftTurret.setDefaultCommand(leftTurret.trackHub());
-        rightTurret.setDefaultCommand(rightTurret.trackHub());
+        leftTurret.setDefaultCommand(leftTurret.track(superstructure.appliedTargetSupplier));
+        rightTurret.setDefaultCommand(rightTurret.track(superstructure.appliedTargetSupplier));
 
         leftHood.setDefaultCommand(leftHood.stow());
         rightHood.setDefaultCommand(rightHood.stow());

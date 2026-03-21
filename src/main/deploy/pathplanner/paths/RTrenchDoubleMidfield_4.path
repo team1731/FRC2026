@@ -3,16 +3,16 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.7653922967189715,
-        "y": 2.566462196861627
+        "x": 7.804208273894435,
+        "y": 2.838174037089873
       },
       "prevControl": null,
       "nextControl": {
         "x": 7.416048502139798,
-        "y": 0.3539514978602005
+        "y": 0.7421112696148362
       },
       "isLocked": false,
-      "linkedName": "RMidIntake1"
+      "linkedName": "RMidIntake2"
     },
     {
       "anchor": {
@@ -20,8 +20,8 @@
         "y": 0.6644793152639101
       },
       "prevControl": {
-        "x": 5.464016534820386,
-        "y": 0.6541724970820917
+        "x": 6.913969718583841,
+        "y": 0.6824905167941928
       },
       "nextControl": null,
       "isLocked": false,
@@ -30,7 +30,7 @@
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.7276677933365466,
+      "waypointRelativePos": 0.9111540318686567,
       "rotationDegrees": 0.0
     }
   ],
@@ -53,7 +53,7 @@
   "folder": "RTrenchDoubleMidfield",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 90.0
+    "rotation": 88.99491399474567
   },
   "useDefaultConstraints": true
 }

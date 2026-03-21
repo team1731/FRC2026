@@ -346,7 +346,7 @@ public void autonomousPeriodic() {
 	if (m_autonomousCommand != null && (Timer.getFPGATimestamp() - autoStartTime) >= 0.25
 			&& (currentPose.getTranslation().getDistance(targetPose.getTranslation()) > 1.0)) {
 		System.out.println("distance is" + currentPose.getTranslation().getDistance(targetPose.getTranslation()));
-		m_autonomousCommand.cancel();
+		// m_autonomousCommand.cancel();
 		System.out.println(
 				"Had to Kill the auto because the target pose and current pose were apart by more than a foot");
 	}

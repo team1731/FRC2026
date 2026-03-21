@@ -12,7 +12,7 @@ public class IntakeConstants {
 
     public static final PIDGains kRollerGains = new PIDGains().setP(0.25).setV(0.12);
 
-    public static final double kRollerCurrentLimit = 40.0;
+    public static final double kRollerCurrentLimit = 50.0;
     public static final double kPivotCurrentLimit = 40.0;
 
     public static final double kPivotGearRatio = 48.0; // reduction

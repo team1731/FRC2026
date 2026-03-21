@@ -247,8 +247,6 @@ public class SwerveSubsystem extends BaseSubsystem {
         if (questNav.isTracking() && isQuestSeeded && questNav.isConnected()) {
             addQuestVisionMeasurement();
         }
-
-
     }
 
     @Override
