@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.804208273894435,
-        "y": 2.838174037089873
+        "x": 7.795886363636363,
+        "y": 3.323829545454546
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.416048502139798,
-        "y": 0.7421112696148362
+        "x": 7.407726591881726,
+        "y": 1.2277667779795092
       },
       "isLocked": false,
       "linkedName": "RMidIntake2"
@@ -53,7 +53,7 @@
   "folder": "RTrenchDoubleMidfield",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 88.99491399474567
+    "rotation": 0.0
   },
   "useDefaultConstraints": true
 }

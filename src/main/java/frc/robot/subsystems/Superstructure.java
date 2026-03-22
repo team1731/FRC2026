@@ -155,7 +155,7 @@ public class Superstructure extends SubsystemBase {
     }
 
     public Command stopShooters() {
-        return leftFlywheel.stopOnce().andThen(rightFlywheel.stopOnce(), leftHood.stowOnce(), rightHood.stowOnce());
+        return leftFlywheel.stop().alongWith(rightFlywheel.stop(), leftHood.stow(), rightHood.stow());
     }
 
     public boolean leftShooterReady() {
@@ -264,10 +264,9 @@ public class Superstructure extends SubsystemBase {
             Command shootCommand = new ParallelCommandGroup(
                 setFlywheels(() -> parameters[1], () -> parameters[1]),
                 setHoods(() -> parameters[0], () -> parameters[0]),
-                runIntake(() -> false),
                 setTurrets(() -> 0, () -> 0), 
                 Commands.waitSeconds(1.0)
-                .andThen(index(true))
+                .andThen(index(true).alongWith(runIntake(() -> false)))
             );
             return shootCommand;
         }, Set.of(leftFlywheel, rightFlywheel, leftHood, rightHood, leftTurret, rightTurret, indexer, pivot, intake));
@@ -284,7 +283,7 @@ public class Superstructure extends SubsystemBase {
                     () -> zeroTurret
                 ),
                 Commands.waitUntil(() -> shootersReady())
-                .andThen(index(true))
+                .andThen(index(true).alongWith(runIntake(() -> false)))
             );
 
             return shootCommand;
@@ -298,7 +297,6 @@ public class Superstructure extends SubsystemBase {
             Command shootCommand = new ParallelCommandGroup(
                 setFlywheels(() -> parameters[1], () -> parameters[1]),
                 setHoods(() -> parameters[0], () -> parameters[0]),
-                runIntake(() -> false),
                 Commands.either(
                     setTurrets(() -> 0, () -> 0), 
                     setTurrets(() -> 180, () -> 180), 
@@ -306,7 +304,7 @@ public class Superstructure extends SubsystemBase {
                 ),
                 // Commands.waitSeconds(1)
                 Commands.waitUntil(() -> hoodAndFlywheelsReady())
-                .andThen(index(true))
+                .andThen(index(true).alongWith(runIntake(() -> false)))
             );
             return shootCommand;
         }, Set.of(leftFlywheel, rightFlywheel, leftHood, rightHood, leftTurret, rightTurret, indexer, pivot, intake));

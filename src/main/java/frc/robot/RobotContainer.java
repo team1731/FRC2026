@@ -100,8 +100,8 @@ public class RobotContainer {
     private void configureNamedCommands() {
         // Named commands useful for PathPlanner events
         // ex. NamedCommands.registerCommand("Example", new ExampleCommand());
-        NamedCommands.registerCommand("Shoot", superstructure.autoShoot().andThen(Commands.deadline(Commands.waitSeconds(0.1), superstructure.stopShooters())));
-        NamedCommands.registerCommand("StopShoot", Commands.deadline(Commands.waitSeconds(0.1), superstructure.stopShooters()));
+        NamedCommands.registerCommand("Shoot", superstructure.autoShoot().andThen(leftFlywheel.stopOnce().alongWith(rightFlywheel.stopOnce())));
+        NamedCommands.registerCommand("StopShoot", superstructure.stopShooters());
         NamedCommands.registerCommand("Intake", superstructure.runIntake(() -> true));
         NamedCommands.registerCommand("Pass", superstructure.pass());
         NamedCommands.registerCommand("StowHood", Commands.deadline(Commands.waitSeconds(0.1), superstructure.stowHoodsOnce()));
