@@ -149,8 +149,8 @@ public class RobotContainer {
         intake.setDefaultCommand(intake.stop());
         indexer.setDefaultCommand(indexer.stop());
 
-        leftTurret.setDefaultCommand(leftTurret.track(superstructure.appliedTargetSupplier));
-        rightTurret.setDefaultCommand(rightTurret.track(superstructure.appliedTargetSupplier));
+        leftTurret.setDefaultCommand(leftTurret.trackHub());
+        rightTurret.setDefaultCommand(rightTurret.trackHub());
 
         leftHood.setDefaultCommand(leftHood.stow());
         rightHood.setDefaultCommand(rightHood.stow());
