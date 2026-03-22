@@ -34,7 +34,7 @@ public class TurretSubsystem extends BaseSubsystem {
 
     private String name;
 
-    private final Supplier<Translation2d> kHubSupplier = () -> Robot.isRedAlliance() ? new Translation2d(11.915394, 4.034536) : new Translation2d(4.625594, 4.034536);
+    // private final Supplier<Translation2d> kHubSupplier = () -> Robot.isRedAlliance() ? new Translation2d(11.915394, 4.034536) : new Translation2d(4.625594, 4.034536);
 
     public TurretSubsystem(TurretConfiguration config, Supplier<Pose2d> swervePoseSupplier, boolean enabled) {
         super(config.name(), config, enabled);
@@ -151,7 +151,9 @@ public class TurretSubsystem extends BaseSubsystem {
     }
 
     public Command trackHub() {
-        return track(kHubSupplier);
+        return track(() -> {
+            return Robot.isRedAlliance() ? new Translation2d(11.915394, 4.034536) : new Translation2d(4.625594, 4.034536);
+        });
     }
 
     public Command track(Supplier<Translation2d> target) {

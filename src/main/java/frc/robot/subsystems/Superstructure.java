@@ -11,7 +11,6 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.*;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.lib.frc1731.field.FieldPositions;
@@ -150,12 +149,16 @@ public class Superstructure extends SubsystemBase {
         return leftTurret.track(left).alongWith(rightTurret.track(right));
     }
 
+    public Command trackHub() {
+        return leftTurret.trackHub().alongWith(rightTurret.trackHub());
+    }
+
     public Command trackAppliedTarget() {
         return this.track(appliedTargetSupplier, appliedTargetSupplier);
     }
 
     public Command stopShooters() {
-        return leftFlywheel.stop().alongWith(rightFlywheel.stop(), leftHood.stow(), rightHood.stow());
+        return leftFlywheel.stop().alongWith(rightFlywheel.stop(), leftHood.stow(), rightHood.stow(), indexer.stop());
     }
 
     public boolean leftShooterReady() {
@@ -181,11 +184,12 @@ public class Superstructure extends SubsystemBase {
     public Command shoot(Supplier<Translation2d> target) {
         return new DeferredCommand(() -> {
             this.targetSupplier = target;
-            this.adjustTargetForMovingShots = true;
+            // this.adjustTargetForMovingShots = true;
             Command shootCommand = new ParallelCommandGroup(
                 setFlywheels(() -> targetLeftFlywheel, () -> targetRightFlywheel),
                 setHoods(() -> targetLeftHood, () -> targetRightHood),
-                trackAppliedTarget(),
+                // trackAppliedTarget(),
+                track(targetSupplier),
                 // Commands.waitSeconds(1.5).andThen(index(true))
                 // Commands.waitUntil(() -> shootersReady()).andThen(index(true))
                 (Commands.waitUntil(() -> shootersReady())
@@ -206,11 +210,11 @@ public class Superstructure extends SubsystemBase {
     public Command feedthrough(Supplier<Translation2d> target) {
         return new DeferredCommand(() -> {
             this.targetSupplier = target;
-            this.adjustTargetForMovingShots = true;
+            // this.adjustTargetForMovingShots = true;
             Command shootCommand = new ParallelCommandGroup(
                 setFlywheels(() -> targetLeftFlywheel, () -> targetRightFlywheel),
                 setHoods(() -> targetLeftHood, () -> targetRightHood),
-                track(appliedTargetSupplier),
+                track(targetSupplier),
                 intake(),
                 (Commands.waitUntil(() -> shootersReady())
                 .andThen(index(true))
@@ -230,7 +234,7 @@ public class Superstructure extends SubsystemBase {
     }
 
     public Command autoShoot() {
-        return this.shoot().withTimeout(4.0).andThen(stopShooters());
+        return this.shoot().withTimeout(4.0);
     }
 
     public Command pass() {
@@ -323,16 +327,17 @@ public class Superstructure extends SubsystemBase {
         double[] leftParameters = shotTable.getShotParameters(targetSupplier.get().minus(leftPose).getNorm());
         double[] rightParameters = shotTable.getShotParameters(targetSupplier.get().minus(rightPose).getNorm());
 
-        ChassisSpeeds swerveSpeed = swerve.getFieldRelativeChassisSpeeds();
-        Translation2d newTarget = targetSupplier.get().minus(new Translation2d(swerveSpeed.vxMetersPerSecond * leftParameters[2], swerveSpeed.vyMetersPerSecond * leftParameters[2]));
+        // ChassisSpeeds swerveSpeed = swerve.getFieldRelativeChassisSpeeds();
+        // Translation2d newTarget = targetSupplier.get().minus(new Translation2d(swerveSpeed.vxMetersPerSecond * leftParameters[2], swerveSpeed.vyMetersPerSecond * leftParameters[2]));
         
-        double[] newLeftParameters = shotTable.getShotParameters(leftPose.minus(newTarget).getNorm());
-        double[] newRightParameters = shotTable.getShotParameters(rightPose.minus(newTarget).getNorm());
+        // double[] newLeftParameters = shotTable.getShotParameters(leftPose.minus(newTarget).getNorm());
+        // double[] newRightParameters = shotTable.getShotParameters(rightPose.minus(newTarget).getNorm());
 
-        double[] appliedLeftParameters = adjustTargetForMovingShots ? newLeftParameters : leftParameters;
-        double[] appliedRightParameters = adjustTargetForMovingShots ? newRightParameters : rightParameters;
+        // double[] appliedLeftParameters = adjustTargetForMovingShots ? newLeftParameters : leftParameters;
+        // double[] appliedRightParameters = adjustTargetForMovingShots ? newRightParameters : rightParameters;
 
-        this.appliedTargetSupplier = () -> adjustTargetForMovingShots ? newTarget : targetSupplier.get();
+        // adjustTargetForMovingShots = false;
+        // this.appliedTargetSupplier = () -> adjustTargetForMovingShots ? newTarget : targetSupplier.get();
 
         if (Robot.isSimulation()) {
             SmartDashboard.putBoolean("SS/Shooters Ready", shootersReady());
@@ -351,9 +356,9 @@ public class Superstructure extends SubsystemBase {
         SmartDashboard.putNumber("Left Turret Degrees", leftTurret.getDegrees());
         SmartDashboard.putNumber("Right Turret Degrees", rightTurret.getDegrees());
 
-        targetLeftHood = appliedLeftParameters[0];
-        targetRightHood = appliedRightParameters[0];
-        targetLeftFlywheel = appliedLeftParameters[1];
-        targetRightFlywheel = appliedRightParameters[1];
+        targetLeftHood = leftParameters[0];
+        targetRightHood = rightParameters[0];
+        targetLeftFlywheel = leftParameters[1];
+        targetRightFlywheel = rightParameters[1];
     }
 }
