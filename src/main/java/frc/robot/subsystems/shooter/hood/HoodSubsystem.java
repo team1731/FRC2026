@@ -54,4 +54,11 @@ public class HoodSubsystem extends BaseSubsystem {
         return setRotations(kMinRotations)
         .withName("Stow");
     }
+
+    public Command stowOnce() {
+        return runOnce(() -> {
+            this.targetRotations = kMinRotations;
+            this.motor.setPosition(targetRotations);
+        }).withName("Stow");
+    }
 }

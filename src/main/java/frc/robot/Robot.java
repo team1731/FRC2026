@@ -7,6 +7,9 @@ import java.util.*;
 import edu.wpi.first.wpilibj.Timer;
 
 import org.littletonrobotics.junction.LoggedRobot;
+import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.NT4Publisher;
+
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.util.PathPlannerLogging;
@@ -143,10 +146,10 @@ public class Robot extends LoggedRobot {
 			System.err.println("DeployedBranchInfo.txt not found");
 			fnf.printStackTrace();
 		}
-		// SmartDashboard.updateValues();
-		if (SHOULD_LOG) {
-			// Logger.addDataReceiver(new NT4Publisher());
-			// Logger.start();
+		if (Robot.isSimulation()) {
+			SmartDashboard.updateValues();
+			Logger.addDataReceiver(new NT4Publisher());
+			Logger.start();
 		}
 	}
 
@@ -343,7 +346,7 @@ public void autonomousPeriodic() {
 	if (m_autonomousCommand != null && (Timer.getFPGATimestamp() - autoStartTime) >= 0.25
 			&& (currentPose.getTranslation().getDistance(targetPose.getTranslation()) > 1.0)) {
 		System.out.println("distance is" + currentPose.getTranslation().getDistance(targetPose.getTranslation()));
-		m_autonomousCommand.cancel();
+		// m_autonomousCommand.cancel();
 		System.out.println(
 				"Had to Kill the auto because the target pose and current pose were apart by more than a foot");
 	}

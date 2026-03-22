@@ -9,7 +9,7 @@ public class HoodConstants {
     public static final double kGearRatio = 1d / (15d / 64d * 32d / 64d * 20d / 380d); // 162.13 : 1.00 overall reduction
 
     public static final double kMinRotations = 0;
-    public static final double kMaxRotations = 7;
+    public static final double kMaxRotations = 8;
     public static final double kEpsilon = 0.25;
 
     public static final double kMaxVelocity = 50;

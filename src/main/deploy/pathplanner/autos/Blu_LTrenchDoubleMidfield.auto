@@ -11,7 +11,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "RTrenchDoubleMidfield_1"
+                  "pathName": "LTrenchDoubleMidfield_1"
                 }
               },
               {
@@ -30,7 +30,13 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "RTrenchDoubleMidfield_2"
+                  "pathName": "LTrenchDoubleMidfield_2"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Warmup"
                 }
               }
             ]
@@ -49,13 +55,19 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "StowHood"
+          }
+        },
+        {
           "type": "deadline",
           "data": {
             "commands": [
               {
                 "type": "path",
                 "data": {
-                  "pathName": "RTrenchDoubleMidfield_3"
+                  "pathName": "LTrenchDoubleMidfield_3"
                 }
               },
               {
@@ -74,7 +86,26 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "RTrenchDoubleMidfield_4"
+                  "pathName": "LTrenchDoubleMidfield_4"
+                }
+              },
+              {
+                "type": "sequential",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 2.75
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Feedthrough"
+                      }
+                    }
+                  ]
                 }
               }
             ]
@@ -83,7 +114,7 @@
         {
           "type": "named",
           "data": {
-            "name": "Shoot"
+            "name": "Feedthrough"
           }
         }
       ]
