@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.407726591881726,
-        "y": 1.2277667779795092
+        "x": 7.18778409090909,
+        "y": 0.6955909090909103
       },
       "isLocked": false,
       "linkedName": "RMidIntake2"
@@ -20,8 +20,8 @@
         "y": 0.6644793152639101
       },
       "prevControl": {
-        "x": 6.913969718583841,
-        "y": 0.6824905167941928
+        "x": 7.187784090909089,
+        "y": 0.6749772727272727
       },
       "nextControl": null,
       "isLocked": false,
@@ -30,7 +30,7 @@
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.9111540318686567,
+      "waypointRelativePos": 0.8598639455782323,
       "rotationDegrees": 0.0
     }
   ],
@@ -53,7 +53,7 @@
   "folder": "RTrenchDoubleMidfield",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 90.0
   },
   "useDefaultConstraints": true
 }

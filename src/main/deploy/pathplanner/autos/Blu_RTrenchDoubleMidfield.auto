@@ -74,13 +74,32 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "RTrenchDoubleMidfield_3_Swing"
+                  "pathName": "RTrenchDoubleMidfield_3"
                 }
               },
               {
                 "type": "named",
                 "data": {
                   "name": "Intake"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "deadline",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "RTrenchDoubleMidfield_4"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Warmup"
                 }
               }
             ]
