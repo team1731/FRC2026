@@ -18,7 +18,10 @@ public class ExampleSubsystem extends BaseSubsystem {
 
     public ExampleSubsystem(boolean enabled) {
         super(enabled); // Calls the BaseSubsystem constructor and passes whether the subsystem is enabled or disabled
-        if (!isEnabled()) return; // If the subsystem is disabled, do not create hardware or utilize it by any means
+    }
+
+    @Override
+    public void initializeHardware() {
         this.exampleMotor = new MotorIOTalonFX(new PortConfig("exampleCANivore", 1, false)); // Creates a new TalonFX motor controller on CAN ID 1
         this.exampleMotor.withFollower(new MotorIOTalonFX(new PortConfig("exampleCANivore", 2, true))); // Creates a follower TalonFX on CAN ID 2 that is inverted from the master
         

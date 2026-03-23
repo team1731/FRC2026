@@ -5,6 +5,9 @@ import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.math.MathUtil;
 
+/**
+ * I think taken from 1678? So thank you for that
+ */
 public class LinearServo extends Servo {
   double m_speed;
   double m_length;

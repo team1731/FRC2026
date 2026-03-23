@@ -3,14 +3,10 @@ package frc.lib.frc1731.hardware.motor;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ctre.phoenix6.configs.CANcoderConfiguration;
-import com.ctre.phoenix6.hardware.CANcoder;
-
 import frc.lib.frc1731.PIDGains;
 
 public abstract class MotorIO {
     protected List<PIDGains> pidGains = new ArrayList<>();
-    protected CANcoder cancoder = null; // Null on default
     protected PortConfig portConfig = null;
 
     protected MotorIO(PortConfig config) {}
@@ -22,11 +18,6 @@ public abstract class MotorIO {
     }
 
     public abstract void withMotionProfile(double velocity, double acceleration);
-
-    public void withCANCoder(int deviceID, String bus, CANcoderConfiguration configuration) {
-        this.cancoder = new CANcoder(deviceID, bus);
-        this.cancoder.getConfigurator().apply(configuration);
-    }
 
     public abstract void withPIDGains(PIDGains gains);
 

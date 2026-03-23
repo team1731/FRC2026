@@ -1,264 +1,231 @@
 package frc.robot.subsystems.shooter.turret;
 
+import static frc.robot.subsystems.shooter.turret.TurretConstants.*;
+
+import java.util.function.*;
+
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.hardware.CANcoder;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.signals.SensorDirectionValue;
+
+import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.*;
+import frc.lib.frc1731.Utils;
+import frc.lib.frc1731.field.FieldPositions;
 import frc.lib.frc1731.hardware.motor.ctre.MotorIOTalonFX;
 import frc.robot.Robot;
 import frc.robot.subsystems.BaseSubsystem;
 
-import static edu.wpi.first.units.Units.*;
-import static frc.robot.subsystems.shooter.turret.TurretConstants.*;
-
-import java.util.function.DoubleSupplier;
-import java.util.function.Supplier;
-
-import com.ctre.phoenix6.configs.FeedbackConfigs;
-import com.ctre.phoenix6.configs.MotionMagicConfigs;
-import com.ctre.phoenix6.hardware.core.CoreCANcoder;
-
-import edu.wpi.first.math.geometry.*;
-import edu.wpi.first.units.measure.*;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.*;
-
 public class TurretSubsystem extends BaseSubsystem {
-    private MotorIOTalonFX leftMotor, rightMotor;
-    private Angle leftTargetAngle = Degrees.zero();
-    private Angle rightTargetAngle = Degrees.zero();
+    private MotorIOTalonFX motor;
+    private CANcoder cancoder;
+    private Translation2d robotToTurret;
+    private Supplier<Pose2d> swervePoseSupplier;
 
-    public TurretSubsystem(boolean enabled) {
-        super(enabled);
-        if (!enabled) return;
-        leftMotor = new MotorIOTalonFX(kLeftPortConfigs);
-        rightMotor = new MotorIOTalonFX(kRightPortConfigs);
-        
-        leftMotor.withPIDGains(kPositionGains);
-        rightMotor.withPIDGains(kPositionGains);
+    private double targetDegrees = 0;
+    private double minDegrees, maxDegrees;
 
-        leftMotor.withStatorCurrentLimit(kCurrentLimit);
-        rightMotor.withStatorCurrentLimit(kCurrentLimit);
+    private Translation2d targetTranslation;
 
-        leftMotor.setSoftLimits(-0.2453, 0.3806);
-        leftMotor.setDynamicMotionMagicSpeeds(20, 20);
-        leftMotor.withMotionMagicConfigs(
-            new MotionMagicConfigs()
-            .withMotionMagicCruiseVelocity(20)
-            .withMotionMagicAcceleration(20)
-        );
+    private String name;
 
-        leftMotor.withFeedbackConfigs(
-            new FeedbackConfigs()
-            .withFusedCANcoder(new CoreCANcoder(29, "Right CANivore"))
-            .withRotorToSensorRatio(kRotorToSensor)
-            .withSensorToMechanismRatio(kSensorToMech)
-        );
-        
-        rightMotor.setSoftLimits(-0.7321, 0.1616);
-        rightMotor.setDynamicMotionMagicSpeeds(40, 20);
-        rightMotor.withMotionMagicConfigs(
-            new MotionMagicConfigs()
-            .withMotionMagicCruiseVelocity(1)
-            .withMotionMagicAcceleration(1)
-        );
+    // private final Supplier<Translation2d> kHubSupplier = () -> Robot.isRedAlliance() ? new Translation2d(11.915394, 4.034536) : new Translation2d(4.625594, 4.034536);
 
-        rightMotor.withFeedbackConfigs(
-            new FeedbackConfigs()
-            .withFusedCANcoder(new CoreCANcoder(30, "Left CANivore"))
-            .withRotorToSensorRatio(kRotorToSensor)
-            .withSensorToMechanismRatio(kSensorToMech)
-        );
-
-        Robot.IS_ENABLED.onTrue(new InstantCommand(() -> {
-            leftMotor.setPercentOutput(0);
-            rightMotor.setPercentOutput(0);
-        }));
+    public TurretSubsystem(TurretConfiguration config, Supplier<Pose2d> swervePoseSupplier, boolean enabled) {
+        super(config.name(), config, enabled);
+        this.swervePoseSupplier = swervePoseSupplier;
+        this.name = config.name();
     }
 
-    public Angle getLeftTargetAngle() {
-        return leftTargetAngle;
+    @Override
+    protected void initializeHardware() {
+        TurretConfiguration turretConfig = (TurretConfiguration)config.get();
+        motor = new MotorIOTalonFX(turretConfig.motorConfigs());
+        cancoder = new CANcoder(turretConfig.cancoderID(), turretConfig.motorConfigs().kBus);
+
+        CANcoderConfiguration coderConfig = new CANcoderConfiguration();
+        coderConfig.MagnetSensor.MagnetOffset = turretConfig.cancoderConfigs().MagnetSensor.MagnetOffset;
+        coderConfig.MagnetSensor.AbsoluteSensorDiscontinuityPoint = turretConfig.cancoderConfigs().MagnetSensor.AbsoluteSensorDiscontinuityPoint;
+        coderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
+        cancoder.getConfigurator().apply(coderConfig);
+
+        TalonFXConfiguration motorConfig = new TalonFXConfiguration();
+        motorConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
+        motorConfig.Feedback.FeedbackRemoteSensorID = cancoder.getDeviceID();
+        motorConfig.Feedback.RotorToSensorRatio = turretConfig.feedbackConfigs().RotorToSensorRatio;
+        motorConfig.Feedback.SensorToMechanismRatio = turretConfig.feedbackConfigs().SensorToMechanismRatio;
+
+        motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+        motorConfig.MotorOutput.Inverted = turretConfig.motorConfigs().kInverted ? InvertedValue.Clockwise_Positive : InvertedValue.CounterClockwise_Positive;
+        motorConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = turretConfig.maxDegrees() / 360.0;
+        motorConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = turretConfig.minDegrees() / 360.0;
+        motorConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+        motorConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+        motorConfig.CurrentLimits.StatorCurrentLimit = 30d;
+
+        motorConfig.Slot0.kP = 60.0; 
+        motorConfig.Slot0.kS = 0.2;
+        motorConfig.Slot0.kA = 0.01;
+        motorConfig.Slot0.kI = 0;
+        motorConfig.Slot0.kD = 0.5;
+        motorConfig.MotionMagic.MotionMagicCruiseVelocity = 4;
+        motorConfig.MotionMagic.MotionMagicAcceleration = 4;
+
+        motor.getMotor().getConfigurator().apply(motorConfig);
+        motor.getMotor().setPosition(cancoder.getAbsolutePosition().waitForUpdate(0.2).getValueAsDouble());
+
+        this.robotToTurret = turretConfig.robotToTurret().toTranslation2d();
+        this.minDegrees = turretConfig.minDegrees();
+        this.maxDegrees = turretConfig.maxDegrees();
     }
 
-    public Angle getRightTargetAngle() {
-        return rightTargetAngle;
-    }
-    
-    public Angle getLeftTurretAngle() {
-        return kConverter.toMechanism(Rotations.of(leftMotor.getRotations()));
+    public Pose2d getTurretPose() {
+        if (!isEnabled()) return new Pose2d();
+        Translation2d swerve = swervePoseSupplier.get().getTranslation();
+        return new Pose2d(swerve.plus(robotToTurret.rotateBy(swervePoseSupplier.get().getRotation())), new Rotation2d());
     }
 
-    public Angle getRightTurretAngle() {
-        return kConverter.toMechanism(Rotations.of(rightMotor.getRotations()));
+    public boolean atTarget() {
+        if (!isEnabled()) return true;
+        return Utils.isWithin(motor.getRotations() * 360.0, targetDegrees, kEpsilon);
     }
 
-    public boolean atLeftTargetAngle() {
-        return getLeftTurretAngle().isNear(getLeftTargetAngle(), kEpsilon);
+    public boolean atTarget(double epsilon) {
+        if (!isEnabled()) return true;
+        return Utils.isWithin(motor.getRotations() * 360.0, targetDegrees, epsilon);
     }
 
-    public boolean atRightTargetAngle() {
-        return getRightTurretAngle().isNear(getRightTargetAngle(), kEpsilon);
+    public double getTarget() {
+        if (!isEnabled()) return 0;
+        return targetDegrees;
     }
 
-    public boolean atBothTargetAngle() {
-        return atLeftTargetAngle() && atRightTargetAngle();
+    public double getDegrees() {
+        if (!isEnabled()) return 0;
+        return motor.getRotations() * 360;
     }
 
-    public Pose3d getLeftTurretPose(Pose3d swervePose) {
-        return swervePose.transformBy(kLeftTurretToRobot);
+    private double calculateBestTurretAngle(double robotHeading, double targetHeading, double current) {
+        // double desired = (targetHeading - robotHeading) % 360;
+        // if (desired > maxDegrees) desired -= 360;
+        // if (desired < minDegrees) desired += 360;
+        // return Math.max(minDegrees, Math.min(maxDegrees, desired));
+        double desired = (targetHeading - robotHeading + 180) % 360;
+        if (desired < 0) desired += 360;
+        desired -= 180;
+
+        double path1 = desired;
+        double path2 = (desired > 0) ? (desired - 360) : (desired + 360);
+
+        boolean reach1 = (path1 >= minDegrees && path1 <= maxDegrees);
+        boolean reach2 = (path2 >= minDegrees && path2 <= maxDegrees);
+
+        if (reach1 && reach2) {
+            return (Math.abs(path1 - current) <= Math.abs(path2 - current)) ? path1 : path2;
+        } else if (reach1) return path1;
+        else if (reach2) return path2;
+
+        return Math.max(minDegrees, Math.min(maxDegrees, path1));
     }
 
-    public Pose3d getRightTurretPose(Pose3d swervePose) {
-        return swervePose.transformBy(kRightTurretToRobot);
-    }
-
-    public Transform3d getTransformToTarget(Pose3d swervePose, Pose3d targetPose) {
-        return getLeftTurretPose(swervePose).minus(targetPose);
-    }
-
-    public double getLeftTurretPosition(Pose2d robotPose, Pose2d targetPose){
-        Transform2d variance = targetPose.minus(robotPose);
-        double turretAngle = Math.toDegrees(Math.atan(variance.getY()/variance.getX()));
-
-        if (variance.getX() <= 0) {
-            turretAngle += 180 * Math.signum(variance.getY());
-        }
-
-        turretAngle -= robotPose.getRotation().getDegrees();
-        return turretAngle;
+    @Override
+    public void periodic() {
+        SmartDashboard.putNumber(name + " Turret Distance", FieldPositions.kHub.get().minus(getTurretPose().getTranslation()).getNorm());
     }
 
     @Override
     public void periodicTelemetry() {
-        logger.log("Left/Motor Rotations", leftMotor.getRotations());
-        logger.log("Left/Turret Degrees", getLeftTurretAngle().in(Degrees));
-        logger.log("Left/Target Degrees", getLeftTargetAngle().in(Degrees));
-        logger.log("Left/At Target", atLeftTargetAngle());
+        logger.log("Pose", getTurretPose());
+        logger.log("Current Degrees", motor.getRotations() * 360.0);
+        logger.log("Target Degrees", targetDegrees);
+        logger.log("At Target", atTarget());
+        logger.log("Min Degrees", minDegrees);
+        logger.log("Max Degrees", maxDegrees);
 
-        logger.log("Right/Motor Rotations", rightMotor.getRotations());
-        logger.log("Right/Turret Degrees", getRightTurretAngle().in(Degrees));
-        logger.log("Right/Target Degrees", getRightTargetAngle().in(Degrees));
-        logger.log("Right/At Target", atRightTargetAngle());
+        if (targetTranslation != null) logger.log("TargetDistance", targetTranslation.minus(getTurretPose().getTranslation()).getNorm());
     }
 
-    public Command setLeftTurretCommand(double targetDegrees) {
-        return run(() -> {
-            leftMotor.setPosition(kConverter.toMotor(Degrees.of(targetDegrees)).in(Rotations));
+    public Command trackHub() {
+        return track(() -> {
+            return Robot.isRedAlliance() ? new Translation2d(11.915394, 4.034536) : new Translation2d(4.625594, 4.034536);
         });
     }
 
-    public Command setRightTurretCommand(double targetDegrees) {
-        return run(() -> {
-            // rightMotor.setPosition(kConverter.toMotor(Degrees.of(targetDegrees)).in(Rotations));
-            this.rightTargetAngle = Degrees.of(targetDegrees);
-            if (targetDegrees >= 266) {
-                rightTargetAngle = rightTargetAngle.minus(Degrees.of(360));
-            } else if (targetDegrees <= -128) {
-                rightTargetAngle = rightTargetAngle.plus(Degrees.of(360));
-            }
-
-            SmartDashboard.putNumber("Right Turret Degrees", turretRotationsToDegrees(rightMotor.getRotations()));
-            rightMotor.setPosition(degreesToTurretRotations(targetDegrees));
-        });
-    }
-
-    public Command setRightTurretCommand(DoubleSupplier targetDegrees) {
-        return run(() -> {
-            // rightMotor.setPosition(kConverter.toMotor(Degrees.of(targetDegrees)).in(Rotations));
-            this.rightTargetAngle = Degrees.of(targetDegrees.getAsDouble());
-            if (targetDegrees.getAsDouble() >= 266) {
-                rightTargetAngle = rightTargetAngle.minus(Degrees.of(360));
-            } else if (targetDegrees.getAsDouble() <= -128) {
-                rightTargetAngle = rightTargetAngle.plus(Degrees.of(360));
-            }
-
-            SmartDashboard.putNumber("Right Turret Degrees", turretRotationsToDegrees(rightMotor.getRotations()));
-            SmartDashboard.putNumber("Swerve yaw", targetDegrees.getAsDouble());
-            rightMotor.setPosition(degreesToTurretRotations(rightTargetAngle.in(Degrees)));
-        });
-    }
-
-    public Command setTurretCommand(double left, double right) {
-        return run(() -> {
-            this.leftTargetAngle = Degrees.of(left);
-            this.rightTargetAngle = Degrees.of(right);
-
-            leftMotor.setPosition(kConverter.toMotor(Degrees.of(left)).in(Rotations));
-            rightMotor.setPosition(kConverter.toMotor(Degrees.of(right)).in(Rotations));
-        });
-    }
-
-    // public Command setLeftRotations(double targetRotations) {
-    //     return run(() -> {
-    //         rightMotor.setPosition(targetRotations);
-    //     });
-    // }
-
-    // public Command setRightRotations(double targetRotations) {
-    //     return run(() -> {
-    //         rightMotor.setPosition(targetRotations);
-    //     });
-    // }
-
-    public double turretRotationsToDegrees(double rotations) {
-        return (rotations + 0.44093) / 0.00226478;
-    }
-
-    public double degreesToTurretRotations(double degrees) {
-        return 0.002678 * degrees - 0.44093;
-    }
-
-
-    public Command stopCommand() {
-        return run(() -> {
-            leftMotor.setPercentOutput(0);
-            rightMotor.setPercentOutput(0);
-        });
-    }
-
-    public Command driveManualCommand(double left, double right) {
-        return run(() -> {
-            // leftMotor.setPercentOutput(left);
-            rightMotor.setPercentOutput(right);
-            SmartDashboard.putNumber("Right Turret Degrees", turretRotationsToDegrees(rightMotor.getRotations()));
-        });
-    }
-
-    public Command aimCommand(Supplier<Pose2d> swervePose, Supplier<Pose2d> targetPose) {
+    public Command track(Supplier<Translation2d> target) {
         return this.run(() -> {
-            Transform2d leftTransform = new Transform2d(kLeftTurretToRobot.getX(), kLeftTurretToRobot.getY(), new Rotation2d());
-            Transform2d rightTransform = new Transform2d(kRightTurretToRobot.getX(), kRightTurretToRobot.getY(), new Rotation2d());
+            // this.targetTranslation = target.get();
+            // Translation2d turretToTarget = target.get().minus(getTurretPose().getTranslation());
+            // return Math.toDegrees(Math.atan(turretToTarget.getY() / turretToTarget.getX()));
+            double currentPosDeg = motor.getRotations() * 360.0;
+            Pose2d robotPose = swervePoseSupplier.get();
+            
+            // Translation2d actualGoal = (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red) 
+            //     ? RED_TARGET : BLUE_TARGET;
 
-            Transform2d leftVariance = targetPose.get().minus(swervePose.get().transformBy(leftTransform));
-            Transform2d rightVariance = targetPose.get().minus(swervePose.get().transformBy(rightTransform));
+            // 1. Calculate turret's current field position
+            Translation2d turretFieldPos = robotPose.getTranslation().plus(
+                robotToTurret.rotateBy(robotPose.getRotation())
+            );
 
-            double leftAngle = Math.toDegrees(Math.atan(leftVariance.getY()/leftVariance.getX()));
-            double rightAngle = Math.toDegrees(Math.atan(rightVariance.getY()/rightVariance.getX()));
+            // 2. Iterative Solver for Time of Flight (TOF)
+            // double timeOfFlight = turretFieldPos.getDistance(actualGoal) / NOTE_VELOCITY_MPS;
+            
+            // // Second pass: Adjust TOF based on the virtual goal's distance
+            // for (int i = 0; i < 2; i++) {
+            //     Translation2d virtualGoal = new Translation2d(
+            //         actualGoal.getX() - (0* timeOfFlight),
+            //         actualGoal.getY() - (0 * timeOfFlight)
+            //     );
+            //     timeOfFlight = turretFieldPos.getDistance(virtualGoal) / NOTE_VELOCITY_MPS;
+            // }
 
-            if (leftVariance.getX() <= 0) {
-                leftAngle += 180 * Math.signum(leftVariance.getY());
-            }
+            // // 3. Final Virtual Goal Calculation
+            // Translation2d finalVirtualGoal = new Translation2d(
+            //     actualGoal.getX() - (0 * timeOfFlight),
+            //     actualGoal.getY() - (0 * timeOfFlight)
+            // );
 
-            if (rightVariance.getX() <= 0) {
-                rightAngle += 180 * Math.signum(rightVariance.getY());
-            }
+            // 4. Calculate Heading to the Virtual Goal
+            double fieldTargetHeading = Math.toDegrees(Math.atan2(
+                target.get().getY() - turretFieldPos.getY(),
+                target.get().getX() - turretFieldPos.getX()
+            ));
 
-            leftAngle -= swervePose.get().getRotation().getDegrees();
-            rightAngle -= swervePose.get().getRotation().getDegrees();
+            double output = calculateBestTurretAngle(
+                robotPose.getRotation().getDegrees(), 
+                fieldTargetHeading, 
+                currentPosDeg
+            );
 
-            leftMotor.setPosition(kConverter.toMotor(Degrees.of(leftAngle)).in(Rotations));
-            rightMotor.setPosition(kConverter.toMotor(Degrees.of(rightAngle)).in(Rotations));
+            this.targetDegrees = output;
 
-            // Pose3d leftPose = new Pose3d(swervePose.get()).transformBy(kLeftTurretToRobot);
-            // Pose3d rightPose = new Pose3d(swervePose.get()).transformBy(kRightTurretToRobot);
-
-            // Transform3d leftTransformToTarget = new Pose3d(targetPose.get()).minus(leftPose);
-            // Transform3d rightTransformToTarget = new Pose3d(targetPose.get()).minus(rightPose);
-
-            // double leftTurretAngle = Math.toDegrees(Math.atan(leftTransformToTarget.getX() / leftTransformToTarget.getY())) - swervePose.get().getRotation().getDegrees();
-            // double rightTurretAngle = Math.toDegrees(Math.atan(rightTransformToTarget.getX() / rightTransformToTarget.getY())) - swervePose.get().getRotation().getDegrees();
-
-            // leftTurretAngle = Utils.clamp(leftTurretAngle, kMinAngle.in(Degrees), kMaxAngle.in(Degrees));
-            // rightTurretAngle = Utils.clamp(rightTurretAngle, kMinAngle.in(Degrees), kMaxAngle.in(Degrees));
-
-            // leftMotor.setPosition(kConverter.toMotor(Degrees.of(leftTurretAngle)).in(Rotations));
-            // rightMotor.setPosition(kConverter.toMotor(Degrees.of(rightTurretAngle)).in(Rotations));
+            motor.setPosition(output / 360.0);
         });
+    }
+
+    public Command track(Translation2d target) {
+        return this.track(() -> target);
+    }
+
+    public Command setDegrees(DoubleSupplier degrees) {
+        return run(() -> {
+            double output = degrees.getAsDouble();
+            if (degrees.getAsDouble() >= maxDegrees) {
+                output -= 360;
+            } else if (degrees.getAsDouble() <= minDegrees) {
+                output += 360;
+            }
+            this.targetDegrees = output;
+            motor.setPosition(output / 360.0);
+        });
+    }
+
+    public Command setDegrees(double degrees) {
+        return this.setDegrees(() -> degrees);
     }
 }

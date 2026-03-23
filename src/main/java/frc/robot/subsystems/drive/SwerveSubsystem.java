@@ -4,15 +4,10 @@ import static edu.wpi.first.units.Units.*;
 
 import java.util.function.BooleanSupplier;
 
-import org.littletonrobotics.junction.Logger;
-
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
-
-import static frc.robot.subsystems.vision.limelight.AprilTagConstants.*;
-import static frc.robot.subsystems.vision.questnav.VSLAMConstants.*;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
@@ -29,16 +24,16 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.lib.frc1731.hardware.camera.LimelightHelpers;
+import frc.lib.frc1731.hardware.camera.limelight.LimelightHelpers;
 import frc.robot.Robot;
 import frc.robot.subsystems.BaseSubsystem;
 import frc.robot.subsystems.drive.generated.CommandSwerveDrivetrain;
 import frc.robot.subsystems.drive.generated.TunerConstants;
-import frc.robot.subsystems.vision.limelight.AprilTagConstants;
 import gg.questnav.questnav.PoseFrame;
 import gg.questnav.questnav.QuestNav;
 
 import static frc.robot.subsystems.drive.SwerveConstants.*;
+import static frc.robot.subsystems.vision.VisionConstants.*;
 
 public class SwerveSubsystem extends BaseSubsystem {
     private CommandSwerveDrivetrain drivetrain;
@@ -63,8 +58,7 @@ public class SwerveSubsystem extends BaseSubsystem {
 
     private static boolean isQuestSeeded = false;
 
-        private static Matrix<N3, N1> QUESTNAV_STD_DEVS =
-    VecBuilder.fill(
+    private static Matrix<N3, N1> QUESTNAV_STD_DEVS = VecBuilder.fill(
         0.02, // Trust down to 2cm in X direction
         0.02, // Trust down to 2cm in Y direction
         0.035 // Trust down to 2 degrees rotational
@@ -73,8 +67,6 @@ public class SwerveSubsystem extends BaseSubsystem {
     private Timer questPoseResetTimer = new Timer();  // ussed primarily in dissabled to reset the pose every few seconds in case the robot is moved b4 auto
 
     private final ProfiledPIDController headingPID = kHeadingGains.toProfiledPIDController(kMaxAngularRate, kMaxAngularAcceleration);
- 
-
 
     public SwerveSubsystem(boolean enabled) {
         super(enabled);
@@ -94,7 +86,7 @@ public class SwerveSubsystem extends BaseSubsystem {
     //      VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(30))
     //    );
 
-        Transform3d tf = kCameraToRobot;
+        Transform3d tf = kLimelightToRobot;
         LimelightHelpers.setCameraPose_RobotSpace(kLimelightName, tf.getX(), tf.getY(), tf.getZ(), tf.getRotation().getX(), tf.getRotation().getY(), tf.getRotation().getZ());
 
         configureAutoBuilder();
@@ -109,7 +101,7 @@ public class SwerveSubsystem extends BaseSubsystem {
         // double orientation = Robot.isRedAlliance() ? 180 - getCurrentPose().getRotation().getDegrees() : getCurrentPose().getRotation().getDegrees();
         double orientation = drivetrain.getPigeon2().getYaw().getValueAsDouble();
         LimelightHelpers.SetRobotOrientation(kLimelightName, orientation, 0, 0, 0, 0, 0);
-        LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(AprilTagConstants.kLimelightName);
+        LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightName);
         
         // Do not use estimate if we are rotating too fast or if we see less than 2 tags
         if(Math.abs(drivetrain.getPigeon2().getAngularVelocityZDevice().getValueAsDouble()) > 720 || mt2.tagCount <= 1) return;
@@ -142,6 +134,7 @@ public class SwerveSubsystem extends BaseSubsystem {
 
     public void resetPose(Pose2d pose) {
         drivetrain.resetPose(pose);
+        // drivetrain.getPigeon2().setYaw(pose.getRotation().getDegrees());
         resetQuestPose(new Pose3d(pose));  
         isQuestSeeded = true; 
     }
@@ -223,7 +216,7 @@ public class SwerveSubsystem extends BaseSubsystem {
         if (Robot.isSimulation() || !kUseVSLAM) {
           //  this.resetPose(pose);  we probably do not want to do this if VSLAM and limelight are working?
         }
-        this.resetPose(pose);
+        // this.resetPose(pose);
     }
 
     @Override
@@ -235,6 +228,7 @@ public class SwerveSubsystem extends BaseSubsystem {
         //         resetPose(resetPosition);
         // }
 
+        drivetrain.periodic();
         updateVisionOdometry();
         questNav.commandPeriodic();
         SmartDashboard.putBoolean("isSeeded", isQuestSeeded);
@@ -254,8 +248,6 @@ public class SwerveSubsystem extends BaseSubsystem {
         if (questNav.isTracking() && isQuestSeeded && questNav.isConnected()) {
             addQuestVisionMeasurement();
         }
-
-
     }
 
     @Override
@@ -465,4 +457,7 @@ public class SwerveSubsystem extends BaseSubsystem {
 public boolean isVslamConnected() {
    return (questNav.isTracking()  && questNav.isConnected());
 }
+
+@Override
+protected void initializeHardware() {}
 }

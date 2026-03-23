@@ -21,14 +21,15 @@ public class ShotTable {
     );
 
     private List<ShotEntry> interpolatingEntries = List.of(
+        new ShotEntry(0, 0, 28, 0.5),
         new ShotEntry(1, 0, 28, 0.5),
-        new ShotEntry(2, 1.75, 30, 0.75),
-        new ShotEntry(3, 3, 35, 0.85),
-        new ShotEntry(4, 5.5, 45, 1.25),
-        new ShotEntry(5, 6, 50, 1.4),
-        new ShotEntry(6, 6, 55, 1.6),
-        new ShotEntry(7, 6, 60, 1.8),
-        new ShotEntry(8, 6, 65, 2.0)
+        new ShotEntry(2, 0.5, 35, 0.75),
+        new ShotEntry(3, 1, 42.5, 0.85),
+        new ShotEntry(4, 1.5, 47.5, 1.25),
+        new ShotEntry(5, 2, 52.5, 1.4),
+        new ShotEntry(6, 3, 55, 1.6),
+        new ShotEntry(7, 4, 60, 1.8),
+        new ShotEntry(8, 4.5, 60, 2.0)
     );
 
     public ShotTable() {

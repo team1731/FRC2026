@@ -7,9 +7,8 @@ import java.util.List;
 
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import frc.robot.Constants;
+import frc.robot.RobotConstants;
 import frc.robot.Robot;
-import frc.robot.Constants.AutoConstants;
 
 public class AutoLoader {
     private static final SendableChooser<String> autoChooser = new SendableChooser<>();
@@ -27,7 +26,7 @@ public class AutoLoader {
 		}
 		
 		// pre-load the default auto
-		autoChooser.setDefaultOption(Constants.AutoConstants.kAutoDefault, Constants.AutoConstants.kAutoDefault);
+		autoChooser.setDefaultOption(RobotConstants.kAutoDefault, RobotConstants.kAutoDefault);
         
         return autoChooser;
     }
@@ -38,7 +37,7 @@ public class AutoLoader {
         List<String> autoModes = new ArrayList<String>();
         for (String key : autoPaths.keySet()) {
             String stripKey = key.toString();
-            if (stripKey.endsWith(AutoConstants.kNoVSLAMPostfix)) {
+            if (stripKey.endsWith(RobotConstants.kNoVSLAMPostfix)) {
                 continue; // exclude these from the chooser
             }
             if (stripKey.startsWith("Red_") || stripKey.startsWith("Blu_")) {

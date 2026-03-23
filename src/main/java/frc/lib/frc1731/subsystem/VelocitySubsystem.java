@@ -28,8 +28,6 @@ public abstract class VelocitySubsystem<M extends MotorIO> extends BaseSubsystem
         initializeHardware();
     }
 
-    protected abstract void initializeHardware();
-
     @Override
     public void periodic() {
         super.periodic();
@@ -58,16 +56,19 @@ public abstract class VelocitySubsystem<M extends MotorIO> extends BaseSubsystem
     }
 
     public Angle getMotorAngle() {
+        if (!isEnabled()) return Degrees.of(0);
         if (Robot.isSimulation() && sim != null) return sim.getPosition().div(mechanismRatio);
         return motor != null ? Rotations.of(motor.getRotations()) : Degrees.zero();
     }
 
     public AngularVelocity getVelocity() {
+        if (!isEnabled()) return DegreesPerSecond.of(0);
         if (Robot.isSimulation() && sim != null) return sim.getVelocity().div(mechanismRatio);
         return motor != null ? RotationsPerSecond.of(motor.getVelocityRPS()) : RotationsPerSecond.zero();
     }
 
     public Voltage getVoltage() {
+        if (!isEnabled()) return Volts.of(0);
         if (Robot.isSimulation() && sim != null) return sim.getAppliedVoltage();
         return Volts.of(motor.getAppliedVoltage());
     }
@@ -81,36 +82,37 @@ public abstract class VelocitySubsystem<M extends MotorIO> extends BaseSubsystem
     }
 
     protected void setVoltage(Voltage volts) {
+        if (!isEnabled()) return;
         if (motor != null)  motor.setVoltage(volts.in(Volts));
         if (Robot.isSimulation() && sim != null) sim.setVoltage(volts); 
     }
 
-    public Command setPercentOutputCommand(DoubleSupplier percent) {
+    public Command setPercentOutput(DoubleSupplier percent) {
         return run(() -> {
             this.targetVelocity = kMaxVelocity.times(percent.getAsDouble());
             if (motor != null)  motor.setPercentOutput(percent.getAsDouble());
-            if (motor != null && sim != null) sim.setVoltage(Volts.of(percent.getAsDouble() * 12d));
+            if (Robot.isSimulation() && sim != null) sim.setVoltage(Volts.of(percent.getAsDouble() * 12d));
         }).withName("SetPercent");
     }
 
-    public Command setPercentOutputCommand(double percent) {
-        return this.setPercentOutputCommand(() -> percent);
+    public Command setPercentOutput(double percent) {
+        return this.setPercentOutput(() -> percent);
     }
 
-    public Command setVelocityCommand(Supplier<AngularVelocity> velocity) {
+    public Command setVelocity(Supplier<AngularVelocity> velocity) {
         return run(() -> {
             this.targetVelocity = velocity.get();
             if (motor != null) motor.setVelocityRPS(targetVelocity.in(RotationsPerSecond) / mechanismRatio);
-            if (sim != null) sim.setVelocity(targetVelocity);
+            if (Robot.isSimulation() && sim != null) sim.setVelocity(targetVelocity);
         }).withName("SetVelocity");
     }
 
-    public Command setVelocityCommand(AngularVelocity velocity) {
-        return this.setVelocityCommand(() -> velocity);
+    public Command setVelocity(AngularVelocity velocity) {
+        return this.setVelocity(() -> velocity);
     }
 
-    public Command stopCommand() {
-        return setPercentOutputCommand(0.0)
+    public Command stop() {
+        return setPercentOutput(0.0)
         .withName("Stop");
     }
 }

@@ -1,8 +1,9 @@
 package frc.robot;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
-import java.io.File;
+
 import edu.wpi.first.wpilibj.Timer;
 
 import org.littletonrobotics.junction.LoggedRobot;
@@ -23,10 +24,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.lib.frc1731.field.FieldLayout;
-import frc.lib.frc1731.field.ReefscapeFieldLayout;
-import frc.lib.frc1731.log.MessageLog;
-import frc.robot.Constants.AutoConstants;
 import frc.robot.autos.AutoFactory;
 import frc.robot.autos.AutoLoader;
 import frc.robot.subsystems.drive.SwerveSubsystem;
@@ -59,7 +56,7 @@ public class Robot extends LoggedRobot {
 	private RobotContainer container;
 	//private Command m_autonomousCommand = null;
 
-	public static final FieldLayout kFieldLayout = new ReefscapeFieldLayout();
+	// public static final FieldLayout kFieldLayout = new ReefscapeFieldLayout();
 	
 	public static final Trigger IS_ENABLED = new Trigger(() -> DriverStation.isEnabled());
 	public static final Trigger IS_TELEOP = new Trigger(() -> DriverStation.isTeleop());
@@ -119,7 +116,7 @@ public class Robot extends LoggedRobot {
 		// kFieldLayout.logToShuffleboard(isSimulation());
 	}
 	private void setupSmartDashboard() {
-		SmartDashboard.putData(AutoConstants.kAutoCodeKey, autoChooser);
+		SmartDashboard.putData(RobotConstants.kAutoCodeKey, autoChooser);
 		SmartDashboard.putString("Build Info - Branch", "N/A");
 		SmartDashboard.putString("Build Info - Commit Hash", "N/A");
 		SmartDashboard.putString("Build Info - Date", "N/A");
@@ -149,8 +146,8 @@ public class Robot extends LoggedRobot {
 			System.err.println("DeployedBranchInfo.txt not found");
 			fnf.printStackTrace();
 		}
-		SmartDashboard.updateValues();
-		if (SHOULD_LOG) {
+		if (Robot.isSimulation()) {
+			SmartDashboard.updateValues();
 			Logger.addDataReceiver(new NT4Publisher());
 			Logger.start();
 		}
@@ -214,7 +211,7 @@ public class Robot extends LoggedRobot {
 		    selectedAutoCode = autoChooser.getSelected();
 		} 
 		if(selectedAutoCode == null) {
-			selectedAutoCode = autoCode == null ? Constants.AutoConstants.kAutoDefault : autoCode;
+			selectedAutoCode = autoCode == null ? RobotConstants.kAutoDefault : autoCode;
 		}
 		if(!selectedAutoCode.equals(autoCode)) {
 			System.out.println("New Auto Code read from dashboard. OLD: " + autoCode + ", NEW: " + selectedAutoCode);
@@ -349,7 +346,7 @@ public void autonomousPeriodic() {
 	if (m_autonomousCommand != null && (Timer.getFPGATimestamp() - autoStartTime) >= 0.25
 			&& (currentPose.getTranslation().getDistance(targetPose.getTranslation()) > 1.0)) {
 		System.out.println("distance is" + currentPose.getTranslation().getDistance(targetPose.getTranslation()));
-		m_autonomousCommand.cancel();
+		// m_autonomousCommand.cancel();
 		System.out.println(
 				"Had to Kill the auto because the target pose and current pose were apart by more than a foot");
 	}
@@ -363,7 +360,7 @@ public void autonomousPeriodic() {
 	@Override
 	public void teleopInit() {
 		// Record both DS control and joystick data in TELEOP
-		MessageLog.getLogger();
+		// MessageLog.getLogger();
 
 		// Cancel any outstanding auto commands
 		CommandScheduler.getInstance().cancelAll();

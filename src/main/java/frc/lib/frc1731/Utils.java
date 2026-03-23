@@ -2,7 +2,7 @@ package frc.lib.frc1731;
 
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.trajectory.Trajectory;
-import frc.lib.frc6328.FieldConstants;
+import frc.lib.frc1731.field.FieldPositions;
 import frc.robot.Robot;
 
 /**
@@ -38,12 +38,12 @@ public final class Utils {
     }
     
     public static Translation2d flip(Translation2d point) {
-        if (Robot.isRedAlliance()) return new Translation2d(FieldConstants.fieldLength - point.getX(), FieldConstants.fieldWidth - point.getY());
-        return point;   
+        if (Robot.isRedAlliance()) return new Translation2d(FieldPositions.kFieldLength - point.getX(), FieldPositions.kFieldWidth - point.getY());
+        return point;
     }
 
     public static Translation3d flip(Translation3d point) {
-        if (Robot.isRedAlliance())  return new Translation3d(FieldConstants.fieldLength - point.getX(), FieldConstants.fieldWidth - point.getY(), point.getZ());
+        if (Robot.isRedAlliance())  return new Translation3d(FieldPositions.kFieldLength - point.getX(), FieldPositions.kFieldWidth - point.getY(), point.getZ());
         return point;   
     }
 

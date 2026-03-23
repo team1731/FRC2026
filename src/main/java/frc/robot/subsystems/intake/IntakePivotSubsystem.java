@@ -1,34 +1,43 @@
 package frc.robot.subsystems.intake;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.lib.frc1731.Utils;
 import frc.lib.frc1731.hardware.motor.ctre.MotorIOTalonFX;
-import frc.robot.Robot;
+import frc.robot.Ports;
 import frc.robot.subsystems.BaseSubsystem;
 
 import static frc.robot.subsystems.intake.IntakeConstants.*;
 
+import java.util.function.DoubleSupplier;
+
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
+import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.core.CoreCANcoder;
 
 public class IntakePivotSubsystem extends BaseSubsystem {
     private MotorIOTalonFX motor;
+    private CANcoder cancoder;
     private double targetPosition = 0;
 
     public IntakePivotSubsystem(boolean enabled) {
         super(enabled);
-        if (!isEnabled()) return;
-        motor = new MotorIOTalonFX(IntakeConstants.kPivotMotorConfig);
+    }
+
+    @Override
+    public void initializeHardware() {
+        motor = new MotorIOTalonFX(Ports.kIntakePivotConfig);
         motor.getMotor().clearStickyFaults();
         motor.withPIDGains(kPivotGains);
-        motor.withStatorCurrentLimit(40d);
+        motor.withStatorCurrentLimit(kPivotCurrentLimit);
+        // motor.setSoftLimits(kPivotStowRotations, kPivotIntakeRotations);
         motor.setSoftLimits(kPivotIntakeRotations, kPivotStowRotations);
         motor.withFeedbackConfigs(new FeedbackConfigs()
-            .withFeedbackRemoteSensorID(15)
-            .withRemoteCANcoder(new CoreCANcoder(15))
-            .withRotorToSensorRatio(36d)
+            .withFeedbackRemoteSensorID(Ports.kPivotCANcoderId)
+            .withRemoteCANcoder(new CoreCANcoder(Ports.kPivotCANcoderId, "Left CANivore"))
+            .withRotorToSensorRatio(kPivotGearRatio)
         );
 
         motor.withMotionMagicConfigs(
@@ -36,46 +45,44 @@ public class IntakePivotSubsystem extends BaseSubsystem {
             .withMotionMagicAcceleration(2)
         );
 
-        motor.setDynamicMotionMagicSpeeds(2, 2);    
+        motor.setDynamicMotionMagicSpeeds(2, 2);  
+        cancoder = new CANcoder(Ports.kPivotCANcoderId);
+
+        CANcoderConfiguration coderConfig = new CANcoderConfiguration()
+        .withMagnetSensor(new MagnetSensorConfigs().withMagnetOffset(-0.04833984375));
+        cancoder.getConfigurator().apply(coderConfig);
         
-        Robot.IS_ENABLED.onTrue(new InstantCommand(() -> motor.setPercentOutput(0)));
+        motor.getMotor().setPosition(cancoder.getAbsolutePosition().waitForUpdate(0.2).getValueAsDouble());
     }
 
     public boolean atTargetPosition() {
+        if (!isEnabled()) return true;
         return Utils.isWithin(motor.getRotations(), targetPosition, 0.01);
     }
 
     @Override
     public void periodicTelemetry() {
-        // logger.log("Current Rotations", motor.getRotations());
-        // logger.log("Target Rotations", targetPosition);
-        // logger.log("At Target Position", atTargetPosition());
+        logger.log("Current Rotations", motor.getRotations());
+        logger.log("Target Rotations", targetPosition);
+        logger.log("At Target Position", atTargetPosition());
     }
     
-    private Command setPositionCommand(double position) {
+    private Command setPosition(DoubleSupplier position) {
         return run(() -> {
-            targetPosition = position;
-            motor.setPosition(targetPosition);
-        }).until(() -> atTargetPosition());
+            targetPosition = position.getAsDouble();
+            motor.setPosition(position.getAsDouble());
+        });
     }
 
-    public Command setManualCommand(double percentOutput) {
+    public Command setManual(double percentOutput) {
         return run(() -> motor.setPercentOutput(percentOutput));
     }
 
-    public Command deployCommand() {
-        return this.setPositionCommand(kPivotIntakeRotations);
+    public Command deploy() {
+        return this.setPosition(() -> kPivotIntakeRotations);
     }
 
-    public Command retractCommand() {
-        return this.setPositionCommand(kPivotStowRotations);
-    }
-
-    public Command unjamCommand() {
-        // Runs the motor forward and reverse for short spurts to attempt to unjam the mechanism; Uses recursion?
-        return this.setManualCommand(0.2)
-            .withTimeout(0.5d)
-            .andThen(setManualCommand(-0.2))
-            .andThen(unjamCommand());
+    public Command retract() {
+        return this.setPosition(() -> kPivotStowRotations);
     }
 }

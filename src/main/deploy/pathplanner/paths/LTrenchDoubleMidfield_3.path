@@ -1,0 +1,88 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 3.4697574893009984,
+        "y": 7.431398002853067
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 6.290500894454384,
+        "y": 7.466672629695886
+      },
+      "isLocked": false,
+      "linkedName": "LTrenchScore"
+    },
+    {
+      "anchor": {
+        "x": 7.831914132379248,
+        "y": 4.546100178890876
+      },
+      "prevControl": {
+        "x": 7.718336314847942,
+        "y": 7.320644007155635
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "LMidIntake2"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.2596810933940782,
+      "rotationDegrees": 0.0
+    },
+    {
+      "waypointRelativePos": 1,
+      "rotationDegrees": -90.0
+    },
+    {
+      "waypointRelativePos": 1.5,
+      "rotationDegrees": 179.97632405928763
+    }
+  ],
+  "constraintZones": [
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 0.79,
+      "maxWaypointRelativePos": 1.75,
+      "constraints": {
+        "maxVelocity": 1.5,
+        "maxAcceleration": 2.0,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 720.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    }
+  ],
+  "pointTowardsZones": [],
+  "eventMarkers": [
+    {
+      "name": "Feedthrough",
+      "waypointRelativePos": 0,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 4.0,
+    "maxAcceleration": 4.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -90.0
+  },
+  "reversed": false,
+  "folder": "LTrenchDoubleMidfield",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 0.0
+  },
+  "useDefaultConstraints": true
+}
