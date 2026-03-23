@@ -11,7 +11,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "RTrenchDoubleMidfield_1"
+                  "pathName": "LTrenchDoubleMidfield_1"
                 }
               },
               {
@@ -30,7 +30,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "RTrenchDoubleMidfield_2"
+                  "pathName": "LTrenchDoubleMidfield_2"
                 }
               },
               {
@@ -74,7 +74,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "RTrenchDoubleMidfield_3"
+                  "pathName": "LTrenchDoubleMidfield_3"
                 }
               },
               {
@@ -93,7 +93,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "RTrenchDoubleMidfield_4"
+                  "pathName": "LTrenchDoubleMidfield_4"
                 }
               },
               {

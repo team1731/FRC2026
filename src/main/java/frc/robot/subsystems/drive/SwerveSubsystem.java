@@ -134,6 +134,7 @@ public class SwerveSubsystem extends BaseSubsystem {
 
     public void resetPose(Pose2d pose) {
         drivetrain.resetPose(pose);
+        // drivetrain.getPigeon2().setYaw(pose.getRotation().getDegrees());
         resetQuestPose(new Pose3d(pose));  
         isQuestSeeded = true; 
     }
@@ -215,7 +216,7 @@ public class SwerveSubsystem extends BaseSubsystem {
         if (Robot.isSimulation() || !kUseVSLAM) {
           //  this.resetPose(pose);  we probably do not want to do this if VSLAM and limelight are working?
         }
-        this.resetPose(pose);
+        // this.resetPose(pose);
     }
 
     @Override
@@ -227,6 +228,7 @@ public class SwerveSubsystem extends BaseSubsystem {
         //         resetPose(resetPosition);
         // }
 
+        drivetrain.periodic();
         updateVisionOdometry();
         questNav.commandPeriodic();
         SmartDashboard.putBoolean("isSeeded", isQuestSeeded);
@@ -246,8 +248,6 @@ public class SwerveSubsystem extends BaseSubsystem {
         if (questNav.isTracking() && isQuestSeeded && questNav.isConnected()) {
             addQuestVisionMeasurement();
         }
-
-
     }
 
     @Override

@@ -53,7 +53,7 @@ public class TurretConstants {
     public static final CANcoderConfiguration kLeftCANCoderConfigs = new CANcoderConfiguration()
     .withMagnetSensor(new MagnetSensorConfigs()
         .withAbsoluteSensorDiscontinuityPoint(0.283)
-        .withMagnetOffset(-0.093994140625)
+        .withMagnetOffset(-0.087890625)
         .withSensorDirection(SensorDirectionValue.CounterClockwise_Positive)
     );
 
