@@ -100,8 +100,8 @@ public class RobotContainer {
     private void configureNamedCommands() {
         // Named commands useful for PathPlanner events
         // ex. NamedCommands.registerCommand("Example", new ExampleCommand());
-        NamedCommands.registerCommand("Shoot", superstructure.autoShoot().andThen(Commands.deadline(Commands.waitSeconds(0.1), superstructure.stopShooters())));
-        NamedCommands.registerCommand("StopShoot", Commands.deadline(Commands.waitSeconds(0.1), superstructure.stopShooters()));
+        NamedCommands.registerCommand("Shoot", superstructure.autoShoot());
+        NamedCommands.registerCommand("StopShoot", superstructure.stopShooters());
         NamedCommands.registerCommand("Intake", superstructure.runIntake(() -> true));
         NamedCommands.registerCommand("Pass", superstructure.pass());
         NamedCommands.registerCommand("StowHood", Commands.deadline(Commands.waitSeconds(0.1), superstructure.stowHoodsOnce()));
@@ -149,8 +149,8 @@ public class RobotContainer {
         intake.setDefaultCommand(intake.stop());
         indexer.setDefaultCommand(indexer.stop());
 
-        leftTurret.setDefaultCommand(leftTurret.track(superstructure.appliedTargetSupplier));
-        rightTurret.setDefaultCommand(rightTurret.track(superstructure.appliedTargetSupplier));
+        leftTurret.setDefaultCommand(leftTurret.trackHub());
+        rightTurret.setDefaultCommand(rightTurret.trackHub());
 
         leftHood.setDefaultCommand(leftHood.stow());
         rightHood.setDefaultCommand(rightHood.stow());

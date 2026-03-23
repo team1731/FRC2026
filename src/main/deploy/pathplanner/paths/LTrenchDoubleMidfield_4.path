@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.830085592011411,
-        "y": 5.283580599144081
+        "x": 7.831914132379248,
+        "y": 4.546100178890876
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.364293865905848,
-        "y": 7.7419258202567764
+        "x": 7.085545617173524,
+        "y": 7.401771019677997
       },
       "isLocked": false,
       "linkedName": "LMidIntake2"
@@ -20,8 +20,8 @@
         "y": 7.431398002853067
       },
       "prevControl": {
-        "x": 6.199814550641939,
-        "y": 7.405520684736091
+        "x": 7.101771019677996,
+        "y": 7.417996422182468
       },
       "nextControl": null,
       "isLocked": false,
@@ -60,7 +60,7 @@
   "folder": "LTrenchDoubleMidfield",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -90.85720800994176
+    "rotation": -90.0
   },
   "useDefaultConstraints": true
 }

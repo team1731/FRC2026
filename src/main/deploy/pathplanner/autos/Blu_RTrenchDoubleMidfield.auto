@@ -32,6 +32,12 @@
                 "data": {
                   "pathName": "RTrenchDoubleMidfield_2"
                 }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Warmup"
+                }
               }
             ]
           }
@@ -43,9 +49,22 @@
           }
         },
         {
-          "type": "named",
+          "type": "deadline",
           "data": {
-            "name": "StopShoot"
+            "commands": [
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 0.1
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "StopShoot"
+                }
+              }
+            ]
           }
         },
         {
@@ -75,6 +94,12 @@
                 "type": "path",
                 "data": {
                   "pathName": "RTrenchDoubleMidfield_4"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Warmup"
                 }
               }
             ]

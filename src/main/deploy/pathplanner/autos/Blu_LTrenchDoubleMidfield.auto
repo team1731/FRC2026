@@ -49,15 +49,22 @@
           }
         },
         {
-          "type": "named",
+          "type": "deadline",
           "data": {
-            "name": "StopShoot"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "StowHood"
+            "commands": [
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 0.1
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "StopShoot"
+                }
+              }
+            ]
           }
         },
         {
@@ -90,22 +97,9 @@
                 }
               },
               {
-                "type": "sequential",
+                "type": "named",
                 "data": {
-                  "commands": [
-                    {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 2.75
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "Feedthrough"
-                      }
-                    }
-                  ]
+                  "name": "Warmup"
                 }
               }
             ]
@@ -114,7 +108,7 @@
         {
           "type": "named",
           "data": {
-            "name": "Feedthrough"
+            "name": "Shoot"
           }
         }
       ]
