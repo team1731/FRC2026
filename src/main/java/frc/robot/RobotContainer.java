@@ -5,10 +5,10 @@ import static frc.robot.subsystems.shooter.hood.HoodConstants.*;
 import static frc.robot.subsystems.shooter.turret.TurretConstants.*;
 
 import com.pathplanner.lib.auto.NamedCommands;
+
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.*;
 import frc.lib.frc6328.LoggedTunableNumber;
-import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.drive.SwerveSubsystem;
 import frc.robot.subsystems.indexer.IndexerSubsystem;
 import frc.robot.subsystems.shooter.flywheel.FlywheelSubsystem;
@@ -16,6 +16,7 @@ import frc.robot.subsystems.shooter.hood.HoodSubsystem;
 import frc.robot.subsystems.intake.IntakePivotSubsystem;
 import frc.robot.subsystems.intake.IntakeRollerSubsystem;
 import frc.robot.subsystems.shooter.turret.TurretSubsystem;
+import frc.robot.subsystems.Superstructure;
 public class RobotContainer {
     public enum TestShotCondition {
         kNone,
@@ -54,8 +55,10 @@ public class RobotContainer {
     
     private final Trigger dTestSetShot = driver.back();
 
+    // private final Trigger isShooting = dShoot.or(dPass).or(dTrenchShot).or(dTowerShot).or(dHubShot);
+
     private final Trigger dRetractIntake = driver.leftBumper();
-    private final Trigger dForceShoot = driver.rightBumper();
+    private final Trigger dStationaryShot = driver.rightBumper();
 
     private final Trigger dLeftTurretLeft = driver.povLeft();
     private final Trigger dLeftTurretRight = driver.povRight();
@@ -102,10 +105,9 @@ public class RobotContainer {
         // ex. NamedCommands.registerCommand("Example", new ExampleCommand());
         NamedCommands.registerCommand("Shoot", superstructure.autoShoot());
         NamedCommands.registerCommand("StopShoot", superstructure.stopShooters());
-        NamedCommands.registerCommand("Intake", superstructure.runIntake(() -> true));
+        NamedCommands.registerCommand("Intake", superstructure.runIntake(true));
         NamedCommands.registerCommand("Pass", superstructure.pass());
         NamedCommands.registerCommand("StowHood", Commands.deadline(Commands.waitSeconds(0.1), superstructure.stowHoodsOnce()));
-        NamedCommands.registerCommand("Stow Pivot", superstructure.stowIntake());
         NamedCommands.registerCommand("Warmup", superstructure.warmup());
         NamedCommands.registerCommand("Feedthrough", superstructure.feedthrough());
     }
@@ -115,13 +117,15 @@ public class RobotContainer {
      */
     private void configureButtonBindings() {
         // Reset robot pose and heading
-        dResetSwerve.onTrue(superstructure.resetGyro());
+        dResetSwerve.onTrue(superstructure.resetYaw());
 
-        dIntake.and(() -> !dShoot.getAsBoolean() || !dPass.getAsBoolean()).whileTrue(superstructure.intake());
+        dIntake.and(() -> !dShoot.getAsBoolean() || !dPass.getAsBoolean()).whileTrue(superstructure.runIntake(true));
         dShoot.whileTrue(superstructure.shoot());
         dPass.whileTrue(superstructure.pass());
         dFeedthrough.whileTrue(superstructure.feedthrough());
         dPassthrough.whileTrue(superstructure.passFeedthrough());
+
+        dStationaryShot.whileTrue(superstructure.shootStationary());
 
         dHubShot.whileTrue(superstructure.shoot(1.8, true));
         dTowerShot.whileTrue(superstructure.shoot(2.5, true));
@@ -133,7 +137,6 @@ public class RobotContainer {
             .whileTrue(superstructure.shoot(tuneableFlywheelRPS.get(), tuneableHoodRotations.get(), true));
 
         dRetractIntake.onTrue(pivot.retract());
-        dForceShoot.whileTrue(superstructure.forceShoot(0.25));
 
         dLeftTurretLeft.whileTrue(leftTurret.setDegrees(-200));
         dLeftTurretRight.whileTrue(leftTurret.setDegrees(80));
@@ -142,7 +145,7 @@ public class RobotContainer {
     }
 
     public void configureDefaultCommands() {
-        // Drivetrain will execute this command periodically 
+        // Drivetrain will execute this command periodically
         // if no other command is active on the drivetrain
         swerve.setDefaultCommand(swerve.driveCommand(driver, () -> true));
 

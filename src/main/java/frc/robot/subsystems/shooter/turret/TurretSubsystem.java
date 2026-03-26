@@ -34,7 +34,7 @@ public class TurretSubsystem extends BaseSubsystem {
 
     private String name;
 
-    // private final Supplier<Translation2d> kHubSupplier = () -> Robot.isRedAlliance() ? new Translation2d(11.915394, 4.034536) : new Translation2d(4.625594, 4.034536);
+    private double lockedTurretHeading = 0;
 
     public TurretSubsystem(TurretConfiguration config, Supplier<Pose2d> swervePoseSupplier, boolean enabled) {
         super(config.name(), config, enabled);
@@ -227,5 +227,14 @@ public class TurretSubsystem extends BaseSubsystem {
 
     public Command setDegrees(double degrees) {
         return this.setDegrees(() -> degrees);
+    }
+
+    public Command zero() {
+        return this.setDegrees(0);
+    }
+
+    public Command lockHeading() {
+        return new InstantCommand(() -> this.lockedTurretHeading = getDegrees())
+        .andThen(this.setDegrees(lockedTurretHeading - swervePoseSupplier.get().getRotation().getDegrees()));
     }
 }
