@@ -327,18 +327,6 @@ public class Superstructure extends SubsystemBase {
         double[] leftParameters = shotTable.getShotParameters(targetSupplier.get().minus(leftPose).getNorm());
         double[] rightParameters = shotTable.getShotParameters(targetSupplier.get().minus(rightPose).getNorm());
 
-        // ChassisSpeeds swerveSpeed = swerve.getFieldRelativeChassisSpeeds();
-        // Translation2d newTarget = targetSupplier.get().minus(new Translation2d(swerveSpeed.vxMetersPerSecond * leftParameters[2], swerveSpeed.vyMetersPerSecond * leftParameters[2]));
-        
-        // double[] newLeftParameters = shotTable.getShotParameters(leftPose.minus(newTarget).getNorm());
-        // double[] newRightParameters = shotTable.getShotParameters(rightPose.minus(newTarget).getNorm());
-
-        // double[] appliedLeftParameters = adjustTargetForMovingShots ? newLeftParameters : leftParameters;
-        // double[] appliedRightParameters = adjustTargetForMovingShots ? newRightParameters : rightParameters;
-
-        // adjustTargetForMovingShots = false;
-        // this.appliedTargetSupplier = () -> adjustTargetForMovingShots ? newTarget : targetSupplier.get();
-
         if (Robot.isSimulation()) {
             SmartDashboard.putBoolean("SS/Shooters Ready", shootersReady());
             SmartDashboard.putBoolean("SS/Flywheel At Target", leftFlywheel.atTargetVelocity());

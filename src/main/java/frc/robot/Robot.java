@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.Timer;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
+import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.commands.PathPlannerAuto;
@@ -94,11 +95,9 @@ public class Robot extends LoggedRobot {
 		container = new RobotContainer(swerve);  // passed in swerve because we needed it here for auto
 	    autoChooser = AutoLoader.loadAutoChooser();
 		autoPreload();
-		setupSmartDashboard();
-		swerve.configureInitialPosition();  // sets the operator perspective
-		// SmartDashboard.updateValues();
-		// Logger.start();
-		// Logger.addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables
+		setupLogging();
+		swerve.configureInitialPosition(); // sets the operator perspective
+		
 		PathPlannerLogging.setLogCurrentPoseCallback((pose) -> {
 			currentPose = pose;
 			currentPoseField.setRobotPose(pose);
@@ -111,46 +110,40 @@ public class Robot extends LoggedRobot {
 			SmartDashboard.putData("PathPlanner target pose", targetPoseField);
 		});
 
-		 FollowPathCommand.warmupCommand().schedule();
-
-		// kFieldLayout.logToShuffleboard(isSimulation());
+		FollowPathCommand.warmupCommand().schedule();
 	}
-	private void setupSmartDashboard() {
-		SmartDashboard.putData(RobotConstants.kAutoCodeKey, autoChooser);
-		SmartDashboard.putString("Build Info - Branch", "N/A");
-		SmartDashboard.putString("Build Info - Commit Hash", "N/A");
-		SmartDashboard.putString("Build Info - Date", "N/A");
+	
+	private void setupLogging() {
+		String branch = "N/A";
+		String commit = "N/A";
+		String date = "N/A";
 
-		/*
-		 * Note: do not think this is implemented in the gradle build, if we want to
-		 * print this we will need to carry that over
-		 */
 		try {
 			File buildInfoFile = new File(Filesystem.getDeployDirectory(), "DeployedBranchInfo.txt");
 			if (buildInfoFile.exists() && buildInfoFile.canRead()) {
 				Scanner reader = new Scanner(buildInfoFile);
-				int i = 0;
-				while (reader.hasNext()) {
-					if (i == 0) {
-						SmartDashboard.putString("Build Info - Branch", reader.nextLine());
-					} else if (i == 1) {
-						SmartDashboard.putString("Build Info - Commit Hash", reader.nextLine());
-					} else {
-						SmartDashboard.putString("Build Info - Date", reader.nextLine());
-					}
-					i++;
-				}
+				if (reader.hasNextLine()) branch = reader.nextLine();
+				if (reader.hasNextLine()) commit = reader.nextLine();
+				if (reader.hasNextLine()) date = reader.nextLine();
 				reader.close();
 			}
-		} catch (FileNotFoundException fnf) {
+		} catch (FileNotFoundException e) {
 			System.err.println("DeployedBranchInfo.txt not found");
-			fnf.printStackTrace();
 		}
+
+		// Log metadata (for AdvantageScope)
+		Logger.recordMetadata("GitBranch", branch);
+		Logger.recordMetadata("Git Commit", commit);
+		Logger.recordMetadata("BuildDate", date);
+
 		if (Robot.isSimulation()) {
-			SmartDashboard.updateValues();
 			Logger.addDataReceiver(new NT4Publisher());
-			Logger.start();
+		} else {
+			Logger.addDataReceiver(new WPILOGWriter("/home/lvuser/logs"));
 		}
+
+		Logger.start();
+		SmartDashboard.updateValues();
 	}
 
 
