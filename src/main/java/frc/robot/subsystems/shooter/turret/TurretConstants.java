@@ -52,16 +52,16 @@ public class TurretConstants {
 
     public static final CANcoderConfiguration kLeftCANCoderConfigs = new CANcoderConfiguration()
     .withMagnetSensor(new MagnetSensorConfigs()
-        .withAbsoluteSensorDiscontinuityPoint(0.283)
-        .withMagnetOffset(-0.087890625)
-        .withSensorDirection(SensorDirectionValue.CounterClockwise_Positive)
+        .withAbsoluteSensorDiscontinuityPoint(0.29)
+        .withMagnetOffset(0.01416015625)
+        .withSensorDirection(SensorDirectionValue.Clockwise_Positive)
     );
 
     public static final CANcoderConfiguration kRightCANCoderConfigs = new CANcoderConfiguration()
     .withMagnetSensor(new MagnetSensorConfigs()
-        .withAbsoluteSensorDiscontinuityPoint(0.7365)
-        .withMagnetOffset(-0.6611328125)
-        .withSensorDirection(SensorDirectionValue.CounterClockwise_Positive)
+        .withAbsoluteSensorDiscontinuityPoint(0.7325)
+        .withMagnetOffset(-0.25244140625)
+        .withSensorDirection(SensorDirectionValue.Clockwise_Positive)
     );
         
     public static final TurretConfiguration kLeftTurretConfigs = new TurretConfiguration(
@@ -70,8 +70,9 @@ public class TurretConstants {
         Ports.kLeftTurretCANCoderId,
         kLeftFeedbackConfigs,
         kLeftCANCoderConfigs,
-        106,
-        -277,
+        125, // .257
+        -261, // -.662
+    
         kRobotToLeftTurret
     );
 
@@ -81,8 +82,8 @@ public class TurretConstants {
         Ports.kRightTurretCANCoderId,
         kRightFeedbackConfigs,
         kRightCANCoderConfigs,
-        288,
-        -101,
+        291, //.73
+        -105, // -.265
         kRobotToRightTurret
     );
 }

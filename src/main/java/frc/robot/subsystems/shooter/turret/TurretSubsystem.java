@@ -51,7 +51,7 @@ public class TurretSubsystem extends BaseSubsystem {
         CANcoderConfiguration coderConfig = new CANcoderConfiguration();
         coderConfig.MagnetSensor.MagnetOffset = turretConfig.cancoderConfigs().MagnetSensor.MagnetOffset;
         coderConfig.MagnetSensor.AbsoluteSensorDiscontinuityPoint = turretConfig.cancoderConfigs().MagnetSensor.AbsoluteSensorDiscontinuityPoint;
-        coderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
+        coderConfig.MagnetSensor.SensorDirection = turretConfig.cancoderConfigs().MagnetSensor.SensorDirection;
         cancoder.getConfigurator().apply(coderConfig);
 
         TalonFXConfiguration motorConfig = new TalonFXConfiguration();
