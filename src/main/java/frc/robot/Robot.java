@@ -11,6 +11,7 @@ import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
+import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.util.PathPlannerLogging;
@@ -89,6 +90,9 @@ public class Robot extends LoggedRobot {
 		//AKLogger.start();
 		// SignalLogger.start();
 		// LiveWindow.disableAllTelemetry();
+
+		SignalLogger.stop();
+		SignalLogger.enableAutoLogging(false);
 
 		// Instantiate our robot container. This will perform all of our button bindings,
 		swerve = new SwerveSubsystem(true); 

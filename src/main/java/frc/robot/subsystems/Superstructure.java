@@ -97,24 +97,12 @@ public class Superstructure extends SubsystemBase {
         return pivot.deploy().alongWith(intake.setVelocity(RotationsPerSecond.of(100)));
     }
 
-    public Command index(boolean withUnjam) {
-        return Commands.either(
-            indexer.setVelocity(() -> RotationsPerSecond.of(100))
-            .withTimeout(1.5)
-            .andThen(indexer.setVelocity(() -> RotationsPerSecond.of(-30)).withTimeout(0.125))
-            .repeatedly(), 
-            indexer.setVelocity(() -> RotationsPerSecond.of(100)),
-            // indexer.setPercentOutput(1.0),
-            () -> false
-        );
-    }
-
     public Command collapseIntakeForScore() {
         return pivot.setManual(0.05).alongWith(intake.setPercentOutput(1.0));
     }
 
     public Command reverseFeeder() {
-        return indexer.setPercentOutput(-1);
+        return indexer.unjam();
     }
 
     public Command setFlywheels(DoubleSupplier left, DoubleSupplier right) {
@@ -193,7 +181,8 @@ public class Superstructure extends SubsystemBase {
                 // Commands.waitSeconds(1.5).andThen(index(true))
                 // Commands.waitUntil(() -> shootersReady()).andThen(index(true))
                 (Commands.waitUntil(() -> shootersReady())
-                .andThen(index(true)
+                .andThen(
+                    indexer.index()
                         .until(() -> !turretsCanShoot())
                         .alongWith(runIntake(() -> false))
                 )).repeatedly()
@@ -217,7 +206,7 @@ public class Superstructure extends SubsystemBase {
                 track(targetSupplier),
                 intake(),
                 (Commands.waitUntil(() -> shootersReady())
-                .andThen(index(true))
+                .andThen(indexer.index())
                 ).repeatedly()
             );
 
@@ -250,7 +239,7 @@ public class Superstructure extends SubsystemBase {
                 setFlywheels(() -> targetLeftFlywheel, () -> targetRightFlywheel),
                 setHoods(() -> targetLeftHood, () -> targetRightHood),
                 track(targetSupplier),
-                new WaitCommand(indexDelay).andThen(index(true).alongWith(runIntake(() -> false)))
+                new WaitCommand(indexDelay).andThen(indexer.index().alongWith(runIntake(() -> false)))
             );
 
             return shootCommand;
@@ -270,7 +259,7 @@ public class Superstructure extends SubsystemBase {
                 setHoods(() -> parameters[0], () -> parameters[0]),
                 setTurrets(() -> 0, () -> 0), 
                 Commands.waitSeconds(1.0)
-                .andThen(index(true).alongWith(runIntake(() -> false)))
+                .andThen(indexer.index().alongWith(runIntake(() -> false)))
             );
             return shootCommand;
         }, Set.of(leftFlywheel, rightFlywheel, leftHood, rightHood, leftTurret, rightTurret, indexer, pivot, intake));
@@ -287,7 +276,7 @@ public class Superstructure extends SubsystemBase {
                     () -> zeroTurret
                 ),
                 Commands.waitUntil(() -> shootersReady())
-                .andThen(index(true).alongWith(runIntake(() -> false)))
+                .andThen(indexer.index().alongWith(runIntake(() -> false)))
             );
 
             return shootCommand;
@@ -308,7 +297,7 @@ public class Superstructure extends SubsystemBase {
                 ),
                 // Commands.waitSeconds(1)
                 Commands.waitUntil(() -> hoodAndFlywheelsReady())
-                .andThen(index(true).alongWith(runIntake(() -> false)))
+                .andThen(indexer.index().alongWith(runIntake(() -> false)))
             );
             return shootCommand;
         }, Set.of(leftFlywheel, rightFlywheel, leftHood, rightHood, leftTurret, rightTurret, indexer, pivot, intake));
