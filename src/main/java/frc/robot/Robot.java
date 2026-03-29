@@ -10,6 +10,7 @@ import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 
+import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.util.PathPlannerLogging;
@@ -89,6 +90,9 @@ public class Robot extends LoggedRobot {
 		// SignalLogger.start();
 		// LiveWindow.disableAllTelemetry();
 
+		SignalLogger.stop();
+		SignalLogger.enableAutoLogging(false);
+
 		// Instantiate our robot container. This will perform all of our button bindings,
 		swerve = new SwerveSubsystem(true); 
 		container = new RobotContainer(swerve);  // passed in swerve because we needed it here for auto
@@ -111,7 +115,7 @@ public class Robot extends LoggedRobot {
 			SmartDashboard.putData("PathPlanner target pose", targetPoseField);
 		});
 
-		 FollowPathCommand.warmupCommand().schedule();
+		FollowPathCommand.warmupCommand().schedule();
 
 		// kFieldLayout.logToShuffleboard(isSimulation());
 	}
