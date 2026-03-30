@@ -19,4 +19,5 @@ public class IntakeConstants {
 
     public static final double kPivotIntakeRotations = -0.142;
     public static final double kPivotStowRotations = 0.0;
+    public static final double kPivotEpsilon = 0.01;
 }

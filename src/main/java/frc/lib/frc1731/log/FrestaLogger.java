@@ -51,14 +51,14 @@ public class FrestaLogger {
 			System.err.println("DeployedBranchInfo.txt not found");
 			fnf.printStackTrace();
 		}
-		SmartDashboard.updateValues();
-		if (RobotConstants.kLogToAdvantageScope) {
-			Logger.addDataReceiver(new NT4Publisher());
-			Logger.start();
-			if (Robot.isReal()) {
-				Logger.addDataReceiver(new WPILOGWriter("/home/lvuser/logs"));
-			}
-		}
 		
+		SmartDashboard.updateValues();
+
+		Logger.start();
+		if (Robot.isReal()) {
+			Logger.addDataReceiver(new WPILOGWriter("/home/lvuser/logs"));
+		} else if (RobotConstants.kLogToAdvantageScope){
+			Logger.addDataReceiver(new NT4Publisher());
+		}
     }
 }

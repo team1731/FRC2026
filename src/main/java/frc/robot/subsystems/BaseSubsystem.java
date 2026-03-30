@@ -196,7 +196,7 @@ public abstract class BaseSubsystem extends SubsystemBase {
     public void periodic() {
         if (isEnabled()) {
             periodicOutput();
-            // periodicTelemetry();
+            periodicTelemetry();
             if (RobotConstants.kLogToAdvantageScope) {
                 logger.log("Command/Actively Commanded", isCurrentlyCommanded());
                 logger.log("Command/Has Default Command", !getDefaultCommand().equals(Commands.none()));

@@ -1,5 +1,7 @@
 package frc.robot.subsystems.indexer;
 
+import frc.lib.frc1731.Utils;
+import frc.lib.frc1731.hardware.motor.MotorConstants;
 import frc.lib.frc1731.hardware.motor.ctre.MotorIOTalonFX;
 import frc.robot.Ports;
 import frc.robot.subsystems.BaseSubsystem;
@@ -10,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 public class IndexerSubsystem extends BaseSubsystem {
     private MotorIOTalonFX bottomMotor, topMotor;
+    private IndexerIOInputsAutoLogged inputs = new IndexerIOInputsAutoLogged();
 
     public IndexerSubsystem(boolean enabled) {
         super(enabled);
@@ -25,10 +28,21 @@ public class IndexerSubsystem extends BaseSubsystem {
     }
 
     @Override
-    public void periodicTelemetry() {}
+    public void periodicTelemetry() {
+        inputs.currentVelocityTop = topMotor.getVelocityRPS();
+        inputs.currentVelocityBottom = bottomMotor.getVelocityRPS();
+
+        inputs.atTargetVelocityTop = Utils.isWithin(inputs.currentVelocityTop, inputs.targetVelocityTop, 1);
+        inputs.atTargetVelocityBottom = Utils.isWithin(inputs.currentVelocityBottom, inputs.targetVelocityBottom, 1);
+
+        logger.processInputs(inputs);
+    }
 
     public Command setPercent(double percentTop, double percentBottom) {
         return run(() -> {
+            inputs.targetVelocityTop = percentTop * MotorConstants.KRAKEN_X60.MAX_VELOCITY_RPM / 60.0;
+            inputs.targetVelocityBottom = percentBottom * MotorConstants.KRAKEN_X60.MAX_VELOCITY_RPM / 60.0;
+
             this.topMotor.setPercentOutput(percentTop);
             this.bottomMotor.setPercentOutput(percentBottom);
         });
@@ -36,6 +50,9 @@ public class IndexerSubsystem extends BaseSubsystem {
 
     public Command setVelocity(double topRPS, double bottomRPS) {
         return run(() -> {
+            inputs.targetVelocityTop = topRPS;
+            inputs.targetVelocityBottom = bottomRPS;
+
             this.topMotor.setVelocityRPS(topRPS);
             this.bottomMotor.setVelocityRPS(bottomRPS);
         });
