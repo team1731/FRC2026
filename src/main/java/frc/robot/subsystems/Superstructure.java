@@ -95,6 +95,8 @@ public class Superstructure extends SubsystemBase {
     private static final double kAccelAlpha = 0.3;   // EMA coefficient for accel filter
     private static final double kMaxPredictTof = 1.2;   // clamp TOF to avoid wild extrapolation (s)
 
+    private static final double kLatency = 0.02; // 20ms
+
     private Translation2d prevVelocity = new Translation2d();
     private Translation2d chassisAccel = new Translation2d();
     private double        prevOmega    = 0;
@@ -459,12 +461,6 @@ public class Superstructure extends SubsystemBase {
         // ---------------------------------------------------------------------
 
         if (Robot.isSimulation()) {
-            SmartDashboard.putBoolean("SS/Shooters Ready", shootersReady());
-            SmartDashboard.putBoolean("SS/Flywheel At Target", leftFlywheel.atTargetVelocity());
-            SmartDashboard.putBoolean("SS/Hood At Target", leftHood.atTarget());
-            SmartDashboard.putBoolean("SS/Turret At Target", leftTurret.atTarget());
-            SmartDashboard.putNumber("SS/Turret Target", leftTurret.getTarget());
-            SmartDashboard.putNumber("SS/Turret", leftTurret.getDegrees());
             SmartDashboard.putNumber("SS/Accel X m/s2", chassisAccel.getX());
             SmartDashboard.putNumber("SS/Accel Y m/s2", chassisAccel.getY());
             SmartDashboard.putNumber("SS/Angular Accel rad/s2", angularAccel);
@@ -473,12 +469,7 @@ public class Superstructure extends SubsystemBase {
                 new Pose2d(compensatedLeftTarget, new Rotation2d()));
             Logger.recordOutput("SmartLogs/RightCompensatedTarget",
                 new Pose2d(compensatedRightTarget, new Rotation2d()));
-            Logger.recordOutput("SmartLogs/LeftTurretPose",  leftTurret.getTurretPose());
-            Logger.recordOutput("SmartLogs/RightTurretPose", rightTurret.getTurretPose());
         }
-
-        SmartDashboard.putNumber("Left Turret Degrees",  leftTurret.getDegrees());
-        SmartDashboard.putNumber("Right Turret Degrees", rightTurret.getDegrees());
     }
 
     // =========================================================================
@@ -557,7 +548,7 @@ public class Superstructure extends SubsystemBase {
 
         // Round 1 — first-guess TOF from current geometry
         double dist0 = target.minus(currentTurretPos).getNorm();
-        double tof1  = Math.min(shotTableTof(dist0), kMaxPredictTof);
+        double tof1  = Math.min(shotTableTof(dist0) + kLatency, kMaxPredictTof);
 
         Translation2d predictedRobot1  = predictPosition(robotXY, vel, accel, tof1);
         Rotation2d    predictedHead1   = predictHeading(robotRot, omega, alpha, tof1);
@@ -566,7 +557,7 @@ public class Superstructure extends SubsystemBase {
 
         // Round 2 — refine TOF from the predicted turret position
         double dist1 = target.minus(predictedTurret1).getNorm();
-        double tof2  = Math.min(shotTableTof(dist1), kMaxPredictTof);
+        double tof2  = Math.min(shotTableTof(dist1) + kLatency, kMaxPredictTof);
 
         Translation2d predictedRobot2  = predictPosition(robotXY, vel, accel, tof2);
         Rotation2d    predictedHead2   = predictHeading(robotRot, omega, alpha, tof2);
