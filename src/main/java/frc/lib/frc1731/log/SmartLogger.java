@@ -3,6 +3,7 @@ package frc.lib.frc1731.log;
 import java.util.function.BooleanSupplier;
 
 import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.inputs.LoggableInputs;
 
 import edu.wpi.first.util.struct.StructSerializable;
 
@@ -96,5 +97,9 @@ public class SmartLogger {
     public <E extends Enum<E>> void logIf(String key, E valueIfTrue, E valueIfFalse, boolean condition) {
         if (!shouldLog.getAsBoolean()) return;
         Logger.recordOutput(logFolder + key, condition ? valueIfTrue : valueIfTrue); // Record to AdvantageKit logs
+    }
+
+    public void processInputs(LoggableInputs inputs) {
+        Logger.processInputs("RealOutputs/" + logFolder, inputs);
     }
 }

@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.Timer;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
+import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.commands.FollowPathCommand;
@@ -52,22 +53,14 @@ public class Robot extends LoggedRobot {
 	private final Field2d targetPoseField = new Field2d();
 	boolean vslamConnectionStatusChanged = false;
 	private boolean isVslamConnected = false;
-	
 
 	private RobotContainer container;
-	//private Command m_autonomousCommand = null;
-
-	// public static final FieldLayout kFieldLayout = new ReefscapeFieldLayout();
 	
 	public static final Trigger IS_ENABLED = new Trigger(() -> DriverStation.isEnabled());
 	public static final Trigger IS_TELEOP = new Trigger(() -> DriverStation.isTeleop());
 	public static final Trigger IS_AUTONOMOUS = new Trigger(() -> DriverStation.isAutonomous());
 	public static final Trigger IS_DISABLED = new Trigger(() -> DriverStation.isDisabled());
 	public static final Trigger IS_TEST = new Trigger(() -> DriverStation.isTest());
-
-	public static final boolean SHOULD_LOG = true;
-
-	// public static final RobotClock CLOCK = new RobotClock();
 
 	public Robot() {}
 
@@ -84,25 +77,20 @@ public class Robot extends LoggedRobot {
 //   ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 	@Override
 	public void robotInit() {
-		// DataLogManager.start();
-		// MessageLog.start();
-		//AKLogger.start();
-		// SignalLogger.start();
-		// LiveWindow.disableAllTelemetry();
-
 		SignalLogger.stop();
 		SignalLogger.enableAutoLogging(false);
 
 		// Instantiate our robot container. This will perform all of our button bindings,
 		swerve = new SwerveSubsystem(true); 
 		container = new RobotContainer(swerve);  // passed in swerve because we needed it here for auto
+		
 	    autoChooser = AutoLoader.loadAutoChooser();
+		SmartDashboard.putData(RobotConstants.kAutoCodeKey, autoChooser);
+
 		autoPreload();
-		setupSmartDashboard();
-		swerve.configureInitialPosition();  // sets the operator perspective
-		// SmartDashboard.updateValues();
-		// Logger.start();
-		// Logger.addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables
+		setupLogging();
+		swerve.configureInitialPosition(); // sets the operator perspective
+		
 		PathPlannerLogging.setLogCurrentPoseCallback((pose) -> {
 			currentPose = pose;
 			currentPoseField.setRobotPose(pose);
@@ -115,46 +103,40 @@ public class Robot extends LoggedRobot {
 			SmartDashboard.putData("PathPlanner target pose", targetPoseField);
 		});
 
-		FollowPathCommand.warmupCommand().schedule();
-
-		// kFieldLayout.logToShuffleboard(isSimulation());
+		CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
 	}
-	private void setupSmartDashboard() {
-		SmartDashboard.putData(RobotConstants.kAutoCodeKey, autoChooser);
-		SmartDashboard.putString("Build Info - Branch", "N/A");
-		SmartDashboard.putString("Build Info - Commit Hash", "N/A");
-		SmartDashboard.putString("Build Info - Date", "N/A");
+	
+	private void setupLogging() {
+		String branch = "N/A";
+		String commit = "N/A";
+		String date = "N/A";
 
-		/*
-		 * Note: do not think this is implemented in the gradle build, if we want to
-		 * print this we will need to carry that over
-		 */
 		try {
 			File buildInfoFile = new File(Filesystem.getDeployDirectory(), "DeployedBranchInfo.txt");
 			if (buildInfoFile.exists() && buildInfoFile.canRead()) {
 				Scanner reader = new Scanner(buildInfoFile);
-				int i = 0;
-				while (reader.hasNext()) {
-					if (i == 0) {
-						SmartDashboard.putString("Build Info - Branch", reader.nextLine());
-					} else if (i == 1) {
-						SmartDashboard.putString("Build Info - Commit Hash", reader.nextLine());
-					} else {
-						SmartDashboard.putString("Build Info - Date", reader.nextLine());
-					}
-					i++;
-				}
+				if (reader.hasNextLine()) branch = reader.nextLine();
+				if (reader.hasNextLine()) commit = reader.nextLine();
+				if (reader.hasNextLine()) date = reader.nextLine();
 				reader.close();
 			}
-		} catch (FileNotFoundException fnf) {
+		} catch (FileNotFoundException e) {
 			System.err.println("DeployedBranchInfo.txt not found");
-			fnf.printStackTrace();
 		}
+
+		// Log metadata (for AdvantageScope)
+		Logger.recordMetadata("GitBranch", branch);
+		Logger.recordMetadata("Git Commit", commit);
+		Logger.recordMetadata("BuildDate", date);
+
 		if (Robot.isSimulation()) {
-			SmartDashboard.updateValues();
 			Logger.addDataReceiver(new NT4Publisher());
-			Logger.start();
+		} else {
+			Logger.addDataReceiver(new WPILOGWriter("/home/lvuser/logs"));
 		}
+
+		Logger.start();
+		SmartDashboard.updateValues();
 	}
 
 
@@ -321,7 +303,7 @@ public class Robot extends LoggedRobot {
 			System.out.println("SOMETHING WENT WRONG - UNABLE TO RUN AUTONOMOUS! CHECK SOFTWARE!");
 		} else {
 			System.out.println("------------> RUNNING AUTONOMOUS COMMAND: " + m_autonomousCommand + " <----------");
-			m_autonomousCommand.schedule();
+			CommandScheduler.getInstance().schedule(m_autonomousCommand);
 		}
 		System.out.println("autonomousInit: End");
 	}
