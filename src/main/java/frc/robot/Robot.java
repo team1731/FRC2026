@@ -77,19 +77,16 @@ public class Robot extends LoggedRobot {
 //   ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 	@Override
 	public void robotInit() {
-		// DataLogManager.start();
-		// MessageLog.start();
-		//AKLogger.start();
-		// SignalLogger.start();
-		// LiveWindow.disableAllTelemetry();
-
 		SignalLogger.stop();
 		SignalLogger.enableAutoLogging(false);
 
 		// Instantiate our robot container. This will perform all of our button bindings,
 		swerve = new SwerveSubsystem(true); 
 		container = new RobotContainer(swerve);  // passed in swerve because we needed it here for auto
+		
 	    autoChooser = AutoLoader.loadAutoChooser();
+		SmartDashboard.putData(RobotConstants.kAutoCodeKey, autoChooser);
+
 		autoPreload();
 		setupLogging();
 		swerve.configureInitialPosition(); // sets the operator perspective

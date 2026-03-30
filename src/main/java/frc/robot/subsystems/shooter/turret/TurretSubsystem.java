@@ -24,14 +24,13 @@ public class TurretSubsystem extends BaseSubsystem {
     private CANcoder cancoder;
     private Translation2d robotToTurret;
     private Supplier<Pose2d> swervePoseSupplier;
-    // private double minDegrees, maxDegrees;
-    // private double targetDegrees = 0;
-    // private Translation2d targetTranslation;
     private TurretIOInputsAutoLogged inputs = new TurretIOInputsAutoLogged();
 
     public TurretSubsystem(TurretConfiguration config, Supplier<Pose2d> swervePoseSupplier, boolean enabled) {
         super(config.name(), config, enabled);
         this.swervePoseSupplier = swervePoseSupplier;
+        inputs.minDegrees = config.minDegrees();
+        inputs.maxDegrees = config.maxDegrees();
     }
 
     @Override
@@ -72,9 +71,6 @@ public class TurretSubsystem extends BaseSubsystem {
         motor.getMotor().setPosition(cancoder.getAbsolutePosition().waitForUpdate(0.2).getValueAsDouble());
 
         this.robotToTurret = turretConfig.robotToTurret().toTranslation2d();
-
-        inputs.minDegrees = turretConfig.minDegrees();
-        inputs.maxDegrees = turretConfig.maxDegrees();
     }
 
     public Pose2d getTurretPose() {
