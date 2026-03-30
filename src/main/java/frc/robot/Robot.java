@@ -53,11 +53,7 @@ public class Robot extends LoggedRobot {
 	boolean vslamConnectionStatusChanged = false;
 	private boolean isVslamConnected = false;
 	
-
 	private RobotContainer container;
-	//private Command m_autonomousCommand = null;
-
-	// public static final FieldLayout kFieldLayout = new ReefscapeFieldLayout();
 	
 	public static final Trigger IS_ENABLED = new Trigger(() -> DriverStation.isEnabled());
 	public static final Trigger IS_TELEOP = new Trigger(() -> DriverStation.isTeleop());
@@ -84,12 +80,6 @@ public class Robot extends LoggedRobot {
 //   ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 	@Override
 	public void robotInit() {
-		// DataLogManager.start();
-		// MessageLog.start();
-		//AKLogger.start();
-		// SignalLogger.start();
-		// LiveWindow.disableAllTelemetry();
-
 		SignalLogger.stop();
 		SignalLogger.enableAutoLogging(false);
 
@@ -100,9 +90,6 @@ public class Robot extends LoggedRobot {
 		autoPreload();
 		setupSmartDashboard();
 		swerve.configureInitialPosition();  // sets the operator perspective
-		// SmartDashboard.updateValues();
-		// Logger.start();
-		// Logger.addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables
 		PathPlannerLogging.setLogCurrentPoseCallback((pose) -> {
 			currentPose = pose;
 			currentPoseField.setRobotPose(pose);
@@ -115,10 +102,10 @@ public class Robot extends LoggedRobot {
 			SmartDashboard.putData("PathPlanner target pose", targetPoseField);
 		});
 
-		FollowPathCommand.warmupCommand().schedule();
-
-		// kFieldLayout.logToShuffleboard(isSimulation());
+		CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
+		GameState.logValues();
 	}
+	
 	private void setupSmartDashboard() {
 		SmartDashboard.putData(RobotConstants.kAutoCodeKey, autoChooser);
 		SmartDashboard.putString("Build Info - Branch", "N/A");
@@ -169,6 +156,14 @@ public class Robot extends LoggedRobot {
 			return alliance.get() == DriverStation.Alliance.Red;
 		}
 		return false;
+	}
+
+	public static Alliance getAlliance() {
+		Optional<Alliance> alliance = DriverStation.getAlliance();
+		if (alliance.isPresent()) {
+			return alliance.get();
+		}
+		return null;
 	}
 
 	/**
@@ -321,7 +316,7 @@ public class Robot extends LoggedRobot {
 			System.out.println("SOMETHING WENT WRONG - UNABLE TO RUN AUTONOMOUS! CHECK SOFTWARE!");
 		} else {
 			System.out.println("------------> RUNNING AUTONOMOUS COMMAND: " + m_autonomousCommand + " <----------");
-			m_autonomousCommand.schedule();
+			CommandScheduler.getInstance().schedule(m_autonomousCommand);
 		}
 		System.out.println("autonomousInit: End");
 	}
