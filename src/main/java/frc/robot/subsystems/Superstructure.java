@@ -126,7 +126,7 @@ public class Superstructure extends SubsystemBase {
     }
 
     public Command warmup() {
-        return leftFlywheel.warmup().alongWith(rightFlywheel.warmup());
+        return leftFlywheel.warmup().alongWith(rightFlywheel.warmup(), leftTurret.trackHub(), rightTurret.trackHub(), leftHood.stow(), rightHood.stow());
     }
 
     public Command track(Supplier<Translation2d> target) {
