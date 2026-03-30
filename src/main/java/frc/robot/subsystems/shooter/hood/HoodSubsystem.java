@@ -11,7 +11,7 @@ import frc.robot.subsystems.BaseSubsystem;
 
 public class HoodSubsystem extends BaseSubsystem {
     private MotorIOTalonFXS motor;
-    private HoodIOInputs inputs = new HoodIOInputs();
+    private HoodIOInputsAutoLogged inputs = new HoodIOInputsAutoLogged();
 
     public HoodSubsystem(HoodConfiguration config, boolean enabled) {
         super(config.name(), config, enabled);
@@ -36,7 +36,6 @@ public class HoodSubsystem extends BaseSubsystem {
     public void periodicTelemetry() {
         inputs.motorRotations = motor.getRotations();
         inputs.atTarget = Utils.isWithin(inputs.motorRotations, inputs.targetRotations, kEpsilon);
-
         logger.processInputs(inputs);
     }
 

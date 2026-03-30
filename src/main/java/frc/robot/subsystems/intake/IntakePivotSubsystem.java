@@ -4,12 +4,14 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.frc1731.Utils;
 import frc.lib.frc1731.hardware.motor.ctre.MotorIOTalonFX;
 import frc.robot.Ports;
+import frc.robot.RobotConstants;
 import frc.robot.subsystems.BaseSubsystem;
 
 import static frc.robot.subsystems.intake.IntakeConstants.*;
 
 import java.util.function.DoubleSupplier;
 
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
@@ -20,7 +22,7 @@ import com.ctre.phoenix6.hardware.core.CoreCANcoder;
 public class IntakePivotSubsystem extends BaseSubsystem {
     private MotorIOTalonFX motor;
     private CANcoder cancoder;
-    private double targetPosition = 0;
+    private IntakePivotIOInputsAutoLogged inputs = new IntakePivotIOInputsAutoLogged();
 
     public IntakePivotSubsystem(boolean enabled) {
         super(enabled);
@@ -32,11 +34,10 @@ public class IntakePivotSubsystem extends BaseSubsystem {
         motor.getMotor().clearStickyFaults();
         motor.withPIDGains(kPivotGains);
         motor.withStatorCurrentLimit(kPivotCurrentLimit);
-        // motor.setSoftLimits(kPivotStowRotations, kPivotIntakeRotations);
         motor.setSoftLimits(kPivotIntakeRotations, kPivotStowRotations);
         motor.withFeedbackConfigs(new FeedbackConfigs()
             .withFeedbackRemoteSensorID(Ports.kPivotCANcoderId)
-            .withRemoteCANcoder(new CoreCANcoder(Ports.kPivotCANcoderId, "Left CANivore"))
+            .withRemoteCANcoder(new CoreCANcoder(Ports.kPivotCANcoderId, new CANBus(RobotConstants.kMainCANBus)))
             .withRotorToSensorRatio(kPivotGearRatio)
         );
 
@@ -49,7 +50,7 @@ public class IntakePivotSubsystem extends BaseSubsystem {
         cancoder = new CANcoder(Ports.kPivotCANcoderId);
 
         CANcoderConfiguration coderConfig = new CANcoderConfiguration()
-        .withMagnetSensor(new MagnetSensorConfigs().withMagnetOffset(-0.04833984375));
+            .withMagnetSensor(new MagnetSensorConfigs().withMagnetOffset(-0.04833984375));
         cancoder.getConfigurator().apply(coderConfig);
         
         motor.getMotor().setPosition(cancoder.getAbsolutePosition().waitForUpdate(0.2).getValueAsDouble());
@@ -57,19 +58,19 @@ public class IntakePivotSubsystem extends BaseSubsystem {
 
     public boolean atTargetPosition() {
         if (!isEnabled()) return true;
-        return Utils.isWithin(motor.getRotations(), targetPosition, 0.01);
+        return Utils.isWithin(motor.getRotations(), inputs.targetPosition, kPivotEpsilon);
     }
 
     @Override
     public void periodicTelemetry() {
-        logger.log("Current Rotations", motor.getRotations());
-        logger.log("Target Rotations", targetPosition);
-        logger.log("At Target Position", atTargetPosition());
+        inputs.currentPosition = motor.getRotations();
+        inputs.atTargetPosition = Utils.isWithin(inputs.currentPosition, inputs.targetPosition, kPivotEpsilon);
+        logger.processInputs(inputs);
     }
     
     private Command setPosition(DoubleSupplier position) {
         return run(() -> {
-            targetPosition = position.getAsDouble();
+            inputs.targetPosition = position.getAsDouble();
             motor.setPosition(position.getAsDouble());
         });
     }

@@ -316,22 +316,12 @@ public class Superstructure extends SubsystemBase {
         double[] leftParameters = shotTable.getShotParameters(targetSupplier.get().minus(leftPose).getNorm());
         double[] rightParameters = shotTable.getShotParameters(targetSupplier.get().minus(rightPose).getNorm());
 
-        if (Robot.isSimulation()) {
-            SmartDashboard.putBoolean("SS/Shooters Ready", shootersReady());
-            SmartDashboard.putBoolean("SS/Flywheel At Target", leftFlywheel.atTargetVelocity());
-            SmartDashboard.putBoolean("SS/Hood At Target", leftHood.atTarget());
-            SmartDashboard.putBoolean("SS/Turret At Target", leftTurret.atTarget());
-            SmartDashboard.putNumber("SS/Turret Target", leftTurret.getTarget());
-            SmartDashboard.putNumber("SS/Turret", leftTurret.getDegrees());
+        // if (Robot.isSimulation()) {
+        //     Logger.recordOutput("SmartLogs/TargetPose", new Pose2d(appliedTargetSupplier.get(), new Rotation2d()));
+        // }
 
-            Logger.recordOutput("SmartLogs/TargetPose", new Pose2d(appliedTargetSupplier.get(), new Rotation2d()));
-
-            Logger.recordOutput("SmartLogs/LeftTurretPose", leftTurret.getTurretPose());
-            Logger.recordOutput("SmartLogs/RightTurretPose", rightTurret.getTurretPose());
-        }
-
-        SmartDashboard.putNumber("Left Turret Degrees", leftTurret.getDegrees());
-        SmartDashboard.putNumber("Right Turret Degrees", rightTurret.getDegrees());
+        // SmartDashboard.putNumber("Left Turret Degrees", leftTurret.getDegrees());
+        // SmartDashboard.putNumber("Right Turret Degrees", rightTurret.getDegrees());
 
         targetLeftHood = leftParameters[0];
         targetRightHood = rightParameters[0];

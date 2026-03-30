@@ -53,22 +53,14 @@ public class Robot extends LoggedRobot {
 	private final Field2d targetPoseField = new Field2d();
 	boolean vslamConnectionStatusChanged = false;
 	private boolean isVslamConnected = false;
-	
 
 	private RobotContainer container;
-	//private Command m_autonomousCommand = null;
-
-	// public static final FieldLayout kFieldLayout = new ReefscapeFieldLayout();
 	
 	public static final Trigger IS_ENABLED = new Trigger(() -> DriverStation.isEnabled());
 	public static final Trigger IS_TELEOP = new Trigger(() -> DriverStation.isTeleop());
 	public static final Trigger IS_AUTONOMOUS = new Trigger(() -> DriverStation.isAutonomous());
 	public static final Trigger IS_DISABLED = new Trigger(() -> DriverStation.isDisabled());
 	public static final Trigger IS_TEST = new Trigger(() -> DriverStation.isTest());
-
-	public static final boolean SHOULD_LOG = true;
-
-	// public static final RobotClock CLOCK = new RobotClock();
 
 	public Robot() {}
 
@@ -114,7 +106,7 @@ public class Robot extends LoggedRobot {
 			SmartDashboard.putData("PathPlanner target pose", targetPoseField);
 		});
 
-		FollowPathCommand.warmupCommand().schedule();
+		CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
 	}
 	
 	private void setupLogging() {
@@ -314,7 +306,7 @@ public class Robot extends LoggedRobot {
 			System.out.println("SOMETHING WENT WRONG - UNABLE TO RUN AUTONOMOUS! CHECK SOFTWARE!");
 		} else {
 			System.out.println("------------> RUNNING AUTONOMOUS COMMAND: " + m_autonomousCommand + " <----------");
-			m_autonomousCommand.schedule();
+			CommandScheduler.getInstance().schedule(m_autonomousCommand);
 		}
 		System.out.println("autonomousInit: End");
 	}
