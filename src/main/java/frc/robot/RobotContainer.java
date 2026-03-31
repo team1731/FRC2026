@@ -15,6 +15,7 @@ import frc.robot.subsystems.shooter.flywheel.FlywheelSubsystem;
 import frc.robot.subsystems.shooter.hood.HoodSubsystem;
 import frc.robot.subsystems.intake.IntakePivotSubsystem;
 import frc.robot.subsystems.intake.IntakeRollerSubsystem;
+import frc.robot.subsystems.leds.LEDSubsystem;
 import frc.robot.subsystems.shooter.turret.TurretSubsystem;
 public class RobotContainer {
     public enum TestShotCondition {
@@ -34,6 +35,8 @@ public class RobotContainer {
     private TurretSubsystem leftTurret, rightTurret;
     private FlywheelSubsystem leftFlywheel, rightFlywheel;
     private HoodSubsystem leftHood, rightHood;
+
+    private LEDSubsystem led;
 
     private Superstructure superstructure;
 
@@ -90,6 +93,8 @@ public class RobotContainer {
         indexer = new IndexerSubsystem(true);
         pivot = new IntakePivotSubsystem(true);
         intake = new IntakeRollerSubsystem(true);
+
+        led = new LEDSubsystem(true);
 
         superstructure = new Superstructure(swerve, leftFlywheel, rightFlywheel, 
                                                 leftHood, rightHood, 
@@ -158,6 +163,8 @@ public class RobotContainer {
 
         leftFlywheel.setDefaultCommand(leftFlywheel.stop());
         rightFlywheel.setDefaultCommand(rightFlywheel.stop());
+
+        led.setDefaultCommand(led.flashAllianceShift());
     }
 
     public void periodic() {

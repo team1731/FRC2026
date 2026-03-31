@@ -153,6 +153,14 @@ public class Robot extends LoggedRobot {
 		return false;
 	}
 
+	public static Alliance getAlliance() {
+		Optional<Alliance> alliance = DriverStation.getAlliance();
+		if (alliance.isPresent()) {
+			return alliance.get();
+		}
+		return null;
+	}
+
 	/**
    * This function is called every robot packet, no matter the mode. Use this for items like
    * diagnostics that you want ran during disabled, autonomous, teleoperated and test.
