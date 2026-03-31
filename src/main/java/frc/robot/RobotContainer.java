@@ -5,6 +5,8 @@ import static frc.robot.subsystems.shooter.hood.HoodConstants.*;
 import static frc.robot.subsystems.shooter.turret.TurretConstants.*;
 
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.events.EventTrigger;
+
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.*;
 import frc.lib.frc6328.LoggedTunableNumber;
@@ -100,14 +102,21 @@ public class RobotContainer {
     private void configureNamedCommands() {
         // Named commands useful for PathPlanner events
         // ex. NamedCommands.registerCommand("Example", new ExampleCommand());
-        NamedCommands.registerCommand("Shoot", superstructure.autoShoot());
-        NamedCommands.registerCommand("StopShoot", superstructure.stopShooters());
-        NamedCommands.registerCommand("Intake", superstructure.runIntake(() -> true));
-        NamedCommands.registerCommand("Pass", superstructure.pass());
-        NamedCommands.registerCommand("StowHood", Commands.deadline(Commands.waitSeconds(0.1), superstructure.stowHoodsOnce()));
-        NamedCommands.registerCommand("Stow Pivot", superstructure.stowIntake());
-        NamedCommands.registerCommand("Warmup", superstructure.warmup());
-        NamedCommands.registerCommand("Feedthrough", superstructure.feedthrough());
+        NamedCommands.registerCommand("ShootCommand", superstructure.autoShoot());
+        NamedCommands.registerCommand("StopShootCommand", superstructure.stopShooters());
+        NamedCommands.registerCommand("IntakeCommand", superstructure.runIntake(() -> true));
+        NamedCommands.registerCommand("PassCommand", superstructure.pass());
+        NamedCommands.registerCommand("WarmupCommand", superstructure.warmup());
+        NamedCommands.registerCommand("FeedthroughCommand", superstructure.feedthrough());
+
+        new EventTrigger("Shoot").whileTrue(superstructure.autoShoot());
+        new EventTrigger("StopShoot").onTrue(superstructure.stopShooters());
+        new EventTrigger("Intake").whileTrue(superstructure.runIntake(() -> true));
+        new EventTrigger("Pass").whileTrue(superstructure.pass());
+        new EventTrigger("StowHood").onTrue(Commands.deadline(Commands.waitSeconds(0.1), superstructure.stowHoodsOnce()));
+        new EventTrigger("Stow Pivot").onTrue(superstructure.stowIntake());
+        new EventTrigger("Warmup").whileTrue(superstructure.warmup());
+        new EventTrigger("Feedthrough").whileTrue(superstructure.feedthrough());
     }
 
     /**

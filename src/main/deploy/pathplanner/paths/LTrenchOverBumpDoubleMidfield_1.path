@@ -135,7 +135,7 @@
     {
       "name": "Shoot",
       "waypointRelativePos": 2.999999999999993,
-      "endWaypointRelativePos": null,
+      "endWaypointRelativePos": 4.0,
       "command": null
     },
     {
