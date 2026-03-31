@@ -57,7 +57,7 @@ public class FrestaLogger {
 		Logger.start();
 		if (Robot.isReal()) {
 			Logger.addDataReceiver(new WPILOGWriter("/home/lvuser/logs"));
-		} else if (RobotConstants.kLogToAdvantageScope){
+		} else if (RobotConstants.kLogToWPILog){
 			Logger.addDataReceiver(new NT4Publisher());
 		}
     }

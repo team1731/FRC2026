@@ -21,7 +21,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Filesystem;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -48,9 +47,7 @@ public class Robot extends LoggedRobot {
 	private double autoStartTime;
 	private static SwerveSubsystem swerve;
 	private Pose2d currentPose;
-	private final Field2d currentPoseField = new Field2d();
 	private Pose2d targetPose;
-	private final Field2d targetPoseField = new Field2d();
 	boolean vslamConnectionStatusChanged = false;
 	private boolean isVslamConnected = false;
 
@@ -91,17 +88,8 @@ public class Robot extends LoggedRobot {
 		setupLogging();
 		swerve.configureInitialPosition(); // sets the operator perspective
 		
-		PathPlannerLogging.setLogCurrentPoseCallback((pose) -> {
-			currentPose = pose;
-			currentPoseField.setRobotPose(pose);
-			SmartDashboard.putData("PathPlanner current pose", currentPoseField);
-		});
-
-		PathPlannerLogging.setLogTargetPoseCallback((pose) -> {
-			targetPose = pose;
-			targetPoseField.setRobotPose(pose);
-			SmartDashboard.putData("PathPlanner target pose", targetPoseField);
-		});
+		PathPlannerLogging.setLogCurrentPoseCallback((pose) -> {currentPose = pose;});
+		PathPlannerLogging.setLogTargetPoseCallback((pose) -> {targetPose = pose;});
 
 		CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
 	}
@@ -126,12 +114,12 @@ public class Robot extends LoggedRobot {
 
 		// Log metadata (for AdvantageScope)
 		Logger.recordMetadata("GitBranch", branch);
-		Logger.recordMetadata("Git Commit", commit);
+		Logger.recordMetadata("GitCommit", commit);
 		Logger.recordMetadata("BuildDate", date);
 
 		if (Robot.isSimulation()) {
 			Logger.addDataReceiver(new NT4Publisher());
-		} else {
+		} else if (RobotConstants.kLogToWPILog) {
 			Logger.addDataReceiver(new WPILOGWriter("/home/lvuser/logs"));
 		}
 
@@ -181,7 +169,7 @@ public class Robot extends LoggedRobot {
 		// block in order for anything in the Command-based framework to work.
 		CommandScheduler.getInstance().run();
 		container.periodic();
-		// CLOCK.update();
+		GameState.logValues();
 	}
 
 	

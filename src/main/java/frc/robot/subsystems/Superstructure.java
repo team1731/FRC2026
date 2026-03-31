@@ -135,7 +135,7 @@ public class Superstructure extends SubsystemBase {
     }
 
     public Command index() {
-        return indexer.setVelocity(100, 100);
+        return indexer.index();
     }
 
     public Command setFlywheels(DoubleSupplier left, DoubleSupplier right) {

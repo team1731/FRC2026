@@ -103,6 +103,14 @@ public class GameState {
         return DriverStation.getMatchTime();
     }
 
+    public static boolean activeCycleEnding() {
+        return getMatchTime() - getCurrentPhase().countDownUntil < 5;
+    }
+
+    public static boolean myHubEnding() {
+        return activeCycleEnding() && isMyHubActive();
+    }
+
     public static void logValues() {
         getAutoWinner();
         Logger.recordOutput("GameState/IsDSAttached", DriverStation.isDSAttached());
@@ -115,5 +123,7 @@ public class GameState {
         Logger.recordOutput("GameState/GameData", DriverStation.getGameSpecificMessage());
         Logger.recordOutput("GameState/CurrentPhase", getCurrentPhase());
         Logger.recordOutput("GameState/IsMyHubActive", isMyHubActive());
+        Logger.recordOutput("GameState/ActiveCycleEnding", activeCycleEnding());
+        Logger.recordOutput("GameState/MyHubEnding", myHubEnding());
     }
 }

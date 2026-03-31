@@ -121,7 +121,7 @@ public class RobotContainer {
         // Reset robot pose and heading
         dResetSwerve.onTrue(superstructure.resetYaw());
 
-        dIntake.and(() -> !dShoot.getAsBoolean() || !dPass.getAsBoolean()).whileTrue(superstructure.runIntake(true));
+        dIntake.and(() -> !dShoot.getAsBoolean() && !dPass.getAsBoolean()).whileTrue(superstructure.runIntake(true));
         dShoot.whileTrue(superstructure.shoot());
         dPass.whileTrue(superstructure.pass());
         dFeedthrough.whileTrue(superstructure.feedthrough());

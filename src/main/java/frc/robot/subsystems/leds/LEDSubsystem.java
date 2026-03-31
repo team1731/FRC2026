@@ -31,7 +31,7 @@ public class LEDSubsystem extends BaseSubsystem {
             if (activeShift) {
                 candle.setRainbow();
             } else {
-                candle.setTwinkleOff(null);
+                candle.setFire();
             }
         });
     }
