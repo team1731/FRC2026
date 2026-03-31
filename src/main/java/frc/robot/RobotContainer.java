@@ -55,7 +55,7 @@ public class RobotContainer {
     private final Trigger dTestSetShot = driver.back();
 
     private final Trigger dRetractIntake = driver.leftBumper();
-    private final Trigger dForceShoot = driver.rightBumper();
+    private final Trigger dStationaryShot = driver.rightBumper();
 
     private final Trigger dLeftTurretLeft = driver.povLeft();
     private final Trigger dLeftTurretRight = driver.povRight();
@@ -102,7 +102,7 @@ public class RobotContainer {
         // ex. NamedCommands.registerCommand("Example", new ExampleCommand());
         NamedCommands.registerCommand("Shoot", superstructure.autoShoot());
         NamedCommands.registerCommand("StopShoot", superstructure.stopShooters());
-        NamedCommands.registerCommand("Intake", superstructure.runIntake(() -> true));
+        NamedCommands.registerCommand("Intake", superstructure.runIntake(true));
         NamedCommands.registerCommand("Pass", superstructure.pass());
         NamedCommands.registerCommand("StowHood", Commands.deadline(Commands.waitSeconds(0.1), superstructure.stowHoodsOnce()));
         NamedCommands.registerCommand("Stow Pivot", superstructure.stowIntake());
@@ -117,23 +117,24 @@ public class RobotContainer {
         // Reset robot pose and heading
         dResetSwerve.onTrue(superstructure.resetGyro());
 
-        dIntake.and(() -> !dShoot.getAsBoolean() || !dPass.getAsBoolean()).whileTrue(superstructure.intake());
+        dIntake.and(() -> !dShoot.getAsBoolean() || !dPass.getAsBoolean()).whileTrue(superstructure.runIntake(true));
         dShoot.whileTrue(superstructure.shoot());
         dPass.whileTrue(superstructure.pass());
         dFeedthrough.whileTrue(superstructure.feedthrough());
         dPassthrough.whileTrue(superstructure.passFeedthrough());
 
-        dHubShot.whileTrue(superstructure.shoot(1.8, true));
-        dTowerShot.whileTrue(superstructure.shoot(2.5, true));
-        dTrenchShot.whileTrue(superstructure.shoot(4, true));
+        dStationaryShot.whileTrue(superstructure.stationaryShot());
+
+        dHubShot.whileTrue(superstructure.manualShot(1.8, true));
+        dTowerShot.whileTrue(superstructure.manualShot(2.5, true));
+        dTrenchShot.whileTrue(superstructure.manualShot(4, true));
         
         (dTestSetShot.and(() -> testCondition.equals(TestShotCondition.kDistance)))
-            .whileTrue(superstructure.shoot(tuneableDistanceShot, true));
+            .whileTrue(superstructure.tuneShot(tuneableDistanceShot, true));
         (dTestSetShot.and(() -> testCondition.equals(TestShotCondition.kParameters)))
-            .whileTrue(superstructure.shoot(tuneableFlywheelRPS.get(), tuneableHoodRotations.get(), true));
+            .whileTrue(superstructure.tuneShot(tuneableFlywheelRPS.get(), tuneableHoodRotations.get(), true));
 
         dRetractIntake.onTrue(pivot.retract());
-        dForceShoot.whileTrue(superstructure.forceShoot(0.25));
 
         dLeftTurretLeft.whileTrue(leftTurret.setDegrees(-200));
         dLeftTurretRight.whileTrue(leftTurret.setDegrees(80));
