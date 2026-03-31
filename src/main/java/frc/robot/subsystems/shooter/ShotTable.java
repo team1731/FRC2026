@@ -10,7 +10,7 @@ public class ShotTable {
     private Regression flywheelModel;
     private Regression tofModel;
 
-    private static final List<ShotEntry> hubEntries = List.of(
+    private static final List<ShotEntry> kHubEntries = List.of(
         new ShotEntry(0, 0, 28, 0.5),
         new ShotEntry(1, 0, 28, 0.5),
         new ShotEntry(2, 0.5, 35, 0.75),
@@ -22,7 +22,7 @@ public class ShotTable {
         new ShotEntry(8, 4.5, 60, 2.0)
     );
 
-    private static final List<ShotEntry> passEntries = List.of(
+    private static final List<ShotEntry> kPassEntries = List.of(
         new ShotEntry(0, 0, 15, 0.5),
         new ShotEntry(1, 0, 15, 0.5),
         new ShotEntry(2, 0.5, 15, 0.75),
@@ -61,12 +61,12 @@ public class ShotTable {
         tofModel = new PiecewiseRegression(tofs.toArray(new Double[0]), 1d);
     }
 
-    public static ShotTable score() {
-        return new ShotTable(hubEntries);
+    public static ShotTable getScoringTable() {
+        return new ShotTable(kHubEntries);
     }
 
-    public static ShotTable pass() {
-        return new ShotTable(passEntries);
+    public static ShotTable getPassingTable() {
+        return new ShotTable(kPassEntries);
     }
 
     public double[] getShotParameters(double distance) {

@@ -157,7 +157,7 @@ public class TurretSubsystem extends BaseSubsystem {
             );
 
             inputs.targetDegrees = output;
-            inputs.target = target.get();
+            inputs.target = new Pose2d(target.get(), new Rotation2d());
 
             motor.setPosition(output / 360.0);
         });

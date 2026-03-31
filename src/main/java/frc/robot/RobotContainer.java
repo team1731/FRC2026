@@ -110,7 +110,6 @@ public class RobotContainer {
         NamedCommands.registerCommand("Intake", superstructure.runIntake(true));
         NamedCommands.registerCommand("Pass", superstructure.pass());
         NamedCommands.registerCommand("StowHood", Commands.deadline(Commands.waitSeconds(0.1), superstructure.stowHoodsOnce()));
-        NamedCommands.registerCommand("Stow Pivot", superstructure.stowIntake());
         NamedCommands.registerCommand("Warmup", superstructure.warmup());
         NamedCommands.registerCommand("Feedthrough", superstructure.feedthrough());
     }
@@ -120,7 +119,7 @@ public class RobotContainer {
      */
     private void configureButtonBindings() {
         // Reset robot pose and heading
-        dResetSwerve.onTrue(superstructure.resetGyro());
+        dResetSwerve.onTrue(superstructure.resetYaw());
 
         dIntake.and(() -> !dShoot.getAsBoolean() || !dPass.getAsBoolean()).whileTrue(superstructure.runIntake(true));
         dShoot.whileTrue(superstructure.shoot());
