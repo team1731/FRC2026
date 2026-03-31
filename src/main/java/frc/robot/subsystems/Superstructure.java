@@ -12,7 +12,6 @@ import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.lib.frc1731.field.FieldPositions;
 import frc.robot.Robot;
@@ -93,16 +92,9 @@ public class Superstructure extends SubsystemBase {
     // Lower alpha = smoother but laggier; 0.3 is a good default for FRC.
     // -------------------------------------------------------------------------
 
-    private static final double kDt = 0.02;  // 50 Hz robot loop period (s)
-    private static final double kAccelAlpha = 0.3;   // EMA coefficient for accel filter
     private static final double kMaxPredictTof = 1.2;   // clamp TOF to avoid wild extrapolation (s)
-
     private static final double kLatency = 0.02; // 20ms
-
-    private Translation2d prevVelocity = new Translation2d();
-    private Translation2d chassisAccel = new Translation2d();
-    private double        prevOmega    = 0;
-    private double        angularAccel = 0;
+    private static final double kCompGain = 0.7; // 0 = no compensation, 1 = full compensation
 
     // -------------------------------------------------------------------------
     // Constructor
@@ -177,7 +169,14 @@ public class Superstructure extends SubsystemBase {
     }
 
     public Command warmup() {
-        return leftFlywheel.warmup().alongWith(rightFlywheel.warmup());
+        return new ParallelCommandGroup(
+            leftFlywheel.warmup(),
+            rightFlywheel.warmup(),
+            leftHood.stow(),
+            rightHood.stow(),
+            leftTurret.trackHub(),
+            rightTurret.trackHub()
+        );
     }
 
     public Command track(Supplier<Translation2d> target) {
@@ -296,7 +295,7 @@ public class Superstructure extends SubsystemBase {
     }
 
     public Command pass() {
-        return this.forceShoot(kPassSupplier, 0.25);
+        return this.shoot(kPassSupplier);
     }
 
     public Command forceShoot(Supplier<Translation2d> target, double indexDelay) {
@@ -372,17 +371,14 @@ public class Superstructure extends SubsystemBase {
         //    (~200 ms) — well before the first shot of a match.
         // ---------------------------------------------------------------------
 
-        Translation2d rawAccel = currentVel.minus(prevVelocity).div(kDt);
-        chassisAccel = new Translation2d(
-            kAccelAlpha * rawAccel.getX() + (1.0 - kAccelAlpha) * chassisAccel.getX(),
-            kAccelAlpha * rawAccel.getY() + (1.0 - kAccelAlpha) * chassisAccel.getY()
-        );
+        // Translation2d rawAccel = currentVel.minus(prevVelocity).div(kDt);
+        // chassisAccel = new Translation2d(
+        //     kAccelAlpha * rawAccel.getX() + (1.0 - kAccelAlpha) * chassisAccel.getX(),
+        //     kAccelAlpha * rawAccel.getY() + (1.0 - kAccelAlpha) * chassisAccel.getY()
+        // );
 
-        double rawAlphaDot = (currentOmega - prevOmega) / kDt;
-        angularAccel = kAccelAlpha * rawAlphaDot + (1.0 - kAccelAlpha) * angularAccel;
-
-        prevVelocity = currentVel;
-        prevOmega = currentOmega;
+        // double rawAlphaDot = (currentOmega - prevOmega) / kDt;
+        // angularAccel = kAccelAlpha * rawAlphaDot + (1.0 - kAccelAlpha) * angularAccel;
 
         // ---------------------------------------------------------------------
         // 3. Current turret pivot positions in field frame
@@ -400,8 +396,8 @@ public class Superstructure extends SubsystemBase {
         if (adjustTargetForMovingShots) {
             Translation2d[] aimPoints = computePerTurretAimPoints(
                 robotXY, robotRot,
-                currentVel, chassisAccel,
-                currentOmega, angularAccel,
+                currentVel,
+                currentOmega,
                 leftTurretPos, rightTurretPos,
                 rawTarget
             );
@@ -432,10 +428,6 @@ public class Superstructure extends SubsystemBase {
         // ---------------------------------------------------------------------
 
         if (Robot.isSimulation()) {
-            SmartDashboard.putNumber("SS/Accel X m/s2", chassisAccel.getX());
-            SmartDashboard.putNumber("SS/Accel Y m/s2", chassisAccel.getY());
-            SmartDashboard.putNumber("SS/Angular Accel rad/s2", angularAccel);
-
             Logger.recordOutput("SmartLogs/LeftCompensatedTarget",
                 new Pose2d(compensatedLeftTarget, new Rotation2d()));
             Logger.recordOutput("SmartLogs/RightCompensatedTarget",
@@ -454,19 +446,27 @@ public class Superstructure extends SubsystemBase {
     // =========================================================================
 
     private Translation2d[] computePerTurretAimPoints(
-            Translation2d robotXY, Rotation2d robotRot,
-            Translation2d vel, Translation2d accel,
-            double omega, double alpha,
-            Translation2d leftTurretPos, Translation2d rightTurretPos,
+            Translation2d robotXY,
+            Rotation2d robotRot,
+            Translation2d vel,
+            double omega,
+            Translation2d leftTurretPos,
+            Translation2d rightTurretPos,
             Translation2d target) {
 
         Translation2d leftAim = computeAimPoint(
-            robotXY, robotRot, vel, accel, omega, alpha,
-            kRobotToLeftTurret.toTranslation2d(), leftTurretPos, target);
+            robotXY, robotRot, vel, omega,
+            kRobotToLeftTurret.toTranslation2d(),
+            leftTurretPos,
+            target
+        );
 
         Translation2d rightAim = computeAimPoint(
-            robotXY, robotRot, vel, accel, omega, alpha,
-            kRobotToRightTurret.toTranslation2d(), rightTurretPos, target);
+            robotXY, robotRot, vel, omega,
+            kRobotToRightTurret.toTranslation2d(),
+            rightTurretPos,
+            target
+        );
 
         return new Translation2d[]{ leftAim, rightAim };
     }
@@ -510,63 +510,50 @@ public class Superstructure extends SubsystemBase {
     // =========================================================================
 
     private Translation2d computeAimPoint(
-            Translation2d robotXY, Rotation2d robotRot,
-            Translation2d vel, Translation2d accel,
-            double omega, double alpha,
+            Translation2d robotXY,
+            Rotation2d robotRot,
+            Translation2d vel,
+            double omega,
             Translation2d turretOffsetRobotFrame,
             Translation2d currentTurretPos,
             Translation2d target) {
 
-        // Round 1 — first-guess TOF from current geometry
-        double dist0 = target.minus(currentTurretPos).getNorm();
-        double tof1  = Math.min(shotTableTof(dist0) + kLatency, kMaxPredictTof);
+        // ---------------------------------------------------------------------
+        // 1. Get distance + TOF (single pass, no iteration)
+        // ---------------------------------------------------------------------
+        double dist = target.minus(currentTurretPos).getNorm();
+        double tof = Math.min(shotTableTof(dist) + kLatency, kMaxPredictTof);
 
-        Translation2d predictedRobot1  = predictPosition(robotXY, vel, accel, tof1);
-        Rotation2d    predictedHead1   = predictHeading(robotRot, omega, alpha, tof1);
-        Translation2d predictedTurret1 = predictedRobot1.plus(
-            turretOffsetRobotFrame.rotateBy(predictedHead1));
+        // ---------------------------------------------------------------------
+        // 2. Predict robot future pose (NO ACCEL)
+        // ---------------------------------------------------------------------
+        Translation2d predictedRobot =
+            robotXY.plus(vel.times(tof));
 
-        // Round 2 — refine TOF from the predicted turret position
-        double dist1 = target.minus(predictedTurret1).getNorm();
-        double tof2  = Math.min(shotTableTof(dist1) + kLatency, kMaxPredictTof);
+        Rotation2d predictedHeading =
+            robotRot.plus(new Rotation2d(omega * tof));
 
-        Translation2d predictedRobot2  = predictPosition(robotXY, vel, accel, tof2);
-        Rotation2d    predictedHead2   = predictHeading(robotRot, omega, alpha, tof2);
-        Translation2d predictedTurret2 = predictedRobot2.plus(
-            turretOffsetRobotFrame.rotateBy(predictedHead2));
+        // ---------------------------------------------------------------------
+        // 3. Predict turret future position
+        // ---------------------------------------------------------------------
+        Translation2d predictedTurret =
+            predictedRobot.plus(turretOffsetRobotFrame.rotateBy(predictedHeading));
 
-        // Net displacement of the turret pivot over the flight time
-        Translation2d turretDisplacement = predictedTurret2.minus(currentTurretPos);
+        // ---------------------------------------------------------------------
+        // 4. Compute displacement and apply damping
+        // ---------------------------------------------------------------------
+        Translation2d turretDisplacement =
+            predictedTurret.minus(currentTurretPos).times(kCompGain);
 
-        // Aim point: the turret locks onto (target - displacement) so that
-        // the projectile, which travels with the turret, lands on target.
+        // ---------------------------------------------------------------------
+        // 5. Return compensated aim point
+        // ---------------------------------------------------------------------
         return target.minus(turretDisplacement);
     }
 
     // =========================================================================
     // Kinematic helpers
     // =========================================================================
-
-    /**
-     * Predict field-frame position at time t using constant-acceleration
-     * kinematics: p(t) = p0 + v*t + 0.5*a*t^2
-     */
-    private static Translation2d predictPosition(
-            Translation2d p0, Translation2d vel, Translation2d accel, double t) {
-        return new Translation2d(
-            p0.getX() + vel.getX() * t + 0.5 * accel.getX() * t * t,
-            p0.getY() + vel.getY() * t + 0.5 * accel.getY() * t * t
-        );
-    }
-
-    /**
-     * Predict robot heading at time t using constant-angular-acceleration
-     * kinematics: theta(t) = theta0 + omega*t + 0.5*alpha*t^2
-     */
-    private static Rotation2d predictHeading(
-            Rotation2d theta0, double omega, double alpha, double t) {
-        return theta0.plus(new Rotation2d(omega * t + 0.5 * alpha * t * t));
-    }
 
     /**
      * Convenience wrapper: extract time-of-flight from the shot table.

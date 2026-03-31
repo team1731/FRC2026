@@ -8,4 +8,6 @@ public class IndexerConstants {
         .setV(0.12)
         .setS(0.15)
         ;
+
+    public static final double kCurrentLimit = 60.0;
 }

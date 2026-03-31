@@ -25,6 +25,9 @@ public class IndexerSubsystem extends BaseSubsystem {
 
         bottomMotor.withPIDGains(kPIDGains);
         topMotor.withPIDGains(kPIDGains);
+
+        bottomMotor.withStatorCurrentLimit(kCurrentLimit);
+        topMotor.withStatorCurrentLimit(kCurrentLimit);
     }
 
     @Override

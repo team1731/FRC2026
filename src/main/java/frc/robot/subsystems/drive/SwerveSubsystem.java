@@ -181,55 +181,34 @@ public class SwerveSubsystem extends BaseSubsystem {
      * otherwise the Oculus will read current position
      */
     private void resetAutoPose(Pose2d pose) {
-        if (Robot.isSimulation() || !kUseVSLAM) {
-          //  this.resetPose(pose);  we probably do not want to do this if VSLAM and limelight are working?
+        if (Robot.isSimulation()) {
+           this.resetPose(pose);
         }
         // this.resetPose(pose);
     }
 
     @Override
-    public void periodic () {
-        super.periodic();
-
+    public void periodicTelemetry() {
         drivetrain.periodic();
         updateVisionOdometry();
         questNav.commandPeriodic();
+
         SmartDashboard.putBoolean("isSeeded", isQuestSeeded);
         SmartDashboard.putBoolean("isTracking", questNav.isTracking());
         SmartDashboard.putBoolean("isConnected", questNav.isConnected());
         SmartDashboard.putBoolean("hasgoodtracking",hasGoodOdometry());
-    //    if (!isQuestSeeded || (DriverStation.isDisabled() && questPoseResetTimer.hasElapsed(5))) {
-    //        if (hasGoodOdometry() && questNav.isTracking() && questNav.isConnected()) {
-    //            this.resetQuestPose(new Pose3d(getCurrentPose()));
-    //            questPoseResetTimer.restart();
-        isQuestSeeded = true;
-    //        }
-    //    }
 
-        if (!questNav.isTracking() ) {
-            isQuestSeeded = false;
-        }
-        if (questNav.isTracking() && isQuestSeeded && questNav.isConnected()) {
-            addQuestVisionMeasurement();
-        }
-    }
+        //    if (!isQuestSeeded || (DriverStation.isDisabled() && questPoseResetTimer.hasElapsed(5))) {
+        //        if (hasGoodOdometry() && questNav.isTracking() && questNav.isConnected()) {
+        //            this.resetQuestPose(new Pose3d(getCurrentPose()));
+        //            questPoseResetTimer.restart();
+        //            isQuestSeeded = true;
+        //        }
+        //    }
 
-    @Override
-    public void periodicTelemetry() {
-        drivetrain.periodic();
-        questNav.commandPeriodic();
-
-        updateVisionOdometry();
-
-        SmartDashboard.putBoolean("isSeeded", isQuestSeeded);
-        SmartDashboard.putBoolean("isTracking", questNav.isTracking());
-        SmartDashboard.putBoolean("isConnected", questNav.isConnected());
-        SmartDashboard.putBoolean("hasgoodtracking", hasGoodOdometry());
-
+        isQuestSeeded = true; // TODO - Fix this once limelight odometry works
         if (!questNav.isTracking()) {
             isQuestSeeded = false;
-        } else {
-            isQuestSeeded = true;
         }
 
         if (questNav.isTracking() && isQuestSeeded && questNav.isConnected()) {
@@ -241,6 +220,8 @@ public class SwerveSubsystem extends BaseSubsystem {
         return run(() -> {
             Translation2d RotationCenter =  new Translation2d();
 
+            double scalar = kMaxSpeed * (m_xboxController.rightTrigger().getAsBoolean() ? 0.5 : 1.0);
+
             if ((Math.abs(m_xboxController.getLeftY()) < kDeadband) && 
                 (Math.abs(m_xboxController.getLeftX()) < kDeadband) &&
                 (Math.abs(m_xboxController.getRightX()) < kDeadband)){
@@ -249,8 +230,8 @@ public class SwerveSubsystem extends BaseSubsystem {
                 if (isFieldCentric.getAsBoolean()) {
                     drivetrain.setControl(
                         kFieldCentricControl
-                            .withVelocityX(-(Math.abs(m_xboxController.getLeftY()) * m_xboxController.getLeftY()) * kMaxSpeed)
-                            .withVelocityY(-(Math.abs(m_xboxController.getLeftX()) * m_xboxController.getLeftX()) * kMaxSpeed)
+                            .withVelocityX(-(Math.abs(m_xboxController.getLeftY()) * m_xboxController.getLeftY()) * scalar)
+                            .withVelocityY(-(Math.abs(m_xboxController.getLeftX()) * m_xboxController.getLeftX()) * scalar)
                             .withRotationalRate(-m_xboxController.getRightX() * kMaxAngularRate)
                             .withCenterOfRotation(RotationCenter)
                     );
@@ -258,8 +239,8 @@ public class SwerveSubsystem extends BaseSubsystem {
                  else {
                      drivetrain.setControl(
                          kRobotCentricControl
-                             .withVelocityX(-(Math.abs(m_xboxController.getLeftY()) * m_xboxController.getLeftY()) * kMaxSpeed)
-                             .withVelocityY(-(Math.abs(m_xboxController.getLeftX()) * m_xboxController.getLeftX()) * kMaxSpeed)
+                             .withVelocityX(-(Math.abs(m_xboxController.getLeftY()) * m_xboxController.getLeftY()) * scalar)
+                             .withVelocityY(-(Math.abs(m_xboxController.getLeftX()) * m_xboxController.getLeftX()) * scalar)
                              .withRotationalRate(-m_xboxController.getRightX() * kMaxAngularRate)
                              .withCenterOfRotation(RotationCenter)
                      );
