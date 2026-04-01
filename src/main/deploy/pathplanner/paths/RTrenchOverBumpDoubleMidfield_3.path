@@ -1,0 +1,97 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 3.793223965763195,
+        "y": 0.6543636363636369
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 4.91888730385164,
+        "y": 0.7809272467902997
+      },
+      "isLocked": false,
+      "linkedName": "RMovingShotFinish"
+    },
+    {
+      "anchor": {
+        "x": 7.739514978601996,
+        "y": 2.514707560627676
+      },
+      "prevControl": {
+        "x": 8.178731208517812,
+        "y": 0.07037375935703771
+      },
+      "nextControl": {
+        "x": 7.441925820256776,
+        "y": 4.170855920114123
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 6.2774465049928665,
+        "y": 2.281811697574893
+      },
+      "prevControl": {
+        "x": 6.044550641940085,
+        "y": 4.442567760342368
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": null
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.4046354418155558,
+      "rotationDegrees": 0.5393603189522228
+    },
+    {
+      "waypointRelativePos": 0.8527281506518487,
+      "rotationDegrees": 88.48440603795878
+    },
+    {
+      "waypointRelativePos": 1.3664896185417734,
+      "rotationDegrees": 154.19008239557988
+    }
+  ],
+  "constraintZones": [
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 0.8389021479713611,
+      "maxWaypointRelativePos": 2.0,
+      "constraints": {
+        "maxVelocity": 2.0,
+        "maxAcceleration": 3.0,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 720.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    }
+  ],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 4.0,
+    "maxAcceleration": 4.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -89.05304855322653
+  },
+  "reversed": false,
+  "folder": "RTrenchOverBumpDoubleMidfield",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 0.0
+  },
+  "useDefaultConstraints": true
+}
