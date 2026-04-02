@@ -18,9 +18,11 @@ import com.pathplanner.lib.util.PathPlannerLogging;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -36,7 +38,7 @@ import frc.robot.subsystems.drive.SwerveSubsystem;
  * the package after creating this project, you must also update the build.gradle file in the
  * project.
  */
-public class Robot extends LoggedRobot {
+public class Robot extends TimedRobot {
 	private PathPlannerAuto m_autonomousCommand;
 	private SendableChooser<String> autoChooser;
 	private String autoCode;
@@ -74,8 +76,9 @@ public class Robot extends LoggedRobot {
 //   ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 	@Override
 	public void robotInit() {
-		SignalLogger.stop();
-		SignalLogger.enableAutoLogging(false);
+		SignalLogger.start();
+		SignalLogger.enableAutoLogging(true);
+		DataLogManager.start();
 
 		// Instantiate our robot container. This will perform all of our button bindings,
 		swerve = new SwerveSubsystem(true); 
@@ -113,18 +116,18 @@ public class Robot extends LoggedRobot {
 		}
 
 		// Log metadata (for AdvantageScope)
-		Logger.recordMetadata("GitBranch", branch);
-		Logger.recordMetadata("GitCommit", commit);
-		Logger.recordMetadata("BuildDate", date);
+		//Logger.recordMetadata("GitBranch", branch);
+		//Logger.recordMetadata("GitCommit", commit);
+		//Logger.recordMetadata("BuildDate", date);
 
 		if (Robot.isSimulation()) {
-			Logger.addDataReceiver(new NT4Publisher());
+	//		Logger.addDataReceiver(new NT4Publisher());
 		} else if (RobotConstants.kLogToWPILog) {
-			Logger.addDataReceiver(new WPILOGWriter("/home/lvuser/logs"));
+	//		Logger.addDataReceiver(new WPILOGWriter("/home/lvuser/logs"));
 		}
 
-		Logger.start();
-		SmartDashboard.updateValues();
+	//	Logger.start();
+	//	SmartDashboard.updateValues();
 	}
 
 

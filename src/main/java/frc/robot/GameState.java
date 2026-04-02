@@ -113,17 +113,17 @@ public class GameState {
 
     public static void logValues() {
         getAutoWinner();
-        Logger.recordOutput("GameState/IsDSAttached", DriverStation.isDSAttached());
-        Logger.recordOutput("GameState/IsFMSAttached", DriverStation.isFMSAttached());
-        Logger.recordOutput("GameState/MatchType", DriverStation.getMatchType());
-        Logger.recordOutput("GameState/IsAutonomus", DriverStation.isAutonomous());
-        Logger.recordOutput("GameState/MatchTime", DriverStation.getMatchTime());
-        Logger.recordOutput("GameState/AutoWinner", autoWinner);
-        Logger.recordOutput("GameState/Alliance", Robot.getAlliance());
-        Logger.recordOutput("GameState/GameData", DriverStation.getGameSpecificMessage());
-        Logger.recordOutput("GameState/CurrentPhase", getCurrentPhase());
-        Logger.recordOutput("GameState/IsMyHubActive", isMyHubActive());
-        Logger.recordOutput("GameState/ActiveCycleEnding", activeCycleEnding());
-        Logger.recordOutput("GameState/MyHubEnding", myHubEnding());
+       // Logger.recordOutput("GameState/IsDSAttached", DriverStation.isDSAttached());
+       // Logger.recordOutput("GameState/IsFMSAttached", DriverStation.isFMSAttached());
+       // Logger.recordOutput("GameState/MatchType", DriverStation.getMatchType());
+      //  Logger.recordOutput("GameState/IsAutonomus", DriverStation.isAutonomous());
+      //  Logger.recordOutput("GameState/MatchTime", DriverStation.getMatchTime());
+      //  Logger.recordOutput("GameState/AutoWinner", autoWinner);
+      //  Logger.recordOutput("GameState/Alliance", Robot.getAlliance());
+       // Logger.recordOutput("GameState/GameData", DriverStation.getGameSpecificMessage());
+       // Logger.recordOutput("GameState/CurrentPhase", getCurrentPhase());
+      //  Logger.recordOutput("GameState/IsMyHubActive", isMyHubActive());
+      //  Logger.recordOutput("GameState/ActiveCycleEnding", activeCycleEnding());
+      //  Logger.recordOutput("GameState/MyHubEnding", myHubEnding());
     }
 }

@@ -24,7 +24,7 @@ public class TurretSubsystem extends BaseSubsystem {
     private CANcoder cancoder;
     private Translation2d robotToTurret;
     private Supplier<Pose2d> swervePoseSupplier;
-    private TurretIOInputsAutoLogged inputs = new TurretIOInputsAutoLogged();
+    private TurretIOInputs inputs = new TurretIOInputs();
 
     public TurretSubsystem(TurretConfiguration config, Supplier<Pose2d> swervePoseSupplier, boolean enabled) {
         super(config.name(), config, enabled);
@@ -127,7 +127,7 @@ public class TurretSubsystem extends BaseSubsystem {
         inputs.currentDegrees = motor.getRotations() * 360.0;
         inputs.turretPose = getTurretPose();
         inputs.atTarget = atTarget();
-        logger.processInputs(inputs);
+     //   logger.processInputs(inputs);
     }
 
     public Command trackHub() {
