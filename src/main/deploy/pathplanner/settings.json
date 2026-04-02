@@ -3,11 +3,12 @@
   "robotLength": 0.853,
   "holonomicMode": true,
   "pathFolders": [
-    "RTrenchOverBumpDoubleMidfield",
     "HubPreloadDepot",
     "LTrenchDoubleMidfield",
     "LTrenchOverBumpDoubleMidfield",
-    "RTrenchDoubleMidfield"
+    "RightChargeX2",
+    "RTrenchDoubleMidfield",
+    "RTrenchOverBumpDoubleMidfield"
   ],
   "autoFolders": [],
   "defaultMaxVel": 4.0,
