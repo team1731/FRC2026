@@ -10,7 +10,6 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 
 import edu.wpi.first.math.Matrix;
-import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.*;
@@ -38,15 +37,12 @@ public class SwerveSubsystem extends BaseSubsystem {
     private Pose2d baselinePose;
     private boolean hasGoodOdometry = false;
     private double distanceBetweenPoses;
-    private boolean headingIsInitialized = false;
 
     private QuestNav questNav;
 
     private static boolean isQuestSeeded = false;
 
     private Timer questPoseResetTimer = new Timer();  // ussed primarily in dissabled to reset the pose every few seconds in case the robot is moved b4 auto
-
-    private final ProfiledPIDController headingPID = kHeadingGains.toProfiledPIDController(kMaxAngularRate, kMaxAngularAcceleration);
 
     public SwerveSubsystem(boolean enabled) {
         super(enabled);
@@ -76,8 +72,7 @@ public class SwerveSubsystem extends BaseSubsystem {
         
         // Do not use estimate if we are rotating too fast or if we see less than 2 tags
         if(Math.abs(drivetrain.getPigeon2().getAngularVelocityZDevice().getValueAsDouble()) > 720 || mt2.tagCount <= 1) return;
-
-        // this.addVisionMeasurement(mt2.pose, mt2.timestampSeconds, VecBuilder.fill(.5,.5,2));
+        this.addVisionMeasurement(mt2.pose, mt2.timestampSeconds, kLimelightStdev);
         
         if (!visionCheckingHasStarted) {
             GoodLimelightTimer.restart();
@@ -102,8 +97,10 @@ public class SwerveSubsystem extends BaseSubsystem {
 
     public void resetPose(Pose2d pose) {
         drivetrain.resetPose(pose);
-        // drivetrain.getPigeon2().setYaw(pose.getRotation().getDegrees());
-        resetQuestPose(new Pose3d(pose));  
+        double yaw = pose.getRotation().getDegrees();
+        if (Robot.isRedAlliance()) yaw = 180 - yaw;
+        // drivetrain.getPigeon2().setYaw(yaw);
+        resetQuestPose(new Pose3d(pose));
         isQuestSeeded = true; 
     }
 
@@ -190,29 +187,35 @@ public class SwerveSubsystem extends BaseSubsystem {
     @Override
     public void periodicTelemetry() {
         drivetrain.periodic();
-        updateVisionOdometry();
-        questNav.commandPeriodic();
+        if (kUseAprilTags) {
+            updateVisionOdometry();
 
-        SmartDashboard.putBoolean("isSeeded", isQuestSeeded);
-        SmartDashboard.putBoolean("isTracking", questNav.isTracking());
-        SmartDashboard.putBoolean("isConnected", questNav.isConnected());
-        SmartDashboard.putBoolean("hasgoodtracking",hasGoodOdometry());
-
-        //    if (!isQuestSeeded || (DriverStation.isDisabled() && questPoseResetTimer.hasElapsed(5))) {
-        //        if (hasGoodOdometry() && questNav.isTracking() && questNav.isConnected()) {
-        //            this.resetQuestPose(new Pose3d(getCurrentPose()));
-        //            questPoseResetTimer.restart();
-        //            isQuestSeeded = true;
-        //        }
-        //    }
-
-        isQuestSeeded = true; // TODO - Fix this once limelight odometry works
-        if (!questNav.isTracking()) {
-            isQuestSeeded = false;
+            SmartDashboard.putBoolean("hasgoodtracking", hasGoodOdometry());
         }
 
-        if (questNav.isTracking() && isQuestSeeded && questNav.isConnected()) {
-            addQuestVisionMeasurement();
+        if (kUseVSLAM) {
+            questNav.commandPeriodic();
+
+            //    if (!isQuestSeeded || (DriverStation.isDisabled() && questPoseResetTimer.hasElapsed(5))) {
+            //        if (hasGoodOdometry() && questNav.isTracking() && questNav.isConnected()) {
+            //            this.resetQuestPose(new Pose3d(getCurrentPose()));
+            //            questPoseResetTimer.restart();
+            //            isQuestSeeded = true;
+            //        }
+            //    }
+
+            SmartDashboard.putBoolean("isSeeded", isQuestSeeded);
+            SmartDashboard.putBoolean("isTracking", questNav.isTracking());
+            SmartDashboard.putBoolean("isConnected", questNav.isConnected());
+
+            isQuestSeeded = true; // TODO - Fix this once limelight odometry works
+            if (!questNav.isTracking()) {
+                isQuestSeeded = false;
+            }
+
+            if (questNav.isTracking() && isQuestSeeded && questNav.isConnected()) {
+                addQuestVisionMeasurement();
+            }
         }
     }
 

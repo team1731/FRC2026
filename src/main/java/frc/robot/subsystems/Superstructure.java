@@ -8,8 +8,6 @@ import java.util.Set;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
-import org.littletonrobotics.junction.Logger;
-
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.*;
@@ -92,9 +90,9 @@ public class Superstructure extends SubsystemBase {
     // Lower alpha = smoother but laggier; 0.3 is a good default for FRC.
     // -------------------------------------------------------------------------
 
-    private static final double kMaxPredictTof = 1.2;   // clamp TOF to avoid wild extrapolation (s)
+    private static final double kMaxPredictTof = 2.2;   // clamp TOF to avoid wild extrapolation (s)
     private static final double kLatency = 0.02; // 20ms
-    private static final double kCompGain = 0.7; // 0 = no compensation, 1 = full compensation
+    private static final double kCompGain = 1.0; // 0 = no compensation, 1 = full compensation
 
     // -------------------------------------------------------------------------
     // Constructor
@@ -128,8 +126,8 @@ public class Superstructure extends SubsystemBase {
 
     public Command runIntake(boolean deployed) {
         return Commands.either(
-            pivot.deploy().alongWith(intake.setVelocity(RotationsPerSecond.of(100))),
-            pivot.retract().alongWith(intake.setVelocity(RotationsPerSecond.of(75))),
+            pivot.deploy().alongWith(intake.setVelocity(RotationsPerSecond.of(125))),
+            pivot.retract().alongWith(intake.setVelocity(RotationsPerSecond.of(100))),
             () -> deployed
         );
     }
@@ -239,8 +237,8 @@ public class Superstructure extends SubsystemBase {
                 setHoods(() -> targetLeftHood, () -> targetRightHood),
                 trackAppliedTarget(),
                 (Commands.waitUntil(this::shootersReady)
-                    .andThen(index()
-                        .until(() -> !turretsCanShoot())
+                    .andThen(
+                        index().until(() -> !turretsCanShoot())
                         .alongWith(runIntake(false))
                     )).repeatedly()
             );
@@ -428,10 +426,10 @@ public class Superstructure extends SubsystemBase {
         // ---------------------------------------------------------------------
 
         if (Robot.isSimulation()) {
-            Logger.recordOutput("SmartLogs/LeftCompensatedTarget",
-                new Pose2d(compensatedLeftTarget, new Rotation2d()));
-            Logger.recordOutput("SmartLogs/RightCompensatedTarget",
-                new Pose2d(compensatedRightTarget, new Rotation2d()));
+         //   Logger.recordOutput("SmartLogs/LeftCompensatedTarget",
+        //        new Pose2d(compensatedLeftTarget, new Rotation2d()));
+         //   Logger.recordOutput("SmartLogs/RightCompensatedTarget",
+         //       new Pose2d(compensatedRightTarget, new Rotation2d()));
         }
     }
 

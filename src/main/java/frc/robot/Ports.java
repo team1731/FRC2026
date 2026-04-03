@@ -15,8 +15,8 @@ public class Ports {
     public static final PortConfig kIntakePivotConfig = new PortConfig(RobotConstants.kMainCANBus, 14, false);
     public static final PortConfig kIntakeRollerConfig = new PortConfig(RobotConstants.kSecondCANBus, 16, true);
 
-    public static final PortConfig kIndexerLeftConfig = new PortConfig(RobotConstants.kMainCANBus, 40, true);
-    public static final PortConfig kIndexerRightConfig = new PortConfig(RobotConstants.kSecondCANBus, 17, false);
+    public static final PortConfig kIndexerLeftConfig = new PortConfig(RobotConstants.kSecondCANBus, 40, false);
+    public static final PortConfig kIndexerRightConfig = new PortConfig(RobotConstants.kMainCANBus, 17, true);
 
     public static final PortConfig kRightTurretConfigs = new PortConfig(RobotConstants.kMainCANBus, 18, true);
     public static final PortConfig kRightHoodConfig = new PortConfig(RobotConstants.kMainCANBus, 19, false);
