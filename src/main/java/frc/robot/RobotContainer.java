@@ -57,7 +57,7 @@ public class RobotContainer {
     
     private final Trigger dTestSetShot = driver.back();
 
-    private final Trigger dRetractIntake = driver.leftBumper();
+    private final Trigger dSpit = driver.leftBumper();
     private final Trigger dStationaryShot = driver.rightBumper();
 
     private final Trigger dLeftTurretLeft = driver.povLeft();
@@ -138,7 +138,7 @@ public class RobotContainer {
         (dTestSetShot.and(() -> testCondition.equals(TestShotCondition.kParameters)))
             .whileTrue(superstructure.tuneShot(tuneableFlywheelRPS.get(), tuneableHoodRotations.get(), true));
 
-        dRetractIntake.onTrue(pivot.retract());
+        dSpit.whileTrue(superstructure.spit());
 
         dLeftTurretLeft.whileTrue(leftTurret.setDegrees(-200));
         dLeftTurretRight.whileTrue(leftTurret.setDegrees(80));

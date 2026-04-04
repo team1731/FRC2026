@@ -10,9 +10,11 @@ import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.lib.frc1731.field.FieldPositions;
 import frc.robot.Robot;
+import frc.robot.commands.JiggleToPosition;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.indexer.*;
 import frc.robot.subsystems.intake.*;
@@ -199,6 +201,10 @@ public class Superstructure extends SubsystemBase {
             rightFlywheel.stop(), leftHood.stow(), rightHood.stow(), indexer.stop());
     }
 
+    public Command spit() {
+        return pivot.deploy().alongWith(intake.setVelocity(RotationsPerSecond.of(-125)), indexer.setPercent(-1, -1));
+    }
+
     // -------------------------------------------------------------------------
     // Readiness checks
     // -------------------------------------------------------------------------
@@ -236,10 +242,11 @@ public class Superstructure extends SubsystemBase {
                 setFlywheels(() -> targetLeftFlywheel, () -> targetRightFlywheel),
                 setHoods(() -> targetLeftHood, () -> targetRightHood),
                 trackAppliedTarget(),
+                intake.setVelocity(RotationsPerSecond.of(100)),
                 (Commands.waitUntil(this::shootersReady)
                     .andThen(
                         index().until(() -> !turretsCanShoot())
-                        .alongWith(runIntake(false))
+                        .alongWith(new JiggleToPosition(pivot, intake))
                     )).repeatedly()
             );
         }, Set.of(leftFlywheel, rightFlywheel, leftHood, rightHood, leftTurret, rightTurret, indexer, pivot, intake));
@@ -253,10 +260,11 @@ public class Superstructure extends SubsystemBase {
                 setFlywheelsToTarget(),
                 setHoodsToTarget(),
                 trackHub(),
+                intake.setVelocity(RotationsPerSecond.of(100)),
                 (Commands.waitUntil(this::shootersReady)
-                    .andThen(index()
-                        .until(() -> !turretsCanShoot())
-                        .alongWith(runIntake(false))
+                    .andThen(
+                        index().until(() -> !turretsCanShoot())
+                        .alongWith(new JiggleToPosition(pivot, intake))
                     )).repeatedly()
             );
         }, Set.of(leftFlywheel, rightFlywheel, leftHood, rightHood, leftTurret, rightTurret, indexer, pivot, intake));
@@ -431,6 +439,9 @@ public class Superstructure extends SubsystemBase {
          //   Logger.recordOutput("SmartLogs/RightCompensatedTarget",
          //       new Pose2d(compensatedRightTarget, new Rotation2d()));
         }
+
+        SmartDashboard.putNumber("Left Distance", rawTarget.getDistance(leftTurretPos));
+        SmartDashboard.putNumber("Right Distance", rawTarget.getDistance(rightTurretPos));
     }
 
     // =========================================================================

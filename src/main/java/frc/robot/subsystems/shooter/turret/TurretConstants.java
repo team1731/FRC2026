@@ -27,13 +27,14 @@ public class TurretConstants {
     );
 
     public static final PIDGains kPositionGains = new PIDGains()
-        .setP(60)
-        .setD(0.5)
-        .setS(0.2)
-        .setA(0.01)
+        .setP(48)
+        .setD(0.1*kGearRatio)
+        .setS(0.25)
+        .setV(0.12*kGearRatio)
+        .setA(0.01*kGearRatio)
     ;
 
-    public static final double kMaxTurretVelocity = 4.0; // Rotations/sec
+    public static final double kMaxTurretVelocity = 2.0; // Rotations/sec
     public static final double kMaxTurretAcceleration = 4.0; // Rotations/sec^2
 
     public static final double kCurrentLimit = 30d; // Amps

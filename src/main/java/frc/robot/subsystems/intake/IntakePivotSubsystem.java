@@ -42,11 +42,11 @@ public class IntakePivotSubsystem extends BaseSubsystem {
         );
 
         motor.withMotionMagicConfigs(
-            new MotionMagicConfigs().withMotionMagicCruiseVelocity(3)
+            new MotionMagicConfigs().withMotionMagicCruiseVelocity(2)
             .withMotionMagicAcceleration(2)
         );
 
-        motor.setDynamicMotionMagicSpeeds(2, 2);  
+        motor.setDynamicMotionMagicSpeeds(2, 2);
         cancoder = new CANcoder(Ports.kPivotCANcoderId);
 
         CANcoderConfiguration coderConfig = new CANcoderConfiguration()
@@ -85,5 +85,9 @@ public class IntakePivotSubsystem extends BaseSubsystem {
 
     public Command retract() {
         return this.setPosition(() -> kPivotStowRotations);
+    }
+
+    public void setPosition(double position) {
+        motor.setPosition(position);
     }
 }

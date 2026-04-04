@@ -12,14 +12,15 @@ public class ShotTable {
 
     private static final List<ShotEntry> kHubEntries = List.of(
         new ShotEntry(0, 0, 28, 0.5),
-        new ShotEntry(1, 0, 35, 0.5),
-        new ShotEntry(2, 0.5, 45, 1.0),
-        new ShotEntry(3, 1, 60, 1.2),
-        new ShotEntry(4, 2, 65, 1.4),
-        new ShotEntry(5, 3, 70, 1.6),
-        new ShotEntry(6, 4, 70, 1.8),
-        new ShotEntry(7, 5, 70, 2.0),
-        new ShotEntry(8, 6, 70, 2.2)
+        new ShotEntry(1, 0, 28, 0.5),
+        new ShotEntry(2, 0.5, 35, 1.25),
+        new ShotEntry(3, 1, 50, 1.5),
+        new ShotEntry(4, 1.5, 70, 1.75),
+        new ShotEntry(5, 2.5, 70, 2),
+        new ShotEntry(6, 3, 70, 2.25),
+        new ShotEntry(7, 4, 70, 2.5),
+        new ShotEntry(8, 5, 70, 2.75)
+
     );
 
     private static final List<ShotEntry> kPassEntries = List.of(
