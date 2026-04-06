@@ -400,16 +400,25 @@ public class Superstructure extends SubsystemBase {
         Translation2d rawTarget = targetSupplier.get();
 
         if (adjustTargetForMovingShots) {
-            Translation2d[] aimPoints = computePerTurretAimPoints(
-                robotXY, robotRot,
-                currentVel,
-                currentOmega,
-                leftTurretPos, rightTurretPos,
-                rawTarget
-            );
+            // Translation2d[] aimPoints = computePerTurretAimPoints(
+            //     robotXY, robotRot,
+            //     currentVel,
+            //     currentOmega,
+            //     leftTurretPos, rightTurretPos,
+            //     rawTarget
+            // );
 
-            compensatedLeftTarget = aimPoints[0];
-            compensatedRightTarget = aimPoints[1];
+            // compensatedLeftTarget = aimPoints[0];
+            // compensatedRightTarget = aimPoints[1];
+            double tof1 = shotTableTof(rawTarget.minus(leftTurretPos).getNorm()) + kLatency;
+            Translation2d firstPassTarget = robotXY.plus(currentVel.times(tof1));
+            double tof2 = shotTableTof(firstPassTarget.minus(leftTurretPos).getNorm()) + kLatency;
+            Translation2d secondPassTarget = robotXY.plus(currentVel.times(tof2));
+
+            Translation2d finalTarget = rawTarget.minus(secondPassTarget.minus(robotXY));
+
+            compensatedLeftTarget = finalTarget;
+            compensatedRightTarget = finalTarget;
         } else {
             compensatedLeftTarget = rawTarget;
             compensatedRightTarget = rawTarget;
@@ -454,31 +463,31 @@ public class Superstructure extends SubsystemBase {
     // Returns Translation2d[] { leftAimPoint, rightAimPoint }
     // =========================================================================
 
-    private Translation2d[] computePerTurretAimPoints(
-            Translation2d robotXY,
-            Rotation2d robotRot,
-            Translation2d vel,
-            double omega,
-            Translation2d leftTurretPos,
-            Translation2d rightTurretPos,
-            Translation2d target) {
+    // private Translation2d[] computePerTurretAimPoints(
+    //         Translation2d robotXY,
+    //         Rotation2d robotRot,
+    //         Translation2d vel,
+    //         double omega,
+    //         Translation2d leftTurretPos,
+    //         Translation2d rightTurretPos,
+    //         Translation2d target) {
 
-        Translation2d leftAim = computeAimPoint(
-            robotXY, robotRot, vel, omega,
-            kRobotToLeftTurret.toTranslation2d(),
-            leftTurretPos,
-            target
-        );
+    //     Translation2d leftAim = computeAimPoint(
+    //         robotXY, robotRot, vel, omega,
+    //         kRobotToLeftTurret.toTranslation2d(),
+    //         leftTurretPos,
+    //         target
+    //     );
 
-        Translation2d rightAim = computeAimPoint(
-            robotXY, robotRot, vel, omega,
-            kRobotToRightTurret.toTranslation2d(),
-            rightTurretPos,
-            target
-        );
+    //     Translation2d rightAim = computeAimPoint(
+    //         robotXY, robotRot, vel, omega,
+    //         kRobotToRightTurret.toTranslation2d(),
+    //         rightTurretPos,
+    //         target
+    //     );
 
-        return new Translation2d[]{ leftAim, rightAim };
-    }
+    //     return new Translation2d[]{ leftAim, rightAim };
+    // }
 
     // =========================================================================
     // computeAimPoint — single-turret closed-form solver with accel + rotation
@@ -518,47 +527,47 @@ public class Superstructure extends SubsystemBase {
     //   target                raw target position (field frame)
     // =========================================================================
 
-    private Translation2d computeAimPoint(
-            Translation2d robotXY,
-            Rotation2d robotRot,
-            Translation2d vel,
-            double omega,
-            Translation2d turretOffsetRobotFrame,
-            Translation2d currentTurretPos,
-            Translation2d target) {
+    // private Translation2d computeAimPoint(
+    //         Translation2d robotXY,
+    //         Rotation2d robotRot,
+    //         Translation2d vel,
+    //         double omega,
+    //         Translation2d turretOffsetRobotFrame,
+    //         Translation2d currentTurretPos,
+    //         Translation2d target) {
 
-        // ---------------------------------------------------------------------
-        // 1. Get distance + TOF (single pass, no iteration)
-        // ---------------------------------------------------------------------
-        double dist = target.minus(currentTurretPos).getNorm();
-        double tof = Math.min(shotTableTof(dist) + kLatency, kMaxPredictTof);
+    //     // ---------------------------------------------------------------------
+    //     // 1. Get distance + TOF (single pass, no iteration)
+    //     // ---------------------------------------------------------------------
+    //     double dist = target.minus(currentTurretPos).getNorm();
+    //     double tof = Math.min(shotTableTof(dist) + kLatency, kMaxPredictTof);
 
-        // ---------------------------------------------------------------------
-        // 2. Predict robot future pose (NO ACCEL)
-        // ---------------------------------------------------------------------
-        Translation2d predictedRobot =
-            robotXY.plus(vel.times(tof));
+    //     // ---------------------------------------------------------------------
+    //     // 2. Predict robot future pose (NO ACCEL)
+    //     // ---------------------------------------------------------------------
+    //     Translation2d predictedRobot =
+    //         robotXY.plus(vel.times(tof));
 
-        Rotation2d predictedHeading =
-            robotRot.plus(new Rotation2d(omega * tof));
+    //     Rotation2d predictedHeading =
+    //         robotRot.plus(new Rotation2d(omega * tof));
 
-        // ---------------------------------------------------------------------
-        // 3. Predict turret future position
-        // ---------------------------------------------------------------------
-        Translation2d predictedTurret =
-            predictedRobot.plus(turretOffsetRobotFrame.rotateBy(predictedHeading));
+    //     // ---------------------------------------------------------------------
+    //     // 3. Predict turret future position
+    //     // ---------------------------------------------------------------------
+    //     Translation2d predictedTurret =
+    //         predictedRobot.plus(turretOffsetRobotFrame.rotateBy(predictedHeading));
 
-        // ---------------------------------------------------------------------
-        // 4. Compute displacement and apply damping
-        // ---------------------------------------------------------------------
-        Translation2d turretDisplacement =
-            predictedTurret.minus(currentTurretPos).times(kCompGain);
+    //     // ---------------------------------------------------------------------
+    //     // 4. Compute displacement and apply damping
+    //     // ---------------------------------------------------------------------
+    //     Translation2d turretDisplacement =
+    //         predictedTurret.minus(currentTurretPos).times(kCompGain);
 
-        // ---------------------------------------------------------------------
-        // 5. Return compensated aim point
-        // ---------------------------------------------------------------------
-        return target.minus(turretDisplacement);
-    }
+    //     // ---------------------------------------------------------------------
+    //     // 5. Return compensated aim point
+    //     // ---------------------------------------------------------------------
+    //     return target.minus(turretDisplacement);
+    // }
 
     // =========================================================================
     // Kinematic helpers

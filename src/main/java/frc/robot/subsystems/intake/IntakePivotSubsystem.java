@@ -50,7 +50,7 @@ public class IntakePivotSubsystem extends BaseSubsystem {
         cancoder = new CANcoder(Ports.kPivotCANcoderId);
 
         CANcoderConfiguration coderConfig = new CANcoderConfiguration()
-            .withMagnetSensor(new MagnetSensorConfigs().withMagnetOffset(-0.04833984375));
+            .withMagnetSensor(new MagnetSensorConfigs().withMagnetOffset(-0.21435546875));
         cancoder.getConfigurator().apply(coderConfig);
         
         motor.getMotor().setPosition(cancoder.getAbsolutePosition().waitForUpdate(0.2).getValueAsDouble());

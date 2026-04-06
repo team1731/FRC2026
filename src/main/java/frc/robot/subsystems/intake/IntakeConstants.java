@@ -17,7 +17,7 @@ public class IntakeConstants {
 
     public static final double kPivotGearRatio = 48.0; // reduction
 
-    public static final double kPivotIntakeRotations = -0.142;
-    public static final double kPivotStowRotations = -.022;
+    public static final double kPivotIntakeRotations = -0.13916;
+    public static final double kPivotStowRotations = 0;
     public static final double kPivotEpsilon = 0.01;
 }
