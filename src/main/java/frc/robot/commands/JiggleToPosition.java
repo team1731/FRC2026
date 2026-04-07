@@ -11,8 +11,8 @@ public class JiggleToPosition extends Command {
     
     private final double START_POS = IntakeConstants.kPivotIntakeRotations;
     private final double END_POS = IntakeConstants.kPivotStowRotations;
-    private final double DURATION = 3.0;
-    private final double JIGGLE_AMPLITUDE = 0.1; // Distance of the "wiggle"
+    private final double DURATION = 3.0 / 2.0;
+    private final double JIGGLE_AMPLITUDE = 0.07; // Distance of the "wiggle"
 
     public JiggleToPosition(IntakePivotSubsystem intake) {
         this.intake = intake;
