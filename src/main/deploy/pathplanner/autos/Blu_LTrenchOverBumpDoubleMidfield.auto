@@ -7,13 +7,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "HubPreloadDepot_1"
+            "pathName": "LTrenchOverBumpDoubleMidfield_1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LTrenchOverBumpDoubleMidfield_2"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "FeedthroughCommand"
+            "name": "ShootCommand"
           }
         }
       ]

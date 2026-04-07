@@ -5,7 +5,10 @@
   "pathFolders": [
     "HubPreloadDepot",
     "LTrenchDoubleMidfield",
-    "RTrenchDoubleMidfield"
+    "LTrenchOverBumpDoubleMidfield",
+    "RightChargeX2",
+    "RTrenchDoubleMidfield",
+    "RTrenchOverBumpDoubleMidfield"
   ],
   "autoFolders": [],
   "defaultMaxVel": 4.0,

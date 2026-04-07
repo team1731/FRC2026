@@ -13,6 +13,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.lib.frc1731.Utils;
 import frc.lib.frc1731.hardware.motor.ctre.MotorIOTalonFX;
@@ -77,7 +78,6 @@ public class TurretSubsystem extends BaseSubsystem {
 
         motor.getMotor().getConfigurator().apply(motorConfig);
         motor.getMotor().setPosition(cancoder.getAbsolutePosition().waitForUpdate(0.2).getValueAsDouble());
-
         this.robotToTurret = turretConfig.robotToTurret().toTranslation2d();
     }
 
@@ -140,11 +140,13 @@ public class TurretSubsystem extends BaseSubsystem {
         inputs.turretPose = getTurretPose();
         inputs.atTarget = atTarget();
      //   logger.processInputs(inputs);
+
+        SmartDashboard.putNumber(((TurretConfiguration)config.get()).name() + " Target", inputs.targetDegrees);
     }
 
     public Command trackHub() {
         return track(() -> {
-            return Robot.isRedAlliance() ? new Translation2d(11.915394, 4.034536) : new Translation2d(4.625594, 4.034536);
+            return Robot.isRedAlliance() ? new Translation2d(11.91, 4.03) : new Translation2d(4.62, 4.03);
         });
     }
 

@@ -17,7 +17,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "Intake"
+                  "name": "IntakeCommand"
                 }
               }
             ]
@@ -36,7 +36,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "Warmup"
+                  "name": "WarmupCommand"
                 }
               }
             ]
@@ -61,7 +61,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "StopShoot"
+                  "name": "StopShootCommand"
                 }
               }
             ]
@@ -80,7 +80,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "Intake"
+                  "name": "IntakeCommand"
                 }
               }
             ]
@@ -99,7 +99,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "Warmup"
+                  "name": "WarmupCommand"
                 }
               }
             ]
@@ -108,7 +108,7 @@
         {
           "type": "named",
           "data": {
-            "name": "Shoot"
+            "name": "ShootCommand"
           }
         }
       ]

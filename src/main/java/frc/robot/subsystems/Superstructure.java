@@ -92,9 +92,9 @@ public class Superstructure extends SubsystemBase {
     // Lower alpha = smoother but laggier; 0.3 is a good default for FRC.
     // -------------------------------------------------------------------------
 
-    private static final double kMaxPredictTof = 2.2;   // clamp TOF to avoid wild extrapolation (s)
-    private static final double kLatency = 0.02; // 20ms
-    private static final double kCompGain = 1.0; // 0 = no compensation, 1 = full compensation
+    // private static final double kMaxPredictTof = 2.2;   // clamp TOF to avoid wild extrapolation (s)
+    // private static final double kLatency = 0.02; // 20ms
+    // private static final double kCompGain = 1.0; // 0 = no compensation, 1 = full compensation
 
     // -------------------------------------------------------------------------
     // Constructor
@@ -246,7 +246,7 @@ public class Superstructure extends SubsystemBase {
                 (Commands.waitUntil(this::shootersReady)
                     .andThen(
                         index().until(() -> !turretsCanShoot())
-                        .alongWith(new JiggleToPosition(pivot, intake))
+                        .alongWith(new JiggleToPosition(pivot))
                     )).repeatedly()
             );
         }, Set.of(leftFlywheel, rightFlywheel, leftHood, rightHood, leftTurret, rightTurret, indexer, pivot, intake));
@@ -264,7 +264,7 @@ public class Superstructure extends SubsystemBase {
                 (Commands.waitUntil(this::shootersReady)
                     .andThen(
                         index().until(() -> !turretsCanShoot())
-                        .alongWith(new JiggleToPosition(pivot, intake))
+                        .alongWith(new JiggleToPosition(pivot))
                     )).repeatedly()
             );
         }, Set.of(leftFlywheel, rightFlywheel, leftHood, rightHood, leftTurret, rightTurret, indexer, pivot, intake));
@@ -326,7 +326,7 @@ public class Superstructure extends SubsystemBase {
             setFlywheels(() -> flywheel, () -> flywheel),
             setHoods(() -> hood, () -> hood),
             Commands.either(setTurrets(() -> 0, () -> 0), setTurrets(() -> 180, () -> 180), () -> zeroTurret),
-            Commands.waitUntil(this::shootersReady).andThen(index().alongWith(runIntake(false)))
+            Commands.waitUntil(this::hoodAndFlywheelsReady).andThen(index().alongWith(runIntake(false)))
         ), Set.of());
     }
 
@@ -365,7 +365,7 @@ public class Superstructure extends SubsystemBase {
         Translation2d currentVel = new Translation2d(fieldSpeeds.vxMetersPerSecond,
                                                        fieldSpeeds.vyMetersPerSecond);
 
-        double currentOmega = fieldSpeeds.omegaRadiansPerSecond;
+        // double currentOmega = fieldSpeeds.omegaRadiansPerSecond;
 
         // ---------------------------------------------------------------------
         // 2. Estimate linear and angular acceleration via EMA-filtered

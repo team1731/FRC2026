@@ -3,12 +3,10 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.intake.IntakePivotSubsystem;
-import frc.robot.subsystems.intake.IntakeRollerSubsystem;
 import frc.robot.subsystems.intake.IntakeConstants;
 
 public class JiggleToPosition extends Command {
     private final IntakePivotSubsystem intake;
-    // private final IntakeRollerSubsystem roller;
     private final Timer timer = new Timer();
     
     private final double START_POS = IntakeConstants.kPivotIntakeRotations;
@@ -16,10 +14,8 @@ public class JiggleToPosition extends Command {
     private final double DURATION = 3.0;
     private final double JIGGLE_AMPLITUDE = 0.1; // Distance of the "wiggle"
 
-    public JiggleToPosition(IntakePivotSubsystem intake, IntakeRollerSubsystem roller) {
+    public JiggleToPosition(IntakePivotSubsystem intake) {
         this.intake = intake;
-        // this.roller = roller;
-        // addRequirements(intake, roller);
     }
 
     @Override
@@ -41,19 +37,16 @@ public class JiggleToPosition extends Command {
         
         // 3. Set the position
         intake.setPosition(trendLine - Math.abs(oscillation));
-        // roller.setVelocity(() -> RotationsPerSecond.of(100));
     }
 
     @Override
     public void end(boolean interrupted) {
         // Hold the final target position exactly at the end
         intake.setPosition(END_POS);
-        // roller.stop();
     }
 
     @Override
     public boolean isFinished() {
-        // return timer.hasElapsed(DURATION);
         return false;
     }
 }

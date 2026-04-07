@@ -15,14 +15,14 @@ public class TurretConstants {
     public static final double kEpsilon = 3d; // Degrees;
 
     public static final Translation3d kRobotToLeftTurret = new Translation3d(
-        Units.inchesToMeters(-7.5d),
-        Units.inchesToMeters(7d), 
+        Units.inchesToMeters(-5.75d),
+        Units.inchesToMeters(7.25d), 
         Units.inchesToMeters(11.4125d)
     );
 
     public static final Translation3d kRobotToRightTurret = new Translation3d(
-        Units.inchesToMeters(-7.5d), 
-        Units.inchesToMeters(-7d), 
+        Units.inchesToMeters(-5.75d),
+        Units.inchesToMeters(-7.25d),
         Units.inchesToMeters(11.4125d)
     );
 
@@ -33,12 +33,6 @@ public class TurretConstants {
         .setV(0.12*kGearRatio)
         .setA(0.01)
     ;
-
-    // motorConfig.Slot0.kP = 60.0; 
-    // motorConfig.Slot0.kS = 0.2;
-    // motorConfig.Slot0.kA = 0.01;
-    // motorConfig.Slot0.kI = 0;
-    // motorConfig.Slot0.kD = 0.5;
 
     public static final double kMaxTurretVelocity = 4.0; // Rotations/sec
     public static final double kMaxTurretAcceleration = 4.0; // Rotations/sec^2

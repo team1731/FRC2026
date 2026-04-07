@@ -7,13 +7,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "HubPreloadDepot_1"
+            "pathName": "RightChargeX2_1"
           }
         },
         {
-          "type": "named",
+          "type": "path",
           "data": {
-            "name": "FeedthroughCommand"
+            "pathName": "RightChargeX2_2"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RightChargeX2_3"
           }
         }
       ]
