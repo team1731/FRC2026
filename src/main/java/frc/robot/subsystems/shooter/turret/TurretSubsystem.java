@@ -59,18 +59,30 @@ public class TurretSubsystem extends BaseSubsystem {
         motorConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
         motorConfig.CurrentLimits.StatorCurrentLimit = 30d;
 
-        motorConfig.Slot0.kP = 60.0; 
-        motorConfig.Slot0.kS = 0.2;
-        motorConfig.Slot0.kA = 0.01;
-        motorConfig.Slot0.kI = 0;
-        motorConfig.Slot0.kD = 0.5;
-        motorConfig.MotionMagic.MotionMagicCruiseVelocity = 4;
-        motorConfig.MotionMagic.MotionMagicAcceleration = 4;
+        motorConfig.Slot0.kP = kPositionGains.kP; 
+        motorConfig.Slot0.kS = kPositionGains.kS;
+        motorConfig.Slot0.kA = kPositionGains.kA;
+        motorConfig.Slot0.kI = kPositionGains.kI;
+        motorConfig.Slot0.kD = kPositionGains.kD;
+        motorConfig.MotionMagic.MotionMagicCruiseVelocity = kMaxTurretVelocity;
+        motorConfig.MotionMagic.MotionMagicAcceleration = kMaxTurretAcceleration;
+
+        // motorConfig.Slot0.kP = 60.0; 
+        // motorConfig.Slot0.kS = 0.2;
+        // motorConfig.Slot0.kA = 0.01;
+        // motorConfig.Slot0.kI = 0;
+        // motorConfig.Slot0.kD = 0.5;
+        // motorConfig.MotionMagic.MotionMagicCruiseVelocity = 4;
+        // motorConfig.MotionMagic.MotionMagicAcceleration = 4;
 
         motor.getMotor().getConfigurator().apply(motorConfig);
         motor.getMotor().setPosition(cancoder.getAbsolutePosition().waitForUpdate(0.2).getValueAsDouble());
 
         this.robotToTurret = turretConfig.robotToTurret().toTranslation2d();
+    }
+
+    public double getError() {
+        return inputs.targetDegrees - inputs.currentDegrees;
     }
 
     public Pose2d getTurretPose() {

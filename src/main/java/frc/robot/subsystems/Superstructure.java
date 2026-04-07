@@ -39,8 +39,8 @@ public class Superstructure extends SubsystemBase {
     // -------------------------------------------------------------------------
 
     private final Supplier<Translation2d> kHubSupplier = () -> Robot.isRedAlliance()
-        ? new Translation2d(11.915394, 4.034536)
-        : new Translation2d(4.625594, 4.034536);
+        ? new Translation2d(11.91, 4.03)
+        : new Translation2d(4.62, 4.03);
 
     private final Supplier<Translation2d> kPassSupplier = () -> {
         double x = Robot.isRedAlliance() ? FieldPositions.kFieldLength - 2 : 2;
@@ -410,15 +410,21 @@ public class Superstructure extends SubsystemBase {
 
             // compensatedLeftTarget = aimPoints[0];
             // compensatedRightTarget = aimPoints[1];
-            double tof1 = shotTableTof(rawTarget.minus(leftTurretPos).getNorm()) + kLatency;
-            Translation2d firstPassTarget = robotXY.plus(currentVel.times(tof1));
-            double tof2 = shotTableTof(firstPassTarget.minus(leftTurretPos).getNorm()) + kLatency;
-            Translation2d secondPassTarget = robotXY.plus(currentVel.times(tof2));
+            double tof1Left = shotTableTof(rawTarget.minus(leftTurretPos).getNorm());
+            Translation2d firstPassTargetLeft = robotXY.plus(currentVel.times(tof1Left));
+            double tof2Left = shotTableTof(firstPassTargetLeft.minus(rightTurretPos).getNorm());
+            Translation2d secondPassTargetLeft = robotXY.plus(currentVel.times(tof2Left));
 
-            Translation2d finalTarget = rawTarget.minus(secondPassTarget.minus(robotXY));
+            double tof1Right = shotTableTof(rawTarget.minus(leftTurretPos).getNorm());
+            Translation2d firstPassTargetRight = robotXY.plus(currentVel.times(tof1Right));
+            double tof2Right = shotTableTof(firstPassTargetRight.minus(rightTurretPos).getNorm());
+            Translation2d secondPassTargetRight = robotXY.plus(currentVel.times(tof2Right));
 
-            compensatedLeftTarget = finalTarget;
-            compensatedRightTarget = finalTarget;
+            Translation2d finalTargetLeft = rawTarget.minus(secondPassTargetLeft.minus(robotXY));
+            Translation2d finalTargetRight = rawTarget.minus(secondPassTargetRight.minus(robotXY));
+
+            compensatedLeftTarget = finalTargetLeft;
+            compensatedRightTarget = finalTargetRight;
         } else {
             compensatedLeftTarget = rawTarget;
             compensatedRightTarget = rawTarget;
@@ -451,6 +457,9 @@ public class Superstructure extends SubsystemBase {
 
         SmartDashboard.putNumber("Left Distance", rawTarget.getDistance(leftTurretPos));
         SmartDashboard.putNumber("Right Distance", rawTarget.getDistance(rightTurretPos));
+
+        SmartDashboard.putNumber("Left Error", leftTurret.getError());
+        SmartDashboard.putNumber("Right Error", rightTurret.getError());
     }
 
     // =========================================================================

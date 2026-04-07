@@ -37,10 +37,10 @@ public class JiggleToPosition extends Command {
         
         // 2. Calculate the oscillation (The Sine Wave)
         // 2 * PI * 3 means 3 oscillations per second 
-        double oscillation = Math.sin(time * Math.PI * 3) * JIGGLE_AMPLITUDE;
+        double oscillation = Math.sin(time * Math.PI * 1.5) * JIGGLE_AMPLITUDE;
         
         // 3. Set the position
-        intake.setPosition(trendLine + oscillation);
+        intake.setPosition(trendLine - Math.abs(oscillation));
         // roller.setVelocity(() -> RotationsPerSecond.of(100));
     }
 
