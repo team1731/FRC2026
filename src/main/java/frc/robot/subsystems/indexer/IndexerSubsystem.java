@@ -11,8 +11,8 @@ import static frc.robot.subsystems.indexer.IndexerConstants.*;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class IndexerSubsystem extends BaseSubsystem {
-    private MotorIOTalonFX bottomMotor, topMotor;
-    private IndexerIOInputsAutoLogged inputs = new IndexerIOInputsAutoLogged();
+    private MotorIOTalonFX leftMotor, rightMotor;
+    private IndexerIOInputs inputs = new IndexerIOInputs();
 
     public IndexerSubsystem(boolean enabled) {
         super(enabled);
@@ -20,41 +20,44 @@ public class IndexerSubsystem extends BaseSubsystem {
 
     @Override
     protected void initializeHardware() {
-        bottomMotor = new MotorIOTalonFX(Ports.kIndexerBottomConfig);
-        topMotor = new MotorIOTalonFX(Ports.kIndexerTopConfig);
+        leftMotor = new MotorIOTalonFX(Ports.kIndexerLeftConfig);
+        rightMotor = new MotorIOTalonFX(Ports.kIndexerRightConfig);
 
-        bottomMotor.withPIDGains(kPIDGains);
-        topMotor.withPIDGains(kPIDGains);
+        leftMotor.withPIDGains(kPIDGains);
+        rightMotor.withPIDGains(kPIDGains);
+
+        // leftMotor.withStatorCurrentLimit(kCurrentLimit);
+        // rightMotor.withStatorCurrentLimit(kCurrentLimit);
     }
 
     @Override
     public void periodicTelemetry() {
-        inputs.currentVelocityTop = topMotor.getVelocityRPS();
-        inputs.currentVelocityBottom = bottomMotor.getVelocityRPS();
+        inputs.currentVelocityLeft = leftMotor.getVelocityRPS();
+        inputs.currentVelocityRight = rightMotor.getVelocityRPS();
 
-        inputs.atTargetVelocityTop = Utils.isWithin(inputs.currentVelocityTop, inputs.targetVelocityTop, 1);
-        inputs.atTargetVelocityBottom = Utils.isWithin(inputs.currentVelocityBottom, inputs.targetVelocityBottom, 1);
+        inputs.atTargetVelocityLeft = Utils.isWithin(inputs.currentVelocityLeft, inputs.targetVelocityLeft, 1);
+        inputs.atTargetVelocityRight = Utils.isWithin(inputs.currentVelocityRight, inputs.targetVelocityRight, 1);
 
-        logger.processInputs(inputs);
+     //   logger.processInputs(inputs);
     }
 
-    public Command setPercent(double percentTop, double percentBottom) {
+    public Command setPercent(double left, double right) {
         return run(() -> {
-            inputs.targetVelocityTop = percentTop * MotorConstants.KRAKEN_X60.MAX_VELOCITY_RPM / 60.0;
-            inputs.targetVelocityBottom = percentBottom * MotorConstants.KRAKEN_X60.MAX_VELOCITY_RPM / 60.0;
+            inputs.targetVelocityLeft = right * MotorConstants.KRAKEN_X60.MAX_VELOCITY_RPM / 60.0;
+            inputs.targetVelocityRight = left * MotorConstants.KRAKEN_X60.MAX_VELOCITY_RPM / 60.0;
 
-            this.topMotor.setPercentOutput(percentTop);
-            this.bottomMotor.setPercentOutput(percentBottom);
+            this.rightMotor.setPercentOutput(left);
+            this.leftMotor.setPercentOutput(right);
         });
     }
 
-    public Command setVelocity(double topRPS, double bottomRPS) {
+    public Command setVelocity(double right, double left) {
         return run(() -> {
-            inputs.targetVelocityTop = topRPS;
-            inputs.targetVelocityBottom = bottomRPS;
+            inputs.targetVelocityLeft = left;
+            inputs.targetVelocityRight = right;
 
-            this.topMotor.setVelocityRPS(topRPS);
-            this.bottomMotor.setVelocityRPS(bottomRPS);
+            this.leftMotor.setVelocityRPS(left);
+            this.rightMotor.setVelocityRPS(right);
         });
     }
 

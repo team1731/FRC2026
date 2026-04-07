@@ -22,7 +22,7 @@ import com.ctre.phoenix6.hardware.core.CoreCANcoder;
 public class IntakePivotSubsystem extends BaseSubsystem {
     private MotorIOTalonFX motor;
     private CANcoder cancoder;
-    private IntakePivotIOInputsAutoLogged inputs = new IntakePivotIOInputsAutoLogged();
+    private IntakePivotIOInputs inputs = new IntakePivotIOInputs();
 
     public IntakePivotSubsystem(boolean enabled) {
         super(enabled);
@@ -42,15 +42,15 @@ public class IntakePivotSubsystem extends BaseSubsystem {
         );
 
         motor.withMotionMagicConfigs(
-            new MotionMagicConfigs().withMotionMagicCruiseVelocity(3)
+            new MotionMagicConfigs().withMotionMagicCruiseVelocity(2)
             .withMotionMagicAcceleration(2)
         );
 
-        motor.setDynamicMotionMagicSpeeds(2, 2);  
+        motor.setDynamicMotionMagicSpeeds(2, 2);
         cancoder = new CANcoder(Ports.kPivotCANcoderId);
 
         CANcoderConfiguration coderConfig = new CANcoderConfiguration()
-            .withMagnetSensor(new MagnetSensorConfigs().withMagnetOffset(-0.04833984375));
+            .withMagnetSensor(new MagnetSensorConfigs().withMagnetOffset(-0.21435546875));
         cancoder.getConfigurator().apply(coderConfig);
         
         motor.getMotor().setPosition(cancoder.getAbsolutePosition().waitForUpdate(0.2).getValueAsDouble());
@@ -65,7 +65,7 @@ public class IntakePivotSubsystem extends BaseSubsystem {
     public void periodicTelemetry() {
         inputs.currentPosition = motor.getRotations();
         inputs.atTargetPosition = Utils.isWithin(inputs.currentPosition, inputs.targetPosition, kPivotEpsilon);
-        logger.processInputs(inputs);
+     //   logger.processInputs(inputs);
     }
     
     private Command setPosition(DoubleSupplier position) {
@@ -85,5 +85,9 @@ public class IntakePivotSubsystem extends BaseSubsystem {
 
     public Command retract() {
         return this.setPosition(() -> kPivotStowRotations);
+    }
+
+    public void setPosition(double position) {
+        motor.setPosition(position);
     }
 }

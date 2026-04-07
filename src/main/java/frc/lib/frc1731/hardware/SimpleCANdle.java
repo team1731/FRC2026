@@ -1,5 +1,6 @@
 package frc.lib.frc1731.hardware;
 
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.*;
 import com.ctre.phoenix6.controls.*;
 import com.ctre.phoenix6.signals.*;
@@ -12,12 +13,16 @@ public class SimpleCANdle {
     private CANdleConfiguration config;
     private CANdleConfigurator configurator;
 
+    private int stripLength = 0;
+
     public SimpleCANdle(int deviceID, int stripLength){
         this(deviceID, "rio", stripLength);
     }
 
     public SimpleCANdle(int deviceID, String canbus, int stripLength){
-        this.candle = new CANdle(deviceID, canbus);
+        this.candle = new CANdle(deviceID, new CANBus(canbus));
+
+        this.stripLength = stripLength;
 
         this.config = new CANdleConfiguration();
         this.config.LED.StripType = StripTypeValue.RGBW;
@@ -28,7 +33,7 @@ public class SimpleCANdle {
         this.configurator.apply(config);
 
         /* clear all previous animations */
-        for (int i = 0; i < 8; ++i) {
+        for (int i = 0; i < stripLength+1; ++i) {
             this.candle.setControl(new EmptyAnimation(i));
         }
     }
@@ -38,7 +43,7 @@ public class SimpleCANdle {
     }
 
     public void setColorFlow(Color color) {
-        this.setColorFlow(color, 0, 7);
+        this.setColorFlow(color, 0, stripLength);
     }
 
     public void setFire(int start, int end) {
@@ -46,7 +51,7 @@ public class SimpleCANdle {
     }
 
     public void setFire() {
-        this.setFire(0, 7);
+        this.setFire(0, stripLength);
     }
 
     public void setLarson(Color color, LarsonBounceValue bounceMode, int start, int end) {
@@ -54,7 +59,7 @@ public class SimpleCANdle {
     }
 
     public void setLarson(Color color, LarsonBounceValue bounceMode) {
-        this.setLarson(color, bounceMode, 0, 7);
+        this.setLarson(color, bounceMode, 0, stripLength);
     }
 
     public void setRainbow(int start, int end) {
@@ -62,7 +67,7 @@ public class SimpleCANdle {
     }
 
     public void setRainbow() {
-        this.setRainbow(0, 7);
+        this.setRainbow(0, stripLength);
     }
 
     public void setRGBFade(int start, int end) {
@@ -70,7 +75,7 @@ public class SimpleCANdle {
     }
 
     public void setRGBFade() {
-        this.setRGBFade(0, 7);
+        this.setRGBFade(0, stripLength);
     }
 
     public void setSingleFade(Color color, int start, int end) {
@@ -78,7 +83,7 @@ public class SimpleCANdle {
     }
 
     public void setSingleFade(Color color) {
-        this.setSingleFade(color, 0, 7);
+        this.setSingleFade(color, 0, stripLength);
     }
 
     public void setStrobe(Color color, int start, int end) {
@@ -86,7 +91,7 @@ public class SimpleCANdle {
     }
 
     public void setStrobe(Color color) {
-        this.setStrobe(color, 0, 7);
+        this.setStrobe(color, 0, stripLength);
     }
 
     public void setTwinkle(Color color, int start, int end) {
@@ -94,7 +99,7 @@ public class SimpleCANdle {
     }
 
     public void setTwinkle(Color color) {
-        this.setTwinkle(color, 0, 7);
+        this.setTwinkle(color, 0, stripLength);
     }
 
     public void setTwinkleOff(Color color, int start, int end) {
@@ -102,6 +107,10 @@ public class SimpleCANdle {
     }
 
     public void setTwinkleOff(Color color) {
-        this.setTwinkleOff(color, 0, 7);
+        this.setTwinkleOff(color, 0, stripLength);
+    }
+
+    public void setOff() {
+        candle.setControl(new SolidColor(0, stripLength).withColor(new RGBWColor(Color.kBlack)));
     }
 }

@@ -3,7 +3,6 @@ package frc.robot.subsystems.shooter.turret;
 import org.littletonrobotics.junction.AutoLog;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Translation2d;
 
 @AutoLog
 public class TurretIOInputs {
@@ -14,6 +13,6 @@ public class TurretIOInputs {
 
     public boolean atTarget = false;
 
-    public Translation2d target = new Translation2d();
+    public Pose2d target = new Pose2d();
     public Pose2d turretPose = new Pose2d();
 }

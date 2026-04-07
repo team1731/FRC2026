@@ -32,32 +32,32 @@
     },
     {
       "anchor": {
-        "x": 5.6046362339514975,
-        "y": 2.4758915834522113
+        "x": 5.656390870185448,
+        "y": 2.7605420827389446
       },
       "prevControl": {
-        "x": 6.497477621764122,
-        "y": 2.481843859370962
+        "x": 6.549232257998073,
+        "y": 2.7664943586576953
       },
       "nextControl": {
-        "x": 3.663837375178317,
-        "y": 2.462952924393724
+        "x": 3.7155920114122676,
+        "y": 2.747603423680457
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 3.5732667617689007,
-        "y": 2.4758915834522113
+        "x": 3.6120827389443653,
+        "y": 2.7605420827389446
       },
       "prevControl": {
-        "x": 5.617574893009986,
-        "y": 2.4758915834522113
+        "x": 5.656390870185451,
+        "y": 2.7605420827389446
       },
       "nextControl": {
-        "x": 2.549557963852714,
-        "y": 2.4758915834522113
+        "x": 2.5883739410281787,
+        "y": 2.7605420827389446
       },
       "isLocked": false,
       "linkedName": null
@@ -117,8 +117,8 @@
       "minWaypointRelativePos": 2.0023866348448633,
       "maxWaypointRelativePos": 2.928400954653938,
       "constraints": {
-        "maxVelocity": 2.0,
-        "maxAcceleration": 3.0,
+        "maxVelocity": 1.5,
+        "maxAcceleration": 2.0,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
         "nominalVoltage": 12.0,
@@ -140,7 +140,26 @@
     }
   ],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "Intake",
+      "waypointRelativePos": 0,
+      "endWaypointRelativePos": 1.3842746400886041,
+      "command": null
+    },
+    {
+      "name": "Warmup",
+      "waypointRelativePos": 1.6677740863787458,
+      "endWaypointRelativePos": 2.943521594684395,
+      "command": null
+    },
+    {
+      "name": "Shoot",
+      "waypointRelativePos": 2.9346622369878177,
+      "endWaypointRelativePos": 4.0,
+      "command": null
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 4.0,
     "maxAcceleration": 4.0,

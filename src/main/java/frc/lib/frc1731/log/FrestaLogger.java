@@ -54,11 +54,11 @@ public class FrestaLogger {
 		
 		SmartDashboard.updateValues();
 
-		Logger.start();
+		//Logger.start();
 		if (Robot.isReal()) {
-			Logger.addDataReceiver(new WPILOGWriter("/home/lvuser/logs"));
-		} else if (RobotConstants.kLogToAdvantageScope){
-			Logger.addDataReceiver(new NT4Publisher());
+		//	Logger.addDataReceiver(new WPILOGWriter("/home/lvuser/logs"));
+		} else if (RobotConstants.kLogToWPILog){
+		//	Logger.addDataReceiver(new NT4Publisher());
 		}
     }
 }

@@ -15,14 +15,14 @@ public class TurretConstants {
     public static final double kEpsilon = 3d; // Degrees;
 
     public static final Translation3d kRobotToLeftTurret = new Translation3d(
-        Units.inchesToMeters(-5.75d), 
+        Units.inchesToMeters(-5.75d),
         Units.inchesToMeters(7.25d), 
         Units.inchesToMeters(11.4125d)
     );
 
     public static final Translation3d kRobotToRightTurret = new Translation3d(
-        Units.inchesToMeters(-5.75d), 
-        Units.inchesToMeters(-7.25d), 
+        Units.inchesToMeters(-5.75d),
+        Units.inchesToMeters(-7.25d),
         Units.inchesToMeters(11.4125d)
     );
 
@@ -30,6 +30,7 @@ public class TurretConstants {
         .setP(60)
         .setD(0.5)
         .setS(0.2)
+        .setV(0.12*kGearRatio)
         .setA(0.01)
     ;
 

@@ -13,6 +13,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.lib.frc1731.Utils;
 import frc.lib.frc1731.hardware.motor.ctre.MotorIOTalonFX;
@@ -24,7 +25,7 @@ public class TurretSubsystem extends BaseSubsystem {
     private CANcoder cancoder;
     private Translation2d robotToTurret;
     private Supplier<Pose2d> swervePoseSupplier;
-    private TurretIOInputsAutoLogged inputs = new TurretIOInputsAutoLogged();
+    private TurretIOInputs inputs = new TurretIOInputs();
 
     public TurretSubsystem(TurretConfiguration config, Supplier<Pose2d> swervePoseSupplier, boolean enabled) {
         super(config.name(), config, enabled);
@@ -59,18 +60,29 @@ public class TurretSubsystem extends BaseSubsystem {
         motorConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
         motorConfig.CurrentLimits.StatorCurrentLimit = 30d;
 
-        motorConfig.Slot0.kP = 60.0; 
-        motorConfig.Slot0.kS = 0.2;
-        motorConfig.Slot0.kA = 0.01;
-        motorConfig.Slot0.kI = 0;
-        motorConfig.Slot0.kD = 0.5;
-        motorConfig.MotionMagic.MotionMagicCruiseVelocity = 4;
-        motorConfig.MotionMagic.MotionMagicAcceleration = 4;
+        motorConfig.Slot0.kP = kPositionGains.kP; 
+        motorConfig.Slot0.kS = kPositionGains.kS;
+        motorConfig.Slot0.kA = kPositionGains.kA;
+        motorConfig.Slot0.kI = kPositionGains.kI;
+        motorConfig.Slot0.kD = kPositionGains.kD;
+        motorConfig.MotionMagic.MotionMagicCruiseVelocity = kMaxTurretVelocity;
+        motorConfig.MotionMagic.MotionMagicAcceleration = kMaxTurretAcceleration;
+
+        // motorConfig.Slot0.kP = 60.0; 
+        // motorConfig.Slot0.kS = 0.2;
+        // motorConfig.Slot0.kA = 0.01;
+        // motorConfig.Slot0.kI = 0;
+        // motorConfig.Slot0.kD = 0.5;
+        // motorConfig.MotionMagic.MotionMagicCruiseVelocity = 4;
+        // motorConfig.MotionMagic.MotionMagicAcceleration = 4;
 
         motor.getMotor().getConfigurator().apply(motorConfig);
         motor.getMotor().setPosition(cancoder.getAbsolutePosition().waitForUpdate(0.2).getValueAsDouble());
-
         this.robotToTurret = turretConfig.robotToTurret().toTranslation2d();
+    }
+
+    public double getError() {
+        return inputs.targetDegrees - inputs.currentDegrees;
     }
 
     public Pose2d getTurretPose() {
@@ -127,12 +139,14 @@ public class TurretSubsystem extends BaseSubsystem {
         inputs.currentDegrees = motor.getRotations() * 360.0;
         inputs.turretPose = getTurretPose();
         inputs.atTarget = atTarget();
-        logger.processInputs(inputs);
+     //   logger.processInputs(inputs);
+
+        SmartDashboard.putNumber(((TurretConfiguration)config.get()).name() + " Target", inputs.targetDegrees);
     }
 
     public Command trackHub() {
         return track(() -> {
-            return Robot.isRedAlliance() ? new Translation2d(11.915394, 4.034536) : new Translation2d(4.625594, 4.034536);
+            return Robot.isRedAlliance() ? new Translation2d(11.91, 4.03) : new Translation2d(4.62, 4.03);
         });
     }
 
@@ -157,7 +171,7 @@ public class TurretSubsystem extends BaseSubsystem {
             );
 
             inputs.targetDegrees = output;
-            inputs.target = target.get();
+            inputs.target = new Pose2d(target.get(), new Rotation2d());
 
             motor.setPosition(output / 360.0);
         });
