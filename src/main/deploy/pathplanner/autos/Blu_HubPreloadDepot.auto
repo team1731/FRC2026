@@ -13,20 +13,27 @@
                 "data": {
                   "pathName": "HubPreloadDepot_1"
                 }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "FeedthroughCommand"
-                }
               }
             ]
           }
         },
         {
-          "type": "named",
+          "type": "deadline",
           "data": {
-            "name": "FeedthroughCommand"
+            "commands": [
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 0.0
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Shoot"
+                }
+              }
+            ]
           }
         }
       ]
