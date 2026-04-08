@@ -5,21 +5,47 @@
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "deadline",
           "data": {
-            "pathName": "RTrenchDoubleMidfield_1"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "RTrenchDoubleMidfield_1"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "IntakeCommand"
+                }
+              }
+            ]
           }
         },
         {
-          "type": "path",
+          "type": "deadline",
           "data": {
-            "pathName": "RTrenchDoubleMidfield_2"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "RTrenchDoubleMidfield_2"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "WarmupCommand"
+                }
+              }
+            ]
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "Shoot"
+            "name": "ShootCommand"
           }
         },
         {
@@ -42,15 +68,28 @@
           }
         },
         {
-          "type": "path",
+          "type": "deadline",
           "data": {
-            "pathName": "RTrenchDoubleMidfield_3"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "RTrenchDoubleMidfield_4"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "RTrenchDoubleMidfield_3_Swing"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "IntakeCommand"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "WarmupCommand"
+                }
+              }
+            ]
           }
         },
         {

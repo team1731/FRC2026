@@ -109,18 +109,19 @@ public class RobotContainer {
         // ex. NamedCommands.registerCommand("Example", new ExampleCommand());
         NamedCommands.registerCommand("ShootCommand", superstructure.autoShoot());
         NamedCommands.registerCommand("StopShootCommand", superstructure.stopShooters());
+        NamedCommands.registerCommand("StopIntakeCommand", intake.stop());
         NamedCommands.registerCommand("IntakeCommand", superstructure.runIntake(true));
         NamedCommands.registerCommand("PassCommand", superstructure.pass());
         NamedCommands.registerCommand("WarmupCommand", superstructure.warmup());
         NamedCommands.registerCommand("FeedthroughCommand", superstructure.feedthrough());
 
-        new EventTrigger("Shoot").whileTrue(superstructure.autoShoot());
-        new EventTrigger("StopShoot").onTrue(superstructure.stopShooters());
-        new EventTrigger("Intake").whileTrue(superstructure.runIntake(true));
-        new EventTrigger("Pass").whileTrue(superstructure.pass());
-        new EventTrigger("StowHood").onTrue(Commands.deadline(Commands.waitSeconds(0.1), superstructure.stowHoodsOnce()));
-        new EventTrigger("Warmup").whileTrue(superstructure.warmup());
-        new EventTrigger("Feedthrough").whileTrue(superstructure.feedthrough());
+        // new EventTrigger("Shoot").whileTrue(superstructure.autoShoot());
+        // new EventTrigger("StopShoot").onTrue(superstructure.stopShooters());
+        // new EventTrigger("Intake").whileTrue(superstructure.runIntake(true));
+        // new EventTrigger("Pass").whileTrue(superstructure.pass());
+        // new EventTrigger("StowHood").onTrue(Commands.deadline(Commands.waitSeconds(0.1), superstructure.stowHoodsOnce()));
+        // new EventTrigger("Warmup").whileTrue(superstructure.warmup());
+        // new EventTrigger("Feedthrough").whileTrue(superstructure.feedthrough());
     }
 
     /**

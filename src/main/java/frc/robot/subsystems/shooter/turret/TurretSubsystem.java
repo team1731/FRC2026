@@ -136,7 +136,7 @@ public class TurretSubsystem extends BaseSubsystem {
 
     @Override
     public void periodicTelemetry() {
-        inputs.currentDegrees = motor.getRotations() * kSensorToMech * 360.0;
+        inputs.currentDegrees = motor.getRotations() * (1/kSensorToMech) * 360.0;
         inputs.turretPose = getTurretPose();
         inputs.atTarget = atTarget();
      //   logger.processInputs(inputs);
@@ -170,7 +170,7 @@ public class TurretSubsystem extends BaseSubsystem {
                 inputs.currentDegrees
             );
 
-            inputs.targetDegrees = output * kSensorToMech;
+            inputs.targetDegrees = output / kSensorToMech;
             inputs.target = new Pose2d(target.get(), new Rotation2d());
 
             motor.setPosition(output / 360.0);

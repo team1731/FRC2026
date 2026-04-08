@@ -8,11 +8,27 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.937332819997404,
-        "y": 0.7921750583581906
+        "x": 7.053766048502139,
+        "y": 1.1173323823109853
       },
       "isLocked": false,
       "linkedName": "RMidIntake2"
+    },
+    {
+      "anchor": {
+        "x": 5.501126961483594,
+        "y": 0.6682289803220032
+      },
+      "prevControl": {
+        "x": 6.375838887671183,
+        "y": 0.6529643933876939
+      },
+      "nextControl": {
+        "x": 4.233138373751783,
+        "y": 0.6903566333808839
+      },
+      "isLocked": false,
+      "linkedName": null
     },
     {
       "anchor": {
@@ -20,8 +36,8 @@
         "y": 0.6682289803220032
       },
       "prevControl": {
-        "x": 7.990004098615943,
-        "y": 0.6787269377853657
+        "x": 4.91888730385164,
+        "y": 0.6903566333808839
       },
       "nextControl": null,
       "isLocked": false,
@@ -30,20 +46,13 @@
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.8598639455782323,
+      "waypointRelativePos": 1,
       "rotationDegrees": 0.0
     }
   ],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "Warmup",
-      "waypointRelativePos": 0.26633444075304435,
-      "endWaypointRelativePos": 1.0,
-      "command": null
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 4.0,
     "maxAcceleration": 4.0,

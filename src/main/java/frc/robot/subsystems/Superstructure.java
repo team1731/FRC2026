@@ -168,7 +168,7 @@ public class Superstructure extends SubsystemBase {
         return leftTurret.setDegrees(left).alongWith(rightTurret.setDegrees(right));
     }
 
-    public Command warmup() {
+    public Command  warmup() {
         return new ParallelCommandGroup(
             leftFlywheel.warmup(),
             rightFlywheel.warmup(),
@@ -411,20 +411,17 @@ public class Superstructure extends SubsystemBase {
             // compensatedLeftTarget = aimPoints[0];
             // compensatedRightTarget = aimPoints[1];
             double tof1Left = shotTableTof(rawTarget.minus(leftTurretPos).getNorm());
-            Translation2d firstPassTargetLeft = robotXY.plus(currentVel.times(tof1Left));
-            double tof2Left = shotTableTof(firstPassTargetLeft.minus(rightTurretPos).getNorm());
-            Translation2d secondPassTargetLeft = robotXY.plus(currentVel.times(tof2Left));
+            Translation2d firstPassTargetLeft = rawTarget.minus(currentVel.times(tof1Left));
+            double tof2Left = shotTableTof(firstPassTargetLeft.minus(leftTurretPos).getNorm());
+            Translation2d secondPassTargetLeft = rawTarget.minus(currentVel.times(tof2Left));
 
-            double tof1Right = shotTableTof(rawTarget.minus(leftTurretPos).getNorm());
-            Translation2d firstPassTargetRight = robotXY.plus(currentVel.times(tof1Right));
+            double tof1Right = shotTableTof(rawTarget.minus(rightTurretPos).getNorm());
+            Translation2d firstPassTargetRight = rawTarget.minus(currentVel.times(tof1Right));
             double tof2Right = shotTableTof(firstPassTargetRight.minus(rightTurretPos).getNorm());
-            Translation2d secondPassTargetRight = robotXY.plus(currentVel.times(tof2Right));
+            Translation2d secondPassTargetRight = rawTarget.minus(currentVel.times(tof2Right));
 
-            Translation2d finalTargetLeft = rawTarget.minus(secondPassTargetLeft.minus(robotXY));
-            Translation2d finalTargetRight = rawTarget.minus(secondPassTargetRight.minus(robotXY));
-
-            compensatedLeftTarget = finalTargetLeft;
-            compensatedRightTarget = finalTargetRight;
+            compensatedLeftTarget = secondPassTargetLeft;
+            compensatedRightTarget = secondPassTargetRight;
         } else {
             compensatedLeftTarget = rawTarget;
             compensatedRightTarget = rawTarget;
