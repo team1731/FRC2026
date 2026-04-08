@@ -6,11 +6,6 @@ import java.util.*;
 
 import edu.wpi.first.wpilibj.Timer;
 
-import org.littletonrobotics.junction.LoggedRobot;
-import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.networktables.NT4Publisher;
-import org.littletonrobotics.junction.wpilog.WPILOGWriter;
-
 import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.commands.PathPlannerAuto;
@@ -23,6 +18,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -90,9 +86,14 @@ public class Robot extends TimedRobot {
 		autoPreload();
 		setupLogging();
 		swerve.configureInitialPosition(); // sets the operator perspective
-		
-		PathPlannerLogging.setLogCurrentPoseCallback((pose) -> {currentPose = pose;});
-		PathPlannerLogging.setLogTargetPoseCallback((pose) -> {targetPose = pose;});
+
+		PathPlannerLogging.setLogCurrentPoseCallback((pose) -> {
+			currentPose = pose;
+		});
+
+		PathPlannerLogging.setLogTargetPoseCallback((pose) -> {
+			targetPose = pose;
+		});
 
 		CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
 	}

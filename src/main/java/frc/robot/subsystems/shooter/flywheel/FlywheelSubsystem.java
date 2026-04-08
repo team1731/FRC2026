@@ -4,6 +4,7 @@ import static frc.robot.subsystems.shooter.flywheel.FlywheelConstants.*;
 
 import java.util.function.DoubleSupplier;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.frc1731.Utils;
 import frc.lib.frc1731.hardware.motor.ctre.MotorIOTalonFX;
@@ -34,6 +35,7 @@ public class FlywheelSubsystem extends BaseSubsystem {
         inputs.currentVelocity = motor.getVelocityRPS();
         inputs.atTargetVelocity = Utils.isWithin(inputs.currentVelocity, inputs.targetVelocity, kEpsilon);
      //   logger.processInputs(inputs);
+        SmartDashboard.putNumber("Target Flywheel Velocity", inputs.targetVelocity);
     }
 
     public Command setVelocity(DoubleSupplier target) {

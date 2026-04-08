@@ -10,6 +10,8 @@ import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.lib.frc1731.field.FieldPositions;
@@ -32,6 +34,11 @@ public class Superstructure extends SubsystemBase {
     private IntakePivotSubsystem pivot;
     private IntakeRollerSubsystem intake;
 
+    private final StructPublisher<Pose2d> leftTargetPose = 
+        NetworkTableInstance.getDefault().getTable("Superstructure").getStructTopic("LeftTarget", Pose2d.struct).publish();
+    private final StructPublisher<Pose2d> rightTargetPose = 
+        NetworkTableInstance.getDefault().getTable("Superstructure").getStructTopic("RightTarget", Pose2d.struct).publish();
+
     private final ShotTable shotTable = ShotTable.getScoringTable();
 
     // -------------------------------------------------------------------------
@@ -44,7 +51,7 @@ public class Superstructure extends SubsystemBase {
 
     private final Supplier<Translation2d> kPassSupplier = () -> {
         double x = Robot.isRedAlliance() ? FieldPositions.kFieldLength - 2 : 2;
-        double y = Robot.isRedAlliance() && swerve.getCurrentPose().getY() > FieldPositions.kFieldWidth / 2.0 ? FieldPositions.kFieldWidth - 1 : 1;
+        double y = Robot.isRedAlliance() && swerve.getCurrentPose().getY() > FieldPositions.kFieldWidth / 2.0 ? FieldPositions.kFieldWidth - 2 : 2;
         return new Translation2d(x, y);
     };
 
@@ -426,6 +433,9 @@ public class Superstructure extends SubsystemBase {
             compensatedLeftTarget = rawTarget;
             compensatedRightTarget = rawTarget;
         }
+
+        leftTargetPose.set(new Pose2d(compensatedLeftTarget, new Rotation2d()));
+        rightTargetPose.set(new Pose2d(compensatedRightTarget, new Rotation2d()));
 
         // ---------------------------------------------------------------------
         // 5. Look up shot parameters from each turret's predicted position

@@ -5,9 +5,22 @@
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "deadline",
           "data": {
-            "pathName": "HubPreloadDepot_1"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "HubPreloadDepot_1"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "FeedthroughCommand"
+                }
+              }
+            ]
           }
         },
         {

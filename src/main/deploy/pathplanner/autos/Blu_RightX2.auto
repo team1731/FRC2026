@@ -7,19 +7,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "LTrenchOverBumpDoubleMidfield_1"
+            "pathName": "RightX2_1"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 4.0
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "LTrenchOverBumpDoubleMidfield_2"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "ShootCommand"
+            "pathName": "RightX2_2"
           }
         }
       ]

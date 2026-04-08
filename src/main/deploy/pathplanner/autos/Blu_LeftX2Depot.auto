@@ -7,19 +7,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "RTrenchOverBumpDoubleMidfield_1"
+            "pathName": "LeftX2Depot_1"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 4.0
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "RTrenchOverBumpDoubleMidfield_2"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "RTrenchOverBumpDoubleMidfield_3"
+            "pathName": "LeftX2Depot_2"
           }
         }
       ]
