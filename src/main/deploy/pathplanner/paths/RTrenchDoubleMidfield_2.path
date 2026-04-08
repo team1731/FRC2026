@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.5971897289586305,
-        "y": 2.5794008559201154
+        "x": 7.66188302425107,
+        "y": 2.7993580599144083
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.403109843081312,
-        "y": 0.43158345221112615
+        "x": 7.4678031383737515,
+        "y": 0.6515406562054191
       },
       "isLocked": false,
       "linkedName": "RMidIntake1"
@@ -36,7 +36,14 @@
   ],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "Warmup",
+      "waypointRelativePos": 0.37707641196013003,
+      "endWaypointRelativePos": 1.0,
+      "command": null
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 4.0,
     "maxAcceleration": 4.0,

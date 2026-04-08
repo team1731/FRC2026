@@ -5,41 +5,15 @@
     "data": {
       "commands": [
         {
-          "type": "deadline",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "RTrenchDoubleMidfield_1"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "IntakeCommand"
-                }
-              }
-            ]
+            "pathName": "RTrenchDoubleMidfield_1"
           }
         },
         {
-          "type": "deadline",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "RTrenchDoubleMidfield_2"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "WarmupCommand"
-                }
-              }
-            ]
+            "pathName": "RTrenchDoubleMidfield_2"
           }
         },
         {
@@ -68,41 +42,15 @@
           }
         },
         {
-          "type": "deadline",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "RTrenchDoubleMidfield_3"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "IntakeCommand"
-                }
-              }
-            ]
+            "pathName": "RTrenchDoubleMidfield_3"
           }
         },
         {
-          "type": "deadline",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "RTrenchDoubleMidfield_4"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "WarmupCommand"
-                }
-              }
-            ]
+            "pathName": "RTrenchDoubleMidfield_4"
           }
         },
         {
