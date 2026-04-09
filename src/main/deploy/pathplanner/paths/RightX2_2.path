@@ -118,7 +118,7 @@
     {
       "name": "Intake",
       "waypointRelativePos": 0.0,
-      "endWaypointRelativePos": null,
+      "endWaypointRelativePos": 3.135269709543523,
       "command": null
     },
     {
@@ -130,13 +130,13 @@
     {
       "name": "Warmup",
       "waypointRelativePos": 3.463414634146337,
-      "endWaypointRelativePos": null,
+      "endWaypointRelativePos": 3.925311203319504,
       "command": null
     },
     {
       "name": "Shoot",
       "waypointRelativePos": 3.939024390243895,
-      "endWaypointRelativePos": null,
+      "endWaypointRelativePos": 4.0,
       "command": null
     }
   ],

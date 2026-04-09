@@ -117,10 +117,10 @@ public class RobotContainer {
 
         new EventTrigger("Shoot").onTrue(superstructure.shoot());
         new EventTrigger("StopShoot").onTrue(superstructure.stopShooters());
-        new EventTrigger("Intake").onTrue(superstructure.runIntake(true));
+        new EventTrigger("Intake").whileTrue(superstructure.runIntake(true));
         new EventTrigger("Pass").onTrue(superstructure.pass());
-        new EventTrigger("Warmup").onTrue(superstructure.warmup());
-        new EventTrigger("Feedthrough").onTrue(superstructure.feedthrough());
+        new EventTrigger("Warmup").whileTrue(superstructure.warmup());
+        new EventTrigger("Feedthrough").whileTrue(superstructure.feedthrough());
     }
 
     /**

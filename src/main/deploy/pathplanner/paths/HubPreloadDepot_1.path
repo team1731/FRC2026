@@ -85,7 +85,7 @@
   "folder": "HubPreloadDepot",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -179.9175363558567
+    "rotation": 179.48383577023517
   },
   "useDefaultConstraints": true
 }

@@ -130,7 +130,10 @@ public class Superstructure extends SubsystemBase {
     // =========================================================================
 
     public Command resetYaw() {
-        return new InstantCommand(() -> swerve.resetHeadingButtonPressed());
+        return new InstantCommand(() -> {
+            swerve.resetHeadingButtonPressed();
+            // swerve.resetTelePose();
+        });
     }
 
     public Command runIntake(boolean deployed) {

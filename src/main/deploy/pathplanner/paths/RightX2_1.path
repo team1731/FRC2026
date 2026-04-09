@@ -113,7 +113,7 @@
   "constraintZones": [
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 1.875,
+      "minWaypointRelativePos": 1.553941908713695,
       "maxWaypointRelativePos": 2.9039634146341538,
       "constraints": {
         "maxVelocity": 1.5,
@@ -130,19 +130,19 @@
     {
       "name": "Intake",
       "waypointRelativePos": 0.0,
-      "endWaypointRelativePos": null,
+      "endWaypointRelativePos": 2.981327800829895,
       "command": null
     },
     {
       "name": "Warmup",
       "waypointRelativePos": 3.0,
-      "endWaypointRelativePos": null,
+      "endWaypointRelativePos": 4.931535269709545,
       "command": null
     },
     {
       "name": "Shoot",
       "waypointRelativePos": 4.939024390243913,
-      "endWaypointRelativePos": null,
+      "endWaypointRelativePos": 5.0,
       "command": null
     }
   ],

@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.*;
 import java.util.function.BooleanSupplier;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
@@ -182,6 +183,10 @@ public class SwerveSubsystem extends BaseSubsystem {
            this.resetPose(pose);
         }
         // this.resetPose(pose);
+    }
+
+    public void resetTelePose() {
+        this.resetPose(new PathPlannerAuto("ResetPosition").getStartingPose());
     }
 
     @Override
