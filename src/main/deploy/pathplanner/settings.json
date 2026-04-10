@@ -4,9 +4,10 @@
   "holonomicMode": true,
   "pathFolders": [
     "HubPreloadDepot",
-    "LeftHubX1Depot",
     "LTrenchDoubleMidfield",
+    "LeftHubX1Depot",
     "LeftX2Depot",
+    "LeftDelayedX2",
     "RTrenchDoubleMidfield",
     "RightX2"
   ],

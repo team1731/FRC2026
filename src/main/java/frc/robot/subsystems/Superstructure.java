@@ -347,7 +347,10 @@ public class Superstructure extends SubsystemBase {
                 setFlywheels(() -> parameters[1], () -> parameters[1]),
                 setHoods(() -> parameters[0], () -> parameters[0]),
                 Commands.either(setTurrets(() -> 0, () -> 0), setTurrets(() -> 180, () -> 180), () -> zeroTurret),
-                Commands.waitUntil(this::hoodAndFlywheelsReady).andThen(index().alongWith(runIntake(false)))
+                Commands.waitUntil(this::hoodAndFlywheelsReady).andThen(index().alongWith(
+                    new JiggleToPosition(pivot),
+                    intake.setVelocity(RotationsPerSecond.of(100))
+                ))
             );
         }, Set.of(leftFlywheel, rightFlywheel, leftHood, rightHood, leftTurret, rightTurret, indexer, pivot, intake));
     }

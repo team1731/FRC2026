@@ -38,7 +38,7 @@ public class RobotContainer {
     private FlywheelSubsystem leftFlywheel, rightFlywheel;
     private HoodSubsystem leftHood, rightHood;
 
-    private LEDSubsystem led;
+    // private LEDSubsystem led;
 
     private Superstructure superstructure;
 
@@ -65,7 +65,7 @@ public class RobotContainer {
     private final Trigger dLeftTurretLeft = driver.povLeft();
     private final Trigger dLeftTurretRight = driver.povRight();
     private final Trigger dRightTurretLeft = driver.povDown();
-    private final Trigger dRightTurretRight = driver.povUp();
+    private final Trigger dRetract = driver.povUp();
 
     private LoggedTunableNumber tuneableFlywheelRPS = new LoggedTunableNumber("TunedFlywheelRPS", 0, () -> testCondition.equals(TestShotCondition.kParameters));
     private LoggedTunableNumber tuneableHoodRotations = new LoggedTunableNumber("TunedHoodRotations", 0, () -> testCondition.equals(TestShotCondition.kParameters));
@@ -89,14 +89,14 @@ public class RobotContainer {
         leftHood = new HoodSubsystem(kLeftHoodConfig, true);
         rightHood = new HoodSubsystem(kRightHoodConfig, true);
 
-        leftTurret = new TurretSubsystem(kLeftTurretConfigs, () -> swerve.getCurrentPose(), true);
-        rightTurret = new TurretSubsystem(kRightTurretConfigs, () -> swerve.getCurrentPose(), true);
+        leftTurret = new TurretSubsystem(kLeftTurretConfigs, () -> swerve.getCurrentPose(), () -> swerve.getYaw(), true);
+        rightTurret = new TurretSubsystem(kRightTurretConfigs, () -> swerve.getCurrentPose(), () -> swerve.getYaw(), true);
 
         indexer = new IndexerSubsystem(true);
         pivot = new IntakePivotSubsystem(true);
         intake = new IntakeRollerSubsystem(true);
 
-        led = new LEDSubsystem(true);
+        // led = new LEDSubsystem(true);
 
         superstructure = new Superstructure(swerve, leftFlywheel, rightFlywheel, 
                                                 leftHood, rightHood, 
@@ -142,17 +142,22 @@ public class RobotContainer {
         dTowerShot.whileTrue(superstructure.manualShot(2.5, true));
         dTrenchShot.whileTrue(superstructure.manualShot(4, true));
         
-        (dTestSetShot.and(() -> testCondition.equals(TestShotCondition.kDistance)))
-            .whileTrue(superstructure.tuneShot(tuneableDistanceShot, true));
-        (dTestSetShot.and(() -> testCondition.equals(TestShotCondition.kParameters)))
-            .whileTrue(superstructure.tuneShot(tuneableFlywheelRPS.get(), tuneableHoodRotations.get(), true));
+        // (dTestSetShot.and(() -> testCondition.equals(TestShotCondition.kDistance)))
+        //     .whileTrue(superstructure.tuneShot(tuneableDistanceShot, true));
+        // (dTestSetShot.and(() -> testCondition.equals(TestShotCondition.kParameters)))
+        //     .whileTrue(superstructure.tuneShot(tuneableFlywheelRPS.get(), tuneableHoodRotations.get(), true));
 
         dSpit.whileTrue(superstructure.spit());
+        driver.back().whileTrue(superstructure.tuneShot(tuneableDistanceShot, true));
 
-        dLeftTurretLeft.whileTrue(leftTurret.setDegrees(-200));
-        dLeftTurretRight.whileTrue(leftTurret.setDegrees(80));
-        dRightTurretLeft.whileTrue(rightTurret.setDegrees(-80));
-        dRightTurretRight.whileTrue(rightTurret.setDegrees(200));
+        // dLeftTurretLeft.whileTrue(leftTurret.setDegrees(-200));
+        // dLeftTurretRight.whileTrue(leftTurret.setDegrees(80));
+        // dRightTurretLeft.whileTrue(rightTurret.setDegrees(-80));
+        // dRightTurretRight.whileTrue(rightTurret.setDegrees(200));
+        dRetract.whileTrue(pivot.retract());
+        driver.povRight().whileTrue(leftTurret.setDegrees(90).alongWith(rightTurret.setDegrees(90)));
+        driver.povDown().whileTrue(leftTurret.setDegrees(180).alongWith(rightTurret.setDegrees(180)));
+        driver.povLeft().whileTrue(leftTurret.setDegrees(-90).alongWith(rightTurret.setDegrees(-90)));
     }
 
     public void configureDefaultCommands() {
@@ -172,7 +177,7 @@ public class RobotContainer {
         leftFlywheel.setDefaultCommand(leftFlywheel.stop());
         rightFlywheel.setDefaultCommand(rightFlywheel.stop());
 
-        led.setDefaultCommand(led.flashAllianceShift());
+        // led.setDefaultCommand(led.flashAllianceShift());
     }
 
     public void periodic() {

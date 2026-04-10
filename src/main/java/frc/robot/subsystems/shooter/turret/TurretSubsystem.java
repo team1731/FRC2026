@@ -25,11 +25,13 @@ public class TurretSubsystem extends BaseSubsystem {
     private CANcoder cancoder;
     private Translation2d robotToTurret;
     private Supplier<Pose2d> swervePoseSupplier;
+    private DoubleSupplier swerveYawSupplier;
     private TurretIOInputs inputs = new TurretIOInputs();
 
-    public TurretSubsystem(TurretConfiguration config, Supplier<Pose2d> swervePoseSupplier, boolean enabled) {
+    public TurretSubsystem(TurretConfiguration config, Supplier<Pose2d> swervePoseSupplier, DoubleSupplier swerveYawSupplier, boolean enabled) {
         super(config.name(), config, enabled);
         this.swervePoseSupplier = swervePoseSupplier;
+        this.swerveYawSupplier = swerveYawSupplier;
         inputs.minDegrees = config.minDegrees();
         inputs.maxDegrees = config.maxDegrees();
     }
@@ -136,12 +138,14 @@ public class TurretSubsystem extends BaseSubsystem {
 
     @Override
     public void periodicTelemetry() {
-        inputs.currentDegrees = motor.getRotations() /** (1/kSensorToMech)*/ * 360.0;
+        inputs.currentDegrees = motor.getRotations() * 360.0;
         inputs.turretPose = getTurretPose();
         inputs.atTarget = atTarget();
      //   logger.processInputs(inputs);
 
-        SmartDashboard.putNumber(((TurretConfiguration)config.get()).name() + " Target", inputs.targetDegrees);
+        // SmartDashboard.putNumber(((TurretConfiguration)config.get()).name() + " Target", inputs.targetDegrees);
+        // SmartDashboard.putNumber(((TurretConfiguration)config.get()).name() + " Current", inputs.currentDegrees);
+        // SmartDashboard.putBoolean(((TurretConfiguration)config.get()).name() + " AtTarget", inputs.atTarget);
     }
 
     public Command trackHub() {
@@ -159,6 +163,8 @@ public class TurretSubsystem extends BaseSubsystem {
                 robotToTurret.rotateBy(robotRotation)
             );
 
+            // robotPose.transformBy(new Transform2d(robotToTurret.getX(), robotToTurret.getY()));
+
             double fieldTargetHeading = Math.toDegrees(Math.atan2(
                 target.get().getY() - turretFieldPos.getY(),
                 target.get().getX() - turretFieldPos.getX()
@@ -170,10 +176,12 @@ public class TurretSubsystem extends BaseSubsystem {
                 inputs.currentDegrees
             );
 
+            // SmartDashboard.putNumber(((TurretConfiguration)config.get()).name() + "TurretToHub", fieldTargetHeading);
+
             inputs.targetDegrees = output;
             inputs.target = new Pose2d(target.get(), new Rotation2d());
 
-            motor.setPosition(output / (360.0));
+            motor.setPosition(inputs.targetDegrees / (360.0));
         });
     }
 
@@ -190,7 +198,7 @@ public class TurretSubsystem extends BaseSubsystem {
                 output += 360;
             }
             inputs.targetDegrees = output;
-            motor.setPosition(output / (360.0));
+            motor.setPosition(inputs.targetDegrees / (360.0));
         });
     }
 

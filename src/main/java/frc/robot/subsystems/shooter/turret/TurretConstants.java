@@ -11,7 +11,7 @@ import frc.robot.Ports;
 public class TurretConstants {
     public static final double kGearRatio = 1d / (15d / 40d * 19d / 36d * 36d / 164d); // 256.00 : 9.00 overall reduction;
     public static final double kRotorToSensor = 1d / (15d / 40d  * 19d / 36d / 5d);
-    public static final double kSensorToMech = 1d / (kRotorToSensor / kGearRatio); // 4.00 : 5.00 overall reduction
+    public static final double kSensorToMech = 1.0 / (kRotorToSensor / kGearRatio); // 4.00 : 5.00 overall reduction
     public static final double kEpsilon = 3d; // Degrees;
 
     public static final Translation3d kRobotToLeftTurret = new Translation3d(
@@ -54,14 +54,14 @@ public class TurretConstants {
     public static final CANcoderConfiguration kLeftCANCoderConfigs = new CANcoderConfiguration()
     .withMagnetSensor(new MagnetSensorConfigs()
         .withAbsoluteSensorDiscontinuityPoint(0.29)
-        .withMagnetOffset(0.01416015625)
+        .withMagnetOffset(0.009521484375)
         .withSensorDirection(SensorDirectionValue.Clockwise_Positive)
     );
 
     public static final CANcoderConfiguration kRightCANCoderConfigs = new CANcoderConfiguration()
     .withMagnetSensor(new MagnetSensorConfigs()
         .withAbsoluteSensorDiscontinuityPoint(0.7325)
-        .withMagnetOffset(-0.25244140625)
+        .withMagnetOffset(-0.26171875)
         .withSensorDirection(SensorDirectionValue.Clockwise_Positive)
     );
         

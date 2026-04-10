@@ -7,6 +7,7 @@ import java.util.*;
 import edu.wpi.first.wpilibj.Timer;
 
 import com.ctre.phoenix6.SignalLogger;
+import com.ctre.phoenix6.hardware.ParentDevice;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.util.PathPlannerLogging;
@@ -17,6 +18,7 @@ import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -96,6 +98,7 @@ public class Robot extends TimedRobot {
 		});
 
 		CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
+		RobotController.setBrownoutVoltage(6.0);
 	}
 	
 	private void setupLogging() {
