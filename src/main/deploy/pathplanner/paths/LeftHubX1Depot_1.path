@@ -3,69 +3,61 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 4.466784090909091,
-        "y": 0.6543636363636369
+        "x": 3.636248952499858,
+        "y": 5.10314275033323
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.436433666191155,
-        "y": 0.6774179743223976
+        "x": 2.7511043741817707,
+        "y": 5.135925882866162
       },
       "isLocked": false,
-      "linkedName": "RTrench"
+      "linkedName": "LBump"
     },
     {
       "anchor": {
-        "x": 5.358801711840228,
-        "y": 0.6543636363636369
+        "x": 1.5931686746939606,
+        "y": 5.958277108436546
       },
       "prevControl": {
-        "x": 4.8026836432810605,
-        "y": 0.6350226536529079
+        "x": 2.210344463925237,
+        "y": 5.958685443478004
       },
       "nextControl": {
-        "x": 7.881840228245363,
-        "y": 0.7421112696148362
+        "x": 0.6749810180861107,
+        "y": 5.957669618315629
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 7.5971897289586305,
-        "y": 2.5794008559201154
+        "x": 0.447125000000931,
+        "y": 5.962374999996823
       },
       "prevControl": {
-        "x": 7.558373751783167,
-        "y": 1.4019828815977178
+        "x": 0.9431434051582988,
+        "y": 5.97466587244307
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "RMidIntake1"
+      "linkedName": "Depot"
     }
   ],
   "rotationTargets": [
     {
       "waypointRelativePos": 1,
-      "rotationDegrees": 0.0
-    },
-    {
-      "waypointRelativePos": 1.5,
-      "rotationDegrees": 90.0
-    },
-    {
-      "waypointRelativePos": 1.95,
-      "rotationDegrees": 89.55574667739947
+      "rotationDegrees": 180.0
     }
   ],
   "constraintZones": [
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 1.3610188261351195,
+      "minWaypointRelativePos": 1.0199170124481456,
       "maxWaypointRelativePos": 2.0,
       "constraints": {
-        "maxVelocity": 1.5,
-        "maxAcceleration": 2.5,
+        "maxVelocity": 1.0,
+        "maxAcceleration": 2.0,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
         "nominalVoltage": 12.0,
@@ -74,7 +66,14 @@
     }
   ],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "Feedthrough",
+      "waypointRelativePos": 0,
+      "endWaypointRelativePos": 2.0,
+      "command": null
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 4.0,
     "maxAcceleration": 4.0,
@@ -85,13 +84,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 90.0
+    "rotation": -179.63713588643614
   },
   "reversed": false,
-  "folder": "RTrenchDoubleMidfield",
+  "folder": "LeftHubX1Depot",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 180.0
   },
   "useDefaultConstraints": true
 }

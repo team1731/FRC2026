@@ -11,18 +11,18 @@ import frc.robot.Ports;
 public class TurretConstants {
     public static final double kGearRatio = 1d / (15d / 40d * 19d / 36d * 36d / 164d); // 256.00 : 9.00 overall reduction;
     public static final double kRotorToSensor = 1d / (15d / 40d  * 19d / 36d / 5d);
-    public static final double kSensorToMech = 1d / (kRotorToSensor / kGearRatio); // 4.00 : 5.00 overall reduction
+    public static final double kSensorToMech = 1.0 / (kRotorToSensor / kGearRatio); // 4.00 : 5.00 overall reduction
     public static final double kEpsilon = 3d; // Degrees;
 
     public static final Translation3d kRobotToLeftTurret = new Translation3d(
-        Units.inchesToMeters(-5.75d), 
+        Units.inchesToMeters(-5.75d),
         Units.inchesToMeters(7.25d), 
         Units.inchesToMeters(11.4125d)
     );
 
     public static final Translation3d kRobotToRightTurret = new Translation3d(
-        Units.inchesToMeters(-5.75d), 
-        Units.inchesToMeters(-7.25d), 
+        Units.inchesToMeters(-5.75d),
+        Units.inchesToMeters(-7.25d),
         Units.inchesToMeters(11.4125d)
     );
 
@@ -30,6 +30,7 @@ public class TurretConstants {
         .setP(60)
         .setD(0.5)
         .setS(0.2)
+        .setV(0.12*kGearRatio)
         .setA(0.01)
     ;
 
@@ -52,16 +53,16 @@ public class TurretConstants {
 
     public static final CANcoderConfiguration kLeftCANCoderConfigs = new CANcoderConfiguration()
     .withMagnetSensor(new MagnetSensorConfigs()
-        .withAbsoluteSensorDiscontinuityPoint(0.283)
-        .withMagnetOffset(-0.087890625)
-        .withSensorDirection(SensorDirectionValue.CounterClockwise_Positive)
+        .withAbsoluteSensorDiscontinuityPoint(0.29)
+        .withMagnetOffset(0.009521484375)
+        .withSensorDirection(SensorDirectionValue.Clockwise_Positive)
     );
 
     public static final CANcoderConfiguration kRightCANCoderConfigs = new CANcoderConfiguration()
     .withMagnetSensor(new MagnetSensorConfigs()
-        .withAbsoluteSensorDiscontinuityPoint(0.7365)
-        .withMagnetOffset(-0.6611328125)
-        .withSensorDirection(SensorDirectionValue.CounterClockwise_Positive)
+        .withAbsoluteSensorDiscontinuityPoint(0.7325)
+        .withMagnetOffset(-0.26171875)
+        .withSensorDirection(SensorDirectionValue.Clockwise_Positive)
     );
         
     public static final TurretConfiguration kLeftTurretConfigs = new TurretConfiguration(
@@ -70,8 +71,8 @@ public class TurretConstants {
         Ports.kLeftTurretCANCoderId,
         kLeftFeedbackConfigs,
         kLeftCANCoderConfigs,
-        106,
-        -277,
+        125, // 0.257
+        -261, // -0.662
         kRobotToLeftTurret
     );
 
@@ -81,8 +82,8 @@ public class TurretConstants {
         Ports.kRightTurretCANCoderId,
         kRightFeedbackConfigs,
         kRightCANCoderConfigs,
-        288,
-        -101,
+        291, // 0.730
+        -105, // -0.265
         kRobotToRightTurret
     );
 }

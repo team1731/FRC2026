@@ -11,13 +11,13 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "RTrenchDoubleMidfield_1"
+                  "pathName": "LTrenchDoubleMidfield_1"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "Intake"
+                  "name": "IntakeCommand"
                 }
               }
             ]
@@ -30,13 +30,13 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "RTrenchDoubleMidfield_2"
+                  "pathName": "LTrenchDoubleMidfield_2"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "Warmup"
+                  "name": "WarmupCommand"
                 }
               }
             ]
@@ -45,7 +45,7 @@
         {
           "type": "named",
           "data": {
-            "name": "Shoot"
+            "name": "ShootCommand"
           }
         },
         {
@@ -61,7 +61,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "StopShoot"
+                  "name": "StopShootCommand"
                 }
               }
             ]
@@ -74,13 +74,13 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "RTrenchDoubleMidfield_3"
+                  "pathName": "LTrenchDoubleMidfield_3"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "Intake"
+                  "name": "IntakeCommand"
                 }
               }
             ]
@@ -93,13 +93,13 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "RTrenchDoubleMidfield_4"
+                  "pathName": "LTrenchDoubleMidfield_4"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "Warmup"
+                  "name": "WarmupCommand"
                 }
               }
             ]
@@ -108,7 +108,7 @@
         {
           "type": "named",
           "data": {
-            "name": "Shoot"
+            "name": "ShootCommand"
           }
         }
       ]

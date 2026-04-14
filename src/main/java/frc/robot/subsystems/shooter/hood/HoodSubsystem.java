@@ -4,6 +4,7 @@ import static frc.robot.subsystems.shooter.hood.HoodConstants.*;
 
 import java.util.function.DoubleSupplier;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.frc1731.Utils;
 import frc.lib.frc1731.hardware.motor.ctre.MotorIOTalonFXS;
@@ -11,7 +12,7 @@ import frc.robot.subsystems.BaseSubsystem;
 
 public class HoodSubsystem extends BaseSubsystem {
     private MotorIOTalonFXS motor;
-    private double targetRotations = 0;
+    private HoodIOInputs inputs = new HoodIOInputs();
 
     public HoodSubsystem(HoodConfiguration config, boolean enabled) {
         super(config.name(), config, enabled);
@@ -29,20 +30,21 @@ public class HoodSubsystem extends BaseSubsystem {
 
     public boolean atTarget() {
         if (!isEnabled()) return true;
-        return Utils.isWithin(motor.getRotations(), targetRotations, kEpsilon);
+        return inputs.atTarget;
     }
 
     @Override
     public void periodicTelemetry() {
-        logger.log("Current Rotations", motor.getRotations());
-        logger.log("Target Rotations", targetRotations);
-        logger.log("At Target", atTarget());
+        inputs.motorRotations = motor.getRotations();
+        inputs.atTarget = Utils.isWithin(inputs.motorRotations, inputs.targetRotations, kEpsilon);
+     //   logger.processInputs(inputs);
+        SmartDashboard.putNumber("Target Hood", inputs.targetRotations);
     }
 
     public Command setRotations(DoubleSupplier target) {
         return run(() -> {
-            this.targetRotations = Utils.clamp(target.getAsDouble(), kMinRotations, kMaxRotations);
-            motor.setPosition(targetRotations);
+            inputs.targetRotations = Utils.clamp(target.getAsDouble(), kMinRotations, kMaxRotations);
+            motor.setPosition(inputs.targetRotations);
         }).withName("SetRotations");
     }
 
@@ -57,8 +59,8 @@ public class HoodSubsystem extends BaseSubsystem {
 
     public Command stowOnce() {
         return runOnce(() -> {
-            this.targetRotations = kMinRotations;
-            this.motor.setPosition(targetRotations);
+            inputs.targetRotations = kMinRotations;
+            this.motor.setPosition(inputs.targetRotations);
         }).withName("Stow");
     }
 }

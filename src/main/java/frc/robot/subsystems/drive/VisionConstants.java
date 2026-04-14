@@ -1,4 +1,4 @@
-package frc.robot.subsystems.vision;
+package frc.robot.subsystems.drive;
 
 import edu.wpi.first.math.*;
 import edu.wpi.first.math.geometry.*;
@@ -33,11 +33,11 @@ public class VisionConstants {
         )
     );
 
-    public static final Matrix<N3, N1> kQuestnavStdev = VecBuilder.fill(
+    public static final Matrix<N3, N1> kQuestnavStdev = VecBuilder.fill(   //note from Brent - these were way way smaller last year
         0.02, // Trust down to 2cm in X direction
         0.02, // Trust down to 2cm in Y direction
         0.035 // Trust down to 2 degrees rotational
     );
 
-    public static final Matrix<N3, N1> kLimelightStdev = VecBuilder.fill(.5,.5,999999);
+    public static final Matrix<N3, N1> kLimelightStdev = VecBuilder.fill(.05,.05,999999);
 }

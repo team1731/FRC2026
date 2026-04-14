@@ -1,0 +1,159 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 0.447125000000931,
+        "y": 5.962374999996823
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 0.9265783132530121,
+        "y": 5.958277108433736
+      },
+      "isLocked": false,
+      "linkedName": "Depot"
+    },
+    {
+      "anchor": {
+        "x": 1.243481927710843,
+        "y": 5.962374999996823
+      },
+      "prevControl": {
+        "x": 0.7735903614457831,
+        "y": 5.969204819277109
+      },
+      "nextControl": {
+        "x": 1.6317736005573185,
+        "y": 5.956731225679568
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 3.4508795180722887,
+        "y": 5.553951807228916
+      },
+      "prevControl": {
+        "x": 2.663346279864896,
+        "y": 5.5653653324203285
+      },
+      "nextControl": {
+        "x": 4.20489156626506,
+        "y": 5.543024096385542
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 5.6364216867469885,
+        "y": 5.553951807228916
+      },
+      "prevControl": {
+        "x": 4.636523711947488,
+        "y": 5.568236064011767
+      },
+      "nextControl": {
+        "x": 6.401361445783133,
+        "y": 5.543024096385542
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 6.106313253012048,
+        "y": 4.111493975903615
+      },
+      "prevControl": {
+        "x": 6.106313253012048,
+        "y": 5.018493975903615
+      },
+      "nextControl": {
+        "x": 6.106313253012048,
+        "y": 3.204493975903615
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 7.406710843373492,
+        "y": 4.111493975903615
+      },
+      "prevControl": {
+        "x": 7.373927710843373,
+        "y": 3.2482048192771082
+      },
+      "nextControl": {
+        "x": 7.439493975903612,
+        "y": 4.974783132530122
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 5.6364216867469885,
+        "y": 5.553951807228916
+      },
+      "prevControl": {
+        "x": 7.002385542168676,
+        "y": 5.510240963855422
+      },
+      "nextControl": {
+        "x": 4.270457831325301,
+        "y": 5.597662650602411
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 3.4508795180722887,
+        "y": 5.553951807228916
+      },
+      "prevControl": {
+        "x": 3.855204819277108,
+        "y": 5.543024096385543
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": null
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 1,
+      "rotationDegrees": -179.2309315342457
+    },
+    {
+      "waypointRelativePos": 2,
+      "rotationDegrees": 0.0
+    }
+  ],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 4.0,
+    "maxAcceleration": 4.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 0.0
+  },
+  "reversed": false,
+  "folder": "LeftHubX1Depot",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": -179.63713588643614
+  },
+  "useDefaultConstraints": true
+}

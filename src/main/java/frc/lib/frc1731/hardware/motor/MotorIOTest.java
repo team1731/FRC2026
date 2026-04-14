@@ -38,8 +38,8 @@ public class MotorIOTest extends SubsystemBase {
 
         dashboardTab = "TestMotor/" + cls.getSimpleName() + "[" + config.kPort + "]";
 
-        this.logger = new SmartLogger(dashboardTab, () -> true);
-        this.logger.log("Class Type", cls.getSimpleName());
+      //  this.logger = new SmartLogger(dashboardTab, () -> true);
+      //  this.logger.log("Class Type", cls.getSimpleName());
 
         SmartDashboard.putNumber(dashboardTab + "/Tuneable Output", desiredOutput);
     }
@@ -133,7 +133,7 @@ public class MotorIOTest extends SubsystemBase {
 
     @Override
     public void periodic() {
-        this.logger.log("Desired Output", desiredOutput);
-        this.logger.log("Output Type", outputType);
+     //   this.logger.log("Desired Output", desiredOutput);
+     //   this.logger.log("Output Type", outputType);
     }
 }
