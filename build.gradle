@@ -67,6 +67,9 @@ dependencies {
     implementation "org.littletonrobotics.akit:akit-java:4.+"
     annotationProcessor "org.littletonrobotics.akit:akit-autolog:4.+"
 
+    compileOnly 'org.projectlombok:lombok:1.18.44'
+    annotationProcessor 'org.projectlombok:lombok:1.18.44'
+
     roborioDebug wpi.java.deps.wpilibJniDebug(wpi.platforms.roborio)
     roborioDebug wpi.java.vendor.jniDebug(wpi.platforms.roborio)
 

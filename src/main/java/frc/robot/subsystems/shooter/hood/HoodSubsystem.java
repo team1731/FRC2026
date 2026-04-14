@@ -4,7 +4,6 @@ import static frc.robot.subsystems.shooter.hood.HoodConstants.*;
 
 import java.util.function.DoubleSupplier;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.frc1731.Utils;
 import frc.lib.frc1731.hardware.motor.ctre.MotorIOTalonFXS;
@@ -12,7 +11,7 @@ import frc.robot.subsystems.BaseSubsystem;
 
 public class HoodSubsystem extends BaseSubsystem {
     private MotorIOTalonFXS motor;
-    private HoodIOInputs inputs = new HoodIOInputs();
+    private HoodIOInputsAutoLogged inputs = new HoodIOInputsAutoLogged();
 
     public HoodSubsystem(HoodConfiguration config, boolean enabled) {
         super(config.name(), config, enabled);
@@ -37,8 +36,7 @@ public class HoodSubsystem extends BaseSubsystem {
     public void periodicTelemetry() {
         inputs.motorRotations = motor.getRotations();
         inputs.atTarget = Utils.isWithin(inputs.motorRotations, inputs.targetRotations, kEpsilon);
-     //   logger.processInputs(inputs);
-        SmartDashboard.putNumber("Target Hood", inputs.targetRotations);
+        logger.processInputs(inputs);
     }
 
     public Command setRotations(DoubleSupplier target) {

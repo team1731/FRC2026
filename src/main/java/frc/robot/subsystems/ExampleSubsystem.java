@@ -37,10 +37,10 @@ public class ExampleSubsystem extends BaseSubsystem {
     @Override
     public void periodicTelemetry() {
         // Periodic logs that send useful information to both AdvantageScope and the USB if on an actual robot
-      //  logger.log("Current Velocity", getVelocity().in(RotationsPerSecond));
-      //  logger.log("Current Position", getPosition().in(Rotations));
-      //  logger.log("Target Setpoint", targetSetpoint);
-      //  logger.log("Is At Setpoint", isAtSetpoint);
+       logger.log("Current Velocity", getVelocity().in(RotationsPerSecond));
+       logger.log("Current Position", getPosition().in(Rotations));
+       logger.log("Target Setpoint", targetSetpoint);
+       logger.log("Is At Setpoint", isAtSetpoint);
     }
 
     /**
@@ -115,8 +115,7 @@ public class ExampleSubsystem extends BaseSubsystem {
             if (Robot.isSimulation()) {
                 // Apply target position to the simulation
             }
-        }).onlyIf(() -> isEnabled())
-        .until(() -> atSetpointPosition())
+        }).until(() -> atSetpointPosition())
         .withName("SetTargetPosition");
     }
 
@@ -130,8 +129,7 @@ public class ExampleSubsystem extends BaseSubsystem {
             if (Robot.isSimulation()) {
                 // Apply target velocity to the simulation
             }
-        }).onlyIf(() -> isEnabled())
-        .until(() -> atSetpointPosition())
+        }).until(() -> atSetpointPosition())
         .withName("SetTargetVelocity");
     }
 }

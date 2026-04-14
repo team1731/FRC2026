@@ -8,10 +8,10 @@ import java.util.Set;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.lib.frc1731.field.FieldPositions;
@@ -33,11 +33,6 @@ public class Superstructure extends SubsystemBase {
     private IndexerSubsystem indexer;
     private IntakePivotSubsystem pivot;
     private IntakeRollerSubsystem intake;
-
-    private final StructPublisher<Pose2d> leftTargetPose = 
-        NetworkTableInstance.getDefault().getTable("Superstructure").getStructTopic("LeftTarget", Pose2d.struct).publish();
-    private final StructPublisher<Pose2d> rightTargetPose = 
-        NetworkTableInstance.getDefault().getTable("Superstructure").getStructTopic("RightTarget", Pose2d.struct).publish();
 
     private final ShotTable shotTable = ShotTable.getScoringTable();
 
@@ -437,8 +432,8 @@ public class Superstructure extends SubsystemBase {
             compensatedRightTarget = rawTarget;
         }
 
-        leftTargetPose.set(new Pose2d(compensatedLeftTarget, new Rotation2d()));
-        rightTargetPose.set(new Pose2d(compensatedRightTarget, new Rotation2d()));
+        Logger.recordOutput("Superstructure/LeftCompensatedTarget", new Pose2d(compensatedLeftTarget, new Rotation2d()));
+        Logger.recordOutput("Superstructure/RightCompensatedTarget", new Pose2d(compensatedRightTarget, new Rotation2d()));
 
         // ---------------------------------------------------------------------
         // 5. Look up shot parameters from each turret's predicted position

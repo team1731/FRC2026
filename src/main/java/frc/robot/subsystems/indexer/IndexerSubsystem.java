@@ -12,7 +12,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 public class IndexerSubsystem extends BaseSubsystem {
     private MotorIOTalonFX leftMotor, rightMotor;
-    private IndexerIOInputs inputs = new IndexerIOInputs();
+    private IndexerIOInputsAutoLogged inputs = new IndexerIOInputsAutoLogged();
 
     public IndexerSubsystem(boolean enabled) {
         super(enabled);
@@ -38,7 +38,7 @@ public class IndexerSubsystem extends BaseSubsystem {
         inputs.atTargetVelocityLeft = Utils.isWithin(inputs.currentVelocityLeft, inputs.targetVelocityLeft, 1);
         inputs.atTargetVelocityRight = Utils.isWithin(inputs.currentVelocityRight, inputs.targetVelocityRight, 1);
 
-     //   logger.processInputs(inputs);
+        logger.processInputs(inputs);
     }
 
     public Command setPercent(double left, double right) {

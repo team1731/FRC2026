@@ -22,7 +22,7 @@ import com.ctre.phoenix6.hardware.core.CoreCANcoder;
 public class IntakePivotSubsystem extends BaseSubsystem {
     private MotorIOTalonFX motor;
     private CANcoder cancoder;
-    private IntakePivotIOInputs inputs = new IntakePivotIOInputs();
+    private IntakePivotIOInputsAutoLogged inputs = new IntakePivotIOInputsAutoLogged();
 
     public IntakePivotSubsystem(boolean enabled) {
         super(enabled);
@@ -65,7 +65,7 @@ public class IntakePivotSubsystem extends BaseSubsystem {
     public void periodicTelemetry() {
         inputs.currentPosition = motor.getRotations();
         inputs.atTargetPosition = Utils.isWithin(inputs.currentPosition, inputs.targetPosition, kPivotEpsilon);
-     //   logger.processInputs(inputs);
+        logger.processInputs(inputs);
     }
     
     private Command setPosition(DoubleSupplier position) {

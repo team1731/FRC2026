@@ -4,10 +4,8 @@ import static frc.robot.subsystems.shooter.flywheel.FlywheelConstants.*;
 import static frc.robot.subsystems.shooter.hood.HoodConstants.*;
 import static frc.robot.subsystems.shooter.turret.TurretConstants.*;
 
-import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.events.EventTrigger;
 
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.*;
 import frc.lib.frc6328.LoggedTunableNumber;
 import frc.robot.subsystems.Superstructure;

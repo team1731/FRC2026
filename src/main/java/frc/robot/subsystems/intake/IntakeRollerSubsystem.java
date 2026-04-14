@@ -1,9 +1,7 @@
 package frc.robot.subsystems.intake;
 
-import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static frc.robot.subsystems.intake.IntakeConstants.*;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.lib.frc1731.hardware.motor.ctre.MotorIOTalonFX;
 import frc.lib.frc1731.subsystem.VelocitySubsystem;
 import frc.robot.Ports;
@@ -24,7 +22,7 @@ public class IntakeRollerSubsystem extends VelocitySubsystem<MotorIOTalonFX>{
     public void periodicTelemetry() {
         // logger.log("Current Velocity", getVelocity().in(RotationsPerSecond));
         // logger.log("Target Velocity", getTargetVelocity().in(RotationsPerSecond));
-        SmartDashboard.putNumber("Current Velocity", getVelocity().in(RotationsPerSecond));
-        SmartDashboard.putNumber("Target Intake Velocity", getTargetVelocity().in(RotationsPerSecond));
+        // SmartDashboard.putNumber("Current Velocity", getVelocity().in(RotationsPerSecond));
+        // SmartDashboard.putNumber("Target Intake Velocity", getTargetVelocity().in(RotationsPerSecond));
     }
 }

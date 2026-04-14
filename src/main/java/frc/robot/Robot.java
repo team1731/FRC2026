@@ -4,6 +4,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
 
+import org.littletonrobotics.junction.LoggedRobot;
+import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.NT4Publisher;
+import org.littletonrobotics.junction.wpilog.WPILOGWriter;
+
 import edu.wpi.first.wpilibj.Timer;
 
 import com.ctre.phoenix6.SignalLogger;
@@ -17,12 +22,12 @@ import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Filesystem;
-import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.lib.frc6328.BatteryLogger;
 import frc.robot.autos.AutoFactory;
 import frc.robot.autos.AutoLoader;
 import frc.robot.subsystems.drive.SwerveSubsystem;
@@ -34,7 +39,7 @@ import frc.robot.subsystems.drive.SwerveSubsystem;
  * the package after creating this project, you must also update the build.gradle file in the
  * project.
  */
-public class Robot extends TimedRobot {
+public class Robot extends LoggedRobot {
 	private PathPlannerAuto m_autonomousCommand;
 	private SendableChooser<String> autoChooser;
 	private String autoCode;
@@ -50,6 +55,8 @@ public class Robot extends TimedRobot {
 	private boolean isVslamConnected = false;
 
 	private RobotContainer container;
+
+	private BatteryLogger batteryLogger = new BatteryLogger();
 	
 	public static final Trigger IS_ENABLED = new Trigger(() -> DriverStation.isEnabled());
 	public static final Trigger IS_TELEOP = new Trigger(() -> DriverStation.isTeleop());
@@ -117,18 +124,18 @@ public class Robot extends TimedRobot {
 		}
 
 		// Log metadata (for AdvantageScope)
-		//Logger.recordMetadata("GitBranch", branch);
-		//Logger.recordMetadata("GitCommit", commit);
-		//Logger.recordMetadata("BuildDate", date);
+		Logger.recordMetadata("GitBranch", branch);
+		Logger.recordMetadata("GitCommit", commit);
+		Logger.recordMetadata("BuildDate", date);
 
 		if (Robot.isSimulation()) {
-	//		Logger.addDataReceiver(new NT4Publisher());
+			Logger.addDataReceiver(new NT4Publisher());
 		} else if (RobotConstants.kLogToWPILog) {
-	//		Logger.addDataReceiver(new WPILOGWriter("/home/lvuser/logs"));
+			Logger.addDataReceiver(new WPILOGWriter("/home/lvuser/logs"));
 		}
 
-	//	Logger.start();
-	//	SmartDashboard.updateValues();
+		Logger.start();
+		SmartDashboard.updateValues();
 	}
 
 
@@ -174,6 +181,9 @@ public class Robot extends TimedRobot {
 		CommandScheduler.getInstance().run();
 		container.periodic();
 		GameState.logValues();
+
+		batteryLogger.setBatteryVoltage(RobotController.getBatteryVoltage());
+		batteryLogger.setRioCurrent(RobotController.getInputCurrent());
 	}
 
 	
