@@ -154,7 +154,7 @@
     {
       "name": "Constraints Zone",
       "minWaypointRelativePos": 1.9207317073170733,
-      "maxWaypointRelativePos": 3.147865853658536,
+      "maxWaypointRelativePos": 2.8860381861575184,
       "constraints": {
         "maxVelocity": 1.5,
         "maxAcceleration": 2.0,
@@ -169,7 +169,7 @@
       "minWaypointRelativePos": 4.396341463414642,
       "maxWaypointRelativePos": 7.0,
       "constraints": {
-        "maxVelocity": 1.0,
+        "maxVelocity": 0.75,
         "maxAcceleration": 2.0,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
@@ -199,8 +199,14 @@
       "command": null
     },
     {
-      "name": "Feedthrough",
+      "name": "Shoot",
       "waypointRelativePos": 4.567073170731718,
+      "endWaypointRelativePos": 5.97673031026258,
+      "command": null
+    },
+    {
+      "name": "Feedthrough",
+      "waypointRelativePos": 6.026849642004779,
       "endWaypointRelativePos": 7.0,
       "command": null
     }

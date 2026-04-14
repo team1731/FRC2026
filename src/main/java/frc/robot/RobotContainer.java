@@ -1,5 +1,6 @@
 package frc.robot;
 
+import static frc.robot.subsystems.drive.SwerveConstants.kAutoCurrentLimit;
 import static frc.robot.subsystems.shooter.flywheel.FlywheelConstants.*;
 import static frc.robot.subsystems.shooter.hood.HoodConstants.*;
 import static frc.robot.subsystems.shooter.turret.TurretConstants.*;
@@ -8,6 +9,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.events.EventTrigger;
 
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.*;
 import frc.lib.frc6328.LoggedTunableNumber;
 import frc.robot.subsystems.Superstructure;
@@ -58,14 +60,16 @@ public class RobotContainer {
     private final Trigger dHubShot = driver.x();
     
     private final Trigger dTestSetShot = driver.back();
+    private final Trigger dUnjam = driver.back();
 
     private final Trigger dSpit = driver.leftBumper();
     private final Trigger dStationaryShot = driver.rightBumper();
 
-    private final Trigger dLeftTurretLeft = driver.povLeft();
-    private final Trigger dLeftTurretRight = driver.povRight();
-    private final Trigger dRightTurretLeft = driver.povDown();
+    // private final Trigger dLeftTurretLeft = driver.povLeft();
+    // private final Trigger dLeftTurretRight = driver.povRight();
+    // private final Trigger dRightTurretLeft = driver.povDown();
     private final Trigger dRetract = driver.povUp();
+    private final Trigger dRaiseCurrentLimit = driver.povLeft();
 
     private LoggedTunableNumber tuneableFlywheelRPS = new LoggedTunableNumber("TunedFlywheelRPS", 0, () -> testCondition.equals(TestShotCondition.kParameters));
     private LoggedTunableNumber tuneableHoodRotations = new LoggedTunableNumber("TunedHoodRotations", 0, () -> testCondition.equals(TestShotCondition.kParameters));
@@ -128,7 +132,7 @@ public class RobotContainer {
      */
     private void configureButtonBindings() {
         // Reset robot pose and heading
-        dResetSwerve.onTrue(superstructure.resetYaw());
+        dResetSwerve.onTrue(superstructure.resetSwerve());
 
         dIntake.and(() -> !dShoot.getAsBoolean() && !dPass.getAsBoolean()).whileTrue(superstructure.runIntake(true));
         dShoot.whileTrue(superstructure.shoot());
@@ -148,16 +152,19 @@ public class RobotContainer {
         //     .whileTrue(superstructure.tuneShot(tuneableFlywheelRPS.get(), tuneableHoodRotations.get(), true));
 
         dSpit.whileTrue(superstructure.spit());
-        driver.back().whileTrue(superstructure.tuneShot(tuneableDistanceShot, true));
+
+        dUnjam.whileTrue(superstructure.unjamIndexer());
+        // driver.back().whileTrue(superstructure.tuneShot(tuneableDistanceShot, true));
 
         // dLeftTurretLeft.whileTrue(leftTurret.setDegrees(-200));
         // dLeftTurretRight.whileTrue(leftTurret.setDegrees(80));
         // dRightTurretLeft.whileTrue(rightTurret.setDegrees(-80));
         // dRightTurretRight.whileTrue(rightTurret.setDegrees(200));
         dRetract.whileTrue(pivot.retract());
-        driver.povRight().whileTrue(leftTurret.setDegrees(90).alongWith(rightTurret.setDegrees(90)));
-        driver.povDown().whileTrue(leftTurret.setDegrees(180).alongWith(rightTurret.setDegrees(180)));
-        driver.povLeft().whileTrue(leftTurret.setDegrees(-90).alongWith(rightTurret.setDegrees(-90)));
+        dRaiseCurrentLimit.onTrue(new InstantCommand(() -> swerve.setStatorCurrentLimit(kAutoCurrentLimit)));
+        // driver.povRight().whileTrue(leftTurret.setDegrees(90).alongWith(rightTurret.setDegrees(90)));
+        // driver.povDown().whileTrue(leftTurret.setDegrees(180).alongWith(rightTurret.setDegrees(180)));
+        // driver.povLeft().whileTrue(leftTurret.setDegrees(-90).alongWith(rightTurret.setDegrees(-90)));
     }
 
     public void configureDefaultCommands() {

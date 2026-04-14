@@ -1,5 +1,8 @@
 package frc.robot;
 
+import static frc.robot.subsystems.drive.SwerveConstants.kAutoCurrentLimit;
+import static frc.robot.subsystems.drive.SwerveConstants.kTeleCurrentLimit;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.*;
@@ -98,7 +101,7 @@ public class Robot extends TimedRobot {
 		});
 
 		CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
-		RobotController.setBrownoutVoltage(6.0);
+		RobotController.setBrownoutVoltage(6.5);
 	}
 	
 	private void setupLogging() {
@@ -356,6 +359,7 @@ public void autonomousPeriodic() {
 
 		currentKeypadCommand = "";
 		SmartDashboard.getString("keypadCommand", currentKeypadCommand);
+		swerve.setStatorCurrentLimit(kTeleCurrentLimit);
 	}
 
 //   ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄

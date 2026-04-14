@@ -8,7 +8,12 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.TalonFXConfigurator;
+import com.ctre.phoenix6.hardware.CANcoder;
+import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
+import com.ctre.phoenix6.swerve.SwerveModule;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.*;
@@ -186,7 +191,11 @@ public class SwerveSubsystem extends BaseSubsystem {
     }
 
     public void resetTelePose() {
-        this.resetPose(new PathPlannerAuto("ResetPosition").getStartingPose());
+        // this.resetPose(new PathPlannerAuto("ResetPosition").getStartingPose());
+        this.resetPose(Robot.isRedAlliance() ? 
+            new Pose2d(12.967, 4.046, Rotation2d.k180deg) : 
+            new Pose2d(3.527, 4.046, Rotation2d.kZero)
+        );
     }
 
     @Override
@@ -318,6 +327,21 @@ public class SwerveSubsystem extends BaseSubsystem {
 
 public boolean isVslamConnected() {
    return (questNav.isTracking()  && questNav.isConnected());
+}
+
+public void setStatorCurrentLimit(double limit) {
+    for (SwerveModule<TalonFX, TalonFX, CANcoder> module : drivetrain.getModules()) {
+        // Create config object
+        TalonFXConfigurator configurator = module.getDriveMotor().getConfigurator();
+        CurrentLimitsConfigs currentLimits = new CurrentLimitsConfigs();
+
+        // Dynamically change limit based on logic (e.g., set to 40A)
+        currentLimits.StatorCurrentLimit = limit;
+        currentLimits.StatorCurrentLimitEnable = true;
+
+        // Apply configuration
+        configurator.apply(currentLimits);
+    }
 }
 
 @Override
