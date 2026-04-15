@@ -13,7 +13,6 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.geometry.*;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.lib.frc1731.Utils;
 import frc.lib.frc1731.hardware.motor.ctre.MotorIOTalonFX;
@@ -136,12 +135,14 @@ public class TurretSubsystem extends BaseSubsystem {
 
     @Override
     public void periodicTelemetry() {
-        inputs.currentDegrees = motor.getRotations() /** (1/kSensorToMech)*/ * 360.0;
+        inputs.currentDegrees = motor.getRotations() * 360.0;
         inputs.turretPose = getTurretPose();
         inputs.atTarget = atTarget();
         logger.processInputs(inputs);
 
-        SmartDashboard.putNumber(((TurretConfiguration)config.get()).name() + " Target", inputs.targetDegrees);
+        // SmartDashboard.putNumber(((TurretConfiguration)config.get()).name() + " Target", inputs.targetDegrees);
+        // SmartDashboard.putNumber(((TurretConfiguration)config.get()).name() + " Current", inputs.currentDegrees);
+        // SmartDashboard.putBoolean(((TurretConfiguration)config.get()).name() + " AtTarget", inputs.atTarget);
     }
 
     public Command trackHub() {
@@ -159,6 +160,8 @@ public class TurretSubsystem extends BaseSubsystem {
                 robotToTurret.rotateBy(robotRotation)
             );
 
+            // robotPose.transformBy(new Transform2d(robotToTurret.getX(), robotToTurret.getY()));
+
             double fieldTargetHeading = Math.toDegrees(Math.atan2(
                 target.get().getY() - turretFieldPos.getY(),
                 target.get().getX() - turretFieldPos.getX()
@@ -170,10 +173,12 @@ public class TurretSubsystem extends BaseSubsystem {
                 inputs.currentDegrees
             );
 
+            // SmartDashboard.putNumber(((TurretConfiguration)config.get()).name() + "TurretToHub", fieldTargetHeading);
+
             inputs.targetDegrees = output;
             inputs.target = new Pose2d(target.get(), new Rotation2d());
 
-            motor.setPosition(output / (360.0));
+            motor.setPosition(inputs.targetDegrees / (360.0));
         });
     }
 
@@ -190,7 +195,7 @@ public class TurretSubsystem extends BaseSubsystem {
                 output += 360;
             }
             inputs.targetDegrees = output;
-            motor.setPosition(output / (360.0));
+            motor.setPosition(inputs.targetDegrees / (360.0));
         });
     }
 

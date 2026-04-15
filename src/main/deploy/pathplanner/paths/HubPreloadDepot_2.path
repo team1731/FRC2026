@@ -3,55 +3,60 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.5273734939759036,
-        "y": 4.045927710843373
+        "x": 0.447125000000931,
+        "y": 5.962374999996823
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.1477755547374784,
-        "y": 5.292026189756708
+        "x": 0.9208416547788869,
+        "y": 5.982268188302426
       },
       "isLocked": false,
-      "linkedName": "Hub"
+      "linkedName": "Depot"
     },
     {
       "anchor": {
-        "x": 0.887441860465116,
+        "x": 1.347817403708987,
         "y": 5.962374999996823
       },
       "prevControl": {
-        "x": 1.2281753130590336,
-        "y": 5.9414847942754925
+        "x": 0.9337803138373753,
+        "y": 5.969329529243937
       },
       "nextControl": {
-        "x": 0.6379103972194207,
-        "y": 5.977673655181583
+        "x": 1.7259915064388422,
+        "y": 5.9560228568621305
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 0.447125000000931,
-        "y": 5.962374999996823
+        "x": 2.9651497860199716,
+        "y": 4.093223965763196
       },
       "prevControl": {
-        "x": 1.0277448676122818,
-        "y": 5.979360006159127
+        "x": 2.05944365192582,
+        "y": 4.727218259629101
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Depot"
+      "linkedName": null
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 1,
+      "rotationDegrees": 178.88212806014397
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "Feedthrough",
+      "name": "Shoot",
       "waypointRelativePos": 0,
-      "endWaypointRelativePos": 2.0,
+      "endWaypointRelativePos": null,
       "command": null
     }
   ],
@@ -65,13 +70,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -179.63713588643614
+    "rotation": 179.2654789657452
   },
   "reversed": false,
   "folder": "HubPreloadDepot",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 179.48383577023517
+    "rotation": -179.63713588643614
   },
   "useDefaultConstraints": false
 }

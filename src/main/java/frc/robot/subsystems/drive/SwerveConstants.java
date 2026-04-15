@@ -69,4 +69,7 @@ public class SwerveConstants {
     
     public static final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     public static final SwerveRequest.ApplyRobotSpeeds autoRequest = new SwerveRequest.ApplyRobotSpeeds();
+
+    public static final double kAutoCurrentLimit = 100;
+    public static final double kTeleCurrentLimit = 60;
 }

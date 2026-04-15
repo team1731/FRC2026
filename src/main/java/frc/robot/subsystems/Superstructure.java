@@ -124,10 +124,10 @@ public class Superstructure extends SubsystemBase {
     // Public commands
     // =========================================================================
 
-    public Command resetYaw() {
+    public Command resetSwerve() {
         return new InstantCommand(() -> {
-            swerve.resetHeadingButtonPressed();
-            // swerve.resetTelePose();
+            // swerve.resetHeadingButtonPressed();
+            swerve.resetTelePose();
         });
     }
 
@@ -141,6 +141,10 @@ public class Superstructure extends SubsystemBase {
 
     public Command index() {
         return indexer.index();
+    }
+
+    public Command unjamIndexer() {
+        return index().withTimeout(0.5).andThen(index().withTimeout(0.25)).repeatedly();
     }
 
     public Command setFlywheels(DoubleSupplier left, DoubleSupplier right) {
@@ -342,7 +346,10 @@ public class Superstructure extends SubsystemBase {
                 setFlywheels(() -> parameters[1], () -> parameters[1]),
                 setHoods(() -> parameters[0], () -> parameters[0]),
                 Commands.either(setTurrets(() -> 0, () -> 0), setTurrets(() -> 180, () -> 180), () -> zeroTurret),
-                Commands.waitUntil(this::hoodAndFlywheelsReady).andThen(index().alongWith(runIntake(false)))
+                Commands.waitSeconds(1.0).andThen(index().alongWith(
+                    new JiggleToPosition(pivot),
+                    intake.setVelocity(RotationsPerSecond.of(100))
+                ))
             );
         }, Set.of(leftFlywheel, rightFlywheel, leftHood, rightHood, leftTurret, rightTurret, indexer, pivot, intake));
     }
