@@ -3,7 +3,6 @@ package frc.robot.subsystems.shooter.hood;
 import edu.wpi.first.math.system.plant.DCMotor;
 import frc.lib.frc1678.sim.PivotSim.PivotSimConstants;
 import frc.lib.frc1731.PIDGains;
-import frc.robot.Ports;
 
 public class HoodConstants {
     public static final double kGearRatio = 1d / (15d / 64d * 32d / 64d * 20d / 380d); // 162.13 : 1.00 overall reduction
@@ -14,9 +13,6 @@ public class HoodConstants {
 
     public static final double kMaxVelocity = 50;
     public static final double kMaxAcceleration = 120;
-
-    public static final HoodConfiguration kLeftHoodConfig = new HoodConfiguration("Left", Ports.kLeftHoodConfig);
-    public static final HoodConfiguration kRightHoodConfig = new HoodConfiguration("Right", Ports.kRightHoodConfig);
 
     public static final double kCurrentLimit = 40d; // Amps
 

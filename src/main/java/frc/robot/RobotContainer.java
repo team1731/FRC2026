@@ -1,14 +1,7 @@
 package frc.robot;
 
 import static frc.robot.subsystems.drive.SwerveConstants.kAutoCurrentLimit;
-import static frc.robot.subsystems.shooter.flywheel.FlywheelConstants.*;
-import static frc.robot.subsystems.shooter.hood.HoodConstants.*;
-import static frc.robot.subsystems.shooter.turret.TurretConstants.*;
 
-import com.pathplanner.lib.auto.NamedCommands;
-import com.pathplanner.lib.events.EventTrigger;
-
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.*;
 import frc.lib.frc6328.LoggedTunableNumber;
@@ -19,8 +12,7 @@ import frc.robot.subsystems.shooter.flywheel.FlywheelSubsystem;
 import frc.robot.subsystems.shooter.hood.HoodSubsystem;
 import frc.robot.subsystems.intake.IntakePivotSubsystem;
 import frc.robot.subsystems.intake.IntakeRollerSubsystem;
-import frc.robot.subsystems.leds.LEDSubsystem;
-import frc.robot.subsystems.shooter.turret.TurretSubsystem;
+import frc.robot.subsystems.kicker.KickerSubsystem;
 public class RobotContainer {
     public enum TestShotCondition {
         kNone,
@@ -33,12 +25,11 @@ public class RobotContainer {
     /* Subsystems */
     private SwerveSubsystem swerve;
     private IndexerSubsystem indexer;
+    private KickerSubsystem kicker;
     private IntakeRollerSubsystem intake;
     private IntakePivotSubsystem pivot;
-
-    private TurretSubsystem leftTurret, rightTurret;
-    private FlywheelSubsystem leftFlywheel, rightFlywheel;
-    private HoodSubsystem leftHood, rightHood;
+    private FlywheelSubsystem flywheel;
+    private HoodSubsystem hood;
 
     // private LEDSubsystem led;
 
@@ -87,25 +78,15 @@ public class RobotContainer {
      * Configure all active subsystems on the robot and set default commands
      */
     private void configureSubsystems() {
-        leftFlywheel = new FlywheelSubsystem(kLeftFlywheelConfig, true);
-        rightFlywheel = new FlywheelSubsystem(kRightFlywheelConfig, true);
-
-        leftHood = new HoodSubsystem(kLeftHoodConfig, true);
-        rightHood = new HoodSubsystem(kRightHoodConfig, true);
-
-        leftTurret = new TurretSubsystem(kLeftTurretConfigs, () -> swerve.getCurrentPose(), () -> swerve.getYaw(), true);
-        rightTurret = new TurretSubsystem(kRightTurretConfigs, () -> swerve.getCurrentPose(), () -> swerve.getYaw(), true);
-
+        flywheel = new FlywheelSubsystem(true);
+        hood = new HoodSubsystem(true);
         indexer = new IndexerSubsystem(true);
+        kicker = new KickerSubsystem(true);
         pivot = new IntakePivotSubsystem(true);
         intake = new IntakeRollerSubsystem(true);
-
         // led = new LEDSubsystem(true);
 
-        superstructure = new Superstructure(swerve, leftFlywheel, rightFlywheel, 
-                                                leftHood, rightHood, 
-                                                indexer, pivot, intake, 
-                                                    leftTurret, rightTurret);
+        superstructure = new Superstructure(swerve, flywheel, hood, indexer, kicker, pivot, intake);
     }
 
     private void configureNamedCommands() {
@@ -119,12 +100,12 @@ public class RobotContainer {
         // NamedCommands.registerCommand("WarmupCommand", superstructure.warmup());
         // NamedCommands.registerCommand("FeedthroughCommand", superstructure.feedthrough());
 
-        new EventTrigger("Shoot").onTrue(superstructure.shoot());
-        new EventTrigger("StopShoot").onTrue(superstructure.stopShooters());
-        new EventTrigger("Intake").whileTrue(superstructure.runIntake(true));
-        new EventTrigger("Pass").onTrue(superstructure.pass());
-        new EventTrigger("Warmup").whileTrue(superstructure.warmup());
-        new EventTrigger("Feedthrough").whileTrue(superstructure.feedthrough());
+        // new EventTrigger("Shoot").onTrue(superstructure.shoot());
+        // new EventTrigger("StopShoot").onTrue(superstructure.stopShooters());
+        // new EventTrigger("Intake").whileTrue(superstructure.runIntake(true));
+        // new EventTrigger("Pass").onTrue(superstructure.pass());
+        // new EventTrigger("Warmup").whileTrue(superstructure.warmup());
+        // new EventTrigger("Feedthrough").whileTrue(superstructure.feedthrough());
     }
 
     /**
@@ -135,16 +116,16 @@ public class RobotContainer {
         dResetSwerve.onTrue(superstructure.resetSwerve());
 
         dIntake.and(() -> !dShoot.getAsBoolean() && !dPass.getAsBoolean()).whileTrue(superstructure.runIntake(true));
-        dShoot.whileTrue(superstructure.shoot());
-        dPass.whileTrue(superstructure.pass());
-        dFeedthrough.whileTrue(superstructure.feedthrough());
-        dPassthrough.whileTrue(superstructure.passFeedthrough());
+        // dShoot.whileTrue(superstructure.shoot());
+        // dPass.whileTrue(superstructure.pass());
+        // dFeedthrough.whileTrue(superstructure.feedthrough());
+        // dPassthrough.whileTrue(superstructure.passFeedthrough());
 
-        dStationaryShot.whileTrue(superstructure.stationaryShot());
+        // dStationaryShot.whileTrue(superstructure.stationaryShot());
 
-        dHubShot.whileTrue(superstructure.manualShot(1.8, true));
-        dTowerShot.whileTrue(superstructure.manualShot(2.5, true));
-        dTrenchShot.whileTrue(superstructure.manualShot(4, true));
+        // dHubShot.whileTrue(superstructure.manualShot(1.8, true));
+        // dTowerShot.whileTrue(superstructure.manualShot(2.5, true));
+        // dTrenchShot.whileTrue(superstructure.manualShot(4, true));
         
         // (dTestSetShot.and(() -> testCondition.equals(TestShotCondition.kDistance)))
         //     .whileTrue(superstructure.tuneShot(tuneableDistanceShot, true));
@@ -153,7 +134,7 @@ public class RobotContainer {
 
         dSpit.whileTrue(superstructure.spit());
 
-        dUnjam.whileTrue(superstructure.unjamIndexer());
+        // dUnjam.whileTrue(superstructure.unjamIndexer());
         // driver.back().whileTrue(superstructure.tuneShot(tuneableDistanceShot, true));
 
         // dLeftTurretLeft.whileTrue(leftTurret.setDegrees(-200));
@@ -174,15 +155,10 @@ public class RobotContainer {
 
         intake.setDefaultCommand(intake.stop());
         indexer.setDefaultCommand(indexer.stop());
+        kicker.setDefaultCommand(kicker.stop());
 
-        leftTurret.setDefaultCommand(leftTurret.trackHub());
-        rightTurret.setDefaultCommand(rightTurret.trackHub());
-
-        leftHood.setDefaultCommand(leftHood.stow());
-        rightHood.setDefaultCommand(rightHood.stow());
-
-        leftFlywheel.setDefaultCommand(leftFlywheel.stop());
-        rightFlywheel.setDefaultCommand(rightFlywheel.stop());
+        hood.setDefaultCommand(hood.stow());
+        flywheel.setDefaultCommand(flywheel.stop());
 
         // led.setDefaultCommand(led.flashAllianceShift());
     }

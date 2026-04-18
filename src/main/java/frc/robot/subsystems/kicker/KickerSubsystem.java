@@ -1,4 +1,5 @@
-package frc.robot.subsystems.indexer;
+package frc.robot.subsystems.kicker;
+
 
 import frc.lib.frc1731.Utils;
 import frc.lib.frc1731.hardware.motor.MotorConstants;
@@ -6,23 +7,23 @@ import frc.lib.frc1731.hardware.motor.ctre.MotorIOTalonFX;
 import frc.robot.Ports;
 import frc.robot.subsystems.BaseSubsystem;
 
-import static frc.robot.subsystems.indexer.IndexerConstants.*;
+import static frc.robot.subsystems.kicker.KickerConstants.*;
 
 import edu.wpi.first.wpilibj2.command.Command;
 
-public class IndexerSubsystem extends BaseSubsystem {
+public class KickerSubsystem extends BaseSubsystem {
     private MotorIOTalonFX motor;
-    private IndexerIOInputs inputs = new IndexerIOInputs();
+    private KickerIOInputs inputs = new KickerIOInputs();
 
-    public IndexerSubsystem(boolean enabled) {
+    public KickerSubsystem(boolean enabled) {
         super(enabled);
     }
 
     @Override
     protected void initializeHardware() {
-        motor = new MotorIOTalonFX(Ports.kLeftIndexerConfig);
+        motor = new MotorIOTalonFX(Ports.kLeftKickerConfig);
         motor.withPIDGains(kPIDGains);
-        motor.withFollower(Ports.kRightIndexerConfig);
+        motor.withFollower(Ports.kRightKickerConfig);
         // motor.withStatorCurrentLimit(kCurrentLimit);
     }
 

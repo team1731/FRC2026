@@ -8,19 +8,21 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.frc1731.Utils;
 import frc.lib.frc1731.hardware.motor.ctre.MotorIOTalonFXS;
+import frc.robot.Ports;
 import frc.robot.subsystems.BaseSubsystem;
 
 public class HoodSubsystem extends BaseSubsystem {
     private MotorIOTalonFXS motor;
     private HoodIOInputs inputs = new HoodIOInputs();
 
-    public HoodSubsystem(HoodConfiguration config, boolean enabled) {
-        super(config.name(), config, enabled);
+    public HoodSubsystem(boolean enabled) {
+        super(enabled);
     }
 
     @Override
     protected void initializeHardware() {
-        motor = new MotorIOTalonFXS(((HoodConfiguration)config.get()).portConfig());
+        motor = new MotorIOTalonFXS(Ports.kLeftHoodConfig)
+            .withFollower(Ports.kRightHoodConfig);
         motor.withPIDGains(kPositionGains);
         motor.withStatorCurrentLimit(kCurrentLimit);
         motor.withMotionProfile(kMaxVelocity, kMaxAcceleration);
@@ -55,12 +57,5 @@ public class HoodSubsystem extends BaseSubsystem {
     public Command stow() {
         return setRotations(kMinRotations)
         .withName("Stow");
-    }
-
-    public Command stowOnce() {
-        return runOnce(() -> {
-            inputs.targetRotations = kMinRotations;
-            this.motor.setPosition(inputs.targetRotations);
-        }).withName("Stow");
     }
 }

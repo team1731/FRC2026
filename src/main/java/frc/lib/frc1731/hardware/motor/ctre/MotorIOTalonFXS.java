@@ -65,6 +65,14 @@ public class MotorIOTalonFXS extends MotorIO {
         return this.motor;
     }
 
+    public MotorIOTalonFXS withFollower(PortConfig... config) {
+        for (PortConfig cfg : config) {
+            MotorIOTalonFX follower = new MotorIOTalonFX(cfg);
+            follower.follow(this);
+        }
+        return this;
+    }
+
     @Override
     public void follow(MotorIO master) {
         this.motor.setControl(new Follower(((MotorIOTalonFX)master).motor.getDeviceID(), 

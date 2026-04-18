@@ -20,7 +20,7 @@ import frc.robot.RobotConstants;
 public abstract class BaseSubsystem extends SubsystemBase {
     private SysIdRoutine sysIdRoutine = null;
     private boolean enabled = false;
-  //  protected SmartLogger logger = null;
+//    protected SmartLogger logger = null;
 
     protected Optional<SubsystemConfiguration> config = Optional.empty();
 
