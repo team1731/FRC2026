@@ -6,7 +6,6 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
@@ -26,7 +25,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.frc1731.hardware.camera.limelight.LimelightHelpers;
-import frc.lib.frc1731.math.Vector2d;
 import frc.robot.Robot;
 import frc.robot.subsystems.BaseSubsystem;
 import frc.robot.subsystems.drive.generated.*;
@@ -63,6 +61,8 @@ public class SwerveSubsystem extends BaseSubsystem {
         this.drivetrain = TunerConstants.createDrivetrain();
         driveAtTargetControl.HeadingController.setPID(10,0,0);
 	    driveAtTargetControl.HeadingController.enableContinuousInput(-Math.PI/2, Math.PI/2);
+        
+        headingPID.setTolerance(kHeadingTolerance);
 
         Transform3d tf = kLimelightToRobot;
         LimelightHelpers.setCameraPose_RobotSpace(kLimelightName, tf.getX(), tf.getY(), tf.getZ(), tf.getRotation().getX(), tf.getRotation().getY(), tf.getRotation().getZ());
@@ -144,6 +144,10 @@ public class SwerveSubsystem extends BaseSubsystem {
 
     public ChassisSpeeds getWheelSpeeds() {
         return getState().Speeds;
+    }
+
+    public boolean atTargetHeading() {
+        return headingPID.atGoal();
     }
 
     /*
@@ -249,12 +253,28 @@ public class SwerveSubsystem extends BaseSubsystem {
                 (Math.abs(m_xboxController.getRightX()) < kDeadband)){
                     drivetrain.setControl(brake);
             } else {
+                double rotRate = -m_xboxController.getRightX() * kMaxAngularRate;
+                if (m_xboxController.rightTrigger().getAsBoolean()) {
+                    Pose2d curPose = getCurrentPose();
+                    Translation2d robotTranslation = curPose.getTranslation();
+                    Translation2d targetTranslation = Robot.isRedAlliance()
+                        ? new Translation2d(11.91, 4.03)
+                        : new Translation2d(4.62, 4.03);
+
+                    Rotation2d targetTheta = Rotation2d.fromRadians(Math.atan(
+                        (targetTranslation.getY() - robotTranslation.getY()) / 
+                        (targetTranslation.getX() - robotTranslation.getX())
+                    ));
+
+                    rotRate = headingPID.calculate(curPose.getRotation().getDegrees() % 360d, targetTheta.getDegrees());
+                }
+
                 if (isFieldCentric.getAsBoolean()) {
                     drivetrain.setControl(
                         kFieldCentricControl
                             .withVelocityX(-(Math.abs(m_xboxController.getLeftY()) * m_xboxController.getLeftY()) * scalar)
                             .withVelocityY(-(Math.abs(m_xboxController.getLeftX()) * m_xboxController.getLeftX()) * scalar)
-                            .withRotationalRate(-m_xboxController.getRightX() * kMaxAngularRate)
+                            .withRotationalRate(rotRate)
                             .withCenterOfRotation(RotationCenter)
                     );
                 } 
@@ -263,7 +283,7 @@ public class SwerveSubsystem extends BaseSubsystem {
                          kRobotCentricControl
                              .withVelocityX(-(Math.abs(m_xboxController.getLeftY()) * m_xboxController.getLeftY()) * scalar)
                              .withVelocityY(-(Math.abs(m_xboxController.getLeftX()) * m_xboxController.getLeftX()) * scalar)
-                             .withRotationalRate(-m_xboxController.getRightX() * kMaxAngularRate)
+                             .withRotationalRate(rotRate)
                              .withCenterOfRotation(RotationCenter)
                      );
                  }

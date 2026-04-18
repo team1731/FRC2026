@@ -20,9 +20,8 @@ public class IndexerSubsystem extends BaseSubsystem {
 
     @Override
     protected void initializeHardware() {
-        motor = new MotorIOTalonFX(Ports.kLeftIndexerConfig);
+        motor = new MotorIOTalonFX(Ports.kIndexerFloorConfig);
         motor.withPIDGains(kPIDGains);
-        motor.withFollower(Ports.kRightIndexerConfig);
         // motor.withStatorCurrentLimit(kCurrentLimit);
     }
 

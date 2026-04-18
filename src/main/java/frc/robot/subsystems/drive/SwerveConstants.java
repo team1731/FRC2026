@@ -29,6 +29,8 @@ public class SwerveConstants {
 
     public static final PIDGains kDriveAtTargetGains = new PIDGains().setP(10).setContinuousInput(-Math.PI, Math.PI);
 
+    public static final double kHeadingTolerance = 1.0; // degrees;
+
     public static final Matrix<N3, N1> kEstimatorStateStdev = VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(5));
     public static final Matrix<N3, N1> kEstimatorMeasurementStdev = VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(5));
 

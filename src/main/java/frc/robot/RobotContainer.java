@@ -55,10 +55,7 @@ public class RobotContainer {
 
     private final Trigger dSpit = driver.leftBumper();
     private final Trigger dStationaryShot = driver.rightBumper();
-
-    // private final Trigger dLeftTurretLeft = driver.povLeft();
-    // private final Trigger dLeftTurretRight = driver.povRight();
-    // private final Trigger dRightTurretLeft = driver.povDown();
+    
     private final Trigger dRetract = driver.povUp();
     private final Trigger dRaiseCurrentLimit = driver.povLeft();
 
@@ -116,16 +113,16 @@ public class RobotContainer {
         dResetSwerve.onTrue(superstructure.resetSwerve());
 
         dIntake.and(() -> !dShoot.getAsBoolean() && !dPass.getAsBoolean()).whileTrue(superstructure.runIntake(true));
-        // dShoot.whileTrue(superstructure.shoot());
-        // dPass.whileTrue(superstructure.pass());
-        // dFeedthrough.whileTrue(superstructure.feedthrough());
-        // dPassthrough.whileTrue(superstructure.passFeedthrough());
+        dShoot.whileTrue(superstructure.shoot());
+        dPass.whileTrue(superstructure.pass());
+        dFeedthrough.whileTrue(superstructure.feedthrough());
+        dPassthrough.whileTrue(superstructure.passFeedthrough());
 
-        // dStationaryShot.whileTrue(superstructure.stationaryShot());
+        dStationaryShot.whileTrue(superstructure.stationaryShot());
 
-        // dHubShot.whileTrue(superstructure.manualShot(1.8, true));
-        // dTowerShot.whileTrue(superstructure.manualShot(2.5, true));
-        // dTrenchShot.whileTrue(superstructure.manualShot(4, true));
+        dHubShot.whileTrue(superstructure.defaultShot(30.0, 0));
+        dTowerShot.whileTrue(superstructure.defaultShot(40.0, 2));
+        dTrenchShot.whileTrue(superstructure.defaultShot(45.0, 3));
         
         // (dTestSetShot.and(() -> testCondition.equals(TestShotCondition.kDistance)))
         //     .whileTrue(superstructure.tuneShot(tuneableDistanceShot, true));
@@ -134,18 +131,9 @@ public class RobotContainer {
 
         dSpit.whileTrue(superstructure.spit());
 
-        // dUnjam.whileTrue(superstructure.unjamIndexer());
         // driver.back().whileTrue(superstructure.tuneShot(tuneableDistanceShot, true));
-
-        // dLeftTurretLeft.whileTrue(leftTurret.setDegrees(-200));
-        // dLeftTurretRight.whileTrue(leftTurret.setDegrees(80));
-        // dRightTurretLeft.whileTrue(rightTurret.setDegrees(-80));
-        // dRightTurretRight.whileTrue(rightTurret.setDegrees(200));
         dRetract.whileTrue(pivot.retract());
         dRaiseCurrentLimit.onTrue(new InstantCommand(() -> swerve.setStatorCurrentLimit(kAutoCurrentLimit)));
-        // driver.povRight().whileTrue(leftTurret.setDegrees(90).alongWith(rightTurret.setDegrees(90)));
-        // driver.povDown().whileTrue(leftTurret.setDegrees(180).alongWith(rightTurret.setDegrees(180)));
-        // driver.povLeft().whileTrue(leftTurret.setDegrees(-90).alongWith(rightTurret.setDegrees(-90)));
     }
 
     public void configureDefaultCommands() {

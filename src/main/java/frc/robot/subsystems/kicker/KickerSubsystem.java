@@ -21,9 +21,9 @@ public class KickerSubsystem extends BaseSubsystem {
 
     @Override
     protected void initializeHardware() {
-        motor = new MotorIOTalonFX(Ports.kLeftKickerConfig);
+        motor = new MotorIOTalonFX(Ports.kLeftKickerConfig)
+            .withFollower(Ports.kRightKickerConfig);
         motor.withPIDGains(kPIDGains);
-        motor.withFollower(Ports.kRightKickerConfig);
         // motor.withStatorCurrentLimit(kCurrentLimit);
     }
 

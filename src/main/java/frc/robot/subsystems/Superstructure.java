@@ -3,16 +3,12 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.*;
 
-import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StructPublisher;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.lib.frc1731.field.FieldPositions;
 import frc.robot.Robot;
@@ -40,11 +36,11 @@ public class Superstructure extends SubsystemBase {
     // Target suppliers
     // -------------------------------------------------------------------------
 
-    private final Supplier<Translation2d> kHubSupplier = () -> Robot.isRedAlliance()
+    public final Supplier<Translation2d> kHubSupplier = () -> Robot.isRedAlliance()
         ? new Translation2d(11.91, 4.03)
         : new Translation2d(4.62, 4.03);
 
-    private final Supplier<Translation2d> kPassSupplier = () -> {
+    public final Supplier<Translation2d> kPassSupplier = () -> {
         double x = Robot.isRedAlliance() ? FieldPositions.kFieldLength - 2 : 2;
         double y = Robot.isRedAlliance() && swerve.getCurrentPose().getY() > FieldPositions.kFieldWidth / 2.0 ? FieldPositions.kFieldWidth - 2 : 2;
         return new Translation2d(x, y);
@@ -151,7 +147,7 @@ public class Superstructure extends SubsystemBase {
     // Shooting commands
     // =========================================================================
 
-    private Command shoot(Supplier<Translation2d> target, BooleanSupplier adjustForMovingShot, BooleanSupplier trackTarget, BooleanSupplier shotCondition) {
+    private Command shoot(Supplier<Translation2d> target, BooleanSupplier adjustForMovingShot, BooleanSupplier trackTarget, BooleanSupplier feedthrough, BooleanSupplier shotCondition) {
         return new InstantCommand(() -> {
             this.targetSupplier = target;
             this.adjustTargetForMovingShots = adjustForMovingShot.getAsBoolean();
@@ -160,9 +156,55 @@ public class Superstructure extends SubsystemBase {
             new ParallelCommandGroup(
                 flywheel.setVelocity(() -> targetFlywheel),
                 hood.setRotations(() -> targetHood),
-                Commands.waitUntil(shotCondition)
+                Commands.waitUntil(shotCondition).andThen(
+                    new JiggleToPosition(pivot).alongWith(
+                        indexer.feed(),
+                        kicker.feed()
+                    )
+                )
             )
         );
+    }
+
+    private Command shoot(DoubleSupplier targetFlywheel, DoubleSupplier targetHood, BooleanSupplier shotCondition) {
+        return new ParallelCommandGroup(
+            flywheel.setVelocity(targetFlywheel.getAsDouble()),
+            hood.setRotations(targetHood.getAsDouble()),
+            Commands.waitUntil(shotCondition).andThen(
+                new JiggleToPosition(pivot).alongWith(
+                    indexer.feed(),
+                    kicker.feed()
+                )
+            )
+        );
+    }
+
+    public Command shoot() {
+        return shoot(kHubSupplier, () -> true, () -> true, () -> false, this::readyToShoot);
+    }
+
+    public Command stationaryShot() {
+        return shoot(kHubSupplier, () -> false, () -> true, () -> false, this::readyToShoot);
+    }
+
+    public Command feedthrough() {
+        return shoot(kHubSupplier, () -> true, () -> true, () -> true, this::readyToShoot);
+    }
+
+    public Command pass() {
+        return shoot(kPassSupplier, () -> true, () -> true, () -> false, this::readyToShoot);
+    }
+
+    public Command passFeedthrough() {
+        return shoot(kPassSupplier, () -> true, () -> true, () -> true, this::readyToShoot);
+    }
+
+    public Command defaultShot(DoubleSupplier flywheelRPS, DoubleSupplier hoodRotations) {
+        return shoot(() -> flywheelRPS.getAsDouble(), () -> hoodRotations.getAsDouble(), this::readyToShoot);
+    }
+
+    public Command defaultShot(double flywheelRPS, double hoodRotations) {
+        return shoot(() -> flywheelRPS, () -> hoodRotations, this::readyToShoot);
     }
 
     // public Command shoot(Supplier<Translation2d> target) {

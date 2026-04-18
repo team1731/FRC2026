@@ -21,8 +21,8 @@ public class FlywheelSubsystem extends BaseSubsystem {
 
     @Override
     protected void initializeHardware() {
-        motor = new MotorIOTalonFX(Ports.kLeftFlywheelConfig)
-            .withFollower(Ports.kRightFlywheelConfig);
+        motor = new MotorIOTalonFX(Ports.kLeftFlywheelTopConfig)
+            .withFollower(Ports.kRightFlywheelTopConfig, Ports.kRightFlywheelBottomConfig, Ports.kLeftFlywheelBottomConfig);
         motor.withPIDGains(kVelocityGains);
         motor.withStatorCurrentLimit(kCurrentLimit);
     }

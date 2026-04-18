@@ -21,8 +21,7 @@ public class HoodSubsystem extends BaseSubsystem {
 
     @Override
     protected void initializeHardware() {
-        motor = new MotorIOTalonFXS(Ports.kLeftHoodConfig)
-            .withFollower(Ports.kRightHoodConfig);
+        motor = new MotorIOTalonFXS(Ports.kHoodConfig);
         motor.withPIDGains(kPositionGains);
         motor.withStatorCurrentLimit(kCurrentLimit);
         motor.withMotionProfile(kMaxVelocity, kMaxAcceleration);
