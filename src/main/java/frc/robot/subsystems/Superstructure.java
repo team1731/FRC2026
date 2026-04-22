@@ -7,8 +7,11 @@ import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.lib.frc1731.field.FieldPositions;
 import frc.robot.Robot;
@@ -153,13 +156,15 @@ public class Superstructure extends SubsystemBase {
             this.adjustTargetForMovingShots = adjustForMovingShot.getAsBoolean();
             this.trackTarget = trackTarget.getAsBoolean();
         }).andThen(
+            swerve.setHeadingTarget(() -> compensatedTarget),
+            swerve.setLockingEnabled(trackTarget.getAsBoolean()),
             new ParallelCommandGroup(
                 flywheel.setVelocity(() -> targetFlywheel),
                 hood.setRotations(() -> targetHood),
                 Commands.waitUntil(shotCondition).andThen(
                     new JiggleToPosition(pivot).alongWith(
                         indexer.feed(),
-                        kicker.feed()
+                        kicker.setVelocity(() -> (targetFlywheel))
                     )
                 )
             )
@@ -173,7 +178,7 @@ public class Superstructure extends SubsystemBase {
             Commands.waitUntil(shotCondition).andThen(
                 new JiggleToPosition(pivot).alongWith(
                     indexer.feed(),
-                    kicker.feed()
+                    kicker.setVelocity(targetFlywheel.getAsDouble())
                 )
             )
         );
@@ -200,7 +205,7 @@ public class Superstructure extends SubsystemBase {
     }
 
     public Command defaultShot(DoubleSupplier flywheelRPS, DoubleSupplier hoodRotations) {
-        return shoot(() -> flywheelRPS.getAsDouble(), () -> hoodRotations.getAsDouble(), this::readyToShoot);
+        return shoot(flywheelRPS, hoodRotations, this::readyToShoot);
     }
 
     public Command defaultShot(double flywheelRPS, double hoodRotations) {
@@ -354,11 +359,18 @@ public class Superstructure extends SubsystemBase {
             compensatedTarget = rawTarget;
         }
 
+
         // ---------------------------------------------------------------------
         // 5. Look up shot parameters from each turret's predicted position
         // ---------------------------------------------------------------------
 
-        double[] shotParams  = shotTable.getShotParameters(compensatedTarget.minus(robotXY).getNorm());
+        double distance = compensatedTarget.minus(robotXY).getNorm();
+
+        double[] shotParams  = shotTable.getShotParameters(distance);
+
+        SmartDashboard.putNumber("Target Distance", distance);
+
+        Logger.recordOutput("CompensatedTarget", new Pose2d(compensatedTarget, Rotation2d.kZero));
 
         targetHood = shotParams[0];
         targetFlywheel = shotParams[1];

@@ -13,23 +13,22 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.*;
-
+import frc.lib.frc1731.log.SmartLogger;
 //import frc.lib.frc1731.log.SmartLogger;
 import frc.robot.RobotConstants;
 
 public abstract class BaseSubsystem extends SubsystemBase {
     private SysIdRoutine sysIdRoutine = null;
     private boolean enabled = false;
-//    protected SmartLogger logger = null;
+   protected SmartLogger logger = null;
 
     protected Optional<SubsystemConfiguration> config = Optional.empty();
 
     protected <T extends SubsystemConfiguration> BaseSubsystem(String nameModifier, SubsystemConfiguration config, boolean enabled) {
         this.enabled = enabled;
         this.setName(nameModifier + getName());
-      //  this.logger = new SmartLogger(getName(), () -> RobotConstants.kLogToWPILog);
+       this.logger = new SmartLogger(getName(), () -> RobotConstants.kLogToWPILog);
         if (isEnabled()){
-            // this.config = config == null ? Optional.empty() : Optional.of(config);
             if (config != null) this.config = Optional.of(config);
             initializeHardware();
         }

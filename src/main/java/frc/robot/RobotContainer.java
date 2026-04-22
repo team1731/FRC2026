@@ -2,6 +2,7 @@ package frc.robot;
 
 import static frc.robot.subsystems.drive.SwerveConstants.kAutoCurrentLimit;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.*;
 import frc.lib.frc6328.LoggedTunableNumber;
@@ -50,8 +51,8 @@ public class RobotContainer {
     private final Trigger dTowerShot = driver.a();
     private final Trigger dHubShot = driver.x();
     
-    private final Trigger dTestSetShot = driver.back();
-    private final Trigger dUnjam = driver.back();
+    // private final Trigger dTestSetShot = driver.back();
+    // private final Trigger dUnjam = driver.back();
 
     private final Trigger dSpit = driver.leftBumper();
     private final Trigger dStationaryShot = driver.rightBumper();
@@ -59,9 +60,9 @@ public class RobotContainer {
     private final Trigger dRetract = driver.povUp();
     private final Trigger dRaiseCurrentLimit = driver.povLeft();
 
-    private LoggedTunableNumber tuneableFlywheelRPS = new LoggedTunableNumber("TunedFlywheelRPS", 0, () -> testCondition.equals(TestShotCondition.kParameters));
-    private LoggedTunableNumber tuneableHoodRotations = new LoggedTunableNumber("TunedHoodRotations", 0, () -> testCondition.equals(TestShotCondition.kParameters));
-    private LoggedTunableNumber tuneableDistanceShot = new LoggedTunableNumber("TunedDistanceShot", 1.8, () -> testCondition.equals(TestShotCondition.kDistance));
+    // private LoggedTunableNumber tuneableFlywheelRPS = new LoggedTunableNumber("TunedFlywheelRPS", 0, () -> testCondition.equals(TestShotCondition.kParameters));
+    // private LoggedTunableNumber tuneableHoodRotations = new LoggedTunableNumber("TunedHoodRotations", 0, () -> testCondition.equals(TestShotCondition.kParameters));
+    // private LoggedTunableNumber tuneableDistanceShot = new LoggedTunableNumber("TunedDistanceShot", 1.8, () -> testCondition.equals(TestShotCondition.kDistance));
 
     public RobotContainer(SwerveSubsystem swerve) {
         this.swerve = swerve;
@@ -69,6 +70,9 @@ public class RobotContainer {
         configureButtonBindings();
         configureDefaultCommands();
         configureNamedCommands();
+
+        SmartDashboard.putNumber("TuneableFlywheelRPS", 80.0);
+        SmartDashboard.putNumber("TuneableHoodRotations", 0);
     }
 
     /**
@@ -113,21 +117,28 @@ public class RobotContainer {
         dResetSwerve.onTrue(superstructure.resetSwerve());
 
         dIntake.and(() -> !dShoot.getAsBoolean() && !dPass.getAsBoolean()).whileTrue(superstructure.runIntake(true));
-        dShoot.whileTrue(superstructure.shoot());
-        dPass.whileTrue(superstructure.pass());
-        dFeedthrough.whileTrue(superstructure.feedthrough());
-        dPassthrough.whileTrue(superstructure.passFeedthrough());
+        dShoot.whileTrue(superstructure.shoot()).onFalse(swerve.setLockingEnabled(false));
+        dPass.whileTrue(superstructure.pass()).onFalse(swerve.setLockingEnabled(false));
+        dFeedthrough.whileTrue(superstructure.feedthrough()).onFalse(swerve.setLockingEnabled(false));
+        dPassthrough.whileTrue(superstructure.passFeedthrough()).onFalse(swerve.setLockingEnabled(false));
 
-        dStationaryShot.whileTrue(superstructure.stationaryShot());
+        dStationaryShot.whileTrue(superstructure.stationaryShot()).onFalse(swerve.setLockingEnabled(false));
 
-        dHubShot.whileTrue(superstructure.defaultShot(30.0, 0));
-        dTowerShot.whileTrue(superstructure.defaultShot(40.0, 2));
-        dTrenchShot.whileTrue(superstructure.defaultShot(45.0, 3));
+        dHubShot.whileTrue(superstructure.defaultShot(100.0, 15)).onFalse(swerve.setLockingEnabled(false));
+        dTowerShot.whileTrue(superstructure.defaultShot(80.0, 8)).onFalse(swerve.setLockingEnabled(false));
+        dTrenchShot.whileTrue(superstructure.defaultShot(80.0, 14)).onFalse(swerve.setLockingEnabled(false));
         
         // (dTestSetShot.and(() -> testCondition.equals(TestShotCondition.kDistance)))
         //     .whileTrue(superstructure.tuneShot(tuneableDistanceShot, true));
         // (dTestSetShot.and(() -> testCondition.equals(TestShotCondition.kParameters)))
         //     .whileTrue(superstructure.tuneShot(tuneableFlywheelRPS.get(), tuneableHoodRotations.get(), true));
+
+        // driver.back().whileTrue(superstructure.defaultShot(
+        //     () -> SmartDashboard.getNumber("TuneableFlywheelRPS", 50.0), 
+        //     () -> SmartDashboard.getNumber("TuneableHoodRotations", 0.0)
+        // ));
+
+        // driver.back().whileTrue(kicker.setVelocity(40));
 
         dSpit.whileTrue(superstructure.spit());
 

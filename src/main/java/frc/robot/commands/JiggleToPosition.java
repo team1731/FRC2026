@@ -14,6 +14,8 @@ public class JiggleToPosition extends Command {
     private final double DURATION = 3.0 / 2.0;
     private final double JIGGLE_AMPLITUDE = 0.1; // Distance of the "wiggle"
 
+    private boolean headingIn = true;
+
     public JiggleToPosition(IntakePivotSubsystem intake) {
         this.intake = intake;
     }
@@ -21,22 +23,29 @@ public class JiggleToPosition extends Command {
     @Override
     public void initialize() {
         timer.restart();
+        intake.setPosition(IntakeConstants.kPivotStowRotations);
     }
 
     @Override
     public void execute() {
         double time = timer.get();
+
+        if(timer.hasElapsed(0.5)) {
+            intake.setPosition(headingIn ? IntakeConstants.kPivotIntakeRotations : IntakeConstants.kPivotStowRotations);
+            timer.restart();
+            headingIn = !headingIn;
+        }
         
-        // 1. Calculate the moving "center" (Linear Interpolation)
-        double progress = Math.min(time / DURATION, 1.0);
-        double trendLine = START_POS + (progress * (END_POS - START_POS));
+        // // 1. Calculate the moving "center" (Linear Interpolation)
+        // double progress = Math.min(time / DURATION, 1.0);
+        // double trendLine = START_POS + (progress * (END_POS - START_POS));
         
-        // 2. Calculate the oscillation (The Sine Wave)
-        // 2 * PI * 3 means 3 oscillations per second 
-        double oscillation = Math.sin(time * Math.PI * 1.5) * JIGGLE_AMPLITUDE;
+        // // 2. Calculate the oscillation (The Sine Wave)
+        // // 2 * PI * 3 means 3 oscillations per second 
+        // double oscillation = Math.sin(time * Math.PI * 1.5) * JIGGLE_AMPLITUDE;
         
-        // 3. Set the position
-        intake.setPosition(trendLine - Math.abs(oscillation));
+        // // 3. Set the position
+        // intake.setPosition(trendLine - Math.abs(oscillation));
     }
 
     @Override

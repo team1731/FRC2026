@@ -64,8 +64,8 @@ dependencies {
     implementation wpi.java.deps.wpilib()
     implementation wpi.java.vendor.java()
 
-    implementation "org.littletonrobotics.akit:akit-java:4.+"
-    annotationProcessor "org.littletonrobotics.akit:akit-autolog:4.+"
+    implementation "org.littletonrobotics.akit:akit-java:4.0.0"
+    annotationProcessor "org.littletonrobotics.akit:akit-autolog:4.0.0"
 
     roborioDebug wpi.java.deps.wpilibJniDebug(wpi.platforms.roborio)
     roborioDebug wpi.java.vendor.jniDebug(wpi.platforms.roborio)

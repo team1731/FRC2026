@@ -5,6 +5,8 @@ import static edu.wpi.first.units.Units.*;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
+import org.littletonrobotics.junction.Logger;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
@@ -16,6 +18,7 @@ import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 import com.ctre.phoenix6.swerve.SwerveModule;
 
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -51,7 +54,13 @@ public class SwerveSubsystem extends BaseSubsystem {
 
     private Timer questPoseResetTimer = new Timer();  // ussed primarily in dissabled to reset the pose every few seconds in case the robot is moved b4 auto
 
-    private final ProfiledPIDController headingPID = kHeadingGains.toProfiledPIDController(kMaxAngularRate, kMaxAngularAcceleration);
+    private final PIDController headingPID = kHeadingGains.toPIDController();
+
+    private boolean trackTargetHeading = false;
+    
+    private Supplier<Translation2d> headingTarget = () -> Robot.isRedAlliance()
+        ? new Translation2d(11.91, 4.03)
+        : new Translation2d(4.62, 4.03);
 
     public SwerveSubsystem(boolean enabled) {
         super(enabled);
@@ -63,6 +72,7 @@ public class SwerveSubsystem extends BaseSubsystem {
 	    driveAtTargetControl.HeadingController.enableContinuousInput(-Math.PI/2, Math.PI/2);
         
         headingPID.setTolerance(kHeadingTolerance);
+        headingPID.enableContinuousInput(0, 2 * Math.PI);
 
         Transform3d tf = kLimelightToRobot;
         LimelightHelpers.setCameraPose_RobotSpace(kLimelightName, tf.getX(), tf.getY(), tf.getZ(), tf.getRotation().getX(), tf.getRotation().getY(), tf.getRotation().getZ());
@@ -147,7 +157,7 @@ public class SwerveSubsystem extends BaseSubsystem {
     }
 
     public boolean atTargetHeading() {
-        return headingPID.atGoal();
+        return headingPID.atSetpoint();
     }
 
     /*
@@ -231,6 +241,8 @@ public class SwerveSubsystem extends BaseSubsystem {
             SmartDashboard.putBoolean("isTracking", questNav.isTracking());
             SmartDashboard.putBoolean("isConnected", questNav.isConnected());
 
+            SmartDashboard.putBoolean("isTrackingHeading", trackTargetHeading);
+
             isQuestSeeded = true; // TODO - Fix this once limelight odometry works
             if (!questNav.isTracking()) {
                 isQuestSeeded = false;
@@ -242,33 +254,40 @@ public class SwerveSubsystem extends BaseSubsystem {
         }
     }
 
+    public Command setHeadingTarget(Supplier<Translation2d> target) {
+        return new InstantCommand(() -> this.headingTarget = target);
+    }
+
+    public Command setLockingEnabled(boolean enabled) {
+        return new InstantCommand(() -> this.trackTargetHeading = enabled);
+    }
+
     public Command driveCommand(CommandXboxController m_xboxController, BooleanSupplier isFieldCentric) {
         return run(() -> {
             Translation2d RotationCenter =  new Translation2d();
 
             double scalar = kMaxSpeed * (m_xboxController.rightTrigger().getAsBoolean() ? 0.5 : 1.0);
 
+            double rotRate = -m_xboxController.getRightX() * kMaxAngularRate;
+            if (trackTargetHeading) {
+                Pose2d curPose = getCurrentPose();
+                Translation2d robotTranslation = curPose.getTranslation();
+                Translation2d targetTranslation = headingTarget.get();
+                // Angle from robot to target
+                Rotation2d targetAngle = targetTranslation.minus(robotTranslation).getAngle();
+                // Flip by 180 degrees so the BACK of the robot points at the target
+                Rotation2d desiredAngle = targetAngle.plus(Rotation2d.fromDegrees(180));
+                rotRate = headingPID.calculate(curPose.getRotation().getRadians() % (2 * Math.PI), desiredAngle.getRadians());
+                logger.log("Target Heading", desiredAngle.getDegrees());
+                Logger.recordOutput("Swerve Target", new Pose2d(targetTranslation, Rotation2d.kZero));
+            }
+
             if ((Math.abs(m_xboxController.getLeftY()) < kDeadband) && 
                 (Math.abs(m_xboxController.getLeftX()) < kDeadband) &&
-                (Math.abs(m_xboxController.getRightX()) < kDeadband)){
+                (Math.abs(m_xboxController.getRightX()) < kDeadband) &&
+                !trackTargetHeading){
                     drivetrain.setControl(brake);
             } else {
-                double rotRate = -m_xboxController.getRightX() * kMaxAngularRate;
-                if (m_xboxController.rightTrigger().getAsBoolean()) {
-                    Pose2d curPose = getCurrentPose();
-                    Translation2d robotTranslation = curPose.getTranslation();
-                    Translation2d targetTranslation = Robot.isRedAlliance()
-                        ? new Translation2d(11.91, 4.03)
-                        : new Translation2d(4.62, 4.03);
-
-                    Rotation2d targetTheta = Rotation2d.fromRadians(Math.atan(
-                        (targetTranslation.getY() - robotTranslation.getY()) / 
-                        (targetTranslation.getX() - robotTranslation.getX())
-                    ));
-
-                    rotRate = headingPID.calculate(curPose.getRotation().getDegrees() % 360d, targetTheta.getDegrees());
-                }
-
                 if (isFieldCentric.getAsBoolean()) {
                     drivetrain.setControl(
                         kFieldCentricControl

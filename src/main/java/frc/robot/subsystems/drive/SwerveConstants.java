@@ -19,7 +19,7 @@ import frc.robot.subsystems.drive.generated.TunerConstants;
 public class SwerveConstants {
     public static final double kMaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // Max robot speed
     public static final double kMaxAngularRate = RotationsPerSecond.of(1.5).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
-    public static final double kMaxAngularAcceleration = 540; // deg/s^2 max acceleration
+    public static final double kMaxAngularAcceleration = Math.toRadians(540); // deg/s^2 max acceleration
     public static final double kDeadband = 0.05; // 5% joystick deadband
     public static final double kMaxVisionAngularRate = 720d; // degrees per second
 
@@ -36,12 +36,13 @@ public class SwerveConstants {
 
     public static final PIDGains kHeadingGains = new PIDGains()
         // .setP(4d/180d); // 4 m/s when 180 degrees of error
-        .setP(0.01d)
+        .setP(6.0)
+        .setD(0.0)
         // .setD(0.0001d)
-        .setContinuousInput(-180, 180); // 4 m/s when 180 degrees of error
+        .setContinuousInput(-360, 360); // 4 m/s when 180 degrees of error
 
     public static final PathConstraints kPathfinderConstraints = new PathConstraints(
-        2.0, 2.0, 
+        2.0, 2.0,
         Units.degreesToRadians(360), Units.degreesToRadians(540)
     );
 

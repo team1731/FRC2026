@@ -21,7 +21,8 @@ public class FlywheelConstants {
     public static final SimConstants kSimConstants = new SimConstants(DCMotor.getKrakenX60(4), kGearRatio, kFlywheelRadius, kFlywheelMass);
 
     public static final PIDGains kVelocityGains = new PIDGains()
-        .setP(1.0)
-        .setD(0.005)
-        .setV(0.175);
+        .setP(.11)
+        .setD(0.0)
+        .setV(0.12)
+        .setS(.1);
 }
