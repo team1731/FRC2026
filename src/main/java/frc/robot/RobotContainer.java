@@ -11,6 +11,7 @@ import frc.robot.subsystems.drive.SwerveSubsystem;
 import frc.robot.subsystems.indexer.IndexerSubsystem;
 import frc.robot.subsystems.shooter.flywheel.FlywheelSubsystem;
 import frc.robot.subsystems.shooter.hood.HoodSubsystem;
+import frc.robot.subsystems.squeezer.SqueezerSubsystem;
 import frc.robot.subsystems.intake.IntakePivotSubsystem;
 import frc.robot.subsystems.intake.IntakeRollerSubsystem;
 import frc.robot.subsystems.kicker.KickerSubsystem;
@@ -31,6 +32,7 @@ public class RobotContainer {
     private IntakePivotSubsystem pivot;
     private FlywheelSubsystem flywheel;
     private HoodSubsystem hood;
+    private SqueezerSubsystem squeezer;
 
     // private LEDSubsystem led;
 
@@ -55,14 +57,12 @@ public class RobotContainer {
     // private final Trigger dUnjam = driver.back();
 
     private final Trigger dSpit = driver.leftBumper();
-    private final Trigger dStationaryShot = driver.rightBumper();
+    // private final Trigger dStationaryShot = driver.rightBumper();
     
     private final Trigger dRetract = driver.povUp();
     private final Trigger dRaiseCurrentLimit = driver.povLeft();
 
-    // private LoggedTunableNumber tuneableFlywheelRPS = new LoggedTunableNumber("TunedFlywheelRPS", 0, () -> testCondition.equals(TestShotCondition.kParameters));
-    // private LoggedTunableNumber tuneableHoodRotations = new LoggedTunableNumber("TunedHoodRotations", 0, () -> testCondition.equals(TestShotCondition.kParameters));
-    // private LoggedTunableNumber tuneableDistanceShot = new LoggedTunableNumber("TunedDistanceShot", 1.8, () -> testCondition.equals(TestShotCondition.kDistance));
+    private final Trigger dRaiseSqueezer = driver.rightBumper();
 
     public RobotContainer(SwerveSubsystem swerve) {
         this.swerve = swerve;
@@ -85,6 +85,7 @@ public class RobotContainer {
         kicker = new KickerSubsystem(true);
         pivot = new IntakePivotSubsystem(true);
         intake = new IntakeRollerSubsystem(true);
+        squeezer = new SqueezerSubsystem(false); // Disabled for now until we can confirm it is on the robot
         // led = new LEDSubsystem(true);
 
         superstructure = new Superstructure(swerve, flywheel, hood, indexer, kicker, pivot, intake);
@@ -122,7 +123,7 @@ public class RobotContainer {
         dFeedthrough.whileTrue(superstructure.feedthrough()).onFalse(swerve.setLockingEnabled(false));
         dPassthrough.whileTrue(superstructure.passFeedthrough()).onFalse(swerve.setLockingEnabled(false));
 
-        dStationaryShot.whileTrue(superstructure.stationaryShot()).onFalse(swerve.setLockingEnabled(false));
+        // dStationaryShot.whileTrue(superstructure.stationaryShot()).onFalse(swerve.setLockingEnabled(false));
 
         dHubShot.whileTrue(superstructure.defaultShot(100.0, 15)).onFalse(swerve.setLockingEnabled(false));
         dTowerShot.whileTrue(superstructure.defaultShot(80.0, 8)).onFalse(swerve.setLockingEnabled(false));
@@ -138,9 +139,9 @@ public class RobotContainer {
         //     () -> SmartDashboard.getNumber("TuneableHoodRotations", 0.0)
         // ));
 
-        // driver.back().whileTrue(kicker.setVelocity(40));
-
         dSpit.whileTrue(superstructure.spit());
+
+        dRaiseSqueezer.whileTrue(squeezer.raise());
 
         // driver.back().whileTrue(superstructure.tuneShot(tuneableDistanceShot, true));
         dRetract.whileTrue(pivot.retract());
