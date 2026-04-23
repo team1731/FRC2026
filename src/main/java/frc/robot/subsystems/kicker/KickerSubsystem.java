@@ -32,14 +32,14 @@ public class KickerSubsystem extends BaseSubsystem {
             .withFollower(Ports.kToptKickerConfig);
         // motor.withPIDGains(kPIDGains);
         // motor.withStatorCurrentLimit(kCurrentLimit);
-
-        Robot.IS_ENABLED.onTrue(new InstantCommand(() -> {
-            motor.withPIDGains(
-                new PIDGains()
-                .setP(kP.get())
-                .setV(kV.get())
-            );
-        }));
+        motor.withPIDGains(KickerConstants.kPIDGains);
+       // Robot.IS_ENABLED.onTrue(new InstantCommand(() -> {
+       //     motor.withPIDGains(
+       //         new PIDGains()
+      //          .setP(kP.get())
+       //         .setV(kV.get())
+       //     );
+      //  }));
     }
 
     @Override

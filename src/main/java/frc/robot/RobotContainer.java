@@ -126,7 +126,7 @@ public class RobotContainer {
 
         dHubShot.whileTrue(superstructure.defaultShot(100.0, 15)).onFalse(swerve.setLockingEnabled(false));
         dTowerShot.whileTrue(superstructure.defaultShot(80.0, 8)).onFalse(swerve.setLockingEnabled(false));
-        dTrenchShot.whileTrue(superstructure.defaultShot(80.0, 14)).onFalse(swerve.setLockingEnabled(false));
+        dTrenchShot.whileTrue(superstructure.defaultShot(65.0, 16)).onFalse(swerve.setLockingEnabled(false));
         
         // (dTestSetShot.and(() -> testCondition.equals(TestShotCondition.kDistance)))
         //     .whileTrue(superstructure.tuneShot(tuneableDistanceShot, true));

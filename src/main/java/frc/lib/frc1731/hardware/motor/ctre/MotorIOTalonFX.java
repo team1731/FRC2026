@@ -181,7 +181,7 @@ public class MotorIOTalonFX extends MotorIO {
 
     @Override
     public void setVelocityRPS(double rps, int pidSlot) {
-        this.motor.setControl(new VelocityVoltage(rps).withSlot(pidSlot));
+        this.motor.setControl(new VelocityTorqueCurrentFOC(rps).withSlot(pidSlot));
         this.motorSim.setAngularVelocity(rps * (2*Math.PI) * 1.2d); // 1.2 is the friction factor
     }
 
