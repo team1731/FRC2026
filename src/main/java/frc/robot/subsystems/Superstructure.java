@@ -124,8 +124,8 @@ public class Superstructure extends SubsystemBase {
 
     public Command runIntake(boolean deployed) {
         return Commands.either(
-            pivot.deploy().alongWith(intake.setVelocity(RotationsPerSecond.of(125))),
-            pivot.retract().alongWith(intake.setVelocity(RotationsPerSecond.of(100))),
+            pivot.deploy().alongWith(intake.setPercentOutput(1.0)),
+            pivot.retract().alongWith(intake.setPercentOutput(1.0)),
             () -> deployed
         );
     }
@@ -135,7 +135,7 @@ public class Superstructure extends SubsystemBase {
     }
 
     public Command spit() {
-        return pivot.deploy().alongWith(intake.setVelocity(RotationsPerSecond.of(-125)), indexer.eject(), kicker.eject());
+        return pivot.deploy().alongWith(intake.setPercentOutput(-1.0), indexer.eject(), kicker.eject());
     }
 
     // -------------------------------------------------------------------------
@@ -164,6 +164,7 @@ public class Superstructure extends SubsystemBase {
                 Commands.waitUntil(shotCondition).andThen(
                     new JiggleToPosition(pivot).alongWith(
                         indexer.feed(),
+                        intake.setPercentOutput(1.0),
                         kicker.setVelocity(() -> (targetFlywheel))
                     )
                 )
@@ -178,6 +179,7 @@ public class Superstructure extends SubsystemBase {
             Commands.waitUntil(shotCondition).andThen(
                 new JiggleToPosition(pivot).alongWith(
                     indexer.feed(),
+                    intake.setPercentOutput(1.0),
                     kicker.setVelocity(targetFlywheel.getAsDouble())
                 )
             )

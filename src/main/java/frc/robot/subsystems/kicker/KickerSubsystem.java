@@ -76,7 +76,7 @@ public class KickerSubsystem extends BaseSubsystem {
     }
 
     public Command eject() {
-        return setPercent(-0.8);
+        return setPercent(-0.5);
     }
 
     public Command stop() {

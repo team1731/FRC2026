@@ -122,11 +122,10 @@ public class RobotContainer {
         dFeedthrough.whileTrue(superstructure.feedthrough()).onFalse(swerve.setLockingEnabled(false));
         dPassthrough.whileTrue(superstructure.passFeedthrough()).onFalse(swerve.setLockingEnabled(false));
 
-        dStationaryShot.whileTrue(superstructure.stationaryShot()).onFalse(swerve.setLockingEnabled(false));
-
-        dHubShot.whileTrue(superstructure.defaultShot(100.0, 15)).onFalse(swerve.setLockingEnabled(false));
-        dTowerShot.whileTrue(superstructure.defaultShot(80.0, 8)).onFalse(swerve.setLockingEnabled(false));
-        dTrenchShot.whileTrue(superstructure.defaultShot(65.0, 16)).onFalse(swerve.setLockingEnabled(false));
+        dStationaryShot.whileTrue(superstructure.defaultShot(50, 9));
+        dHubShot.whileTrue(superstructure.defaultShot(60, 8)).onFalse(swerve.setLockingEnabled(false));
+        dTowerShot.whileTrue(superstructure.defaultShot(100, 8)).onFalse(swerve.setLockingEnabled(false));
+        dTrenchShot.whileTrue(superstructure.defaultShot(60.0, 12)).onFalse(swerve.setLockingEnabled(false));
         
         // (dTestSetShot.and(() -> testCondition.equals(TestShotCondition.kDistance)))
         //     .whileTrue(superstructure.tuneShot(tuneableDistanceShot, true));
