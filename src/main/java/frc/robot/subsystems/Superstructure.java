@@ -226,6 +226,10 @@ public class Superstructure extends SubsystemBase {
         return shoot(() -> flywheelRPS, () -> hoodRotations, this::readyToShoot);
     }
 
+    public Command warmup() {
+        return flywheel.setVelocity(() -> targetFlywheel).alongWith(hood.setRotations(() -> targetHood));
+    }
+
     // public Command shoot(Supplier<Translation2d> target) {
     //     return new DeferredCommand(() -> {
     //         this.targetSupplier = target;
