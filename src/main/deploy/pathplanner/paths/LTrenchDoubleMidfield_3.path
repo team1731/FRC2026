@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 4.3759033989266545,
-        "y": 7.434221824686941
+        "x": 2.735155555555556,
+        "y": 5.4479444444444445
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.196646804080041,
-        "y": 7.46949645152976
+        "x": 5.555898960708943,
+        "y": 5.483219071287263
       },
       "isLocked": false,
       "linkedName": "LTrenchScore"
@@ -86,7 +86,7 @@
   "folder": "LTrenchDoubleMidfield",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 180.0
   },
   "useDefaultConstraints": true
 }

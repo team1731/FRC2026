@@ -33,6 +33,10 @@ public class MotorIOSparkMax extends MotorIO {
         this.config.inverted(config.kInverted);
     }
 
+    public SparkMax getMotor() {
+        return motor;
+    }
+
     @Override
     public void withMotionProfile(double maxVelocity, double maxAcceleration) {
         this.config.closedLoop.maxMotion

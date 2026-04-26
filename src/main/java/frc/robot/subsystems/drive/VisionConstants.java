@@ -13,8 +13,8 @@ public class VisionConstants {
 
     public static final Transform3d kRobotToOculus = new Transform3d(
         Units.inchesToMeters(-12.5),
-        Units.inchesToMeters(-7.5),
-        Units.inchesToMeters(14.5),
+        Units.inchesToMeters(0.0),
+        Units.inchesToMeters(13.0),
         new Rotation3d(
             Units.degreesToRadians(0.0),
             Units.degreesToRadians(0.0),

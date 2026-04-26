@@ -11,6 +11,7 @@ import frc.robot.subsystems.drive.SwerveSubsystem;
 import frc.robot.subsystems.indexer.IndexerSubsystem;
 import frc.robot.subsystems.shooter.flywheel.FlywheelSubsystem;
 import frc.robot.subsystems.shooter.hood.HoodSubsystem;
+import frc.robot.subsystems.squeezer.SqueezerSubsystem;
 import frc.robot.subsystems.intake.IntakePivotSubsystem;
 import frc.robot.subsystems.intake.IntakeRollerSubsystem;
 import frc.robot.subsystems.kicker.KickerSubsystem;
@@ -31,6 +32,7 @@ public class RobotContainer {
     private IntakePivotSubsystem pivot;
     private FlywheelSubsystem flywheel;
     private HoodSubsystem hood;
+    private SqueezerSubsystem squeezer;
 
     // private LEDSubsystem led;
 
@@ -85,9 +87,10 @@ public class RobotContainer {
         kicker = new KickerSubsystem(true);
         pivot = new IntakePivotSubsystem(true);
         intake = new IntakeRollerSubsystem(true);
+        squeezer = new SqueezerSubsystem(true);
         // led = new LEDSubsystem(true);
 
-        superstructure = new Superstructure(swerve, flywheel, hood, indexer, kicker, pivot, intake);
+        superstructure = new Superstructure(swerve, flywheel, hood, indexer, kicker, pivot, intake, squeezer);
     }
 
     private void configureNamedCommands() {
@@ -116,21 +119,21 @@ public class RobotContainer {
         // Reset robot pose and heading
         dResetSwerve.onTrue(superstructure.resetSwerve());
 
-        dIntake.and(() -> !dShoot.getAsBoolean() && !dPass.getAsBoolean()).whileTrue(superstructure.runIntake(true));
+        dIntake.and(() -> !dShoot.getAsBoolean() && !dPass.getAsBoolean()).whileTrue(superstructure.runIntake(true).alongWith(squeezer.raise()));
         dShoot.whileTrue(superstructure.shoot()).onFalse(swerve.setLockingEnabled(false));
         dPass.whileTrue(superstructure.pass()).onFalse(swerve.setLockingEnabled(false));
         dFeedthrough.whileTrue(superstructure.feedthrough()).onFalse(swerve.setLockingEnabled(false));
         dPassthrough.whileTrue(superstructure.passFeedthrough()).onFalse(swerve.setLockingEnabled(false));
 
         dStationaryShot.whileTrue(superstructure.defaultShot(50, 9));
-        dHubShot.whileTrue(superstructure.defaultShot(60, 8)).onFalse(swerve.setLockingEnabled(false));
-        dTowerShot.whileTrue(superstructure.defaultShot(100, 8)).onFalse(swerve.setLockingEnabled(false));
-        dTrenchShot.whileTrue(superstructure.defaultShot(60.0, 12)).onFalse(swerve.setLockingEnabled(false));
+        dHubShot.whileTrue(superstructure.defaultShot(60, 0)).onFalse(swerve.setLockingEnabled(false));
+        dTowerShot.whileTrue(superstructure.defaultShot(90, 8)).onFalse(swerve.setLockingEnabled(false));
+        dTrenchShot.whileTrue(superstructure.defaultShot(70, 2)).onFalse(swerve.setLockingEnabled(false));
         
         // (dTestSetShot.and(() -> testCondition.equals(TestShotCondition.kDistance)))
         //     .whileTrue(superstructure.tuneShot(tuneableDistanceShot, true));
         // (dTestSetShot.and(() -> testCondition.equals(TestShotCondition.kParameters)))
-        //     .whileTrue(superstructure.tuneShot(tuneableFlywheelRPS.get(), tuneableHoodRotations.get(), true));
+        //     .whileTrue(superstructure.tuneShot(tuneableFlywheelRPS.get(), tuneableH oodRotations.get(), true));
 
         // driver.back().whileTrue(superstructure.defaultShot(
         //     () -> SmartDashboard.getNumber("TuneableFlywheelRPS", 50.0), 
@@ -144,6 +147,8 @@ public class RobotContainer {
         // driver.back().whileTrue(superstructure.tuneShot(tuneableDistanceShot, true));
         dRetract.whileTrue(pivot.retract());
         dRaiseCurrentLimit.onTrue(new InstantCommand(() -> swerve.setStatorCurrentLimit(kAutoCurrentLimit)));
+        driver.povDown().onTrue(swerve.launchQuestnav());
+        // driver.povRight().whileTrue(squeezer.reset()).onFalse(squeezer.stop());
     }
 
     public void configureDefaultCommands() {
@@ -157,6 +162,8 @@ public class RobotContainer {
 
         hood.setDefaultCommand(hood.stow());
         flywheel.setDefaultCommand(flywheel.stop());
+
+        // squeezer.setDefaultCommand(squeezer.stop());
 
         // led.setDefaultCommand(led.flashAllianceShift());
     }

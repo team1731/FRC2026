@@ -23,6 +23,7 @@ import frc.robot.subsystems.kicker.KickerSubsystem;
 import frc.robot.subsystems.shooter.*;
 import frc.robot.subsystems.shooter.flywheel.*;
 import frc.robot.subsystems.shooter.hood.*;
+import frc.robot.subsystems.squeezer.SqueezerSubsystem;
 
 public class Superstructure extends SubsystemBase {
     private SwerveSubsystem swerve;
@@ -32,6 +33,7 @@ public class Superstructure extends SubsystemBase {
     private KickerSubsystem kicker;
     private IntakePivotSubsystem pivot;
     private IntakeRollerSubsystem intake;
+    private SqueezerSubsystem squeezer;
 
     private final ShotTable shotTable = ShotTable.getScoringTable();
 
@@ -101,7 +103,8 @@ public class Superstructure extends SubsystemBase {
                           IndexerSubsystem indexer,
                           KickerSubsystem kicker,
                           IntakePivotSubsystem pivot, 
-                          IntakeRollerSubsystem intake
+                          IntakeRollerSubsystem intake,
+                          SqueezerSubsystem squeezer
                           ) {
         this.swerve = swerve;
         this.flywheel = flywheel;
@@ -110,6 +113,7 @@ public class Superstructure extends SubsystemBase {
         this.kicker = kicker;
         this.pivot = pivot;
         this.intake = intake;
+        this.squeezer = squeezer;
     }
 
     // =========================================================================
@@ -165,7 +169,8 @@ public class Superstructure extends SubsystemBase {
                     new JiggleToPosition(pivot).alongWith(
                         indexer.feed(),
                         intake.setPercentOutput(1.0),
-                        kicker.setVelocity(() -> (targetFlywheel))
+                        kicker.setVelocity(() -> (targetFlywheel)),
+                        squeezer.squeeze()
                     )
                 )
             )
@@ -176,14 +181,16 @@ public class Superstructure extends SubsystemBase {
         return new ParallelCommandGroup(
             flywheel.setVelocity(targetFlywheel.getAsDouble()),
             hood.setRotations(targetHood.getAsDouble()),
-            Commands.waitUntil(shotCondition).andThen(
+            Commands.waitUntil(shotCondition) .andThen(
                 new JiggleToPosition(pivot).alongWith(
                     indexer.feed(),
                     intake.setPercentOutput(1.0),
-                    kicker.setVelocity(targetFlywheel.getAsDouble())
+                    kicker.setVelocity(targetFlywheel.getAsDouble()),
+                    squeezer.squeeze()
                 )
             )
-        );
+            )
+        ;
     }
 
     public Command shoot() {

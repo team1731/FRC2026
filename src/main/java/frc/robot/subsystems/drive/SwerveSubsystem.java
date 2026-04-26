@@ -48,7 +48,10 @@ public class SwerveSubsystem extends BaseSubsystem {
     private boolean hasGoodOdometry = false;
     private double distanceBetweenPoses;
 
+    private boolean lastConnected = false;
+
     private QuestNav questNav;
+    private QuestWaker waker;
 
     private static boolean isQuestSeeded = false;
 
@@ -66,6 +69,7 @@ public class SwerveSubsystem extends BaseSubsystem {
         super(enabled);
         if(!enabled) return;
         questNav = new QuestNav();
+        waker = new QuestWaker();
 
         this.drivetrain = TunerConstants.createDrivetrain();
         driveAtTargetControl.HeadingController.setPID(10,0,0);
@@ -252,6 +256,13 @@ public class SwerveSubsystem extends BaseSubsystem {
                 addQuestVisionMeasurement();
             }
         }
+    }
+
+    public Command launchQuestnav() {
+        return runOnce(() -> {
+            waker.updateQuestIP();
+            waker.launchQuestNav();
+        });
     }
 
     public Command setHeadingTarget(Supplier<Translation2d> target) {

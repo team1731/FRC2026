@@ -24,4 +24,6 @@ public class Ports {
 
     public static final PortConfig kLeftFlywheelBottomConfig = new PortConfig(RobotConstants.kSecondCANBus, 24, false);
     public static final PortConfig kRightFlywheelBottomConfig = new PortConfig(RobotConstants.kSecondCANBus, 25, true);
+
+    public static final PortConfig kSqueezerConfig = new PortConfig(RobotConstants.kSecondCANBus, 26, false);
 }

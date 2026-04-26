@@ -16,12 +16,12 @@
     },
     {
       "anchor": {
-        "x": 4.3759033989266545,
-        "y": 7.434221824686941
+        "x": 2.735155555555556,
+        "y": 5.4479444444444445
       },
       "prevControl": {
-        "x": 5.706386404293381,
-        "y": 7.434221824686941
+        "x": 4.065638560922283,
+        "y": 5.4479444444444445
       },
       "nextControl": null,
       "isLocked": false,
@@ -47,7 +47,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 180.0
   },
   "reversed": false,
   "folder": "LTrenchDoubleMidfield",
