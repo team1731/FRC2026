@@ -169,7 +169,7 @@ public class Superstructure extends SubsystemBase {
                     new JiggleToPosition(pivot).alongWith(
                         indexer.feed(),
                         intake.setPercentOutput(1.0),
-                        kicker.setVelocity(() -> (targetFlywheel)),
+                        kicker.setVelocity(() -> 90.0),
                         squeezer.squeeze()
                     )
                 )
@@ -185,7 +185,7 @@ public class Superstructure extends SubsystemBase {
                 new JiggleToPosition(pivot).alongWith(
                     indexer.feed(),
                     intake.setPercentOutput(1.0),
-                    kicker.setVelocity(targetFlywheel.getAsDouble()),
+                    kicker.setVelocity(90.0),
                     squeezer.squeeze()
                 )
             )

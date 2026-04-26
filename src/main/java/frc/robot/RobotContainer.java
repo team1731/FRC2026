@@ -62,10 +62,6 @@ public class RobotContainer {
     private final Trigger dRetract = driver.povUp();
     private final Trigger dRaiseCurrentLimit = driver.povLeft();
 
-    // private LoggedTunableNumber tuneableFlywheelRPS = new LoggedTunableNumber("TunedFlywheelRPS", 0, () -> testCondition.equals(TestShotCondition.kParameters));
-    // private LoggedTunableNumber tuneableHoodRotations = new LoggedTunableNumber("TunedHoodRotations", 0, () -> testCondition.equals(TestShotCondition.kParameters));
-    // private LoggedTunableNumber tuneableDistanceShot = new LoggedTunableNumber("TunedDistanceShot", 1.8, () -> testCondition.equals(TestShotCondition.kDistance));
-
     public RobotContainer(SwerveSubsystem swerve) {
         this.swerve = swerve;
         configureSubsystems();
@@ -96,17 +92,11 @@ public class RobotContainer {
     private void configureNamedCommands() {
         // Named commands useful for PathPlanner events
         // ex. NamedCommands.registerCommand("Example", new ExampleCommand());
-        // NamedCommands.registerCommand("SitAndShoot", superstructure.autoShoot());
-        // NamedCommands.registerCommand("StowShooter", superstructure.stopShooters());
-        // NamedCommands.registerCommand("StopIntakeCommand", intake.stop());
-        // NamedCommands.registerCommand("IntakeCommand", superstructure.runIntake(true));
-        // NamedCommands.registerCommand("PassCommand", superstructure.pass());
-        // NamedCommands.registerCommand("WarmupCommand", superstructure.warmup());
-        // NamedCommands.registerCommand("FeedthroughCommand", superstructure.feedthrough());
 
-        // new EventTrigger("Shoot").onTrue(superstructure.shoot());
-        // new EventTrigger("StopShoot").onTrue(superstructure.stopShooters());
-        // new EventTrigger("Intake").whileTrue(superstructure.runIntake(true));
+        new EventTrigger("Shoot").onTrue(superstructure.shoot());
+        new EventTrigger("StopShoot").onTrue(superstructure.stopShooters());
+        new EventTrigger("Intake").whileTrue(superstructure.runIntake(true));
+        new EventTrigger("RaiseSqueezer").whileTrue(squeezer.raise());
         // new EventTrigger("Pass").onTrue(superstructure.pass());
         // new EventTrigger("Warmup").whileTrue(superstructure.warmup());
         // new EventTrigger("Feedthrough").whileTrue(superstructure.feedthrough());
