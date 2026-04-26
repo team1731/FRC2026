@@ -273,6 +273,28 @@ public class SwerveSubsystem extends BaseSubsystem {
         return new InstantCommand(() -> this.trackTargetHeading = enabled);
     }
 
+    public Command lockHeadingTarget(Supplier<Translation2d> target) {
+        return setLockingEnabled(true).andThen(
+            setHeadingTarget(target),
+            run(
+                Pose2d curPose = getCurrentPose();
+                Translation2d robotTranslation = curPose.getTranslation();
+                Translation2d targetTranslation = headingTarget.get();
+                // Angle from robot to target
+                Rotation2d targetAngle = targetTranslation.minus(robotTranslation).getAngle();
+                // Flip by 180 degrees so the BACK of the robot points at the target
+                Rotation2d desiredAngle = targetAngle.plus(Rotation2d.fromDegrees(180));
+                rotRate = headingPID.calculate(curPose.getRotation().getRadians() % (2 * Math.PI), desiredAngle.getRadians());
+                drivetrain.setControl(
+                    kFieldCentricControl
+                        .withVelocityX(0)
+                        .withVelocityY(0)
+                        .withRotationalRate(rotRate)
+                );
+            )
+        );
+    }
+
     public Command driveCommand(CommandXboxController m_xboxController, BooleanSupplier isFieldCentric) {
         return run(() -> {
             Translation2d RotationCenter =  new Translation2d();
@@ -289,8 +311,8 @@ public class SwerveSubsystem extends BaseSubsystem {
                 // Flip by 180 degrees so the BACK of the robot points at the target
                 Rotation2d desiredAngle = targetAngle.plus(Rotation2d.fromDegrees(180));
                 rotRate = headingPID.calculate(curPose.getRotation().getRadians() % (2 * Math.PI), desiredAngle.getRadians());
-                logger.log("Target Heading", desiredAngle.getDegrees());
-                Logger.recordOutput("Swerve Target", new Pose2d(targetTranslation, Rotation2d.kZero));
+                // logger.log("Target Heading", desiredAngle.getDegrees());
+                // Logger.recordOutput("Swerve Target", new Pose2d(targetTranslation, Rotation2d.kZero));
             }
 
             if ((Math.abs(m_xboxController.getLeftY()) < kDeadband) && 

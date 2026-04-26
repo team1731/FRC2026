@@ -92,7 +92,8 @@ public class RobotContainer {
     private void configureNamedCommands() {
         // Named commands useful for PathPlanner events
         // ex. NamedCommands.registerCommand("Example", new ExampleCommand());
-        new EventTrigger("Shoot").onTrue(superstructure.shoot());
+        new EventTrigger("Shoot").whileTrue(superstructure.autoShoot(false));
+        new EventTrigger("Feedthrough").whileTrue(superstructure.autoShoot(true));
         new EventTrigger("StopShoot").onTrue(superstructure.stopShooters());
         new EventTrigger("Intake").whileTrue(superstructure.runIntake(true));
         new EventTrigger("RaiseSqueezer").whileTrue(squeezer.raise());

@@ -37,10 +37,6 @@ public class Superstructure extends SubsystemBase {
 
     private final ShotTable shotTable = ShotTable.getScoringTable();
 
-    // -------------------------------------------------------------------------
-    // Target suppliers
-    // -------------------------------------------------------------------------
-
     public final Supplier<Translation2d> kHubSupplier = () -> Robot.isRedAlliance()
         ? new Translation2d(11.91, 4.03)
         : new Translation2d(4.62, 4.03);
@@ -53,45 +49,14 @@ public class Superstructure extends SubsystemBase {
 
     private Supplier<Translation2d> targetSupplier = kHubSupplier;
 
-    // -------------------------------------------------------------------------
-    // Per-turret compensated aim points (written by periodic, read by commands)
-    // -------------------------------------------------------------------------
-
     private Translation2d compensatedTarget  = new Translation2d();
 
-    // final lambdas — never reassigned, always read the latest field value
     public final Supplier<Translation2d> appliedTargetSupplier  = () -> compensatedTarget;
-
-    // -------------------------------------------------------------------------
-    // Shot parameter targets (written by periodic, read by commands via lambdas)
-    // -------------------------------------------------------------------------
 
     private double targetHood = 0;
     private double targetFlywheel = 0;
     private boolean adjustTargetForMovingShots = false;
     private boolean trackTarget = false;
-
-    // -------------------------------------------------------------------------
-    // Velocity / acceleration state for the robot chassis
-    //
-    // We maintain a running derivative of field-relative chassis speeds so we
-    // can predict where the turret pivot will be at time-of-flight, not just
-    // where it is right now.
-    //
-    // Layout:
-    //   prevVelocity        — field-relative velocity one loop ago (m/s)
-    //   chassisAcceleration — finite-difference derivative (m/s²)
-    //   prevOmega           — angular velocity one loop ago (rad/s)
-    //   angularAcceleration — derivative of omega (rad/s²)
-    //
-    // We use a small exponential filter (alpha = 0.3) on both acceleration terms
-    // to suppress quantisation noise from the 50 Hz odometry update.
-    // Lower alpha = smoother but laggier; 0.3 is a good default for FRC.
-    // -------------------------------------------------------------------------
-
-    // private static final double kMaxPredictTof = 2.2;   // clamp TOF to avoid wild extrapolation (s)
-    // private static final double kLatency = 0.02; // 20ms
-    // private static final double kCompGain = 1.0; // 0 = no compensation, 1 = full compensation
 
     // -------------------------------------------------------------------------
     // Constructor
@@ -198,6 +163,33 @@ public class Superstructure extends SubsystemBase {
         ;
     }
 
+    public Command autoShoot(boolean feedthrough) {
+        return new InstantCommand(() -> {
+            this.targetSupplier = kHubSupplier;
+            this.adjustTargetForMovingShots = () -> true;
+            this.trackTarget = () -> true;
+        }).andThen(
+            new ParallelCommandGroup(
+                swerve.lockHeadingTarget(compensatedTarget),
+                flywheel.setVelocity(() -> targetFlywheel),
+                hood.setRotations(() -> targetHood),
+                Commands.waitUntil(this::readyToShoot).andThen(
+                    new ParallelCommandGroup( // Only start the feeding sequence after we are ready to shoot
+                        indexer.feed(),
+                        kicker.setVelocity(() -> 90.0),
+                        squeezer.squeeze()
+                    )
+                ),
+                Commands.either( // If feedthrough continue intaking, otherwise jiggle
+                    this.runIntake(true),
+                    Commands.waitUntil(this::readyToShoot)
+                        .andThen(new JiggleToPosition(pivot).alongWith(intake.setPercentOutput(1.0))),
+                    () -> feedthrough
+                )
+            )
+        );
+    }
+
     public Command shoot() {
         return shoot(kHubSupplier, () -> true, () -> true, () -> false, this::readyToShoot, () -> true);
     }
@@ -230,131 +222,8 @@ public class Superstructure extends SubsystemBase {
         return flywheel.setVelocity(() -> targetFlywheel).alongWith(hood.setRotations(() -> targetHood));
     }
 
-    // public Command shoot(Supplier<Translation2d> target) {
-    //     return new DeferredCommand(() -> {
-    //         this.targetSupplier = target;
-    //         this.adjustTargetForMovingShots = true;
-    //         return new ParallelCommandGroup(
-    //             setFlywheels(() -> targetFlywheel, () -> targetRightFlywheel),
-    //             setHoods(() -> targetHood, () -> targetRightHood),
-    //             trackAppliedTarget(),
-    //             intake.setVelocity(RotationsPerSecond.of(100)),
-    //             (Commands.waitUntil(this::shootersReady)
-    //                 .andThen(
-    //                     index().until(() -> !turretsCanShoot())
-    //                     .alongWith(new JiggleToPosition(pivot))
-    //                 )).repeatedly()
-    //         );
-    //     }, Set.of(flywheel, hood, leftHood, rightHood, leftTurret, rightTurret, indexer, pivot, intake));
-    // }
-
-    // public Command stationaryShot() {
-    //     return new DeferredCommand(() -> {
-    //         this.targetSupplier = kHubSupplier;
-    //         this.adjustTargetForMovingShots = false;
-    //         return new ParallelCommandGroup(
-    //             setFlywheelToTarget(),
-    //             setHoodsToTarget(),
-    //             trackHub(),
-    //             intake.setVelocity(RotationsPerSecond.of(100)),
-    //             (Commands.waitUntil(this::shootersReady)
-    //                 .andThen(
-    //                     index().until(() -> !turretsCanShoot())
-    //                     .alongWith(new JiggleToPosition(pivot))
-    //                 )).repeatedly()
-    //         );
-    //     }, Set.of(leftFlywheel, rightFlywheel, leftHood, rightHood, leftTurret, rightTurret, indexer, pivot, intake));
-    // }
-
-    // public Command shoot() {
-    //     return this.shoot(targetSupplier);
-    // }
-
-    // public Command feedthrough(Supplier<Translation2d> target) {
-    //     return new DeferredCommand(() -> {
-    //         this.targetSupplier = target;
-    //         this.adjustTargetForMovingShots = true;
-    //         return new ParallelCommandGroup(
-    //             setFlywheels(() -> targetFlywheel, () -> targetRightFlywheel),
-    //             setHoods(() -> targetHood, () -> targetRightHood),
-    //             trackAppliedTarget(),
-    //             runIntake(true),
-    //             (Commands.waitUntil(this::shootersReady).andThen(index())).repeatedly()
-    //         );
-    //     }, Set.of(leftFlywheel, rightFlywheel, leftHood, rightHood, leftTurret, rightTurret, indexer, pivot, intake));
-    // }
-
-    // public Command feedthrough() {
-    //     return this.feedthrough(() -> FieldPositions.kHub.get());
-    // }
-
-    // public Command passFeedthrough() {
-    //     return this.feedthrough(kPassSupplier);
-    // }
-
-    // public Command autoShoot() {
-    //     return this.shoot().withTimeout(4.0);
-    // }
-
-    // public Command pass() {
-    //     return this.shoot(kPassSupplier);
-    // }
-
-    // public Command forceShoot(Supplier<Translation2d> target, double indexDelay) {
-    //     return new DeferredCommand(() -> {
-    //         this.targetSupplier = target;
-    //         this.adjustTargetForMovingShots = false;
-    //         return new ParallelCommandGroup(
-    //             setFlywheels(() -> targetFlywheel, () -> targetRightFlywheel),
-    //             setHoods(() -> targetHood, () -> targetRightHood),
-    //             track(targetSupplier),
-    //             new WaitCommand(indexDelay).andThen(index().alongWith(runIntake(false)))
-    //         );
-    //     }, Set.of(leftFlywheel, rightFlywheel, leftHood, rightHood, leftTurret, rightTurret, indexer, pivot, intake));
-    // }
-
-    // public Command forceShoot(double indexDelay) {
-    //     return this.forceShoot(() -> FieldPositions.kHub.get(), indexDelay);
-    // }
-
-    // public Command tuneShot(double flywheel, double hood, boolean zeroTurret) {
-    //     return new DeferredCommand(() -> new ParallelCommandGroup(
-    //         setFlywheels(() -> flywheel, () -> flywheel),
-    //         setHoods(() -> hood, () -> hood),
-    //         Commands.either(setTurrets(() -> 0, () -> 0), setTurrets(() -> 180, () -> 180), () -> zeroTurret),
-    //         Commands.waitUntil(this::hoodAndFlywheelsReady).andThen(index().alongWith(runIntake(false)))
-    //     ), Set.of());
-    // }
-
-    // public Command tuneShot(DoubleSupplier distance, boolean zeroTurret) {
-    //     return new DeferredCommand(() -> {
-    //         double[] parameters = shotTable.getShotParameters(distance.getAsDouble());
-    //         return new ParallelCommandGroup(
-    //             setFlywheels(() -> parameters[1], () -> parameters[1]),
-    //             setHoods(() -> parameters[0], () -> parameters[0]),
-    //             Commands.either(setTurrets(() -> 0, () -> 0), setTurrets(() -> 180, () -> 180), () -> zeroTurret),
-    //             Commands.waitSeconds(1.0).andThen(index().alongWith(
-    //                 new JiggleToPosition(pivot),
-    //                 intake.setVelocity(RotationsPerSecond.of(100))
-    //             ))
-    //         );
-    //     }, Set.of(leftFlywheel, rightFlywheel, leftHood, rightHood, leftTurret, rightTurret, indexer, pivot, intake));
-    // }
-
-    // public Command manualShot(double distance, boolean zeroTurret) {
-    //     return this.tuneShot(() -> distance, zeroTurret);
-    // }
-
-    // =========================================================================
-    // periodic() — all prediction math lives here
-    // =========================================================================
-
     @Override
     public void periodic() {
-
-        // ---------------------------------------------------------------------
-        // 1. Snapshot current chassis state
-        // ---------------------------------------------------------------------
 
         Pose2d robotPose = swerve.getCurrentPose();
         Rotation2d robotRot = robotPose.getRotation();
@@ -377,21 +246,15 @@ public class Superstructure extends SubsystemBase {
             compensatedTarget = rawTarget;
         }
 
-
-        // ---------------------------------------------------------------------
-        // 5. Look up shot parameters from each turret's predicted position
-        // ---------------------------------------------------------------------
-
         double distance = compensatedTarget.minus(robotXY).getNorm();
 
         double[] shotParams  = shotTable.getShotParameters(distance);
 
         SmartDashboard.putNumber("Target Distance", distance);
-
         Logger.recordOutput("CompensatedTarget", new Pose2d(compensatedTarget, Rotation2d.kZero));
 
-        targetHood = shotParams[0];
-        targetFlywheel = shotParams[1];
+        this.targetHood = shotParams[0];
+        this.targetFlywheel = shotParams[1];
     }
 
     // =========================================================================
