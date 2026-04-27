@@ -100,7 +100,7 @@ public class Superstructure extends SubsystemBase {
     }
 
     public Command stopShooters() {
-        return flywheel.stop().alongWith(hood.stow(), indexer.stop(), kicker.stop());
+        return flywheel.stop().alongWith(hood.stow(), indexer.stop(), kicker.stop(), swerve.stopLocking());
     }
 
     public Command spit() {
@@ -134,7 +134,7 @@ public class Superstructure extends SubsystemBase {
                     new ParallelCommandGroup( // Only start the feeding sequence after we are ready to shoot
                         indexer.feed(),
                         kicker.setVelocity(() -> 90.0),
-                        Commands.either(squeezer.squeeze(), Commands.none(), squeeze.getAsBoolean())
+                        Commands.either(squeezer.squeeze(), Commands.none(), squeeze)
                     )
                 ),
                 Commands.either( // If feedthrough continue intaking, otherwise jiggle
@@ -166,11 +166,10 @@ public class Superstructure extends SubsystemBase {
     public Command autoShoot(boolean feedthrough) {
         return new InstantCommand(() -> {
             this.targetSupplier = kHubSupplier;
-            this.adjustTargetForMovingShots = () -> true;
-            this.trackTarget = () -> true;
+            this.adjustTargetForMovingShots = true;
+            this.trackTarget = true;
         }).andThen(
             new ParallelCommandGroup(
-                swerve.lockHeadingTarget(compensatedTarget),
                 flywheel.setVelocity(() -> targetFlywheel),
                 hood.setRotations(() -> targetHood),
                 Commands.waitUntil(this::readyToShoot).andThen(

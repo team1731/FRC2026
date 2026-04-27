@@ -56,8 +56,8 @@
         "y": 0.6646704545454554
       },
       "nextControl": {
-        "x": 4.216787703965236,
-        "y": 0.6530195697671646
+        "x": 4.21678770396523,
+        "y": 0.6530195697671645
       },
       "isLocked": false,
       "linkedName": null
@@ -116,7 +116,7 @@
   "folder": "RTrenchDoubleMidfield",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 89.9818070138905
   },
   "useDefaultConstraints": true
 }

@@ -91,7 +91,7 @@
   "folder": "RTrenchDoubleMidfield",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 89.9818070138905
   },
   "useDefaultConstraints": true
 }

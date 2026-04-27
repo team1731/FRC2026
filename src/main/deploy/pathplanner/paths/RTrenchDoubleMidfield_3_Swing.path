@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 4.2461001788908765,
-        "y": 0.6682289803220032
+        "x": 3.024698795180723,
+        "y": 0.6543636363636369
       },
       "prevControl": null,
       "nextControl": {
-        "x": 8.23736773497958,
-        "y": 0.6684201196035484
+        "x": 7.015966351269427,
+        "y": 0.6545547756451824
       },
       "isLocked": false,
       "linkedName": "RTrenchScore"
@@ -64,12 +64,12 @@
     },
     {
       "anchor": {
-        "x": 4.2461001788908765,
-        "y": 0.6682289803220032
+        "x": 3.024698795180723,
+        "y": 0.6543636363636369
       },
       "prevControl": {
-        "x": 6.000788189525036,
-        "y": 0.6478064832399115
+        "x": 4.779386805814882,
+        "y": 0.633941139281545
       },
       "nextControl": null,
       "isLocked": false,
@@ -125,13 +125,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": -118.10685546362046
   },
   "reversed": false,
   "folder": "RTrenchDoubleMidfield",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": -118.10685546362046
   },
   "useDefaultConstraints": true
 }

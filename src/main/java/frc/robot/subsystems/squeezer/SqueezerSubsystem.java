@@ -33,8 +33,8 @@ public class SqueezerSubsystem extends BaseSubsystem {
         config = new SparkMaxConfig();
         config.inverted(Ports.kSqueezerConfig.kInverted);
 
-        config.smartCurrentLimit(30);
-        config.secondaryCurrentLimit(30);
+        config.smartCurrentLimit(20);
+        config.secondaryCurrentLimit(20);
         config.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder)
         .p(0.5);
 

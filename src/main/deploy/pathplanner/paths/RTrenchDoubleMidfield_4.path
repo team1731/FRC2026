@@ -32,12 +32,12 @@
     },
     {
       "anchor": {
-        "x": 4.2461001788908765,
-        "y": 0.6682289803220032
+        "x": 3.024698795180723,
+        "y": 0.6543636363636369
       },
       "prevControl": {
-        "x": 4.91888730385164,
-        "y": 0.6903566333808839
+        "x": 3.697485920141486,
+        "y": 0.6764912894225179
       },
       "nextControl": null,
       "isLocked": false,
@@ -63,7 +63,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": -118.10685546362046
   },
   "reversed": false,
   "folder": "RTrenchDoubleMidfield",

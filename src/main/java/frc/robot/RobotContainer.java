@@ -2,6 +2,8 @@ package frc.robot;
 
 import static frc.robot.subsystems.drive.SwerveConstants.kAutoCurrentLimit;
 
+import com.pathplanner.lib.events.EventTrigger;
+
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.*;
@@ -92,12 +94,14 @@ public class RobotContainer {
     private void configureNamedCommands() {
         // Named commands useful for PathPlanner events
         // ex. NamedCommands.registerCommand("Example", new ExampleCommand());
-        new EventTrigger("Shoot").whileTrue(superstructure.autoShoot(false));
-        new EventTrigger("Feedthrough").whileTrue(superstructure.autoShoot(true));
+        new EventTrigger("Shoot").whileTrue(superstructure.shoot());
+        new EventTrigger("Feedthrough").whileTrue(superstructure.shoot());
         new EventTrigger("StopShoot").onTrue(superstructure.stopShooters());
         new EventTrigger("Intake").whileTrue(superstructure.runIntake(true));
         new EventTrigger("RaiseSqueezer").whileTrue(squeezer.raise());
         new EventTrigger("Warmup").whileTrue(superstructure.warmup());
+        new EventTrigger("TargetLock").onTrue(swerve.autoLockTarget());
+        new EventTrigger("StopTrack").onTrue(swerve.setLockingEnabled(false));
     }
 
     /**
