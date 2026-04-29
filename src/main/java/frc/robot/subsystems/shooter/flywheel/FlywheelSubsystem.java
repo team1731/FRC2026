@@ -4,23 +4,24 @@ import static frc.robot.subsystems.shooter.flywheel.FlywheelConstants.*;
 
 import java.util.function.DoubleSupplier;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.frc1731.Utils;
 import frc.lib.frc1731.hardware.motor.ctre.MotorIOTalonFX;
+import frc.robot.Ports;
 import frc.robot.subsystems.BaseSubsystem;
 
 public class FlywheelSubsystem extends BaseSubsystem {
     private MotorIOTalonFX motor;
-    private FlywheelIOInputs inputs = new FlywheelIOInputs();
+    private FlywheelIOInputsAutoLogged inputs = new FlywheelIOInputsAutoLogged();
 
-    public FlywheelSubsystem(FlywheelConfiguration config, boolean enabled) {
-        super(config.name(), config, enabled);
+    public FlywheelSubsystem(boolean enabled) {
+        super(enabled);
     }
 
     @Override
     protected void initializeHardware() {
-        motor = new MotorIOTalonFX(((FlywheelConfiguration)config.get()).portConfig());
+        motor = new MotorIOTalonFX(Ports.kLeftFlywheelTopConfig)
+            .withFollower(Ports.kRightFlywheelTopConfig, Ports.kRightFlywheelBottomConfig, Ports.kLeftFlywheelBottomConfig);
         motor.withPIDGains(kVelocityGains);
         motor.withStatorCurrentLimit(kCurrentLimit);
     }
@@ -34,8 +35,7 @@ public class FlywheelSubsystem extends BaseSubsystem {
     public void periodicTelemetry() {
         inputs.currentVelocity = motor.getVelocityRPS();
         inputs.atTargetVelocity = Utils.isWithin(inputs.currentVelocity, inputs.targetVelocity, kEpsilon);
-     //   logger.processInputs(inputs);
-        SmartDashboard.putNumber("Target Flywheel Velocity", inputs.targetVelocity);
+        logger.processInputs(inputs);
     }
 
     public Command setVelocity(DoubleSupplier target) {
@@ -67,11 +67,5 @@ public class FlywheelSubsystem extends BaseSubsystem {
     public Command stop() {
         return this.setPercent(0)
         .withName("Stop");
-    }
-    
-    public Command stopOnce() {
-        return runOnce(() -> {
-            motor.setPercentOutput(0d);
-        });
     }
 }

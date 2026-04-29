@@ -1,0 +1,187 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 4.532722891566265,
+        "y": 7.411662650602409
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 5.848738342320868,
+        "y": 7.307609428278505
+      },
+      "isLocked": false,
+      "linkedName": "LTrench"
+    },
+    {
+      "anchor": {
+        "x": 7.887530120481928,
+        "y": 6.6904337349397585
+      },
+      "prevControl": {
+        "x": 7.4897986476140295,
+        "y": 7.348332066787715
+      },
+      "nextControl": {
+        "x": 8.157295813448332,
+        "y": 6.24420704306478
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 7.887530120481928,
+        "y": 5.357253012048193
+      },
+      "prevControl": {
+        "x": 7.999308612035854,
+        "y": 5.677386984886786
+      },
+      "nextControl": {
+        "x": 7.742494345159932,
+        "y": 4.94187006751135
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 5.865903614457832,
+        "y": 5.543024096385542
+      },
+      "prevControl": {
+        "x": 6.8302631073580065,
+        "y": 5.523736906527539
+      },
+      "nextControl": {
+        "x": 4.773132530120482,
+        "y": 5.564879518072289
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 3.789638554216867,
+        "y": 5.543024096385542
+      },
+      "prevControl": {
+        "x": 4.860554216867469,
+        "y": 5.532096385542169
+      },
+      "nextControl": {
+        "x": 3.4194215440797673,
+        "y": 5.546801820978778
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 2.959132530120482,
+        "y": 5.543024096385542
+      },
+      "prevControl": {
+        "x": 2.7092008516248742,
+        "y": 5.54886841707902
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "LOverBumpFinish"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 1,
+      "rotationDegrees": -105.05121999259102
+    },
+    {
+      "waypointRelativePos": 2,
+      "rotationDegrees": -108.43494882292211
+    },
+    {
+      "waypointRelativePos": 3,
+      "rotationDegrees": 179.3013056170165
+    },
+    {
+      "waypointRelativePos": 4,
+      "rotationDegrees": 180.0
+    }
+  ],
+  "constraintZones": [
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 0.8983402489626502,
+      "maxWaypointRelativePos": 2.408713692946074,
+      "constraints": {
+        "maxVelocity": 1.5,
+        "maxAcceleration": 2.0,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 720.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    },
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 2.9564315352697186,
+      "maxWaypointRelativePos": 4.192946058091338,
+      "constraints": {
+        "maxVelocity": 1.5,
+        "maxAcceleration": 2.0,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 720.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    }
+  ],
+  "pointTowardsZones": [],
+  "eventMarkers": [
+    {
+      "name": "LowerSqueezer",
+      "waypointRelativePos": 0,
+      "endWaypointRelativePos": null,
+      "command": null
+    },
+    {
+      "name": "Intake",
+      "waypointRelativePos": 0.3257261410788379,
+      "endWaypointRelativePos": 2.8485477178422958,
+      "command": null
+    },
+    {
+      "name": "RaiseSqueezer",
+      "waypointRelativePos": 1.396265560165978,
+      "endWaypointRelativePos": null,
+      "command": null
+    },
+    {
+      "name": "Warmup",
+      "waypointRelativePos": 3.661825726141052,
+      "endWaypointRelativePos": 5.0,
+      "command": null
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 4.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 136.88818800674096
+  },
+  "reversed": false,
+  "folder": "LeftOverBumpX2",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": -89.75292020188239
+  },
+  "useDefaultConstraints": false
+}

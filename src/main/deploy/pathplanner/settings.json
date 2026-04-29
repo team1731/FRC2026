@@ -4,12 +4,11 @@
   "holonomicMode": true,
   "pathFolders": [
     "HubPreloadDepot",
-    "LTrenchDoubleMidfield",
-    "LeftHubX1Depot",
-    "LeftX2Depot",
-    "LeftDelayedX2",
-    "RTrenchDoubleMidfield",
-    "RightX2"
+    "LeftOverBumpX2",
+    "LeftTrenchTandem",
+    "LeftX2NoBump",
+    "MiddleLeftOverBumpDelayed",
+    "RightOverBumpX2"
   ],
   "autoFolders": [],
   "defaultMaxVel": 4.0,
