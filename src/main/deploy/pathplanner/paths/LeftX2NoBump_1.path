@@ -178,7 +178,7 @@
   "folder": "LeftX2NoBump",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -89.75292020188239
+    "rotation": 0.4570817156017955
   },
   "useDefaultConstraints": false
 }
