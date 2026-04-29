@@ -1,8 +1,6 @@
 package frc.robot.subsystems;
 
 
-import static edu.wpi.first.units.Units.*;
-
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -11,14 +9,15 @@ import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
+import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import frc.lib.frc1731.field.FieldPositions;
 import frc.robot.Robot;
 import frc.robot.commands.JiggleToPosition;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.indexer.*;
-import frc.robot.subsystems.intake.*;
+import frc.robot.subsystems.intake.pivot.IntakePivotSubsystem;
+import frc.robot.subsystems.intake.roller.IntakeRollerSubsystem;
 import frc.robot.subsystems.kicker.KickerSubsystem;
 import frc.robot.subsystems.shooter.*;
 import frc.robot.subsystems.shooter.flywheel.*;
@@ -56,7 +55,6 @@ public class Superstructure extends SubsystemBase {
     private double targetHood = 0;
     private double targetFlywheel = 0;
     private boolean adjustTargetForMovingShots = false;
-    private boolean trackTarget = false;
 
     // -------------------------------------------------------------------------
     // Constructor
@@ -107,6 +105,10 @@ public class Superstructure extends SubsystemBase {
         return pivot.deploy().alongWith(intake.setPercentOutput(-1.0), indexer.eject(), kicker.eject());
     }
 
+    public Command lockSwerveToHub() {
+        return swerve.lockHeadingTarget(appliedTargetSupplier);
+    }
+
     // -------------------------------------------------------------------------
     // Readiness checks
     // -------------------------------------------------------------------------
@@ -123,7 +125,6 @@ public class Superstructure extends SubsystemBase {
         return new InstantCommand(() -> {
             this.targetSupplier = target;
             this.adjustTargetForMovingShots = adjustForMovingShot.getAsBoolean();
-            this.trackTarget = trackTarget.getAsBoolean();
         }).andThen(
             swerve.setHeadingTarget(() -> compensatedTarget),
             swerve.setLockingEnabled(trackTarget.getAsBoolean()),
@@ -133,7 +134,7 @@ public class Superstructure extends SubsystemBase {
                 Commands.waitUntil(shotCondition).andThen(
                     new ParallelCommandGroup( // Only start the feeding sequence after we are ready to shoot
                         indexer.feed(),
-                        kicker.setVelocity(() -> 90.0),
+                        kicker.setVelocity(() -> targetFlywheel),
                         Commands.either(squeezer.squeeze(), Commands.none(), squeeze)
                     )
                 ),
@@ -155,7 +156,7 @@ public class Superstructure extends SubsystemBase {
                 new JiggleToPosition(pivot).alongWith(
                     indexer.feed(),
                     intake.setPercentOutput(1.0),
-                    kicker.setVelocity(90.0),
+                    kicker.setVelocity(targetFlywheel.getAsDouble()),
                     squeezer.squeeze()
                 )
             )
@@ -167,15 +168,17 @@ public class Superstructure extends SubsystemBase {
         return new InstantCommand(() -> {
             this.targetSupplier = kHubSupplier;
             this.adjustTargetForMovingShots = true;
-            this.trackTarget = true;
         }).andThen(
+            swerve.setHeadingTarget(() -> compensatedTarget),
+            swerve.setLockingEnabled(true),
             new ParallelCommandGroup(
                 flywheel.setVelocity(() -> targetFlywheel),
+                swerve.lockHeadingTarget(() -> compensatedTarget).withInterruptBehavior(InterruptionBehavior.kCancelSelf),
                 hood.setRotations(() -> targetHood),
                 Commands.waitUntil(this::readyToShoot).andThen(
                     new ParallelCommandGroup( // Only start the feeding sequence after we are ready to shoot
                         indexer.feed(),
-                        kicker.setVelocity(() -> 90.0),
+                        kicker.setVelocity(() -> targetFlywheel),
                         squeezer.squeeze()
                     )
                 ),
@@ -217,15 +220,17 @@ public class Superstructure extends SubsystemBase {
         return shoot(() -> flywheelRPS, () -> hoodRotations, this::readyToShoot);
     }
 
+    public Command defaultShot(double distance) {
+        return defaultShot(() -> shotTable.getShotParameters(distance)[1], () -> shotTable.getShotParameters(distance)[0]);
+    }
+
     public Command warmup() {
         return flywheel.setVelocity(() -> targetFlywheel).alongWith(hood.setRotations(() -> targetHood));
     }
 
     @Override
     public void periodic() {
-
         Pose2d robotPose = swerve.getCurrentPose();
-        Rotation2d robotRot = robotPose.getRotation();
         Translation2d robotXY = robotPose.getTranslation();
 
         ChassisSpeeds fieldSpeeds = swerve.getFieldRelativeChassisSpeeds();
@@ -249,8 +254,10 @@ public class Superstructure extends SubsystemBase {
 
         double[] shotParams  = shotTable.getShotParameters(distance);
 
-        SmartDashboard.putNumber("Target Distance", distance);
-        Logger.recordOutput("CompensatedTarget", new Pose2d(compensatedTarget, Rotation2d.kZero));
+        if (Robot.isSimulation()) {
+            Logger.recordOutput("TargetDistance", distance);
+            Logger.recordOutput("CompensatedTarget", new Pose2d(compensatedTarget, Rotation2d.kZero));
+        }
 
         this.targetHood = shotParams[0];
         this.targetFlywheel = shotParams[1];

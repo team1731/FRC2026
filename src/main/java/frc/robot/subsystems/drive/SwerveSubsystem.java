@@ -5,8 +5,6 @@ import static edu.wpi.first.units.Units.*;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
-import org.littletonrobotics.junction.Logger;
-
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
@@ -19,7 +17,6 @@ import com.ctre.phoenix6.swerve.SwerveModule;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.*;
@@ -47,8 +44,6 @@ public class SwerveSubsystem extends BaseSubsystem {
     private Pose2d baselinePose;
     private boolean hasGoodOdometry = false;
     private double distanceBetweenPoses;
-
-    private boolean lastConnected = false;
 
     private QuestNav questNav;
     private QuestWaker waker;
@@ -83,8 +78,6 @@ public class SwerveSubsystem extends BaseSubsystem {
 
         configureAutoBuilder();
         drivetrain.registerTelemetry(telemetry::telemeterize);
-
-        Robot.IS_TELEOP.onTrue(setLockingEnabled(false));
     }
 
     public void addVisionMeasurement(Pose2d pose, double timestamp, Matrix<N3,N1> visionMeasurementStdDevs) {
@@ -291,30 +284,26 @@ public class SwerveSubsystem extends BaseSubsystem {
     }
 
     public Command lockHeadingTarget(Supplier<Translation2d> target) {
-        return setLockingEnabled(true).andThen(
-            setHeadingTarget(target),
-            run(() -> {
-                Pose2d curPose = getCurrentPose();
-                Translation2d robotTranslation = curPose.getTranslation();
-                Translation2d targetTranslation = headingTarget.get();
-                // Angle from robot to target
-                Rotation2d targetAngle = targetTranslation.minus(robotTranslation).getAngle();
-                // Flip by 180 degrees so the BACK of the robot points at the target
-                Rotation2d desiredAngle = targetAngle.plus(Rotation2d.fromDegrees(180));
-                double rotRate = headingPID.calculate(curPose.getRotation().getRadians() % (2 * Math.PI), desiredAngle.getRadians());
-                drivetrain.setControl(
-                    kFieldCentricControl
-                        .withVelocityX(0)
-                        .withVelocityY(0)
-                        .withRotationalRate(rotRate)
-                );
-            }
-            )
-        );
+        return run(() -> {
+            Pose2d curPose = getCurrentPose();
+            Translation2d robotTranslation = curPose.getTranslation();
+            Translation2d targetTranslation = headingTarget.get();
+            // Angle from robot to target
+            Rotation2d targetAngle = targetTranslation.minus(robotTranslation).getAngle();
+            // Flip by 180 degrees so the BACK of the robot points at the target
+            Rotation2d desiredAngle = targetAngle.plus(Rotation2d.fromDegrees(180));
+            double rotRate = headingPID.calculate(curPose.getRotation().getRadians() % (2 * Math.PI), desiredAngle.getRadians());
+            drivetrain.setControl(
+                kFieldCentricControl
+                    .withVelocityX(0)
+                    .withVelocityY(0)
+                    .withRotationalRate(rotRate)
+            );
+        }).withName("LockHeading");
     }
 
     public Command stopLocking() {
-        return setLockingEnabled(false).andThen(runOnce(() -> PPHolonomicDriveController.clearFeedbackOverrides()));
+        return setLockingEnabled(false).andThen(new InstantCommand(() -> drivetrain.setControl(kFieldCentricControl.withVelocityX(0).withVelocityY(0).withRotationalRate(0))));
     }
 
     public Command driveCommand(CommandXboxController m_xboxController, BooleanSupplier isFieldCentric) {

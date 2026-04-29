@@ -4,27 +4,20 @@ import static frc.robot.subsystems.drive.SwerveConstants.kAutoCurrentLimit;
 
 import com.pathplanner.lib.events.EventTrigger;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.*;
-import frc.lib.frc6328.LoggedTunableNumber;
 import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.drive.SwerveSubsystem;
 import frc.robot.subsystems.indexer.IndexerSubsystem;
 import frc.robot.subsystems.shooter.flywheel.FlywheelSubsystem;
 import frc.robot.subsystems.shooter.hood.HoodSubsystem;
 import frc.robot.subsystems.squeezer.SqueezerSubsystem;
-import frc.robot.subsystems.intake.IntakePivotSubsystem;
-import frc.robot.subsystems.intake.IntakeRollerSubsystem;
+import frc.robot.subsystems.intake.pivot.IntakePivotSubsystem;
+import frc.robot.subsystems.intake.roller.IntakeRollerSubsystem;
 import frc.robot.subsystems.kicker.KickerSubsystem;
-public class RobotContainer {
-    public enum TestShotCondition {
-        kNone,
-        kDistance,
-        kParameters,
-    }
 
-    private static TestShotCondition testCondition = TestShotCondition.kParameters;
+public class RobotContainer {
+    private Superstructure superstructure;
 
     /* Subsystems */
     private SwerveSubsystem swerve;
@@ -36,11 +29,8 @@ public class RobotContainer {
     private HoodSubsystem hood;
     private SqueezerSubsystem squeezer;
 
-    // private LEDSubsystem led;
-
-    private Superstructure superstructure;
-
     /* Driver Buttons */
+    // Unused buttons: back, pov down/right
     private final CommandXboxController driver = new CommandXboxController(0);
     private final Trigger dResetSwerve = driver.start();
 
@@ -48,19 +38,16 @@ public class RobotContainer {
     private final Trigger dShoot = driver.rightTrigger();
     private final Trigger dPass = driver.y();
 
-    private final Trigger dFeedthrough = dIntake.and(dShoot);
-    private final Trigger dPassthrough = dIntake.and(dPass);
+    private final Trigger dSpit = driver.leftBumper();
+    private final Trigger dIntakeNoHopper = driver.rightBumper();
+
+    private final Trigger dFeedthrough = dIntake.or(dIntakeNoHopper).and(dShoot);
+    private final Trigger dPassthrough = dIntake.or(dIntakeNoHopper).and(dPass);
 
     private final Trigger dTrenchShot = driver.b();
-    private final Trigger dTowerShot = driver.a();
+    private final Trigger dManualPass = driver.a();
     private final Trigger dHubShot = driver.x();
-    
-    // private final Trigger dTestSetShot = driver.back();
-    // private final Trigger dUnjam = driver.back();
 
-    private final Trigger dSpit = driver.leftBumper();
-    private final Trigger dStationaryShot = driver.rightBumper();
-    
     private final Trigger dRetract = driver.povUp();
     private final Trigger dRaiseCurrentLimit = driver.povLeft();
 
@@ -70,9 +57,6 @@ public class RobotContainer {
         configureButtonBindings();
         configureDefaultCommands();
         configureNamedCommands();
-
-        SmartDashboard.putNumber("TuneableFlywheelRPS", 80.0);
-        SmartDashboard.putNumber("TuneableHoodRotations", 0);
     }
 
     /**
@@ -94,14 +78,15 @@ public class RobotContainer {
     private void configureNamedCommands() {
         // Named commands useful for PathPlanner events
         // ex. NamedCommands.registerCommand("Example", new ExampleCommand());
-        new EventTrigger("Shoot").whileTrue(superstructure.shoot());
-        new EventTrigger("Feedthrough").whileTrue(superstructure.shoot());
+        new EventTrigger("Shoot").onTrue(superstructure.shoot());
+        // new EventTrigger("Feedthrough").whileTrue(superstructure.feedthrough());
         new EventTrigger("StopShoot").onTrue(superstructure.stopShooters());
         new EventTrigger("Intake").whileTrue(superstructure.runIntake(true));
-        new EventTrigger("RaiseSqueezer").whileTrue(squeezer.raise());
+        new EventTrigger("RaiseSqueezer").onTrue(squeezer.raise());
+        new EventTrigger("LowerSqueezer").onTrue(squeezer.squeeze());
         new EventTrigger("Warmup").whileTrue(superstructure.warmup());
-        new EventTrigger("TargetLock").onTrue(swerve.autoLockTarget());
-        new EventTrigger("StopTrack").onTrue(swerve.setLockingEnabled(false));
+        // new EventTrigger("TargetLock").onTrue(superstructure.lockSwerveToHub());
+        new EventTrigger("StopTrack").onTrue(swerve.stopLocking());
     }
 
     /**
@@ -117,30 +102,17 @@ public class RobotContainer {
         dFeedthrough.whileTrue(superstructure.feedthrough()).onFalse(swerve.setLockingEnabled(false));
         dPassthrough.whileTrue(superstructure.passFeedthrough()).onFalse(swerve.setLockingEnabled(false));
 
-        dStationaryShot.whileTrue(superstructure.defaultShot(50, 9));
+        dIntakeNoHopper.and(() -> !dShoot.getAsBoolean() && !dPass.getAsBoolean()).whileTrue(superstructure.runIntake(true).alongWith(squeezer.squeeze()));
+
         dHubShot.whileTrue(superstructure.defaultShot(60, 0)).onFalse(swerve.setLockingEnabled(false));
-        dTowerShot.whileTrue(superstructure.defaultShot(90, 8)).onFalse(swerve.setLockingEnabled(false));
-        dTrenchShot.whileTrue(superstructure.defaultShot(70, 2)).onFalse(swerve.setLockingEnabled(false));
+        dManualPass.whileTrue(superstructure.defaultShot(75, 18)).onFalse(swerve.setLockingEnabled(false));
+        dTrenchShot.whileTrue(superstructure.defaultShot(3.2)).onFalse(swerve.setLockingEnabled(false));
         
-        // (dTestSetShot.and(() -> testCondition.equals(TestShotCondition.kDistance)))
-        //     .whileTrue(superstructure.tuneShot(tuneableDistanceShot, true));
-        // (dTestSetShot.and(() -> testCondition.equals(TestShotCondition.kParameters)))
-        //     .whileTrue(superstructure.tuneShot(tuneableFlywheelRPS.get(), tuneableH oodRotations.get(), true));
-
-        // driver.back().whileTrue(superstructure.defaultShot(
-        //     () -> SmartDashboard.getNumber("TuneableFlywheelRPS", 50.0), 
-        //     () -> SmartDashboard.getNumber("TuneableHoodRotations", 0.0)
-        // ));
-
-        // driver.back().whileTrue(kicker.setVelocity(40));
-
         dSpit.whileTrue(superstructure.spit());
 
-        // driver.back().whileTrue(superstructure.tuneShot(tuneableDistanceShot, true));
         dRetract.whileTrue(pivot.retract());
         dRaiseCurrentLimit.onTrue(new InstantCommand(() -> swerve.setStatorCurrentLimit(kAutoCurrentLimit)));
         driver.povDown().onTrue(swerve.launchQuestnav());
-        // driver.povRight().whileTrue(squeezer.reset()).onFalse(squeezer.stop());
     }
 
     public void configureDefaultCommands() {

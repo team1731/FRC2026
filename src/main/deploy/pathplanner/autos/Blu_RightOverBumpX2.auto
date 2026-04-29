@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "LeftX2Depot_1"
+            "pathName": "RightOverBumpX2_1"
           }
         },
         {
@@ -17,7 +17,7 @@
               {
                 "type": "wait",
                 "data": {
-                  "waitTime": 4.0
+                  "waitTime": 3.0
                 }
               },
               {
@@ -32,7 +32,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": null
+            "pathName": "RightOverBumpX2_2"
           }
         },
         {
@@ -42,7 +42,7 @@
               {
                 "type": "wait",
                 "data": {
-                  "waitTime": 4.0
+                  "waitTime": 5.0
                 }
               },
               {

@@ -1,6 +1,5 @@
 package frc.robot.subsystems.squeezer;
 
-import com.ctre.phoenix6.sim.TalonFXSimState.MotorType;
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.FeedbackSensor;
@@ -9,7 +8,6 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.lib.frc1731.Utils;
@@ -20,8 +18,7 @@ public class SqueezerSubsystem extends BaseSubsystem {
     private SparkMax motor;
     private SparkClosedLoopController ctrl;
     private SparkMaxConfig config = new SparkMaxConfig();
-    private boolean atTarget = false;
-    private double targetRotations = 0;
+    private SqueezerIOInputsAutoLogged inputs = new SqueezerIOInputsAutoLogged();
 
     public SqueezerSubsystem(boolean enabled) {
         super(enabled);
@@ -52,27 +49,28 @@ public class SqueezerSubsystem extends BaseSubsystem {
 
     @Override
     public void periodicTelemetry() {
-        atTarget = Utils.isWithin(motor.getEncoder().getPosition(), targetRotations, 1);
-        SmartDashboard.putNumber("Squeeze Rotations", motor.getEncoder().getPosition());
+        inputs.currentRotations = motor.getEncoder().getPosition();
+        inputs.atTarget = Utils.isWithin(inputs.currentRotations, inputs.targetRotations, 1);
+        logger.processInputs(inputs);
     }
     
     public Command raise() {
         return run(() -> {
-            this.targetRotations = 45;
-            ctrl.setSetpoint(targetRotations, ControlType.kPosition);
-        });
+            inputs.targetRotations = 45;
+            ctrl.setSetpoint(inputs.targetRotations, ControlType.kPosition);
+        }).withName("Raise");
     }
 
     public Command squeeze() {
         return run(() -> {
-            this.targetRotations = 0;
-            ctrl.setSetpoint(targetRotations, ControlType.kPosition);
-        });
+            inputs.targetRotations = 0;
+            ctrl.setSetpoint(inputs.targetRotations, ControlType.kPosition);
+        }).withName("Squeeze");
     }
 
     public Command reset() {
         return new InstantCommand(() -> {
-                this.targetRotations = 0;
+                inputs.targetRotations = 0;
                 config.softLimit.reverseSoftLimitEnabled(false);
                 motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
         }).andThen(
@@ -89,6 +87,6 @@ public class SqueezerSubsystem extends BaseSubsystem {
     public Command stop() {
         return run(() -> {
             motor.set(0);
-        });
+        }).withName("Stop");
     }
 }

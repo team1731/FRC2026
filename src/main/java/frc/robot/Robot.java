@@ -1,10 +1,7 @@
 package frc.robot;
 
-import static frc.robot.subsystems.drive.SwerveConstants.kAutoCurrentLimit;
 import static frc.robot.subsystems.drive.SwerveConstants.kTeleCurrentLimit;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.*;
 
 import org.littletonrobotics.junction.LoggedRobot;
@@ -24,7 +21,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -107,22 +103,22 @@ public class Robot extends LoggedRobot {
 	}
 	
 	private void setupLogging() {
-		String branch = "N/A";
-		String commit = "N/A";
-		String date = "N/A";
+		// String branch = "N/A";
+		// String commit = "N/A";
+		// String date = "N/A";
 
-		try {
-			File buildInfoFile = new File(Filesystem.getDeployDirectory(), "DeployedBranchInfo.txt");
-			if (buildInfoFile.exists() && buildInfoFile.canRead()) {
-				Scanner reader = new Scanner(buildInfoFile);
-				if (reader.hasNextLine()) branch = reader.nextLine();
-				if (reader.hasNextLine()) commit = reader.nextLine();
-				if (reader.hasNextLine()) date = reader.nextLine();
-				reader.close();
-			}
-		} catch (FileNotFoundException e) {
-			System.err.println("DeployedBranchInfo.txt not found");
-		}
+		// try {
+		// 	File buildInfoFile = new File(Filesystem.getDeployDirectory(), "DeployedBranchInfo.txt");
+		// 	if (buildInfoFile.exists() && buildInfoFile.canRead()) {
+		// 		Scanner reader = new Scanner(buildInfoFile);
+		// 		if (reader.hasNextLine()) branch = reader.nextLine();
+		// 		if (reader.hasNextLine()) commit = reader.nextLine();
+		// 		if (reader.hasNextLine()) date = reader.nextLine();
+		// 		reader.close();
+		// 	}
+		// } catch (FileNotFoundException e) {
+		// 	System.err.println("DeployedBranchInfo.txt not found");
+		// }
 
 		// Log metadata (for AdvantageScope)
 		//Logger.recordMetadata("GitBranch", branch);
@@ -363,6 +359,7 @@ public void autonomousPeriodic() {
 		currentKeypadCommand = "";
 		SmartDashboard.getString("keypadCommand", currentKeypadCommand);
 		swerve.setStatorCurrentLimit(kTeleCurrentLimit);
+		swerve.setLockingEnabled(false);
 	}
 
 //   ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄

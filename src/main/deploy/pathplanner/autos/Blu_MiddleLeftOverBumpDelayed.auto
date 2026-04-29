@@ -7,13 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "HubPreloadDepot_1"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "HubPreloadDepot_2"
+            "pathName": "MiddleLeftOverBumpDelayed"
           }
         },
         {
