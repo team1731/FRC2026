@@ -38,11 +38,10 @@ public class RobotContainer {
     private final Trigger dShoot = driver.rightTrigger();
     private final Trigger dPass = driver.y();
 
-    private final Trigger dSpit = driver.leftBumper();
-    private final Trigger dIntakeNoHopper = driver.rightBumper();
+    private final Trigger dIntakeNoHopper = driver.leftBumper();
 
-    private final Trigger dFeedthrough = dIntake.or(dIntakeNoHopper).and(dShoot);
-    private final Trigger dPassthrough = dIntake.or(dIntakeNoHopper).and(dPass);
+    private final Trigger dFeedthrough = dIntake.and(dShoot);
+    private final Trigger dPassthrough = dIntake.and(dPass);
 
     private final Trigger dTrenchShot = driver.b();
     private final Trigger dManualPass = driver.a();
@@ -78,7 +77,7 @@ public class RobotContainer {
     private void configureNamedCommands() {
         // Named commands useful for PathPlanner events
         // ex. NamedCommands.registerCommand("Example", new ExampleCommand());
-        new EventTrigger("Shoot").onTrue(superstructure.shoot());
+        new EventTrigger("Shoot").onTrue(superstructure.autoShoot());
         // new EventTrigger("Feedthrough").whileTrue(superstructure.feedthrough());
         new EventTrigger("StopShoot").onTrue(superstructure.stopShooters());
         new EventTrigger("Intake").whileTrue(superstructure.runIntake(true));
@@ -108,7 +107,7 @@ public class RobotContainer {
         dManualPass.whileTrue(superstructure.defaultShot(75, 18)).onFalse(swerve.setLockingEnabled(false));
         dTrenchShot.whileTrue(superstructure.defaultShot(3.2)).onFalse(swerve.setLockingEnabled(false));
         
-        dSpit.whileTrue(superstructure.spit());
+        // dSpit.whileTrue(superstructure.spit());
 
         dRetract.whileTrue(pivot.retract());
         dRaiseCurrentLimit.onTrue(new InstantCommand(() -> swerve.setStatorCurrentLimit(kAutoCurrentLimit)));

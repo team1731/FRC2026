@@ -29,7 +29,7 @@ public class IndexerSubsystem extends BaseSubsystem {
     public void periodicTelemetry() {
         inputs.currentVelocity = motor.getVelocityRPS();
         inputs.atTargetVelocity = Utils.isWithin(inputs.currentVelocity, inputs.targetVelocity, 1);
-        logger.processInputs(inputs);
+     //   logger.processInputs(inputs);
     }
 
     public Command setPercent(double setpoint) {

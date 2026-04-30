@@ -65,7 +65,7 @@ public class IntakePivotSubsystem extends BaseSubsystem {
     public void periodicTelemetry() {
         inputs.currentPosition = motor.getRotations();
         inputs.atTargetPosition = Utils.isWithin(inputs.currentPosition, inputs.targetPosition, kPivotEpsilon);
-        logger.processInputs(inputs);
+      //  logger.processInputs(inputs);
     }
     
     private Command setPosition(DoubleSupplier position) {

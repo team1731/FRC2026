@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 
+import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -98,7 +99,7 @@ public class Superstructure extends SubsystemBase {
     }
 
     public Command stopShooters() {
-        return flywheel.stop().alongWith(hood.stow(), indexer.stop(), kicker.stop(), swerve.stopLocking());
+        return flywheel.stop().alongWith(hood.stow(), indexer.stop(), kicker.stop());
     }
 
     public Command spit() {
@@ -114,7 +115,9 @@ public class Superstructure extends SubsystemBase {
     // -------------------------------------------------------------------------
 
     public boolean readyToShoot() {
+      //  return true;
         return hood.atTarget() && flywheel.atTargetVelocity();
+
     }
 
     // =========================================================================
@@ -164,34 +167,22 @@ public class Superstructure extends SubsystemBase {
         ;
     }
 
-    public Command autoShoot(boolean feedthrough) {
-        return new InstantCommand(() -> {
-            this.targetSupplier = kHubSupplier;
+    public Command autoShoot() {
+        return new DeferredCommand(() -> {
             this.adjustTargetForMovingShots = true;
-        }).andThen(
-            swerve.setHeadingTarget(() -> compensatedTarget),
-            swerve.setLockingEnabled(true),
-            new ParallelCommandGroup(
-                flywheel.setVelocity(() -> targetFlywheel),
-                swerve.lockHeadingTarget(() -> compensatedTarget).withInterruptBehavior(InterruptionBehavior.kCancelSelf),
+            this.targetSupplier = kHubSupplier;
+            return new ParallelCommandGroup(
+                flywheel.setVelocity(()-> targetFlywheel),
                 hood.setRotations(() -> targetHood),
                 Commands.waitUntil(this::readyToShoot).andThen(
-                    new ParallelCommandGroup( // Only start the feeding sequence after we are ready to shoot
-                        indexer.feed(),
-                        kicker.setVelocity(() -> targetFlywheel),
-                        squeezer.squeeze()
-                    )
-                ),
-                Commands.either( // If feedthrough continue intaking, otherwise jiggle
-                    this.runIntake(true),
-                    Commands.waitUntil(this::readyToShoot)
-                        .andThen(new JiggleToPosition(pivot).alongWith(intake.setPercentOutput(1.0))),
-                    () -> feedthrough
+                    indexer.feed().alongWith(kicker.setVelocity(() -> targetFlywheel), new JiggleToPosition(pivot))
                 )
-            )
-        );
+            );
+        }, 
+        Set.of(flywheel, hood, indexer, kicker));
     }
 
+   //  shoot(Supplier<Translation2d> target, BooleanSupplier adjustForMovingShot, BooleanSupplier trackTarget, BooleanSupplier feedthrough, BooleanSupplier shotCondition, BooleanSupplier squeeze)
     public Command shoot() {
         return shoot(kHubSupplier, () -> true, () -> true, () -> false, this::readyToShoot, () -> true);
     }

@@ -37,7 +37,7 @@ public class HoodSubsystem extends BaseSubsystem {
     public void periodicTelemetry() {
         inputs.motorRotations = motor.getRotations();
         inputs.atTarget = Utils.isWithin(inputs.motorRotations, inputs.targetRotations, kEpsilon);
-        logger.processInputs(inputs);
+      //  logger.processInputs(inputs);
     }
 
     public Command setRotations(DoubleSupplier target) {

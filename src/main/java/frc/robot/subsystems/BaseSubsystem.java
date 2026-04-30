@@ -20,14 +20,14 @@ import frc.robot.RobotConstants;
 public abstract class BaseSubsystem extends SubsystemBase {
     private SysIdRoutine sysIdRoutine = null;
     private boolean enabled = false;
-   protected SmartLogger logger = null;
+  // protected SmartLogger logger = null;
 
     protected Optional<SubsystemConfiguration> config = Optional.empty();
 
     protected <T extends SubsystemConfiguration> BaseSubsystem(String nameModifier, SubsystemConfiguration config, boolean enabled) {
         this.enabled = enabled;
         this.setName(nameModifier + getName());
-       this.logger = new SmartLogger(getName(), () -> RobotConstants.kLogToWPILog);
+   //    this.logger = new SmartLogger(getName(), () -> RobotConstants.kLogToWPILog);
         if (isEnabled()){
             if (config != null) this.config = Optional.of(config);
             initializeHardware();
@@ -197,10 +197,10 @@ public abstract class BaseSubsystem extends SubsystemBase {
             periodicOutput();
             periodicTelemetry();
             if (RobotConstants.kLogToWPILog) {
-               logger.log("Command/Actively Commanded", isCurrentlyCommanded());
-               logger.log("Command/Has Default Command", !getDefaultCommand().equals(Commands.none()));
-               logger.log("Command/Active Command", getCurrentCommand().getName());
-               logger.log("Command/Default Command", getDefaultCommand().getName());
+             //  logger.log("Command/Actively Commanded", isCurrentlyCommanded());
+             //  logger.log("Command/Has Default Command", !getDefaultCommand().equals(Commands.none()));
+             //  logger.log("Command/Active Command", getCurrentCommand().getName());
+             //  logger.log("Command/Default Command", getDefaultCommand().getName());
             }
         }
     }

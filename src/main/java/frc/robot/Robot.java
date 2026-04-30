@@ -5,7 +5,7 @@ import static frc.robot.subsystems.drive.SwerveConstants.kTeleCurrentLimit;
 import java.util.*;
 
 import org.littletonrobotics.junction.LoggedRobot;
-import org.littletonrobotics.junction.Logger;
+//import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -37,7 +38,7 @@ import frc.robot.subsystems.drive.SwerveSubsystem;
  * the package after creating this project, you must also update the build.gradle file in the
  * project.
  */
-public class Robot extends LoggedRobot {
+public class Robot extends TimedRobot {
 	private PathPlannerAuto m_autonomousCommand;
 	private SendableChooser<String> autoChooser;
 	private String autoCode;
@@ -126,13 +127,13 @@ public class Robot extends LoggedRobot {
 		//Logger.recordMetadata("BuildDate", date);
 
 		if (Robot.isSimulation()) {
-			Logger.addDataReceiver(new NT4Publisher());
+		//	Logger.addDataReceiver(new NT4Publisher());
 		} else if (RobotConstants.kLogToWPILog) {
-			Logger.addDataReceiver(new WPILOGWriter("/home/lvuser/logs"));
-			Logger.addDataReceiver(new NT4Publisher());
+		//	Logger.addDataReceiver(new WPILOGWriter("/home/lvuser/logs"));
+		//	Logger.addDataReceiver(new NT4Publisher());
 		}
 
-		Logger.start();
+	//	Logger.start();
 	//	SmartDashboard.updateValues();
 	}
 

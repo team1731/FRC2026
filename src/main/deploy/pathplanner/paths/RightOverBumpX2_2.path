@@ -139,7 +139,7 @@
     },
     {
       "waypointRelativePos": 4,
-      "rotationDegrees": 89.34893961977049
+      "rotationDegrees": 89.3489396197705
     },
     {
       "waypointRelativePos": 5,
@@ -173,7 +173,7 @@
       "minWaypointRelativePos": 6.079253112033185,
       "maxWaypointRelativePos": 6.83443983402485,
       "constraints": {
-        "maxVelocity": 1.5,
+        "maxVelocity": 3.0,
         "maxAcceleration": 2.0,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
@@ -191,20 +191,20 @@
       "command": null
     },
     {
+      "name": "StopShoot",
+      "waypointRelativePos": 0,
+      "endWaypointRelativePos": null,
+      "command": null
+    },
+    {
       "name": "Intake",
       "waypointRelativePos": 2.1755186721991624,
       "endWaypointRelativePos": 6.404564315352642,
       "command": null
     },
     {
-      "name": "RaiseSqueezer",
-      "waypointRelativePos": 3.9763485477178864,
-      "endWaypointRelativePos": null,
-      "command": null
-    },
-    {
-      "name": "Warmup",
-      "waypointRelativePos": 6.253526970954332,
+      "name": "Shoot",
+      "waypointRelativePos": 6.940942928039688,
       "endWaypointRelativePos": 7.0,
       "command": null
     }
