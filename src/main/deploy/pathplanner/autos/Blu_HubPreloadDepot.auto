@@ -11,12 +11,6 @@
           }
         },
         {
-          "type": "path",
-          "data": {
-            "pathName": "HubPreloadDepot_2"
-          }
-        },
-        {
           "type": "deadline",
           "data": {
             "commands": [
@@ -33,6 +27,12 @@
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "HubPreloadDepot_2"
           }
         }
       ]

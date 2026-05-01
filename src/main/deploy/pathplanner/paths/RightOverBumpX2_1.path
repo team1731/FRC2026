@@ -149,7 +149,7 @@
       "minWaypointRelativePos": 3.8609958506224245,
       "maxWaypointRelativePos": 6.0,
       "constraints": {
-        "maxVelocity": 1.5,
+        "maxVelocity": 1.75,
         "maxAcceleration": 2.0,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
@@ -189,7 +189,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -140.33215888165964
+    "rotation": -137.30669144593188
   },
   "reversed": false,
   "folder": "RightOverBumpX2",

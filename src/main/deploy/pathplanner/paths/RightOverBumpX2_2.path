@@ -170,10 +170,23 @@
     },
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 6.079253112033185,
+      "minWaypointRelativePos": 5.926550868486361,
       "maxWaypointRelativePos": 6.83443983402485,
       "constraints": {
-        "maxVelocity": 3.0,
+        "maxVelocity": 2.0,
+        "maxAcceleration": 2.0,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 720.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    },
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 0,
+      "maxWaypointRelativePos": 0.7295285359801649,
+      "constraints": {
+        "maxVelocity": 1.0,
         "maxAcceleration": 2.0,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
@@ -211,7 +224,7 @@
   ],
   "globalConstraints": {
     "maxVelocity": 4.0,
-    "maxAcceleration": 4.0,
+    "maxAcceleration": 2.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -219,13 +232,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -140.33215888165964
+    "rotation": -137.30669144593188
   },
   "reversed": false,
   "folder": "RightOverBumpX2",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -140.33215888165964
+    "rotation": -137.30669144593188
   },
-  "useDefaultConstraints": true
+  "useDefaultConstraints": false
 }

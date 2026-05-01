@@ -54,6 +54,8 @@ public class Robot extends TimedRobot {
 	private boolean isVslamConnected = false;
 
 	private RobotContainer container;
+
+	private boolean autoStarted = false;
 	
 	public static final Trigger IS_ENABLED = new Trigger(() -> DriverStation.isEnabled());
 	public static final Trigger IS_TELEOP = new Trigger(() -> DriverStation.isTeleop());
@@ -236,7 +238,7 @@ public class Robot extends TimedRobot {
 		/*
 		 * If any of these above conditions changed, kick off creation of a new auto command
 		 */
-		if(autoCodeChanged || allianceChanged || vslamConnectionStatusChanged ) {
+		if((autoCodeChanged || allianceChanged) && !autoStarted) {
 			vslamConnectionStatusChanged = false;
 			m_autonomousCommand = null;
 			m_autonomousCommand = (PathPlannerAuto) AutoFactory.getAutonomousCommand(selectedAutoCode, redAlliance);		
@@ -273,7 +275,9 @@ public class Robot extends TimedRobot {
 //   ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 	@Override
 	public void disabledPeriodic() {	
-		autoPreload();
+		if(!autoStarted) {
+			autoPreload();
+		}
 		if (Robot.isReal()) {
 			try {
 				OptionalInt stationNumberInt = DriverStation.getLocation();
@@ -304,6 +308,7 @@ public class Robot extends TimedRobot {
 		CommandScheduler.getInstance().cancelAll();
 
 		autoStartTime = Timer.getFPGATimestamp();
+		autoStarted = true;
 
 		if (m_autonomousCommand == null) {
 			System.out.println("SOMETHING WENT WRONG - UNABLE TO RUN AUTONOMOUS! CHECK SOFTWARE!");
@@ -323,7 +328,7 @@ public class Robot extends TimedRobot {
 @Override
 public void autonomousPeriodic() {
 	if (doSD()) {
-		System.out.println("AUTO PERIODIC");
+		// System.out.println("AUTO PERIODIC");
 	}
 	// SmartDashboard.putString("Path running", PathPlannerAuto.currentPathName);
 	// SmartDashboard.putNumber("current Pose X", currentPose.getX());
@@ -335,13 +340,13 @@ public void autonomousPeriodic() {
 	// SmartDashboard.putNumber("AutoRunningTime", Timer.getFPGATimestamp()-
 	// autoStartTime);
 
-	if (m_autonomousCommand != null && (Timer.getFPGATimestamp() - autoStartTime) >= 0.25
-			&& (currentPose.getTranslation().getDistance(targetPose.getTranslation()) > 1.0)) {
-		System.out.println("distance is" + currentPose.getTranslation().getDistance(targetPose.getTranslation()));
+	// if (m_autonomousCommand != null && (Timer.getFPGATimestamp() - autoStartTime) >= 0.25
+	// 		&& (currentPose.getTranslation().getDistance(targetPose.getTranslation()) > 1.0)) {
+		// System.out.println("distance is" + currentPose.getTranslation().getDistance(targetPose.getTranslation()));
 		// m_autonomousCommand.cancel();
-		System.out.println(
-				"Had to Kill the auto because the target pose and current pose were apart by more than a foot");
-	}
+		//System.out.println(
+		//		"Had to Kill the auto because the target pose and current pose were apart by more than a foot");
+	// }
 }
 
 //   ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
