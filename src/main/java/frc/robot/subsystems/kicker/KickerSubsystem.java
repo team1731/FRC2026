@@ -1,4 +1,5 @@
-package frc.robot.subsystems.indexer;
+package frc.robot.subsystems.kicker;
+
 
 import frc.lib.frc1731.Utils;
 import frc.lib.frc1731.hardware.motor.MotorConstants;
@@ -6,30 +7,31 @@ import frc.lib.frc1731.hardware.motor.ctre.MotorIOTalonFX;
 import frc.robot.Ports;
 import frc.robot.subsystems.BaseSubsystem;
 
-import static frc.robot.subsystems.indexer.IndexerConstants.*;
+import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.wpilibj2.command.Command;
 
-public class IndexerSubsystem extends BaseSubsystem {
+public class KickerSubsystem extends BaseSubsystem {
     private MotorIOTalonFX motor;
-    private IndexerIOInputsAutoLogged inputs = new IndexerIOInputsAutoLogged();
+    private KickerIOInputsAutoLogged inputs = new KickerIOInputsAutoLogged();
 
-    public IndexerSubsystem(boolean enabled) {
+    public KickerSubsystem(boolean enabled) {
         super(enabled);
     }
 
     @Override
     protected void initializeHardware() {
-        motor = new MotorIOTalonFX(Ports.kIndexerFloorConfig);
-        motor.withPIDGains(kPIDGains);
-        // motor.withStatorCurrentLimit(kCurrentLimit);
+        motor = new MotorIOTalonFX(Ports.kBottomtKickerConfig)
+            .withFollower(Ports.kToptKickerConfig);
+        motor.withPIDGains(KickerConstants.kPIDGains);
     }
 
     @Override
     public void periodicTelemetry() {
         inputs.currentVelocity = motor.getVelocityRPS();
         inputs.atTargetVelocity = Utils.isWithin(inputs.currentVelocity, inputs.targetVelocity, 1);
-     //   logger.processInputs(inputs);
+      //  logger.processInputs(inputs);
+        
     }
 
     public Command setPercent(double setpoint) {
@@ -46,15 +48,24 @@ public class IndexerSubsystem extends BaseSubsystem {
         });
     }
 
+    public Command setVelocity(DoubleSupplier setpoint) {
+        return run(() -> {
+            inputs.targetVelocity = setpoint.getAsDouble();
+            this.motor.setVelocityRPS(inputs.targetVelocity);
+        });
+    }
+
     public Command feed() {
-        return setPercent(1.0);
+        return setPercent(0.8);
     }
 
     public Command eject() {
-        return setPercent(-1.0);
+        return setPercent(-0.5);
     }
 
     public Command stop() {
-        return setPercent(0);
+        return run(() -> {
+            this.motor.coast();
+        });
     }
 }

@@ -1,0 +1,244 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 2.9700602409638552,
+        "y": 2.373987951807229
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 2.073408518262182,
+        "y": 1.5506383317183232
+      },
+      "isLocked": false,
+      "linkedName": "ROverBumpFinish"
+    },
+    {
+      "anchor": {
+        "x": 3.560156626506024,
+        "y": 0.669265060240964
+      },
+      "prevControl": {
+        "x": 2.777748842784118,
+        "y": 0.7607160835216122
+      },
+      "nextControl": {
+        "x": 3.8084661914575015,
+        "y": 0.6402416222363436
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 4.882409638554217,
+        "y": 0.669265060240964
+      },
+      "prevControl": {
+        "x": 4.129021724924095,
+        "y": 0.6540323296416475
+      },
+      "nextControl": {
+        "x": 6.084919777572834,
+        "y": 0.6935785814154094
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 6.117240963855421,
+        "y": 1.8931686746987966
+      },
+      "prevControl": {
+        "x": 6.078609942484045,
+        "y": 1.6461714192731456
+      },
+      "nextControl": {
+        "x": 6.194523996074402,
+        "y": 2.3872973871020466
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 6.117240963855421,
+        "y": 3.2482048192771082
+      },
+      "prevControl": {
+        "x": 6.046195745462798,
+        "y": 3.008512147416777
+      },
+      "nextControl": {
+        "x": 6.373553279965509,
+        "y": 4.112952444368733
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 7.199084337349397,
+        "y": 3.2482048192771082
+      },
+      "prevControl": {
+        "x": 7.14018172159298,
+        "y": 3.806320499385805
+      },
+      "nextControl": {
+        "x": 7.240154685330874,
+        "y": 2.859053931805953
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 5.691060240963855,
+        "y": 2.373987951807229
+      },
+      "prevControl": {
+        "x": 6.760027385269701,
+        "y": 2.381892605221948
+      },
+      "nextControl": {
+        "x": 4.398738509832312,
+        "y": 2.3644316661539992
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 2.9700602409638552,
+        "y": 2.373987951807229
+      },
+      "prevControl": {
+        "x": 5.461578313253011,
+        "y": 2.384915662650603
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "ROverBumpFinish"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 1,
+      "rotationDegrees": 0.0
+    },
+    {
+      "waypointRelativePos": 2,
+      "rotationDegrees": 0.0
+    },
+    {
+      "waypointRelativePos": 3,
+      "rotationDegrees": 90.0
+    },
+    {
+      "waypointRelativePos": 4,
+      "rotationDegrees": 89.3489396197705
+    },
+    {
+      "waypointRelativePos": 5,
+      "rotationDegrees": -88.72696997994332
+    },
+    {
+      "waypointRelativePos": 6,
+      "rotationDegrees": 180.0
+    },
+    {
+      "waypointRelativePos": 6.860249554367171,
+      "rotationDegrees": 180.0
+    }
+  ],
+  "constraintZones": [
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 2.640248962655609,
+      "maxWaypointRelativePos": 5.161410788381715,
+      "constraints": {
+        "maxVelocity": 1.5,
+        "maxAcceleration": 2.0,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 720.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    },
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 5.926550868486361,
+      "maxWaypointRelativePos": 6.83443983402485,
+      "constraints": {
+        "maxVelocity": 2.0,
+        "maxAcceleration": 2.0,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 720.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    },
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 0,
+      "maxWaypointRelativePos": 0.7295285359801649,
+      "constraints": {
+        "maxVelocity": 1.0,
+        "maxAcceleration": 2.0,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 720.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    }
+  ],
+  "pointTowardsZones": [],
+  "eventMarkers": [
+    {
+      "name": "LowerSqueezer",
+      "waypointRelativePos": 0,
+      "endWaypointRelativePos": null,
+      "command": null
+    },
+    {
+      "name": "StopShoot",
+      "waypointRelativePos": 0,
+      "endWaypointRelativePos": null,
+      "command": null
+    },
+    {
+      "name": "Intake",
+      "waypointRelativePos": 2.1755186721991624,
+      "endWaypointRelativePos": 6.404564315352642,
+      "command": null
+    },
+    {
+      "name": "Shoot",
+      "waypointRelativePos": 6.940942928039688,
+      "endWaypointRelativePos": 7.0,
+      "command": null
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 4.0,
+    "maxAcceleration": 2.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -137.30669144593188
+  },
+  "reversed": false,
+  "folder": "RightOverBumpX2",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": -137.30669144593188
+  },
+  "useDefaultConstraints": false
+}

@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "HubPreloadDepot_1"
+            "pathName": "MiddleLeftOverBumpDelayed"
           }
         },
         {
@@ -21,18 +21,25 @@
                 }
               },
               {
-                "type": "named",
+                "type": "deadline",
                 "data": {
-                  "name": "Shoot"
+                  "commands": [
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Shoot"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "TargetLock"
+                      }
+                    }
+                  ]
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "HubPreloadDepot_2"
           }
         }
       ]

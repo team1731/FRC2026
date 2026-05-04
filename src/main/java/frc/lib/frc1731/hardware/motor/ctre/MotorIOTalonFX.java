@@ -39,7 +39,7 @@ public class MotorIOTalonFX extends MotorIO {
         this.configurator = motor.getConfigurator();
 
         // Set up configuration
-        cfg.MotorOutput.NeutralMode = NeutralModeValue.Brake; // Brake on default
+        cfg.MotorOutput.NeutralMode = NeutralModeValue.Coast; // Brake on default
 
         cfg.MotorOutput.Inverted = config.kInverted ? // Inverted = ccw
             InvertedValue.CounterClockwise_Positive : 
@@ -65,10 +65,19 @@ public class MotorIOTalonFX extends MotorIO {
         return this.motor;
     }
 
+    public MotorIOTalonFX withFollower(PortConfig... config) {
+        for (PortConfig cfg : config) {
+            TalonFX follower = new TalonFX(cfg.kPort, cfg.kBus);
+            // Correct constructor: new Follower(leaderID, opposeLeaderDirection)
+            follower.setControl(new Follower(this.motor.getDeviceID(),   (isInverted() != (cfg.kInverted) )? MotorAlignmentValue.Opposed : MotorAlignmentValue.Aligned));
+        }
+        return this;
+    }
+
+  
     @Override
     public void follow(MotorIO master) {
-        this.motor.setControl(new Follower(((MotorIOTalonFX)master).motor.getDeviceID(), 
-        isInverted() != ((MotorIOTalonFX)master).isInverted() ? MotorAlignmentValue.Opposed : MotorAlignmentValue.Aligned));
+       
     }
 
     @Override
@@ -172,7 +181,7 @@ public class MotorIOTalonFX extends MotorIO {
 
     @Override
     public void setVelocityRPS(double rps, int pidSlot) {
-        this.motor.setControl(new VelocityVoltage(rps).withSlot(pidSlot));
+        this.motor.setControl(new VelocityTorqueCurrentFOC(rps).withSlot(pidSlot));
         this.motorSim.setAngularVelocity(rps * (2*Math.PI) * 1.2d); // 1.2 is the friction factor
     }
 
@@ -215,6 +224,10 @@ public class MotorIOTalonFX extends MotorIO {
     @Override
     public void brake() {
         this.motor.setControl(new NeutralOut());
+    }
+
+    public void coast() {
+        this.motor.setControl(new CoastOut());
     }
 
     @Override

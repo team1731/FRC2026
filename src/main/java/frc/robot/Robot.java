@@ -1,16 +1,17 @@
 package frc.robot;
 
-import static frc.robot.subsystems.drive.SwerveConstants.kAutoCurrentLimit;
 import static frc.robot.subsystems.drive.SwerveConstants.kTeleCurrentLimit;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.*;
+
+import org.littletonrobotics.junction.LoggedRobot;
+//import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.NT4Publisher;
+import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 import edu.wpi.first.wpilibj.Timer;
 
 import com.ctre.phoenix6.SignalLogger;
-import com.ctre.phoenix6.hardware.ParentDevice;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.util.PathPlannerLogging;
@@ -20,10 +21,8 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -55,6 +54,8 @@ public class Robot extends TimedRobot {
 	private boolean isVslamConnected = false;
 
 	private RobotContainer container;
+
+	private boolean autoStarted = false;
 	
 	public static final Trigger IS_ENABLED = new Trigger(() -> DriverStation.isEnabled());
 	public static final Trigger IS_TELEOP = new Trigger(() -> DriverStation.isTeleop());
@@ -105,22 +106,22 @@ public class Robot extends TimedRobot {
 	}
 	
 	private void setupLogging() {
-		String branch = "N/A";
-		String commit = "N/A";
-		String date = "N/A";
+		// String branch = "N/A";
+		// String commit = "N/A";
+		// String date = "N/A";
 
-		try {
-			File buildInfoFile = new File(Filesystem.getDeployDirectory(), "DeployedBranchInfo.txt");
-			if (buildInfoFile.exists() && buildInfoFile.canRead()) {
-				Scanner reader = new Scanner(buildInfoFile);
-				if (reader.hasNextLine()) branch = reader.nextLine();
-				if (reader.hasNextLine()) commit = reader.nextLine();
-				if (reader.hasNextLine()) date = reader.nextLine();
-				reader.close();
-			}
-		} catch (FileNotFoundException e) {
-			System.err.println("DeployedBranchInfo.txt not found");
-		}
+		// try {
+		// 	File buildInfoFile = new File(Filesystem.getDeployDirectory(), "DeployedBranchInfo.txt");
+		// 	if (buildInfoFile.exists() && buildInfoFile.canRead()) {
+		// 		Scanner reader = new Scanner(buildInfoFile);
+		// 		if (reader.hasNextLine()) branch = reader.nextLine();
+		// 		if (reader.hasNextLine()) commit = reader.nextLine();
+		// 		if (reader.hasNextLine()) date = reader.nextLine();
+		// 		reader.close();
+		// 	}
+		// } catch (FileNotFoundException e) {
+		// 	System.err.println("DeployedBranchInfo.txt not found");
+		// }
 
 		// Log metadata (for AdvantageScope)
 		//Logger.recordMetadata("GitBranch", branch);
@@ -128,9 +129,10 @@ public class Robot extends TimedRobot {
 		//Logger.recordMetadata("BuildDate", date);
 
 		if (Robot.isSimulation()) {
-	//		Logger.addDataReceiver(new NT4Publisher());
+		//	Logger.addDataReceiver(new NT4Publisher());
 		} else if (RobotConstants.kLogToWPILog) {
-	//		Logger.addDataReceiver(new WPILOGWriter("/home/lvuser/logs"));
+		//	Logger.addDataReceiver(new WPILOGWriter("/home/lvuser/logs"));
+		//	Logger.addDataReceiver(new NT4Publisher());
 		}
 
 	//	Logger.start();
@@ -236,7 +238,7 @@ public class Robot extends TimedRobot {
 		/*
 		 * If any of these above conditions changed, kick off creation of a new auto command
 		 */
-		if(autoCodeChanged || allianceChanged || vslamConnectionStatusChanged ) {
+		if((autoCodeChanged || allianceChanged) && !autoStarted) {
 			vslamConnectionStatusChanged = false;
 			m_autonomousCommand = null;
 			m_autonomousCommand = (PathPlannerAuto) AutoFactory.getAutonomousCommand(selectedAutoCode, redAlliance);		
@@ -273,7 +275,9 @@ public class Robot extends TimedRobot {
 //   ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 	@Override
 	public void disabledPeriodic() {	
-		autoPreload();
+		if(!autoStarted) {
+			autoPreload();
+		}
 		if (Robot.isReal()) {
 			try {
 				OptionalInt stationNumberInt = DriverStation.getLocation();
@@ -304,6 +308,7 @@ public class Robot extends TimedRobot {
 		CommandScheduler.getInstance().cancelAll();
 
 		autoStartTime = Timer.getFPGATimestamp();
+		autoStarted = true;
 
 		if (m_autonomousCommand == null) {
 			System.out.println("SOMETHING WENT WRONG - UNABLE TO RUN AUTONOMOUS! CHECK SOFTWARE!");
@@ -323,7 +328,7 @@ public class Robot extends TimedRobot {
 @Override
 public void autonomousPeriodic() {
 	if (doSD()) {
-		System.out.println("AUTO PERIODIC");
+		// System.out.println("AUTO PERIODIC");
 	}
 	// SmartDashboard.putString("Path running", PathPlannerAuto.currentPathName);
 	// SmartDashboard.putNumber("current Pose X", currentPose.getX());
@@ -335,13 +340,13 @@ public void autonomousPeriodic() {
 	// SmartDashboard.putNumber("AutoRunningTime", Timer.getFPGATimestamp()-
 	// autoStartTime);
 
-	if (m_autonomousCommand != null && (Timer.getFPGATimestamp() - autoStartTime) >= 0.25
-			&& (currentPose.getTranslation().getDistance(targetPose.getTranslation()) > 1.0)) {
-		System.out.println("distance is" + currentPose.getTranslation().getDistance(targetPose.getTranslation()));
+	// if (m_autonomousCommand != null && (Timer.getFPGATimestamp() - autoStartTime) >= 0.25
+	// 		&& (currentPose.getTranslation().getDistance(targetPose.getTranslation()) > 1.0)) {
+		// System.out.println("distance is" + currentPose.getTranslation().getDistance(targetPose.getTranslation()));
 		// m_autonomousCommand.cancel();
-		System.out.println(
-				"Had to Kill the auto because the target pose and current pose were apart by more than a foot");
-	}
+		//System.out.println(
+		//		"Had to Kill the auto because the target pose and current pose were apart by more than a foot");
+	// }
 }
 
 //   ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
@@ -360,6 +365,7 @@ public void autonomousPeriodic() {
 		currentKeypadCommand = "";
 		SmartDashboard.getString("keypadCommand", currentKeypadCommand);
 		swerve.setStatorCurrentLimit(kTeleCurrentLimit);
+		swerve.setLockingEnabled(false);
 	}
 
 //   ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄

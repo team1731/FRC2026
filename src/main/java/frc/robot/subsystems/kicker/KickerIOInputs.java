@@ -1,9 +1,9 @@
-package frc.robot.subsystems.indexer;
+package frc.robot.subsystems.kicker;
 
 import org.littletonrobotics.junction.AutoLog;
 
 @AutoLog
-public class IndexerIOInputs {
+public class KickerIOInputs {
     public double currentVelocity = 0.0;
     public double targetVelocity = 0.0;
     public boolean atTargetVelocity = false;

@@ -8,55 +8,86 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.1477755547374784,
-        "y": 5.292026189756708
+        "x": 2.6474555555555552,
+        "y": 4.882766666666666
       },
       "isLocked": false,
       "linkedName": "Hub"
     },
     {
       "anchor": {
-        "x": 0.887441860465116,
-        "y": 5.962374999996823
+        "x": 0.6693333333333333,
+        "y": 5.194588888888888
       },
       "prevControl": {
-        "x": 1.2281753130590336,
-        "y": 5.9414847942754925
+        "x": 0.6780462040678071,
+        "y": 4.898351283916777
       },
       "nextControl": {
-        "x": 0.6379103972194207,
-        "y": 5.977673655181583
+        "x": 0.6498444444444444,
+        "y": 5.857211111111111
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 0.447125000000931,
-        "y": 5.962374999996823
+        "x": 0.6693333333333333,
+        "y": 6.237244444444444
       },
       "prevControl": {
-        "x": 1.0277448676122818,
-        "y": 5.979360006159127
+        "x": 0.6493970277626109,
+        "y": 5.988040624810413
+      },
+      "nextControl": {
+        "x": 0.7156548008572905,
+        "y": 6.816262788493909
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 2.1992111111111114,
+        "y": 4.151933333333333
+      },
+      "prevControl": {
+        "x": 2.394100000000001,
+        "y": 5.730533333333334
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "Depot"
+      "linkedName": "DepotFinish"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 1,
+      "rotationDegrees": 151.18920625702694
+    },
+    {
+      "waypointRelativePos": 2,
+      "rotationDegrees": 151.43416320625343
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "Feedthrough",
+      "name": "Intake",
       "waypointRelativePos": 0,
-      "endWaypointRelativePos": 2.0,
+      "endWaypointRelativePos": 2.3315136476426845,
+      "command": null
+    },
+    {
+      "name": "Shoot",
+      "waypointRelativePos": 2.903225806451613,
+      "endWaypointRelativePos": 3.0,
       "command": null
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 1.0,
+    "maxVelocity": 2.0,
     "maxAcceleration": 2.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
@@ -65,13 +96,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -179.63713588643614
+    "rotation": 174.89783474764178
   },
   "reversed": false,
   "folder": "HubPreloadDepot",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 179.48383577023517
+    "rotation": -0.13998644667441998
   },
   "useDefaultConstraints": false
 }

@@ -1,4 +1,4 @@
-package frc.robot.subsystems.intake;
+package frc.robot.subsystems.intake.pivot;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.frc1731.Utils;
@@ -22,7 +22,7 @@ import com.ctre.phoenix6.hardware.core.CoreCANcoder;
 public class IntakePivotSubsystem extends BaseSubsystem {
     private MotorIOTalonFX motor;
     private CANcoder cancoder;
-    private IntakePivotIOInputs inputs = new IntakePivotIOInputs();
+    private IntakePivotIOInputsAutoLogged inputs = new IntakePivotIOInputsAutoLogged();
 
     public IntakePivotSubsystem(boolean enabled) {
         super(enabled);
@@ -50,7 +50,7 @@ public class IntakePivotSubsystem extends BaseSubsystem {
         cancoder = new CANcoder(Ports.kPivotCANcoderId);
 
         CANcoderConfiguration coderConfig = new CANcoderConfiguration()
-            .withMagnetSensor(new MagnetSensorConfigs().withMagnetOffset(-0.21435546875));
+            .withMagnetSensor(new MagnetSensorConfigs().withMagnetOffset(0.4541015625));
         cancoder.getConfigurator().apply(coderConfig);
         
         motor.getMotor().setPosition(cancoder.getAbsolutePosition().waitForUpdate(0.2).getValueAsDouble());
@@ -65,7 +65,7 @@ public class IntakePivotSubsystem extends BaseSubsystem {
     public void periodicTelemetry() {
         inputs.currentPosition = motor.getRotations();
         inputs.atTargetPosition = Utils.isWithin(inputs.currentPosition, inputs.targetPosition, kPivotEpsilon);
-     //   logger.processInputs(inputs);
+      //  logger.processInputs(inputs);
     }
     
     private Command setPosition(DoubleSupplier position) {

@@ -1,50 +1,37 @@
 package frc.robot;
 
 import static frc.robot.subsystems.drive.SwerveConstants.kAutoCurrentLimit;
-import static frc.robot.subsystems.shooter.flywheel.FlywheelConstants.*;
-import static frc.robot.subsystems.shooter.hood.HoodConstants.*;
-import static frc.robot.subsystems.shooter.turret.TurretConstants.*;
 
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.events.EventTrigger;
 
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.*;
-import frc.lib.frc6328.LoggedTunableNumber;
 import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.drive.SwerveSubsystem;
 import frc.robot.subsystems.indexer.IndexerSubsystem;
 import frc.robot.subsystems.shooter.flywheel.FlywheelSubsystem;
 import frc.robot.subsystems.shooter.hood.HoodSubsystem;
-import frc.robot.subsystems.intake.IntakePivotSubsystem;
-import frc.robot.subsystems.intake.IntakeRollerSubsystem;
-import frc.robot.subsystems.leds.LEDSubsystem;
-import frc.robot.subsystems.shooter.turret.TurretSubsystem;
-public class RobotContainer {
-    public enum TestShotCondition {
-        kNone,
-        kDistance,
-        kParameters,
-    }
+import frc.robot.subsystems.squeezer.SqueezerSubsystem;
+import frc.robot.subsystems.intake.pivot.IntakePivotSubsystem;
+import frc.robot.subsystems.intake.roller.IntakeRollerSubsystem;
+import frc.robot.subsystems.kicker.KickerSubsystem;
 
-    private static TestShotCondition testCondition = TestShotCondition.kParameters;
+public class RobotContainer {
+    private Superstructure superstructure;
 
     /* Subsystems */
     private SwerveSubsystem swerve;
     private IndexerSubsystem indexer;
+    private KickerSubsystem kicker;
     private IntakeRollerSubsystem intake;
     private IntakePivotSubsystem pivot;
-
-    private TurretSubsystem leftTurret, rightTurret;
-    private FlywheelSubsystem leftFlywheel, rightFlywheel;
-    private HoodSubsystem leftHood, rightHood;
-
-    // private LEDSubsystem led;
-
-    private Superstructure superstructure;
+    private FlywheelSubsystem flywheel;
+    private HoodSubsystem hood;
+    private SqueezerSubsystem squeezer;
 
     /* Driver Buttons */
+    // Unused buttons: back, pov down/right
     private final CommandXboxController driver = new CommandXboxController(0);
     private final Trigger dResetSwerve = driver.start();
 
@@ -52,28 +39,17 @@ public class RobotContainer {
     private final Trigger dShoot = driver.rightTrigger();
     private final Trigger dPass = driver.y();
 
+    private final Trigger dIntakeNoHopper = driver.leftBumper();
+
     private final Trigger dFeedthrough = dIntake.and(dShoot);
     private final Trigger dPassthrough = dIntake.and(dPass);
 
     private final Trigger dTrenchShot = driver.b();
-    private final Trigger dTowerShot = driver.a();
+    private final Trigger dManualPass = driver.a();
     private final Trigger dHubShot = driver.x();
-    
-    private final Trigger dTestSetShot = driver.back();
-    private final Trigger dUnjam = driver.back();
 
-    private final Trigger dSpit = driver.leftBumper();
-    private final Trigger dStationaryShot = driver.rightBumper();
-
-    // private final Trigger dLeftTurretLeft = driver.povLeft();
-    // private final Trigger dLeftTurretRight = driver.povRight();
-    // private final Trigger dRightTurretLeft = driver.povDown();
     private final Trigger dRetract = driver.povUp();
     private final Trigger dRaiseCurrentLimit = driver.povLeft();
-
-    private LoggedTunableNumber tuneableFlywheelRPS = new LoggedTunableNumber("TunedFlywheelRPS", 0, () -> testCondition.equals(TestShotCondition.kParameters));
-    private LoggedTunableNumber tuneableHoodRotations = new LoggedTunableNumber("TunedHoodRotations", 0, () -> testCondition.equals(TestShotCondition.kParameters));
-    private LoggedTunableNumber tuneableDistanceShot = new LoggedTunableNumber("TunedDistanceShot", 1.8, () -> testCondition.equals(TestShotCondition.kDistance));
 
     public RobotContainer(SwerveSubsystem swerve) {
         this.swerve = swerve;
@@ -87,44 +63,30 @@ public class RobotContainer {
      * Configure all active subsystems on the robot and set default commands
      */
     private void configureSubsystems() {
-        leftFlywheel = new FlywheelSubsystem(kLeftFlywheelConfig, true);
-        rightFlywheel = new FlywheelSubsystem(kRightFlywheelConfig, true);
-
-        leftHood = new HoodSubsystem(kLeftHoodConfig, true);
-        rightHood = new HoodSubsystem(kRightHoodConfig, true);
-
-        leftTurret = new TurretSubsystem(kLeftTurretConfigs, () -> swerve.getCurrentPose(), () -> swerve.getYaw(), true);
-        rightTurret = new TurretSubsystem(kRightTurretConfigs, () -> swerve.getCurrentPose(), () -> swerve.getYaw(), true);
-
+        flywheel = new FlywheelSubsystem(true);
+        hood = new HoodSubsystem(true);
         indexer = new IndexerSubsystem(true);
+        kicker = new KickerSubsystem(true);
         pivot = new IntakePivotSubsystem(true);
         intake = new IntakeRollerSubsystem(true);
-
+        squeezer = new SqueezerSubsystem(true);
         // led = new LEDSubsystem(true);
 
-        superstructure = new Superstructure(swerve, leftFlywheel, rightFlywheel, 
-                                                leftHood, rightHood, 
-                                                indexer, pivot, intake, 
-                                                    leftTurret, rightTurret);
+        superstructure = new Superstructure(swerve, flywheel, hood, indexer, kicker, pivot, intake, squeezer);
     }
 
     private void configureNamedCommands() {
         // Named commands useful for PathPlanner events
         // ex. NamedCommands.registerCommand("Example", new ExampleCommand());
-        // NamedCommands.registerCommand("SitAndShoot", superstructure.autoShoot());
-        // NamedCommands.registerCommand("StowShooter", superstructure.stopShooters());
-        // NamedCommands.registerCommand("StopIntakeCommand", intake.stop());
-        // NamedCommands.registerCommand("IntakeCommand", superstructure.runIntake(true));
-        // NamedCommands.registerCommand("PassCommand", superstructure.pass());
-        // NamedCommands.registerCommand("WarmupCommand", superstructure.warmup());
-        // NamedCommands.registerCommand("FeedthroughCommand", superstructure.feedthrough());
-
-        new EventTrigger("Shoot").onTrue(superstructure.shoot());
+        new EventTrigger("Shoot").onTrue(superstructure.autoShoot());
+        // new EventTrigger("Feedthrough").whileTrue(superstructure.feedthrough());
         new EventTrigger("StopShoot").onTrue(superstructure.stopShooters());
         new EventTrigger("Intake").whileTrue(superstructure.runIntake(true));
-        new EventTrigger("Pass").onTrue(superstructure.pass());
+        new EventTrigger("RaiseSqueezer").onTrue(squeezer.raise());
+        new EventTrigger("LowerSqueezer").onTrue(squeezer.squeeze());
         new EventTrigger("Warmup").whileTrue(superstructure.warmup());
-        new EventTrigger("Feedthrough").whileTrue(superstructure.feedthrough());
+        // new EventTrigger("StopTrack").onTrue(swerve.stopLocking());
+        NamedCommands.registerCommand("TargetLock", superstructure.lockSwerveToHub());
     }
 
     /**
@@ -134,37 +96,23 @@ public class RobotContainer {
         // Reset robot pose and heading
         dResetSwerve.onTrue(superstructure.resetSwerve());
 
-        dIntake.and(() -> !dShoot.getAsBoolean() && !dPass.getAsBoolean()).whileTrue(superstructure.runIntake(true));
-        dShoot.whileTrue(superstructure.shoot());
-        dPass.whileTrue(superstructure.pass());
-        dFeedthrough.whileTrue(superstructure.feedthrough());
-        dPassthrough.whileTrue(superstructure.passFeedthrough());
+        dIntake.and(() -> !dShoot.getAsBoolean() && !dPass.getAsBoolean()).whileTrue(superstructure.runIntake(true).alongWith(squeezer.raise()));
+        dShoot.whileTrue(superstructure.shoot()).onFalse(swerve.setLockingEnabled(false));
+        dPass.whileTrue(superstructure.pass()).onFalse(swerve.setLockingEnabled(false));
+        dFeedthrough.whileTrue(superstructure.feedthrough()).onFalse(swerve.setLockingEnabled(false));
+        dPassthrough.whileTrue(superstructure.passFeedthrough()).onFalse(swerve.setLockingEnabled(false));
 
-        dStationaryShot.whileTrue(superstructure.stationaryShot());
+        dIntakeNoHopper.and(() -> !dShoot.getAsBoolean() && !dPass.getAsBoolean()).whileTrue(superstructure.runIntake(true).alongWith(squeezer.squeeze()));
 
-        dHubShot.whileTrue(superstructure.manualShot(1.8, true));
-        dTowerShot.whileTrue(superstructure.manualShot(2.5, true));
-        dTrenchShot.whileTrue(superstructure.manualShot(4, true));
+        dHubShot.whileTrue(superstructure.defaultShot(60, 3)).onFalse(swerve.setLockingEnabled(false));
+        dManualPass.whileTrue(superstructure.defaultShot(75, 18)).onFalse(swerve.setLockingEnabled(false));
+        dTrenchShot.whileTrue(superstructure.defaultShot(3.2)).onFalse(swerve.setLockingEnabled(false));
         
-        // (dTestSetShot.and(() -> testCondition.equals(TestShotCondition.kDistance)))
-        //     .whileTrue(superstructure.tuneShot(tuneableDistanceShot, true));
-        // (dTestSetShot.and(() -> testCondition.equals(TestShotCondition.kParameters)))
-        //     .whileTrue(superstructure.tuneShot(tuneableFlywheelRPS.get(), tuneableHoodRotations.get(), true));
+        // dSpit.whileTrue(superstructure.spit());
 
-        dSpit.whileTrue(superstructure.spit());
-
-        dUnjam.whileTrue(superstructure.unjamIndexer());
-        // driver.back().whileTrue(superstructure.tuneShot(tuneableDistanceShot, true));
-
-        // dLeftTurretLeft.whileTrue(leftTurret.setDegrees(-200));
-        // dLeftTurretRight.whileTrue(leftTurret.setDegrees(80));
-        // dRightTurretLeft.whileTrue(rightTurret.setDegrees(-80));
-        // dRightTurretRight.whileTrue(rightTurret.setDegrees(200));
         dRetract.whileTrue(pivot.retract());
         dRaiseCurrentLimit.onTrue(new InstantCommand(() -> swerve.setStatorCurrentLimit(kAutoCurrentLimit)));
-        // driver.povRight().whileTrue(leftTurret.setDegrees(90).alongWith(rightTurret.setDegrees(90)));
-        // driver.povDown().whileTrue(leftTurret.setDegrees(180).alongWith(rightTurret.setDegrees(180)));
-        // driver.povLeft().whileTrue(leftTurret.setDegrees(-90).alongWith(rightTurret.setDegrees(-90)));
+        // driver.povDown().onTrue(swerve.launchQuestnav());
     }
 
     public void configureDefaultCommands() {
@@ -174,15 +122,12 @@ public class RobotContainer {
 
         intake.setDefaultCommand(intake.stop());
         indexer.setDefaultCommand(indexer.stop());
+        kicker.setDefaultCommand(kicker.stop());
 
-        leftTurret.setDefaultCommand(leftTurret.trackHub());
-        rightTurret.setDefaultCommand(rightTurret.trackHub());
+        hood.setDefaultCommand(hood.stow());
+        flywheel.setDefaultCommand(flywheel.stop());
 
-        leftHood.setDefaultCommand(leftHood.stow());
-        rightHood.setDefaultCommand(rightHood.stow());
-
-        leftFlywheel.setDefaultCommand(leftFlywheel.stop());
-        rightFlywheel.setDefaultCommand(rightFlywheel.stop());
+        // squeezer.setDefaultCommand(squeezer.stop());
 
         // led.setDefaultCommand(led.flashAllianceShift());
     }

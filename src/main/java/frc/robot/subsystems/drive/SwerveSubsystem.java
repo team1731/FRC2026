@@ -3,9 +3,9 @@ package frc.robot.subsystems.drive;
 import static edu.wpi.first.units.Units.*;
 
 import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
@@ -16,12 +16,14 @@ import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 import com.ctre.phoenix6.swerve.SwerveModule;
 
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.*;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
+import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.frc1731.hardware.camera.limelight.LimelightHelpers;
 import frc.robot.Robot;
@@ -45,19 +47,36 @@ public class SwerveSubsystem extends BaseSubsystem {
     private double distanceBetweenPoses;
 
     private QuestNav questNav;
+    private QuestWaker waker;
 
     private static boolean isQuestSeeded = false;
 
+    private Timer timer = new Timer();
+
     private Timer questPoseResetTimer = new Timer();  // ussed primarily in dissabled to reset the pose every few seconds in case the robot is moved b4 auto
+
+    private final PIDController headingPID = kHeadingGains.toPIDController();
+
+    private boolean trackTargetHeading = false;
+
+    private double targetError = 0;
+
+    private Supplier<Translation2d> headingTarget = () -> Robot.isRedAlliance()
+        ? new Translation2d(11.91, 4.03)
+        : new Translation2d(4.62, 4.03);
 
     public SwerveSubsystem(boolean enabled) {
         super(enabled);
         if(!enabled) return;
         questNav = new QuestNav();
+        waker = new QuestWaker();
 
         this.drivetrain = TunerConstants.createDrivetrain();
         driveAtTargetControl.HeadingController.setPID(10,0,0);
 	    driveAtTargetControl.HeadingController.enableContinuousInput(-Math.PI/2, Math.PI/2);
+        
+        headingPID.setTolerance(kHeadingTolerance);
+        headingPID.enableContinuousInput(0, 2 * Math.PI);
 
         Transform3d tf = kLimelightToRobot;
         LimelightHelpers.setCameraPose_RobotSpace(kLimelightName, tf.getX(), tf.getY(), tf.getZ(), tf.getRotation().getX(), tf.getRotation().getY(), tf.getRotation().getZ());
@@ -141,6 +160,10 @@ public class SwerveSubsystem extends BaseSubsystem {
         return getState().Speeds;
     }
 
+    public boolean atTargetHeading() {
+        return headingPID.atSetpoint();
+    }
+
     /*
      * This method will get called in two instances:
      * 1. After the VSLAM connects successfully
@@ -222,6 +245,8 @@ public class SwerveSubsystem extends BaseSubsystem {
             SmartDashboard.putBoolean("isTracking", questNav.isTracking());
             SmartDashboard.putBoolean("isConnected", questNav.isConnected());
 
+            SmartDashboard.putBoolean("isTrackingHeading", trackTargetHeading);
+
             isQuestSeeded = true; // TODO - Fix this once limelight odometry works
             if (!questNav.isTracking()) {
                 isQuestSeeded = false;
@@ -233,15 +258,90 @@ public class SwerveSubsystem extends BaseSubsystem {
         }
     }
 
+    public Command launchQuestnav() {
+        return runOnce(() -> {
+            waker.updateQuestIP();
+            waker.launchQuestNav();
+        });
+    }
+
+    public Command setHeadingTarget(Supplier<Translation2d> target) {
+        return new InstantCommand(() -> this.headingTarget = target);
+    }
+
+    public Command setLockingEnabled(boolean enabled) {
+        return new InstantCommand(() -> this.trackTargetHeading = enabled);
+    }
+
+    public Command autoLockTarget() {
+        return runOnce(() -> {
+            PPHolonomicDriveController.overrideRotationFeedback(() -> {
+                Pose2d curPose = getCurrentPose();
+                Translation2d robotTranslation = curPose.getTranslation();
+                Translation2d targetTranslation = headingTarget.get();
+                // Angle from robot to target
+                Rotation2d targetAngle = targetTranslation.minus(robotTranslation).getAngle();
+                // Flip by 180 degrees so the BACK of the robot points at the target
+                Rotation2d desiredAngle = targetAngle.plus(Rotation2d.fromDegrees(180));
+                return headingPID.calculate(curPose.getRotation().getRadians() % (2 * Math.PI), desiredAngle.getRadians());
+            });
+        });
+    }
+
+    public Command lockHeadingTarget(Supplier<Translation2d> target) {
+        return run(() -> {
+            Pose2d curPose = getCurrentPose();
+            Translation2d robotTranslation = curPose.getTranslation();
+            Translation2d targetTranslation = target.get();
+            // Angle from robot to target
+            Rotation2d targetAngle = targetTranslation.minus(robotTranslation).getAngle();
+            // Flip by 180 degrees so the BACK of the robot points at the target
+            Rotation2d desiredAngle = targetAngle.plus(Rotation2d.fromDegrees(180));
+            double rotRate = headingPID.calculate(curPose.getRotation().getRadians() % (2 * Math.PI), desiredAngle.getRadians());
+            
+            targetError = targetAngle.minus(desiredAngle).getDegrees();
+            drivetrain.setControl(
+                kFieldCentricControl
+                    .withVelocityX(0)
+                    .withVelocityY(0)
+                    .withRotationalRate(rotRate)
+            );
+
+            timer.start();
+            SmartDashboard.putNumber("TimerTime", timer.get());
+        }).withName("LockHeading")
+        .until(() -> Math.abs(targetError) < 1.0)
+        .withInterruptBehavior(InterruptionBehavior.kCancelSelf);
+    }
+
+    // public Command stopLocking() {
+    //     return setLockingEnabled(false).andThen(this.runOnce(() -> drivetrain.setControl(kFieldCentricControl.withVelocityX(0).withVelocityY(0).withRotationalRate(0))));
+    // }
+
     public Command driveCommand(CommandXboxController m_xboxController, BooleanSupplier isFieldCentric) {
         return run(() -> {
             Translation2d RotationCenter =  new Translation2d();
 
             double scalar = kMaxSpeed * (m_xboxController.rightTrigger().getAsBoolean() ? 0.5 : 1.0);
 
+            double rotRate = -m_xboxController.getRightX() * kMaxAngularRate;
+            if (trackTargetHeading) {
+                Pose2d curPose = getCurrentPose();
+                Translation2d robotTranslation = curPose.getTranslation();
+                Translation2d targetTranslation = headingTarget.get();
+                // Angle from robot to target
+                Rotation2d targetAngle = targetTranslation.minus(robotTranslation).getAngle();
+                // Flip by 180 degrees so the BACK of the robot points at the target
+                Rotation2d desiredAngle = targetAngle.plus(Rotation2d.fromDegrees(180));
+                rotRate = headingPID.calculate(curPose.getRotation().getRadians() % (2 * Math.PI), desiredAngle.getRadians());
+                // logger.log("Target Heading", desiredAngle.getDegrees());
+                // Logger.recordOutput("Swerve Target", new Pose2d(targetTranslation, Rotation2d.kZero));
+            }
+
             if ((Math.abs(m_xboxController.getLeftY()) < kDeadband) && 
                 (Math.abs(m_xboxController.getLeftX()) < kDeadband) &&
-                (Math.abs(m_xboxController.getRightX()) < kDeadband)){
+                (Math.abs(m_xboxController.getRightX()) < kDeadband) &&
+                !trackTargetHeading){
                     drivetrain.setControl(brake);
             } else {
                 if (isFieldCentric.getAsBoolean()) {
@@ -249,7 +349,7 @@ public class SwerveSubsystem extends BaseSubsystem {
                         kFieldCentricControl
                             .withVelocityX(-(Math.abs(m_xboxController.getLeftY()) * m_xboxController.getLeftY()) * scalar)
                             .withVelocityY(-(Math.abs(m_xboxController.getLeftX()) * m_xboxController.getLeftX()) * scalar)
-                            .withRotationalRate(-m_xboxController.getRightX() * kMaxAngularRate)
+                            .withRotationalRate(rotRate)
                             .withCenterOfRotation(RotationCenter)
                     );
                 } 
@@ -258,12 +358,54 @@ public class SwerveSubsystem extends BaseSubsystem {
                          kRobotCentricControl
                              .withVelocityX(-(Math.abs(m_xboxController.getLeftY()) * m_xboxController.getLeftY()) * scalar)
                              .withVelocityY(-(Math.abs(m_xboxController.getLeftX()) * m_xboxController.getLeftX()) * scalar)
-                             .withRotationalRate(-m_xboxController.getRightX() * kMaxAngularRate)
+                             .withRotationalRate(rotRate)
                              .withCenterOfRotation(RotationCenter)
                      );
                  }
             }
         }).withName("Drive" + (isFieldCentric.getAsBoolean() ? "FieldCentric" : "RobotCentric"));
+    }
+
+    public Command pathfindToPoseCommand(Pose2d targetPose, double endVelocity) {
+        return AutoBuilder.pathfindToPose(
+            targetPose, 
+            kPathfinderConstraints, 
+            endVelocity
+        ).withName("PathFindToPose");
+    }
+
+    public Command setHeadingTargetCommand(CommandXboxController m_xboxController, Rotation2d targetHeading) {
+        return this.run(() -> {
+            drivetrain.setControl(
+                kFieldCentricControl
+                    .withVelocityX(-(Math.abs(m_xboxController.getLeftY()) * m_xboxController.getLeftY()) * kMaxSpeed)
+                    .withVelocityY(-(Math.abs(m_xboxController.getLeftX()) * m_xboxController.getLeftX()) * kMaxSpeed)
+                    .withRotationalRate(headingPID.calculate(drivetrain.getRotation3d().getZ() % 360d, targetHeading.getDegrees()))
+                    .withCenterOfRotation(new Translation2d(0, 0))
+            );
+        }).withName("SetHeadingTarget");
+    }
+
+    public Command facePoseCommand(CommandXboxController m_xboxController, Supplier<Pose2d> targetPose) {
+        return this.run(() -> {
+            Pose2d curPose = getCurrentPose();
+            Translation2d robotTranslation = curPose.getTranslation();
+            Translation2d targetTranslation = targetPose.get().getTranslation();
+            Rotation2d targetTheta = Rotation2d.fromRadians(Math.atan(
+                (targetTranslation.getY() - robotTranslation.getY()) / 
+                (targetTranslation.getX() - robotTranslation.getX())
+            ));
+
+            // Vector2d robotToTarget = new Vector2d(curPose.getX() - targetPose.get().getX(), curPose.getY() - targetPose.get().getY());
+
+            drivetrain.setControl(
+                kFieldCentricControl
+                    .withVelocityX(-(Math.abs(m_xboxController.getLeftY()) * m_xboxController.getLeftY()) * kMaxSpeed)
+                    .withVelocityY(-(Math.abs(m_xboxController.getLeftX()) * m_xboxController.getLeftX()) * kMaxSpeed)
+                    .withRotationalRate(headingPID.calculate(drivetrain.getRotation3d().getZ() % 360d, targetTheta.getDegrees()))
+                    .withCenterOfRotation(new Translation2d(0, 0))
+            );
+        }).withName("FacePose");
     }
 
     public ChassisSpeeds getFieldRelativeChassisSpeeds() { // used for shoot on the fly
