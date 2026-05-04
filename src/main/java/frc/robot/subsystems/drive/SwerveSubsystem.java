@@ -23,6 +23,7 @@ import edu.wpi.first.math.numbers.*;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
+import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.frc1731.hardware.camera.limelight.LimelightHelpers;
 import frc.robot.Robot;
@@ -50,12 +51,16 @@ public class SwerveSubsystem extends BaseSubsystem {
 
     private static boolean isQuestSeeded = false;
 
+    private Timer timer = new Timer();
+
     private Timer questPoseResetTimer = new Timer();  // ussed primarily in dissabled to reset the pose every few seconds in case the robot is moved b4 auto
 
     private final PIDController headingPID = kHeadingGains.toPIDController();
 
     private boolean trackTargetHeading = false;
-    
+
+    private double targetError = 0;
+
     private Supplier<Translation2d> headingTarget = () -> Robot.isRedAlliance()
         ? new Translation2d(11.91, 4.03)
         : new Translation2d(4.62, 4.03);
@@ -287,24 +292,31 @@ public class SwerveSubsystem extends BaseSubsystem {
         return run(() -> {
             Pose2d curPose = getCurrentPose();
             Translation2d robotTranslation = curPose.getTranslation();
-            Translation2d targetTranslation = headingTarget.get();
+            Translation2d targetTranslation = target.get();
             // Angle from robot to target
             Rotation2d targetAngle = targetTranslation.minus(robotTranslation).getAngle();
             // Flip by 180 degrees so the BACK of the robot points at the target
             Rotation2d desiredAngle = targetAngle.plus(Rotation2d.fromDegrees(180));
             double rotRate = headingPID.calculate(curPose.getRotation().getRadians() % (2 * Math.PI), desiredAngle.getRadians());
+            
+            targetError = targetAngle.minus(desiredAngle).getDegrees();
             drivetrain.setControl(
                 kFieldCentricControl
                     .withVelocityX(0)
                     .withVelocityY(0)
                     .withRotationalRate(rotRate)
             );
-        }).withName("LockHeading");
+
+            timer.start();
+            SmartDashboard.putNumber("TimerTime", timer.get());
+        }).withName("LockHeading")
+        .until(() -> Math.abs(targetError) < 1.0)
+        .withInterruptBehavior(InterruptionBehavior.kCancelSelf);
     }
 
-    public Command stopLocking() {
-        return setLockingEnabled(false).andThen(new InstantCommand(() -> drivetrain.setControl(kFieldCentricControl.withVelocityX(0).withVelocityY(0).withRotationalRate(0))));
-    }
+    // public Command stopLocking() {
+    //     return setLockingEnabled(false).andThen(this.runOnce(() -> drivetrain.setControl(kFieldCentricControl.withVelocityX(0).withVelocityY(0).withRotationalRate(0))));
+    // }
 
     public Command driveCommand(CommandXboxController m_xboxController, BooleanSupplier isFieldCentric) {
         return run(() -> {

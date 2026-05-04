@@ -51,7 +51,7 @@ public class SqueezerSubsystem extends BaseSubsystem {
     public void periodicTelemetry() {
         inputs.currentRotations = motor.getEncoder().getPosition();
         inputs.atTarget = Utils.isWithin(inputs.currentRotations, inputs.targetRotations, 1);
-        logger.processInputs(inputs);
+      //  logger.processInputs(inputs);
     }
     
     public Command raise() {

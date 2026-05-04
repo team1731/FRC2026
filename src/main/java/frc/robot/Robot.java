@@ -5,7 +5,7 @@ import static frc.robot.subsystems.drive.SwerveConstants.kTeleCurrentLimit;
 import java.util.*;
 
 import org.littletonrobotics.junction.LoggedRobot;
-import org.littletonrobotics.junction.Logger;
+//import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -37,7 +38,7 @@ import frc.robot.subsystems.drive.SwerveSubsystem;
  * the package after creating this project, you must also update the build.gradle file in the
  * project.
  */
-public class Robot extends LoggedRobot {
+public class Robot extends TimedRobot {
 	private PathPlannerAuto m_autonomousCommand;
 	private SendableChooser<String> autoChooser;
 	private String autoCode;
@@ -53,6 +54,8 @@ public class Robot extends LoggedRobot {
 	private boolean isVslamConnected = false;
 
 	private RobotContainer container;
+
+	private boolean autoStarted = false;
 	
 	public static final Trigger IS_ENABLED = new Trigger(() -> DriverStation.isEnabled());
 	public static final Trigger IS_TELEOP = new Trigger(() -> DriverStation.isTeleop());
@@ -126,13 +129,13 @@ public class Robot extends LoggedRobot {
 		//Logger.recordMetadata("BuildDate", date);
 
 		if (Robot.isSimulation()) {
-			Logger.addDataReceiver(new NT4Publisher());
+		//	Logger.addDataReceiver(new NT4Publisher());
 		} else if (RobotConstants.kLogToWPILog) {
-			Logger.addDataReceiver(new WPILOGWriter("/home/lvuser/logs"));
-			Logger.addDataReceiver(new NT4Publisher());
+		//	Logger.addDataReceiver(new WPILOGWriter("/home/lvuser/logs"));
+		//	Logger.addDataReceiver(new NT4Publisher());
 		}
 
-		Logger.start();
+	//	Logger.start();
 	//	SmartDashboard.updateValues();
 	}
 
@@ -235,7 +238,7 @@ public class Robot extends LoggedRobot {
 		/*
 		 * If any of these above conditions changed, kick off creation of a new auto command
 		 */
-		if(autoCodeChanged || allianceChanged || vslamConnectionStatusChanged ) {
+		if((autoCodeChanged || allianceChanged) && !autoStarted) {
 			vslamConnectionStatusChanged = false;
 			m_autonomousCommand = null;
 			m_autonomousCommand = (PathPlannerAuto) AutoFactory.getAutonomousCommand(selectedAutoCode, redAlliance);		
@@ -272,7 +275,9 @@ public class Robot extends LoggedRobot {
 //   ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
 	@Override
 	public void disabledPeriodic() {	
-		autoPreload();
+		if(!autoStarted) {
+			autoPreload();
+		}
 		if (Robot.isReal()) {
 			try {
 				OptionalInt stationNumberInt = DriverStation.getLocation();
@@ -303,6 +308,7 @@ public class Robot extends LoggedRobot {
 		CommandScheduler.getInstance().cancelAll();
 
 		autoStartTime = Timer.getFPGATimestamp();
+		autoStarted = true;
 
 		if (m_autonomousCommand == null) {
 			System.out.println("SOMETHING WENT WRONG - UNABLE TO RUN AUTONOMOUS! CHECK SOFTWARE!");
@@ -322,7 +328,7 @@ public class Robot extends LoggedRobot {
 @Override
 public void autonomousPeriodic() {
 	if (doSD()) {
-		System.out.println("AUTO PERIODIC");
+		// System.out.println("AUTO PERIODIC");
 	}
 	// SmartDashboard.putString("Path running", PathPlannerAuto.currentPathName);
 	// SmartDashboard.putNumber("current Pose X", currentPose.getX());
@@ -334,13 +340,13 @@ public void autonomousPeriodic() {
 	// SmartDashboard.putNumber("AutoRunningTime", Timer.getFPGATimestamp()-
 	// autoStartTime);
 
-	if (m_autonomousCommand != null && (Timer.getFPGATimestamp() - autoStartTime) >= 0.25
-			&& (currentPose.getTranslation().getDistance(targetPose.getTranslation()) > 1.0)) {
-		System.out.println("distance is" + currentPose.getTranslation().getDistance(targetPose.getTranslation()));
+	// if (m_autonomousCommand != null && (Timer.getFPGATimestamp() - autoStartTime) >= 0.25
+	// 		&& (currentPose.getTranslation().getDistance(targetPose.getTranslation()) > 1.0)) {
+		// System.out.println("distance is" + currentPose.getTranslation().getDistance(targetPose.getTranslation()));
 		// m_autonomousCommand.cancel();
-		System.out.println(
-				"Had to Kill the auto because the target pose and current pose were apart by more than a foot");
-	}
+		//System.out.println(
+		//		"Had to Kill the auto because the target pose and current pose were apart by more than a foot");
+	// }
 }
 
 //   ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄

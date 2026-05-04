@@ -35,7 +35,7 @@ public class FlywheelSubsystem extends BaseSubsystem {
     public void periodicTelemetry() {
         inputs.currentVelocity = motor.getVelocityRPS();
         inputs.atTargetVelocity = Utils.isWithin(inputs.currentVelocity, inputs.targetVelocity, kEpsilon);
-        logger.processInputs(inputs);
+     //   logger.processInputs(inputs);
     }
 
     public Command setVelocity(DoubleSupplier target) {

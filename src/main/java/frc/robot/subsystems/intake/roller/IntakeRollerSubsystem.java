@@ -25,6 +25,6 @@ public class IntakeRollerSubsystem extends VelocitySubsystem<MotorIOTalonFX>{
     public void periodicTelemetry() {
         inputs.currentVelocity = getVelocity().in(RotationsPerSecond);
         inputs.targetVelocity = getTargetVelocity().in(RotationsPerSecond);
-        logger.processInputs(inputs);
+       // logger.processInputs(inputs);
     }
 }

@@ -2,6 +2,7 @@ package frc.robot;
 
 import static frc.robot.subsystems.drive.SwerveConstants.kAutoCurrentLimit;
 
+import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.events.EventTrigger;
 
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -38,11 +39,10 @@ public class RobotContainer {
     private final Trigger dShoot = driver.rightTrigger();
     private final Trigger dPass = driver.y();
 
-    private final Trigger dSpit = driver.leftBumper();
-    private final Trigger dIntakeNoHopper = driver.rightBumper();
+    private final Trigger dIntakeNoHopper = driver.leftBumper();
 
-    private final Trigger dFeedthrough = dIntake.or(dIntakeNoHopper).and(dShoot);
-    private final Trigger dPassthrough = dIntake.or(dIntakeNoHopper).and(dPass);
+    private final Trigger dFeedthrough = dIntake.and(dShoot);
+    private final Trigger dPassthrough = dIntake.and(dPass);
 
     private final Trigger dTrenchShot = driver.b();
     private final Trigger dManualPass = driver.a();
@@ -78,15 +78,15 @@ public class RobotContainer {
     private void configureNamedCommands() {
         // Named commands useful for PathPlanner events
         // ex. NamedCommands.registerCommand("Example", new ExampleCommand());
-        new EventTrigger("Shoot").onTrue(superstructure.shoot());
+        new EventTrigger("Shoot").onTrue(superstructure.autoShoot());
         // new EventTrigger("Feedthrough").whileTrue(superstructure.feedthrough());
         new EventTrigger("StopShoot").onTrue(superstructure.stopShooters());
         new EventTrigger("Intake").whileTrue(superstructure.runIntake(true));
         new EventTrigger("RaiseSqueezer").onTrue(squeezer.raise());
         new EventTrigger("LowerSqueezer").onTrue(squeezer.squeeze());
         new EventTrigger("Warmup").whileTrue(superstructure.warmup());
-        // new EventTrigger("TargetLock").onTrue(superstructure.lockSwerveToHub());
-        new EventTrigger("StopTrack").onTrue(swerve.stopLocking());
+        // new EventTrigger("StopTrack").onTrue(swerve.stopLocking());
+        NamedCommands.registerCommand("TargetLock", superstructure.lockSwerveToHub());
     }
 
     /**
@@ -104,15 +104,15 @@ public class RobotContainer {
 
         dIntakeNoHopper.and(() -> !dShoot.getAsBoolean() && !dPass.getAsBoolean()).whileTrue(superstructure.runIntake(true).alongWith(squeezer.squeeze()));
 
-        dHubShot.whileTrue(superstructure.defaultShot(60, 0)).onFalse(swerve.setLockingEnabled(false));
+        dHubShot.whileTrue(superstructure.defaultShot(60, 3)).onFalse(swerve.setLockingEnabled(false));
         dManualPass.whileTrue(superstructure.defaultShot(75, 18)).onFalse(swerve.setLockingEnabled(false));
         dTrenchShot.whileTrue(superstructure.defaultShot(3.2)).onFalse(swerve.setLockingEnabled(false));
         
-        dSpit.whileTrue(superstructure.spit());
+        // dSpit.whileTrue(superstructure.spit());
 
         dRetract.whileTrue(pivot.retract());
         dRaiseCurrentLimit.onTrue(new InstantCommand(() -> swerve.setStatorCurrentLimit(kAutoCurrentLimit)));
-        driver.povDown().onTrue(swerve.launchQuestnav());
+        // driver.povDown().onTrue(swerve.launchQuestnav());
     }
 
     public void configureDefaultCommands() {

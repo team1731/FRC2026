@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.196467825552229,
-        "y": 0.7059115289125896
+        "x": 4.750684736091298,
+        "y": 0.6644793152639101
       },
       "isLocked": false,
       "linkedName": "RTrench90Start"
@@ -20,12 +20,12 @@
         "y": 0.669265060240964
       },
       "prevControl": {
-        "x": 4.969831325301204,
-        "y": 0.6474096385542166
+        "x": 5.190599144079885,
+        "y": 0.6644793152639101
       },
       "nextControl": {
-        "x": 6.951961231720517,
-        "y": 0.7317555920188692
+        "x": 6.953093964960727,
+        "y": 0.693283462722535
       },
       "isLocked": false,
       "linkedName": null
@@ -53,7 +53,7 @@
       },
       "prevControl": {
         "x": 8.30737023623843,
-        "y": 2.431237429663924
+        "y": 2.4312374296639234
       },
       "nextControl": {
         "x": 7.681352629954058,
@@ -111,7 +111,7 @@
   "rotationTargets": [
     {
       "waypointRelativePos": 1,
-      "rotationDegrees": 90.67403689798444
+      "rotationDegrees": -0.2775051947283578
     },
     {
       "waypointRelativePos": 2,
@@ -149,7 +149,7 @@
       "minWaypointRelativePos": 3.8609958506224245,
       "maxWaypointRelativePos": 6.0,
       "constraints": {
-        "maxVelocity": 1.5,
+        "maxVelocity": 1.75,
         "maxAcceleration": 2.0,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
@@ -173,14 +173,8 @@
       "command": null
     },
     {
-      "name": "RaiseSqueezer",
-      "waypointRelativePos": 1.3879668049792526,
-      "endWaypointRelativePos": 3.7863070539419152,
-      "command": null
-    },
-    {
-      "name": "Warmup",
-      "waypointRelativePos": 4.7,
+      "name": "Shoot",
+      "waypointRelativePos": 5.580148883374718,
       "endWaypointRelativePos": 6.0,
       "command": null
     }
@@ -195,13 +189,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -140.33215888165964
+    "rotation": -137.30669144593188
   },
   "reversed": false,
   "folder": "RightOverBumpX2",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 90.0
+    "rotation": -0.5521663714130368
   },
   "useDefaultConstraints": false
 }

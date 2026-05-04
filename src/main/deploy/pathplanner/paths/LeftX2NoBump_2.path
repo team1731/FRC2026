@@ -174,14 +174,20 @@
       "command": null
     },
     {
+      "name": "StopShoot",
+      "waypointRelativePos": 0,
+      "endWaypointRelativePos": null,
+      "command": null
+    },
+    {
       "name": "Intake",
       "waypointRelativePos": 1.9940446650124115,
       "endWaypointRelativePos": 4.189578163771741,
       "command": null
     },
     {
-      "name": "Warmup",
-      "waypointRelativePos": 5.912655086848565,
+      "name": "Shoot",
+      "waypointRelativePos": 6.718610421836215,
       "endWaypointRelativePos": 7.0,
       "command": null
     }

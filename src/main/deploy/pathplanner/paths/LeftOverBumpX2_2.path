@@ -189,8 +189,8 @@
       "minWaypointRelativePos": 6.02679900744419,
       "maxWaypointRelativePos": 6.932009925558382,
       "constraints": {
-        "maxVelocity": 1.5,
-        "maxAcceleration": 2.0,
+        "maxVelocity": 4.0,
+        "maxAcceleration": 3.0,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
         "nominalVoltage": 12.0,
@@ -207,20 +207,20 @@
       "command": null
     },
     {
+      "name": "StopShoot",
+      "waypointRelativePos": 0,
+      "endWaypointRelativePos": null,
+      "command": null
+    },
+    {
       "name": "Intake",
       "waypointRelativePos": 2.5012406947890957,
       "endWaypointRelativePos": 5.915632754342463,
       "command": null
     },
     {
-      "name": "RaiseSqueezer",
-      "waypointRelativePos": 3.803473945409429,
-      "endWaypointRelativePos": null,
-      "command": null
-    },
-    {
-      "name": "Warmup",
-      "waypointRelativePos": 6.3761786600495824,
+      "name": "Shoot",
+      "waypointRelativePos": 6.932009925558302,
       "endWaypointRelativePos": 8.0,
       "command": null
     }

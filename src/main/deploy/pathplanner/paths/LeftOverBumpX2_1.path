@@ -129,7 +129,7 @@
       "minWaypointRelativePos": 2.9564315352697186,
       "maxWaypointRelativePos": 4.192946058091338,
       "constraints": {
-        "maxVelocity": 1.5,
+        "maxVelocity": 2.0,
         "maxAcceleration": 2.0,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
@@ -153,21 +153,15 @@
       "command": null
     },
     {
-      "name": "RaiseSqueezer",
-      "waypointRelativePos": 1.396265560165978,
-      "endWaypointRelativePos": null,
-      "command": null
-    },
-    {
-      "name": "Warmup",
-      "waypointRelativePos": 3.661825726141052,
+      "name": "Shoot",
+      "waypointRelativePos": 4.213399503722154,
       "endWaypointRelativePos": 5.0,
       "command": null
     }
   ],
   "globalConstraints": {
     "maxVelocity": 4.0,
-    "maxAcceleration": 3.0,
+    "maxAcceleration": 4.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -181,7 +175,7 @@
   "folder": "LeftOverBumpX2",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -89.75292020188239
+    "rotation": 0.4570817156017955
   },
   "useDefaultConstraints": false
 }
