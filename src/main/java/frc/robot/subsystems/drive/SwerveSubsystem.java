@@ -226,7 +226,6 @@ public class SwerveSubsystem extends BaseSubsystem {
         drivetrain.periodic();
         if (kUseAprilTags) {
             updateVisionOdometry();
-
             SmartDashboard.putBoolean("hasgoodtracking", hasGoodOdometry());
         }
 
