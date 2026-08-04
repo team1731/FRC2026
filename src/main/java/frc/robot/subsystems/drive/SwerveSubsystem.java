@@ -321,7 +321,7 @@ public class SwerveSubsystem extends BaseSubsystem {
         return run(() -> {
             Translation2d RotationCenter =  new Translation2d();
 
-            double scalar = kMaxSpeed * (m_xboxController.rightTrigger().getAsBoolean() ? 0.5 : 1.0);
+            double scalar = kMaxSpeed * (m_xboxController.rightTrigger().getAsBoolean() ? 0.5 : 1.0) * 0.75;
 
             double rotRate = -m_xboxController.getRightX() * kMaxAngularRate;
             if (trackTargetHeading) {

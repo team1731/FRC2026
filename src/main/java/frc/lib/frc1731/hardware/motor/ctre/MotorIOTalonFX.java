@@ -3,6 +3,7 @@ package frc.lib.frc1731.hardware.motor.ctre;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.*;
 import com.ctre.phoenix6.controls.*;
@@ -70,6 +71,7 @@ public class MotorIOTalonFX extends MotorIO {
             TalonFX follower = new TalonFX(cfg.kPort, cfg.kBus);
             // Correct constructor: new Follower(leaderID, opposeLeaderDirection)
             follower.setControl(new Follower(this.motor.getDeviceID(),   (isInverted() != (cfg.kInverted) )? MotorAlignmentValue.Opposed : MotorAlignmentValue.Aligned));
+            follower.close();
         }
         return this;
     }
@@ -270,7 +272,7 @@ public class MotorIOTalonFX extends MotorIO {
     }
 
     public void withCANCoder(int deviceID, String bus, CANcoderConfiguration configuration) {
-        this.cancoder = new CANcoder(deviceID, bus);
+        this.cancoder = new CANcoder(deviceID, new CANBus(bus));
         this.cancoder.getConfigurator().apply(configuration);
         motor.setPosition(cancoder.getAbsolutePosition().getValueAsDouble());
     }
