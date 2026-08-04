@@ -40,6 +40,7 @@ public class RobotContainer {
     private final Trigger dPass = driver.y();
 
     private final Trigger dIntakeNoHopper = driver.leftBumper();
+    private final Trigger dManualLongPass = driver.rightBumper();
 
     private final Trigger dFeedthrough = dIntake.and(dShoot);
     private final Trigger dPassthrough = dIntake.and(dPass);
@@ -97,21 +98,25 @@ public class RobotContainer {
         dResetSwerve.onTrue(superstructure.resetSwerve());
 
         dIntake.and(() -> !dShoot.getAsBoolean() && !dPass.getAsBoolean()).whileTrue(superstructure.runIntake(true).alongWith(squeezer.raise()));
-        dShoot.whileTrue(superstructure.shoot()).onFalse(swerve.setLockingEnabled(false));
-        dPass.whileTrue(superstructure.pass()).onFalse(swerve.setLockingEnabled(false));
-        dFeedthrough.whileTrue(superstructure.feedthrough()).onFalse(swerve.setLockingEnabled(false));
-        dPassthrough.whileTrue(superstructure.passFeedthrough()).onFalse(swerve.setLockingEnabled(false));
+        // dShoot.whileTrue(superstructure.shoot()).onFalse(swerve.setLockingEnabled(false));
+        // dPass.whileTrue(superstructure.pass()).onFalse(swerve.setLockingEnabled(false));
+        // dFeedthrough.whileTrue(superstructure.feedthrough()).onFalse(swerve.setLockingEnabled(false));
+        // dPassthrough.whileTrue(superstructure.passFeedthrough()).onFalse(swerve.setLockingEnabled(false));
 
         dIntakeNoHopper.and(() -> !dShoot.getAsBoolean() && !dPass.getAsBoolean()).whileTrue(superstructure.runIntake(true).alongWith(squeezer.squeeze()));
 
         dHubShot.whileTrue(superstructure.defaultShot(60, 3)).onFalse(swerve.setLockingEnabled(false));
         dManualPass.whileTrue(superstructure.defaultShot(75, 18)).onFalse(swerve.setLockingEnabled(false));
+        dShoot.whileTrue(superstructure.defaultShot(94, 18)).onFalse(swerve.setLockingEnabled(false));
+        dManualLongPass.whileTrue(superstructure.defaultShot(94, 21)).onFalse(swerve.setLockingEnabled(false));
         dTrenchShot.whileTrue(superstructure.defaultShot(3.2)).onFalse(swerve.setLockingEnabled(false));
         
         // dSpit.whileTrue(superstructure.spit());
 
         dRetract.whileTrue(pivot.retract());
+        dPass.whileTrue(superstructure.defaultShot(98, 20));
         dRaiseCurrentLimit.onTrue(new InstantCommand(() -> swerve.setStatorCurrentLimit(kAutoCurrentLimit)));
+        // dOverrideVision.toggleOnFalse(null);
         // driver.povDown().onTrue(swerve.launchQuestnav());
     }
 

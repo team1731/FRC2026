@@ -6,8 +6,8 @@ import edu.wpi.first.math.numbers.*;
 import edu.wpi.first.math.util.Units;
 
 public class VisionConstants {
-    public static final boolean kUseVSLAM = true;
-    public static final boolean kUseAprilTags = false;
+    public static final boolean kUseVSLAM = false;
+    public static final boolean kUseAprilTags = true;
     
     public static final String kLimelightName = "limelight-main";
 
@@ -23,12 +23,12 @@ public class VisionConstants {
     );
 
     public static final Transform3d kLimelightToRobot = new Transform3d(
-        Units.inchesToMeters(-11.25),
-        Units.inchesToMeters(-9.5),
-        Units.inchesToMeters(13.25),
+        Units.inchesToMeters(-(12.5 - 1.475)),
+        Units.inchesToMeters(0.25),
+        Units.inchesToMeters(15.0),
         new Rotation3d(
             Units.degreesToRadians(0.0),
-            Units.degreesToRadians(110.0),
+            Units.degreesToRadians(15.0),
             Units.degreesToRadians(180.0)
         )
     );

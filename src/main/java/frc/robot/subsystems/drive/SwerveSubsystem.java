@@ -61,6 +61,8 @@ public class SwerveSubsystem extends BaseSubsystem {
 
     private double targetError = 0;
 
+    private boolean lastOculusConnected = false;
+
     private Supplier<Translation2d> headingTarget = () -> Robot.isRedAlliance()
         ? new Translation2d(11.91, 4.03)
         : new Translation2d(4.62, 4.03);
@@ -92,26 +94,26 @@ public class SwerveSubsystem extends BaseSubsystem {
     public void updateVisionOdometry() {
         // double orientation = Robot.isRedAlliance() ? 180 - getCurrentPose().getRotation().getDegrees() : getCurrentPose().getRotation().getDegrees();
         double orientation = drivetrain.getPigeon2().getYaw().getValueAsDouble();
-        LimelightHelpers.SetRobotOrientation(kLimelightName, orientation, 0, 0, 0, 0, 0);
-        LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(kLimelightName);
+        // LimelightHelpers.SetRobotOrientation(kLimelightName, orientation, 0, 0, 0, 0, 0);
+        LimelightHelpers.PoseEstimate mt1 = LimelightHelpers.getBotPoseEstimate_wpiBlue(kLimelightName);
         
         // Do not use estimate if we are rotating too fast or if we see less than 2 tags
-        if(Math.abs(drivetrain.getPigeon2().getAngularVelocityZDevice().getValueAsDouble()) > 720 || mt2.tagCount <= 1) return;
-        this.addVisionMeasurement(mt2.pose, mt2.timestampSeconds, kLimelightStdev);
+        if(Math.abs(drivetrain.getPigeon2().getAngularVelocityZDevice().getValueAsDouble()) > 720.0 || mt1.tagCount <= 1) return;
+        this.addVisionMeasurement(mt1.pose, mt1.timestampSeconds, kLimelightStdev);
         
-        if (!visionCheckingHasStarted) {
-            GoodLimelightTimer.restart();
-            baselinePose = mt2.pose;
-            visionCheckingHasStarted = true;
-        } else if (GoodLimelightTimer.hasElapsed(2)) {
-            distanceBetweenPoses = distanceBetween(mt2.pose, baselinePose);
-            if (distanceBetweenPoses < .005) {
-                hasGoodOdometry = true;                 
-            } else {
-                hasGoodOdometry = false;
-            }
-            visionCheckingHasStarted = false;
-        }
+        // if (!visionCheckingHasStarted) {
+        //     GoodLimelightTimer.restart();
+        //     baselinePose = mt1.pose;
+        //     visionCheckingHasStarted = true;
+        // } else if (GoodLimelightTimer.hasElapsed(2)) {
+        //     distanceBetweenPoses = distanceBetween(mt1.pose, baselinePose);
+        //     if (distanceBetweenPoses < .005) {
+        //         hasGoodOdometry = true;                 
+        //     } else {
+        //         hasGoodOdometry = false;
+        //     }
+        //     visionCheckingHasStarted = false;
+        // }
     }
 
     public static double distanceBetween(Pose2d a, Pose2d b) { Translation2d ta = a.getTranslation(); Translation2d tb = b.getTranslation(); return ta.getDistance(tb); }
@@ -134,7 +136,6 @@ public class SwerveSubsystem extends BaseSubsystem {
                 ? new Pose2d(getCurrentPose().getX(), getCurrentPose().getY(), new Rotation2d(Math.toRadians(180)))
                 : new Pose2d(getCurrentPose().getX(), getCurrentPose().getY(), new Rotation2d(Math.toRadians(0)));
         resetPose(resetPosition);
-
     }
 
     public void resetJustHeading(Pose2d autoStartPose) {  // this is called from auto preloads
@@ -226,8 +227,8 @@ public class SwerveSubsystem extends BaseSubsystem {
         drivetrain.periodic();
         if (kUseAprilTags) {
             updateVisionOdometry();
+            // SmartDashboard.putBoolean("hasgoodtracking", hasGoodOdometry());
 
-            SmartDashboard.putBoolean("hasgoodtracking", hasGoodOdometry());
         }
 
         if (kUseVSLAM) {
@@ -255,6 +256,8 @@ public class SwerveSubsystem extends BaseSubsystem {
             if (questNav.isTracking() && isQuestSeeded && questNav.isConnected()) {
                 addQuestVisionMeasurement();
             }
+
+            lastOculusConnected = questNav.isConnected() && questNav.isTracking();
         }
     }
 
