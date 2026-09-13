@@ -61,6 +61,11 @@ public class IntakePivotSubsystem extends BaseSubsystem {
         return Utils.isWithin(motor.getRotations(), inputs.targetPosition, kPivotEpsilon);
     }
 
+    public double getPosition() {
+        if (!isEnabled()) return 0.0;
+        return motor.getRotations();
+    }
+
     @Override
     public void periodicTelemetry() {
         inputs.currentPosition = motor.getRotations();
@@ -69,10 +74,7 @@ public class IntakePivotSubsystem extends BaseSubsystem {
     }
     
     private Command setPosition(DoubleSupplier position) {
-        return run(() -> {
-            inputs.targetPosition = position.getAsDouble();
-            motor.setPosition(position.getAsDouble());
-        });
+        return run(() -> setPosition(position.getAsDouble()));
     }
 
     public Command setManual(double percentOutput) {
@@ -88,6 +90,8 @@ public class IntakePivotSubsystem extends BaseSubsystem {
     }
 
     public void setPosition(double position) {
-        motor.setPosition(position);
+        if (!isEnabled()) return;
+        inputs.targetPosition = Utils.clamp(position, kPivotIntakeRotations, kPivotStowRotations);
+        motor.setPosition(inputs.targetPosition);
     }
 }

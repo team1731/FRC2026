@@ -1,61 +1,48 @@
 package frc.robot.commands;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.intake.IntakeConstants;
 import frc.robot.subsystems.intake.pivot.IntakePivotSubsystem;
 
+/** Collapses the intake and attached hopper over a fixed time without oscillating. */
 public class JiggleToPosition extends Command {
     private final IntakePivotSubsystem intake;
     private final Timer timer = new Timer();
-    
-    private final double START_POS = IntakeConstants.kPivotIntakeRotations;
-    private final double END_POS = IntakeConstants.kPivotStowRotations;
-    private final double DURATION = 3.0 / 2.0;
-    private final double JIGGLE_AMPLITUDE = 0.1; // Distance of the "wiggle"
-
-    private boolean headingIn = true;
+    private static final double DURATION_SECONDS = 1.5;
+    private double startPosition;
 
     public JiggleToPosition(IntakePivotSubsystem intake) {
         this.intake = intake;
+        addRequirements(intake);
     }
 
     @Override
     public void initialize() {
+        startPosition = MathUtil.clamp(intake.getPosition(),
+            IntakeConstants.kPivotIntakeRotations, IntakeConstants.kPivotStowRotations);
+        intake.setPosition(startPosition);
         timer.restart();
-        intake.setPosition(IntakeConstants.kPivotStowRotations);
     }
 
     @Override
     public void execute() {
-        double time = timer.get();
-
-        if(timer.hasElapsed(0.5)) {
-            intake.setPosition(headingIn ? IntakeConstants.kPivotIntakeRotations : IntakeConstants.kPivotStowRotations);
-            timer.restart();
-            headingIn = !headingIn;
-        }
-        
-        // // 1. Calculate the moving "center" (Linear Interpolation)
-        // double progress = Math.min(time / DURATION, 1.0);
-        // double trendLine = START_POS + (progress * (END_POS - START_POS));
-        
-        // // 2. Calculate the oscillation (The Sine Wave)
-        // // 2 * PI * 3 means 3 oscillations per second 
-        // double oscillation = Math.sin(time * Math.PI * 1.5) * JIGGLE_AMPLITUDE;
-        
-        // // 3. Set the position
-        // intake.setPosition(trendLine - Math.abs(oscillation));
+        double progress = MathUtil.clamp(timer.get() / DURATION_SECONDS, 0.0, 1.0);
+        // Smoothstep starts and ends the commanded trajectory at zero velocity.
+        double blend = progress * progress * (3.0 - 2.0 * progress);
+        intake.setPosition(startPosition
+            + (IntakeConstants.kPivotStowRotations - startPosition) * blend);
     }
 
     @Override
     public void end(boolean interrupted) {
-        // Hold the final target position exactly at the end
-        intake.setPosition(END_POS);
+        timer.stop();
+        intake.setPosition(interrupted ? intake.getPosition() : IntakeConstants.kPivotStowRotations);
     }
 
     @Override
     public boolean isFinished() {
-        return false;
+        return timer.hasElapsed(DURATION_SECONDS);
     }
 }

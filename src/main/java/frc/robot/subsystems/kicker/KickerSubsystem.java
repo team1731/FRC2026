@@ -24,14 +24,14 @@ public class KickerSubsystem extends BaseSubsystem {
         motor = new MotorIOTalonFX(Ports.kBottomtKickerConfig)
             .withFollower(Ports.kToptKickerConfig);
         motor.withPIDGains(KickerConstants.kPIDGains);
+        // motor.withStatorCurrentLimit(KickerConstants.kCurrentLimit);
     }
 
     @Override
     public void periodicTelemetry() {
         inputs.currentVelocity = motor.getVelocityRPS();
         inputs.atTargetVelocity = Utils.isWithin(inputs.currentVelocity, inputs.targetVelocity, 1);
-      //  logger.processInputs(inputs);
-        
+        logger.processInputs(inputs);
     }
 
     public Command setPercent(double setpoint) {
@@ -56,15 +56,17 @@ public class KickerSubsystem extends BaseSubsystem {
     }
 
     public Command feed() {
-        return setPercent(0.8);
+        return setVelocity(KickerConstants.kFeedRPS);
+        // return setPercent(0.6);
     }
 
     public Command eject() {
-        return setPercent(-0.5);
+        return setVelocity(KickerConstants.kEjectRPS);
     }
 
     public Command stop() {
         return run(() -> {
+            inputs.targetVelocity = 0;
             this.motor.coast();
         });
     }

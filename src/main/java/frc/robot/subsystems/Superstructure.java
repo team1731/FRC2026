@@ -10,8 +10,8 @@ import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
-import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import frc.lib.frc1731.field.FieldPositions;
 import frc.robot.Robot;
 import frc.robot.commands.JiggleToPosition;
@@ -92,8 +92,8 @@ public class Superstructure extends SubsystemBase {
 
     public Command runIntake(boolean deployed) {
         return Commands.either(
-            pivot.deploy().alongWith(intake.setPercentOutput(1.0)),
-            pivot.retract().alongWith(intake.setPercentOutput(1.0)),
+            pivot.deploy().alongWith(intake.intake()),
+            pivot.retract().alongWith(intake.intake()),
             () -> deployed
         );
     }
@@ -103,7 +103,7 @@ public class Superstructure extends SubsystemBase {
     }
 
     public Command spit() {
-        return pivot.deploy().alongWith(intake.setPercentOutput(-1.0), indexer.eject(), kicker.eject());
+        return pivot.deploy().alongWith(intake.eject(), indexer.eject(), kicker.eject());
     }
 
     public Command lockSwerveToHub() {
@@ -137,14 +137,14 @@ public class Superstructure extends SubsystemBase {
                 Commands.waitUntil(shotCondition).andThen(
                     new ParallelCommandGroup( // Only start the feeding sequence after we are ready to shoot
                         indexer.feed(),
-                        kicker.setVelocity(() -> targetFlywheel),
-                        Commands.either(squeezer.squeeze(), Commands.none(), squeeze)
+                        kicker.feed(),
+                        Commands.either(Commands.waitSeconds(1.5).andThen(squeezer.squeeze()), Commands.none(), squeeze)
                     )
                 ),
                 Commands.either( // If feedthrough continue intaking, otherwise jiggle
                     this.runIntake(true),
                     Commands.waitUntil(shotCondition)
-                        .andThen(new JiggleToPosition(pivot).alongWith(intake.setPercentOutput(1.0))),
+                        .andThen(new JiggleToPosition(pivot).alongWith(intake.intake())),
                     feedthrough
                 )
             )
@@ -158,9 +158,9 @@ public class Superstructure extends SubsystemBase {
             Commands.waitUntil(shotCondition) .andThen(
                 new JiggleToPosition(pivot).alongWith(
                     indexer.feed(),
-                    intake.setPercentOutput(1.0),
-                    kicker.setVelocity(targetFlywheel.getAsDouble()),
-                    squeezer.squeeze()
+                    intake.intake(),
+                    kicker.feed(),
+                    Commands.waitSeconds(1.5).andThen(squeezer.squeeze())
                 )
             )
             )
@@ -175,11 +175,11 @@ public class Superstructure extends SubsystemBase {
                 flywheel.setVelocity(()-> targetFlywheel),
                 hood.setRotations(() -> targetHood),
                 Commands.waitUntil(this::readyToShoot).andThen(
-                    indexer.feed().alongWith(kicker.setVelocity(() -> targetFlywheel), new JiggleToPosition(pivot))
+                    indexer.feed().alongWith(kicker.feed(), new JiggleToPosition(pivot))
                 )
             );
         }, 
-        Set.of(flywheel, hood, indexer, kicker));
+        Set.of(flywheel, hood, indexer, kicker, pivot));
     }
 
    //  shoot(Supplier<Translation2d> target, BooleanSupplier adjustForMovingShot, BooleanSupplier trackTarget, BooleanSupplier feedthrough, BooleanSupplier shotCondition, BooleanSupplier squeeze)
@@ -245,6 +245,7 @@ public class Superstructure extends SubsystemBase {
 
         double[] shotParams  = shotTable.getShotParameters(distance);
 
+        SmartDashboard.putNumber("TargetDistance", distance);
         if (Robot.isSimulation()) {
             Logger.recordOutput("TargetDistance", distance);
             Logger.recordOutput("CompensatedTarget", new Pose2d(compensatedTarget, Rotation2d.kZero));
