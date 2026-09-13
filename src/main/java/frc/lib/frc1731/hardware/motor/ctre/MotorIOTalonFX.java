@@ -68,7 +68,7 @@ public class MotorIOTalonFX extends MotorIO {
 
     public MotorIOTalonFX withFollower(PortConfig... config) {
         for (PortConfig cfg : config) {
-            TalonFX follower = new TalonFX(cfg.kPort, cfg.kBus);
+            TalonFX follower = new TalonFX(cfg.kPort, new CANBus(cfg.kBus));
             // Correct constructor: new Follower(leaderID, opposeLeaderDirection)
             follower.setControl(new Follower(this.motor.getDeviceID(),   (isInverted() != (cfg.kInverted) )? MotorAlignmentValue.Opposed : MotorAlignmentValue.Aligned));
             follower.close();
@@ -183,7 +183,7 @@ public class MotorIOTalonFX extends MotorIO {
 
     @Override
     public void setVelocityRPS(double rps, int pidSlot) {
-        this.motor.setControl(new VelocityTorqueCurrentFOC(rps).withSlot(pidSlot));
+        this.motor.setControl(new VelocityVoltage(rps).withSlot(pidSlot));
         this.motorSim.setAngularVelocity(rps * (2*Math.PI) * 1.2d); // 1.2 is the friction factor
     }
 

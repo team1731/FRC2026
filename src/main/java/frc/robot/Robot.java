@@ -5,16 +5,12 @@ import static frc.robot.subsystems.drive.SwerveConstants.kTeleCurrentLimit;
 import java.util.*;
 
 import org.littletonrobotics.junction.LoggedRobot;
-//import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
-import org.littletonrobotics.junction.wpilog.WPILOGWriter;
-
-import edu.wpi.first.wpilibj.Timer;
 
 import com.ctre.phoenix6.SignalLogger;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.commands.PathPlannerAuto;
-import com.pathplanner.lib.util.PathPlannerLogging;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -22,11 +18,9 @@ import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.autos.AutoFactory;
 import frc.robot.autos.AutoLoader;
 import frc.robot.subsystems.drive.SwerveSubsystem;
@@ -38,7 +32,7 @@ import frc.robot.subsystems.drive.SwerveSubsystem;
  * the package after creating this project, you must also update the build.gradle file in the
  * project.
  */
-public class Robot extends TimedRobot {
+public class Robot extends LoggedRobot {
 	private PathPlannerAuto m_autonomousCommand;
 	private SendableChooser<String> autoChooser;
 	private String autoCode;
@@ -46,10 +40,7 @@ public class Robot extends TimedRobot {
 	private int stationNumber = 0;
 	private boolean redAlliance = false;
 	public static long millis = System.currentTimeMillis();
-	private double autoStartTime;
 	private static SwerveSubsystem swerve;
-	private Pose2d currentPose;
-	private Pose2d targetPose;
 	boolean vslamConnectionStatusChanged = false;
 	private boolean isVslamConnected = false;
 
@@ -57,12 +48,6 @@ public class Robot extends TimedRobot {
 
 	private boolean autoStarted = false;
 	
-	public static final Trigger IS_ENABLED = new Trigger(() -> DriverStation.isEnabled());
-	public static final Trigger IS_TELEOP = new Trigger(() -> DriverStation.isTeleop());
-	public static final Trigger IS_AUTONOMOUS = new Trigger(() -> DriverStation.isAutonomous());
-	public static final Trigger IS_DISABLED = new Trigger(() -> DriverStation.isDisabled());
-	public static final Trigger IS_TEST = new Trigger(() -> DriverStation.isTest());
-
 	public Robot() {}
 
 	/**
@@ -93,14 +78,6 @@ public class Robot extends TimedRobot {
 		setupLogging();
 		swerve.configureInitialPosition(); // sets the operator perspective
 
-		PathPlannerLogging.setLogCurrentPoseCallback((pose) -> {
-			currentPose = pose;
-		});
-
-		PathPlannerLogging.setLogTargetPoseCallback((pose) -> {
-			targetPose = pose;
-		});
-
 		CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
 		RobotController.setBrownoutVoltage(6.5);
 	}
@@ -129,14 +106,14 @@ public class Robot extends TimedRobot {
 		//Logger.recordMetadata("BuildDate", date);
 
 		if (Robot.isSimulation()) {
-		//	Logger.addDataReceiver(new NT4Publisher());
+			Logger.addDataReceiver(new NT4Publisher());
 		} else if (RobotConstants.kLogToWPILog) {
-		//	Logger.addDataReceiver(new WPILOGWriter("/home/lvuser/logs"));
-		//	Logger.addDataReceiver(new NT4Publisher());
+			// Logger.addDataReceiver(new WPILOGWriter("/home/lvuser/logs"));
+			Logger.addDataReceiver(new NT4Publisher());
 		}
 
-	//	Logger.start();
-	//	SmartDashboard.updateValues();
+		Logger.start();
+		SmartDashboard.updateValues();
 	}
 
 
@@ -307,13 +284,13 @@ public class Robot extends TimedRobot {
 		System.out.println("AUTO INIT");
 		CommandScheduler.getInstance().cancelAll();
 
-		autoStartTime = Timer.getFPGATimestamp();
 		autoStarted = true;
 
 		if (m_autonomousCommand == null) {
 			System.out.println("SOMETHING WENT WRONG - UNABLE TO RUN AUTONOMOUS! CHECK SOFTWARE!");
 		} else {
 			System.out.println("------------> RUNNING AUTONOMOUS COMMAND: " + m_autonomousCommand + " <----------");
+			swerve.setStatorCurrentLimit(kTeleCurrentLimit);
 			CommandScheduler.getInstance().schedule(m_autonomousCommand);
 		}
 		System.out.println("autonomousInit: End");

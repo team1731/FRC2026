@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.9700602409638552,
-        "y": 2.373987951807229
+        "x": 2.8357631954350926,
+        "y": 2.0618544935805994
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.073408518262182,
-        "y": 1.5506383317183232
+        "x": 1.9391114727334195,
+        "y": 1.2385048734916935
       },
       "isLocked": false,
       "linkedName": "ROverBumpFinish"
@@ -112,12 +112,12 @@
     },
     {
       "anchor": {
-        "x": 2.9700602409638552,
-        "y": 2.373987951807229
+        "x": 2.8357631954350926,
+        "y": 2.0618544935805994
       },
       "prevControl": {
-        "x": 5.461578313253011,
-        "y": 2.384915662650603
+        "x": 3.8579172610556345,
+        "y": 2.398259629101284
       },
       "nextControl": null,
       "isLocked": false,
@@ -186,7 +186,7 @@
       "minWaypointRelativePos": 0,
       "maxWaypointRelativePos": 0.7295285359801649,
       "constraints": {
-        "maxVelocity": 1.0,
+        "maxVelocity": 2.0,
         "maxAcceleration": 2.0,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,

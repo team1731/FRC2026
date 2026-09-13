@@ -14,7 +14,6 @@ public class ExampleSubsystem extends BaseSubsystem {
     private MotorIOTalonFX exampleMotor; // The running motor controller for this subsystem
     private double targetSetpoint = 0.0; // The updated target position for the motor to reach
     private double setpointTolerance = 0.1; // The acceptable error to be considered "at target"
-    private boolean isAtSetpoint = false; // Whether the motor is currently at the target setpoint
 
     public ExampleSubsystem(boolean enabled) {
         super(enabled); // Calls the BaseSubsystem constructor and passes whether the subsystem is enabled or disabled

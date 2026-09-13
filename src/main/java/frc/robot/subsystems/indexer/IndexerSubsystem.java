@@ -8,6 +8,7 @@ import frc.robot.subsystems.BaseSubsystem;
 
 import static frc.robot.subsystems.indexer.IndexerConstants.*;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class IndexerSubsystem extends BaseSubsystem {
@@ -30,6 +31,7 @@ public class IndexerSubsystem extends BaseSubsystem {
         inputs.currentVelocity = motor.getVelocityRPS();
         inputs.atTargetVelocity = Utils.isWithin(inputs.currentVelocity, inputs.targetVelocity, 1);
      //   logger.processInputs(inputs);
+        SmartDashboard.putNumber("INDEXER RPS", inputs.currentVelocity);
     }
 
     public Command setPercent(double setpoint) {
@@ -47,11 +49,12 @@ public class IndexerSubsystem extends BaseSubsystem {
     }
 
     public Command feed() {
-        return setPercent(1.0);
+        return setVelocity(kFeedRPS);
+        // return setPercent(0.6);
     }
 
     public Command eject() {
-        return setPercent(-1.0);
+        return setVelocity(kEjectRPS);
     }
 
     public Command stop() {
