@@ -68,7 +68,7 @@ public class MotorIOTalonFX extends MotorIO {
 
     public MotorIOTalonFX withFollower(PortConfig... config) {
         for (PortConfig cfg : config) {
-            TalonFX follower = new TalonFX(cfg.kPort, new CANBus(cfg.kBus));
+            TalonFX follower = new TalonFX(cfg.kPort, cfg.kBus);
             // Correct constructor: new Follower(leaderID, opposeLeaderDirection)
             follower.setControl(new Follower(this.motor.getDeviceID(),   (isInverted() != (cfg.kInverted) )? MotorAlignmentValue.Opposed : MotorAlignmentValue.Aligned));
             follower.close();
