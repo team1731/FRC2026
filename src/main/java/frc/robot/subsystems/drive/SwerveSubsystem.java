@@ -257,6 +257,9 @@ public class SwerveSubsystem extends BaseSubsystem {
             SmartDashboard.putBoolean("isTracking", tracking);
             SmartDashboard.putBoolean("isConnected", questNav.isConnected());
             SmartDashboard.putBoolean("isTrackingHeading", trackTargetHeading);
+
+            logger.log("IsTracking", tracking);
+            logger.log("IsConnected", questNav.isConnected());
  
             if (tracking && isQuestSeeded && questNav.isConnected()) {
                 addQuestVisionMeasurement();
@@ -323,10 +326,12 @@ public class SwerveSubsystem extends BaseSubsystem {
     public Command driveCommand(CommandXboxController m_xboxController, BooleanSupplier isFieldCentric) {
         return run(() -> {
             Translation2d RotationCenter =  new Translation2d();
+
+            boolean slowMode = m_xboxController.rightTrigger().getAsBoolean() || m_xboxController.rightBumper().getAsBoolean();
  
-            double scalar = kMaxSpeed * (m_xboxController.rightTrigger().getAsBoolean() ? 0.5 : 1.0);
+            double scalar = kMaxSpeed * (slowMode ? 0.5 : 1.0);
  
-            double rotRate = -m_xboxController.getRightX() * kMaxAngularRate; 
+            double rotRate = -m_xboxController.getRightX() * kMaxAngularRate * (slowMode ? 0.5 : 1.0); 
             if (trackTargetHeading) {
                 Pose2d curPose = getCurrentPose();
                 Translation2d robotTranslation = curPose.getTranslation();

@@ -25,7 +25,7 @@ public class HoodConstants {
     ;
 
     public static final double kHoodRadiusInches = 8.4d; // Radius of the hood
-    public static final double kHoodMassLbs = 2d; // Weight of the moving hood
+    public static final double kHoodMassLbs = 5d; // Weight of the moving hood
     public static final PivotSimConstants kSimConstants = new PivotSimConstants()
         .withConstraints(kMinRotations, kMaxRotations * kGearRatio * 360.0, kMinRotations, kHoodRadiusInches)
         .withPhysics(kGearRatio, 0.5 * kHoodMassLbs * Math.pow(kHoodRadiusInches, 2), false)

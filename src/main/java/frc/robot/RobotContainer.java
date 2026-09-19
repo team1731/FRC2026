@@ -1,11 +1,8 @@
 package frc.robot;
 
-import static frc.robot.subsystems.drive.SwerveConstants.kAutoCurrentLimit;
-
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.events.EventTrigger;
 
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.*;
 import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.drive.SwerveSubsystem;
@@ -33,24 +30,24 @@ public class RobotContainer {
     /* Driver Buttons */
     // Unused buttons: back, pov down/right
     private final CommandXboxController driver = new CommandXboxController(0);
+    private final CommandPS5Controller operator = new CommandPS5Controller(1);
+
+    private final Trigger oHubShot = operator.cross();
+    private final Trigger oTowerShot = operator.square();
+    private final Trigger oBumpShot = operator.triangle();
+
+    private final Trigger shotOverride = oHubShot.or(oTowerShot).or(oBumpShot);
+
     private final Trigger dResetSwerve = driver.start();
 
     private final Trigger dIntake = driver.leftTrigger();
     private final Trigger dShoot = driver.rightTrigger();
     private final Trigger dPass = driver.y();
 
-    private final Trigger dIntakeNoHopper = driver.leftBumper();
-    private final Trigger dManualLongPass = driver.rightBumper();
-
     private final Trigger dFeedthrough = dIntake.and(dShoot);
     private final Trigger dPassthrough = dIntake.and(dPass);
 
-    private final Trigger dTrenchShot = driver.b();
-    private final Trigger dManualPass = driver.a();
-    private final Trigger dHubShot = driver.x();
-
     private final Trigger dRetract = driver.povUp();
-    private final Trigger dRaiseCurrentLimit = driver.povLeft();
 
     public RobotContainer(SwerveSubsystem swerve) {
         this.swerve = swerve;
@@ -97,23 +94,21 @@ public class RobotContainer {
         // Reset robot pose and heading
         dResetSwerve.onTrue(superstructure.resetSwerve());
 
-        dIntake.and(() -> !dShoot.getAsBoolean() && !dPass.getAsBoolean()).whileTrue(superstructure.runIntake(true).alongWith(squeezer.raise()));
-        dShoot.whileTrue(superstructure.shoot()).onFalse(swerve.setLockingEnabled(false).alongWith(squeezer.squeeze()));
+        dIntake.and(() -> !dShoot.getAsBoolean() && !dPass.getAsBoolean()).whileTrue(superstructure.runIntake(true).alongWith(indexer.setVelocity(20)));
+        // dIntakeNoHopper.and(() -> !dShoot.getAsBoolean() && !dPass.getAsBoolean()).whileTrue(superstructure.runIntake(true).alongWith(squeezer.squeeze()));
+
+        dShoot.and(shotOverride.negate()).whileTrue(superstructure.shoot()).onFalse(swerve.setLockingEnabled(false).alongWith(squeezer.squeeze()));
+        oHubShot.and(dShoot).whileTrue(superstructure.defaultShot(60, 3)).onFalse(swerve.setLockingEnabled(false).alongWith(squeezer.squeeze()));
+        oBumpShot.and(dShoot).whileTrue(superstructure.defaultShot(3.2)).onFalse(swerve.setLockingEnabled(false).alongWith(squeezer.squeeze()));
+        oTowerShot.and(dShoot).whileTrue(superstructure.defaultShot(4.0)).onFalse(swerve.setLockingEnabled(false).alongWith(squeezer.squeeze()));
+        // dManualPass.whileTrue(superstructure.defaultShot(75, 18)).onFalse(swerve.setLockingEnabled(false).alongWith(squeezer.squeeze()));
+        
         dPass.whileTrue(superstructure.pass()).onFalse(swerve.setLockingEnabled(false).alongWith(squeezer.squeeze()));
+        
         dFeedthrough.whileTrue(superstructure.feedthrough()).onFalse(swerve.setLockingEnabled(false));
         dPassthrough.whileTrue(superstructure.passFeedthrough()).onFalse(swerve.setLockingEnabled(false));
-
-        dIntakeNoHopper.and(() -> !dShoot.getAsBoolean() && !dPass.getAsBoolean()).whileTrue(superstructure.runIntake(true).alongWith(squeezer.squeeze()));
-
-        dHubShot.whileTrue(superstructure.defaultShot(60, 3)).onFalse(swerve.setLockingEnabled(false).alongWith(squeezer.squeeze()));
-        dManualPass.whileTrue(superstructure.defaultShot(75, 18)).onFalse(swerve.setLockingEnabled(false).alongWith(squeezer.squeeze()));
-        dManualLongPass.whileTrue(superstructure.defaultShot(94, 21)).onFalse(swerve.setLockingEnabled(false).alongWith(squeezer.squeeze()));
-        dTrenchShot.whileTrue(superstructure.defaultShot(3.2)).onFalse(swerve.setLockingEnabled(false).alongWith(squeezer.squeeze()));
         
-        // dSpit.whileTrue(superstructure.spit());
-
         dRetract.whileTrue(pivot.retract().alongWith(squeezer.squeeze()));
-        dRaiseCurrentLimit.onTrue(new InstantCommand(() -> swerve.setStatorCurrentLimit(kAutoCurrentLimit)));
     }
 
     public void configureDefaultCommands() {

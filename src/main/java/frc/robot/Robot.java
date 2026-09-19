@@ -105,11 +105,10 @@ public class Robot extends LoggedRobot {
 		//Logger.recordMetadata("GitCommit", commit);
 		//Logger.recordMetadata("BuildDate", date);
 
+		Logger.addDataReceiver(new NT4Publisher());
 		if (Robot.isSimulation()) {
-			Logger.addDataReceiver(new NT4Publisher());
-		} else if (RobotConstants.kLogToWPILog) {
+		} else if (RobotConstants.kLogToWPILog && Robot.isReal()) {
 			// Logger.addDataReceiver(new WPILOGWriter("/home/lvuser/logs"));
-			Logger.addDataReceiver(new NT4Publisher());
 		}
 
 		Logger.start();
