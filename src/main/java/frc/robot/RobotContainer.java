@@ -29,20 +29,22 @@ public class RobotContainer {
 
     /* Driver Buttons */
     // Unused buttons: back, pov down/right
-    private final CommandXboxController driver = new CommandXboxController(0);
-    private final CommandPS5Controller operator = new CommandPS5Controller(1);
+    private final CommandPS5Controller driver = new CommandPS5Controller(0);
+    private final CommandXboxController operator = new CommandXboxController(1);
 
-    private final Trigger oHubShot = operator.cross();
-    private final Trigger oTowerShot = operator.square();
-    private final Trigger oBumpShot = operator.triangle();
+    private final Trigger oHubShot = operator.a();
+    private final Trigger oTowerShot = operator.x();
+    private final Trigger oBumpShot = operator.y();
 
     private final Trigger shotOverride = oHubShot.or(oTowerShot).or(oBumpShot);
 
-    private final Trigger dResetSwerve = driver.start();
+    private final Trigger oWarmup = operator.rightTrigger();
 
-    private final Trigger dIntake = driver.leftTrigger();
-    private final Trigger dShoot = driver.rightTrigger();
-    private final Trigger dPass = driver.y();
+    private final Trigger dResetSwerve = driver.options();
+
+    private final Trigger dIntake = driver.L2();
+    private final Trigger dShoot = driver.R2();
+    private final Trigger dPass = driver.R1();
 
     private final Trigger dFeedthrough = dIntake.and(dShoot);
     private final Trigger dPassthrough = dIntake.and(dPass);
@@ -93,6 +95,8 @@ public class RobotContainer {
     private void configureButtonBindings() {
         // Reset robot pose and heading
         dResetSwerve.onTrue(superstructure.resetSwerve());
+
+        oWarmup.whileTrue(flywheel.setVelocity(40));
 
         dIntake.and(() -> !dShoot.getAsBoolean() && !dPass.getAsBoolean()).whileTrue(superstructure.runIntake(true).alongWith(indexer.setVelocity(20)));
         // dIntakeNoHopper.and(() -> !dShoot.getAsBoolean() && !dPass.getAsBoolean()).whileTrue(superstructure.runIntake(true).alongWith(squeezer.squeeze()));

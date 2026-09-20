@@ -182,7 +182,6 @@ public class Superstructure extends SubsystemBase {
         Set.of(flywheel, hood, indexer, kicker, pivot));
     }
 
-   //  shoot(Supplier<Translation2d> target, BooleanSupplier adjustForMovingShot, BooleanSupplier trackTarget, BooleanSupplier feedthrough, BooleanSupplier shotCondition, BooleanSupplier squeeze)
     public Command shoot() {
         return shoot(kHubSupplier, () -> true, () -> true, () -> false, this::readyToShoot, () -> true);
     }

@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
+import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.lib.frc1731.hardware.camera.limelight.LimelightHelpers;
 import frc.robot.Robot;
@@ -323,11 +324,11 @@ public class SwerveSubsystem extends BaseSubsystem {
         .withInterruptBehavior(InterruptionBehavior.kCancelSelf);
     }
  
-    public Command driveCommand(CommandXboxController m_xboxController, BooleanSupplier isFieldCentric) {
+    public Command driveCommand(CommandPS5Controller m_xboxController, BooleanSupplier isFieldCentric) {
         return run(() -> {
             Translation2d RotationCenter =  new Translation2d();
 
-            boolean slowMode = m_xboxController.rightTrigger().getAsBoolean() || m_xboxController.rightBumper().getAsBoolean();
+            boolean slowMode = m_xboxController.R2().getAsBoolean() || m_xboxController.L1().getAsBoolean();
  
             double scalar = kMaxSpeed * (slowMode ? 0.5 : 1.0);
  
