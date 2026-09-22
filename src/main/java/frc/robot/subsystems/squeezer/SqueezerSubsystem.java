@@ -14,7 +14,6 @@ import frc.lib.frc1731.Utils;
 import frc.robot.Ports;
 import frc.robot.subsystems.BaseSubsystem;
 
-@Deprecated(forRemoval = false)
 public class SqueezerSubsystem extends BaseSubsystem {
     private SparkMax motor;
     private SparkClosedLoopController ctrl;

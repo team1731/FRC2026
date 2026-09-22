@@ -11,15 +11,15 @@ public class ShotTable {
     private Regression tofModel;
 
     private static final List<ShotEntry> kHubEntries = List.of(
-        new ShotEntry(0, 0.0, 57.5, 0.5),
-        new ShotEntry(1, 0.0, 57.5, 0.5),
-        new ShotEntry(2, 5, 57.5, 1.25),
-        new ShotEntry(3, 6, 65.0, 1.4),
-        new ShotEntry(4, 9, 72.5, 1.8),
-        new ShotEntry(5, 15, 82.5,2.25),
-        new ShotEntry(6, 17, 90, 2.5),
-        new ShotEntry(7, 18, 95, 2.8),
-        new ShotEntry(8, 20, 97, 3.0)
+        new ShotEntry(0, 0.0, 55, 0.5),
+        new ShotEntry(1, 0.0, 55, 0.5),
+        new ShotEntry(2, 5, 55, 1.25),
+        new ShotEntry(3, 6, 62.5, 1.4),
+        new ShotEntry(4, 9, 70, 1.8),
+        new ShotEntry(5, 15, 80,2.25),
+        new ShotEntry(6, 17, 87.5, 2.5),
+        new ShotEntry(7, 18, 92.5, 2.8),
+        new ShotEntry(8, 20, 94.5, 3.0)
     );
 
     private static final List<ShotEntry> kPassEntries = List.of(
@@ -70,6 +70,6 @@ public class ShotTable {
     }
 
     public double[] getShotParameters(double distance) {
-        return new double[] {hoodModel.getInterpolation(distance), flywheelModel.getInterpolation(distance) - 2.5, tofModel.getInterpolation(distance)};
+        return new double[] {hoodModel.getInterpolation(distance), flywheelModel.getInterpolation(distance), tofModel.getInterpolation(distance)};
     }
 }

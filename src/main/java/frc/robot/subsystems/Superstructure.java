@@ -13,6 +13,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.lib.frc1731.field.FieldPositions;
+import frc.lib.frc6328.LoggedTunableNumber;
 import frc.robot.Robot;
 import frc.robot.commands.JiggleToPosition;
 import frc.robot.subsystems.drive.*;
@@ -56,6 +57,9 @@ public class Superstructure extends SubsystemBase {
     private double targetHood = 0;
     private double targetFlywheel = 0;
     private boolean adjustTargetForMovingShots = false;
+
+    private LoggedTunableNumber tuneableFlywheelRPS = new LoggedTunableNumber("Tuned Flywheel RPS", 0.0, () -> true);
+    private LoggedTunableNumber tuneableHoodRotations = new LoggedTunableNumber("Tuned Hood Rotations", 0.0, () -> true);
 
     // -------------------------------------------------------------------------
     // Constructor
@@ -180,6 +184,22 @@ public class Superstructure extends SubsystemBase {
             );
         }, 
         Set.of(flywheel, hood, indexer, kicker, pivot));
+    }
+
+    public Command tunedShot() {
+        return new ParallelCommandGroup(
+            flywheel.setVelocity(tuneableFlywheelRPS),
+            hood.setRotations(tuneableHoodRotations),
+            // Allow the live setpoints and periodic readiness telemetry to update first.
+            Commands.waitSeconds(0.04)
+                .andThen(Commands.waitUntil(() -> tuneableFlywheelRPS.get() > 0 && readyToShoot()))
+                .andThen(
+                indexer.feed().alongWith(
+                    kicker.setTipSpeedMPS(flywheel::getTargetTipSpeedMPS),
+                    new JiggleToPosition(pivot)
+                )
+            )
+        );
     }
 
     public Command shoot() {

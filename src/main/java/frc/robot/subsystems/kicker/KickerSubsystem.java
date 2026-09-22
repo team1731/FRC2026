@@ -27,6 +27,18 @@ public class KickerSubsystem extends BaseSubsystem {
         // motor.withStatorCurrentLimit(KickerConstants.kCurrentLimit);
     }
 
+    public double getTipSpeedMPS() {
+        if (!isEnabled()) return 0;
+        return motor.getVelocityRPS() / KickerConstants.kGearRatio
+            * Math.PI * edu.wpi.first.math.util.Units.inchesToMeters(KickerConstants.kRollerDiameter);
+    }
+
+    /** Commands roller surface speed in meters per second, using motor-RPS feedback. */
+    public Command setTipSpeedMPS(DoubleSupplier tipSpeed) {
+        return setVelocity(() -> tipSpeed.getAsDouble() * KickerConstants.kGearRatio
+            / (Math.PI * edu.wpi.first.math.util.Units.inchesToMeters(KickerConstants.kRollerDiameter)));
+    }
+
     @Override
     public void periodicTelemetry() {
         inputs.currentVelocity = motor.getVelocityRPS();

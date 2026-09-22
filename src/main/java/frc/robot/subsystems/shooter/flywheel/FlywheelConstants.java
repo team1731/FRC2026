@@ -13,7 +13,7 @@ public class FlywheelConstants {
     public static final double kWarmupVelocity = 40; // Warmup velocity
     public static final double kEpsilon = 3; // 3 RPS tolerance
 
-    public static final Distance kFlywheelRadius = Inches.of(1.5d); // 4 inch diameter
+    public static final Distance kFlywheelRadius = Inches.of(3.034184).div(2); // 3.034 inch diameter
     public static final Mass kFlywheelMass = Pounds.of(1d); // 1 lb flywheel
 
     public static final double kCurrentLimit = 60d; // Amps

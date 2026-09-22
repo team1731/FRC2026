@@ -1,5 +1,6 @@
 package frc.robot.subsystems.shooter.flywheel;
 
+import static edu.wpi.first.units.Units.Meters;
 import static frc.robot.subsystems.shooter.flywheel.FlywheelConstants.*;
 
 import java.util.function.DoubleSupplier;
@@ -29,6 +30,15 @@ public class FlywheelSubsystem extends BaseSubsystem {
     public boolean atTargetVelocity() {
         if (!isEnabled()) return true;
         return Utils.isWithin(motor.getVelocityRPS(), inputs.targetVelocity, kEpsilon);
+    }
+
+    public double getTipSpeedMPS() {
+        if (!isEnabled()) return 0;
+        return motor.getVelocityRPS() / kGearRatio * 2 * Math.PI * kFlywheelRadius.in(Meters);
+    }
+
+    public double getTargetTipSpeedMPS() {
+        return inputs.targetVelocity / kGearRatio * 2 * Math.PI * kFlywheelRadius.in(Meters);
     }
 
     @Override

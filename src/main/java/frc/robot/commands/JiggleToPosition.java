@@ -6,12 +6,17 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.intake.IntakeConstants;
 import frc.robot.subsystems.intake.pivot.IntakePivotSubsystem;
 
-/** Collapses the intake and attached hopper over a fixed time without oscillating. */
+/** Oscillates the position target between deployed and stowed once per second. */
 public class JiggleToPosition extends Command {
+    private static final double PERIOD_SECONDS = 1.0;
+    private static final double MIN_POSITION = IntakeConstants.kPivotIntakeRotations;
+    private static final double MAX_POSITION = IntakeConstants.kPivotStowRotations;
+    private static final double CENTER_POSITION = (MIN_POSITION + MAX_POSITION) / 2.0;
+    private static final double AMPLITUDE = (MAX_POSITION - MIN_POSITION) / 2.0;
+
     private final IntakePivotSubsystem intake;
     private final Timer timer = new Timer();
-    private static final double DURATION_SECONDS = 1.5;
-    private double startPosition;
+    private double initialPhase;
 
     public JiggleToPosition(IntakePivotSubsystem intake) {
         this.intake = intake;
@@ -20,29 +25,28 @@ public class JiggleToPosition extends Command {
 
     @Override
     public void initialize() {
-        startPosition = MathUtil.clamp(intake.getPosition(),
-            IntakeConstants.kPivotIntakeRotations, IntakeConstants.kPivotStowRotations);
-        intake.setPosition(startPosition);
+        double position = MathUtil.clamp(intake.getPosition(), MIN_POSITION, MAX_POSITION);
+        // Start at the measured position, initially moving toward stow, without a target jump.
+        initialPhase = Math.acos(MathUtil.clamp(
+            (CENTER_POSITION - position) / AMPLITUDE, -1.0, 1.0));
+        intake.setPosition(position);
         timer.restart();
     }
 
     @Override
     public void execute() {
-        double progress = MathUtil.clamp(timer.get() / DURATION_SECONDS, 0.0, 1.0);
-        // Smoothstep starts and ends the commanded trajectory at zero velocity.
-        double blend = progress * progress * (3.0 - 2.0 * progress);
-        intake.setPosition(startPosition
-            + (IntakeConstants.kPivotStowRotations - startPosition) * blend);
+        double phase = initialPhase + 2.0 * Math.PI * timer.get() / PERIOD_SECONDS;
+        intake.setPosition(CENTER_POSITION - AMPLITUDE * Math.cos(phase));
     }
 
     @Override
     public void end(boolean interrupted) {
         timer.stop();
-        intake.setPosition(interrupted ? intake.getPosition() : IntakeConstants.kPivotStowRotations);
+        intake.setPosition(intake.getPosition());
     }
 
     @Override
     public boolean isFinished() {
-        return timer.hasElapsed(DURATION_SECONDS);
+        return false;
     }
 }
