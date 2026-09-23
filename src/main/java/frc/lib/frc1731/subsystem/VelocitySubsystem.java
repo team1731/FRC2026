@@ -111,6 +111,13 @@ public abstract class VelocitySubsystem<M extends MotorIO> extends BaseSubsystem
         return this.setVelocity(() -> velocity);
     }
 
+    public Command setVoltage(double volts) {
+        return run(() -> {
+            this.targetVelocity = RotationsPerSecond.of(volts);
+            if (motor != null) motor.setVoltage(volts);
+        });
+    }
+
     public Command stop() {
         return setPercentOutput(0.0)
         .withName("Stop");

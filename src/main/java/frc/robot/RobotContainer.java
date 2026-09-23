@@ -96,13 +96,12 @@ public class RobotContainer {
             .onTrue(superstructure.resetSwerve());
 
         oWarmup
-            .whileTrue(flywheel.setVelocity(40));
+            .whileTrue(flywheel.setVelocity(40).alongWith(superstructure.stageFuel()));
 
         dIntake
             .and(() -> !dShoot.getAsBoolean() && !dPass.getAsBoolean())
             .whileTrue(
                 superstructure.runIntake(true)
-                    .alongWith(indexer.setVelocity(20))
             );
 
         dShoot

@@ -34,6 +34,7 @@ public class IntakeRollerSubsystem extends VelocitySubsystem<MotorIOTalonFX>{
 
     public Command intake() {
         return setVelocity(RotationsPerSecond.of(kRollerIntakeRPS));
+        // return setVoltage(11.0);
         // return setPercentOutput(90);
     }
 

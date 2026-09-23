@@ -89,6 +89,10 @@ public class IntakePivotSubsystem extends BaseSubsystem {
         return this.setPosition(() -> kPivotStowRotations);
     }
 
+    public Command jiggle() {
+        return retract().withTimeout(1.0).andThen(deploy().withTimeout(1.0)).repeatedly();
+    }
+
     public void setPosition(double position) {
         if (!isEnabled()) return;
         inputs.targetPosition = Utils.clamp(position, kPivotIntakeRotations, kPivotStowRotations);
