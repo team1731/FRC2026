@@ -3,7 +3,6 @@ package frc.robot.subsystems.intake.roller;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static frc.robot.subsystems.intake.IntakeConstants.*;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.frc1731.hardware.motor.ctre.MotorIOTalonFX;
 import frc.lib.frc1731.subsystem.VelocitySubsystem;
@@ -28,14 +27,10 @@ public class IntakeRollerSubsystem extends VelocitySubsystem<MotorIOTalonFX>{
         inputs.currentVelocity = getVelocity().in(RotationsPerSecond);
         inputs.targetVelocity = getTargetVelocity().in(RotationsPerSecond);
        // logger.processInputs(inputs);
-
-       SmartDashboard.putNumber("INTAKE RPS", inputs.currentVelocity);
     }
 
     public Command intake() {
         return setVelocity(RotationsPerSecond.of(kRollerIntakeRPS));
-        // return setVoltage(11.0);
-        // return setPercentOutput(90);
     }
 
     public Command eject() {

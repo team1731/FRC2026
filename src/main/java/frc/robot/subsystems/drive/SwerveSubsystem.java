@@ -258,6 +258,7 @@ public class SwerveSubsystem extends BaseSubsystem {
             SmartDashboard.putBoolean("isTracking", tracking);
             SmartDashboard.putBoolean("isConnected", questNav.isConnected());
             SmartDashboard.putBoolean("isTrackingHeading", trackTargetHeading);
+            SmartDashboard.putNumber("OculusBattery", questNav.getBatteryPercent().getAsInt());
 
             logger.log("IsTracking", tracking);
             logger.log("IsConnected", questNav.isConnected());

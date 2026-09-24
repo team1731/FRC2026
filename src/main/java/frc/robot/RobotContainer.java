@@ -82,7 +82,7 @@ public class RobotContainer {
         // ex. NamedCommands.registerCommand("Example", new ExampleCommand());
         new EventTrigger("Shoot").onTrue(superstructure.autoShoot());
         new EventTrigger("StopShoot").onTrue(superstructure.stopShooters());
-        new EventTrigger("Intake").whileTrue(superstructure.runIntake(true));
+        new EventTrigger("Intake").whileTrue(superstructure.intake());
         new EventTrigger("Warmup").whileTrue(superstructure.warmup());
         NamedCommands.registerCommand("TargetLock", superstructure.lockSwerveToHub());
     }
@@ -101,7 +101,7 @@ public class RobotContainer {
         dIntake
             .and(() -> !dShoot.getAsBoolean() && !dPass.getAsBoolean())
             .whileTrue(
-                superstructure.runIntake(true)
+                superstructure.intake()
             );
 
         dShoot

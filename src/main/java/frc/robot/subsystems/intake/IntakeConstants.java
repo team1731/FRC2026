@@ -12,7 +12,7 @@ public class IntakeConstants {
 
     // Initial VelocityVoltage gains, using motor-shaft RPS. Validate under load.
     public static final PIDGains kRollerGains = new PIDGains()
-        .setP(0.10).setI(0).setD(0).setS(0.15).setV(0.12).setA(0);
+        .setP(0.05).setI(0.0).setV(0.10);
 
     // Provisional motor-shaft speeds; not conversions from duty cycle.
     public static final double kRollerIntakeRPS = 110;

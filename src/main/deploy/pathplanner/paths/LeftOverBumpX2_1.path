@@ -20,12 +20,12 @@
         "y": 6.6904337349397585
       },
       "prevControl": {
-        "x": 7.4897986476140295,
-        "y": 7.348332066787715
+        "x": 7.341144578313252,
+        "y": 7.51001204819277
       },
       "nextControl": {
-        "x": 8.157295813448332,
-        "y": 6.24420704306478
+        "x": 8.17676879735269,
+        "y": 6.256575719633618
       },
       "isLocked": false,
       "linkedName": null
@@ -129,7 +129,7 @@
       "minWaypointRelativePos": 2.8904847396768374,
       "maxWaypointRelativePos": 4.192946058091338,
       "constraints": {
-        "maxVelocity": 3.0,
+        "maxVelocity": 2.0,
         "maxAcceleration": 2.0,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
@@ -140,12 +140,6 @@
   ],
   "pointTowardsZones": [],
   "eventMarkers": [
-    {
-      "name": "LowerSqueezer",
-      "waypointRelativePos": 0,
-      "endWaypointRelativePos": null,
-      "command": null
-    },
     {
       "name": "Intake",
       "waypointRelativePos": 0.3257261410788379,

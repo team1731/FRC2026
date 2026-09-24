@@ -50,11 +50,13 @@ public class SwerveConstants {
     public static final SwerveRequest.FieldCentric kFieldCentricControl = new SwerveRequest.FieldCentric()
         .withDeadband(kMaxSpeed * kDeadband) // Add a 5% deadband
         .withRotationalDeadband(kMaxAngularRate * kDeadband) // Add a 5% deadband
+        .withDesaturateWheelSpeeds(true)
         .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
 
     public static final SwerveRequest.RobotCentric kRobotCentricControl = new SwerveRequest.RobotCentric()
         .withDeadband(kMaxSpeed * kDeadband) // Add a 5% deadband
         .withRotationalDeadband(kMaxAngularRate * kDeadband) // Add a 5% deadband
+        .withDesaturateWheelSpeeds(true)
         .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
     private static final double kDriveToTargetMaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);

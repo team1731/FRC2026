@@ -101,11 +101,12 @@ public class Superstructure extends SubsystemBase {
         });
     }
 
-    public Command runIntake(boolean deployed) {
-        return Commands.either(
-            pivot.deploy().alongWith(intake.intake()),
-            pivot.retract().alongWith(intake.intake()),
-            () -> deployed
+    public Command intake() {
+        return pivot.deploy()
+        .alongWith(intake.intake())
+        .alongWith(
+            kicker.setPercent(0.05), 
+            indexer.setPercent(0.05)
         );
     }
 
@@ -153,7 +154,7 @@ public class Superstructure extends SubsystemBase {
                     )
                 ),
                 Commands.either( // If feedthrough continue intaking, otherwise jiggle
-                    this.runIntake(true),
+                    pivot.deploy().alongWith(intake.intake()),
                     Commands.waitUntil(shotCondition)
                         .andThen(pivot.jiggle().alongWith(intake.intake())),
                     feedthrough
@@ -166,7 +167,7 @@ public class Superstructure extends SubsystemBase {
         return new ParallelCommandGroup(
             flywheel.setVelocity(targetFlywheel.getAsDouble()),
             hood.setRotations(targetHood.getAsDouble()),
-            Commands.waitUntil(shotCondition) .andThen(
+            Commands.waitUntil(shotCondition).andThen(
                 pivot.jiggle().alongWith(
                     indexer.feed(),
                     intake.intake(),

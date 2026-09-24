@@ -14,7 +14,7 @@ public class ShotTable {
         new ShotEntry(0, 0.0, 55, 0.5),
         new ShotEntry(1, 0.0, 55, 0.5),
         new ShotEntry(2, 5, 55, 1.25),
-        new ShotEntry(3, 6, 62.5, 1.4),
+        new ShotEntry(3, 7, 65, 1.4),
         new ShotEntry(4, 9, 70, 1.8),
         new ShotEntry(5, 15, 80,2.0),
         new ShotEntry(6, 17, 87.5, 2.1),

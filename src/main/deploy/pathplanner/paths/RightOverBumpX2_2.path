@@ -116,8 +116,8 @@
         "y": 2.313761363639787
       },
       "prevControl": {
-        "x": 3.2737368045609436,
-        "y": 2.874872779150097
+        "x": 3.3634578313253014,
+        "y": 2.6143975903614454
       },
       "nextControl": null,
       "isLocked": false,
@@ -207,12 +207,6 @@
       "name": "Intake",
       "waypointRelativePos": 1.8906144496961654,
       "endWaypointRelativePos": 6.404564315352642,
-      "command": null
-    },
-    {
-      "name": "Warmup",
-      "waypointRelativePos": 6.044883303411136,
-      "endWaypointRelativePos": 6.899461400359066,
       "command": null
     },
     {

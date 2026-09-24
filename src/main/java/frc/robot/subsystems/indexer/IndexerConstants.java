@@ -13,6 +13,6 @@ public class IndexerConstants {
     public static final double kRollerDiameter = 1.398; // inches
 
     // Provisional motor-shaft RPS for VelocityVoltage; validate under load.
-    public static final double kFeedRPS = 65;
+    public static final double kFeedRPS = 50;
     public static final double kEjectRPS = -90;
 }
