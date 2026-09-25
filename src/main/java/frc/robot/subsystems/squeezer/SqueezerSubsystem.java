@@ -58,14 +58,16 @@ public class SqueezerSubsystem extends BaseSubsystem {
         return run(() -> {
             inputs.targetRotations = 45;
             ctrl.setSetpoint(inputs.targetRotations, ControlType.kPosition);
-        }).withName("Raise");
+        }).withName("Raise")
+        .onlyIf(() -> false);
     }
 
     public Command squeeze() {
         return run(() -> {
             inputs.targetRotations = 0;
             ctrl.setSetpoint(inputs.targetRotations, ControlType.kPosition);
-        }).withName("Squeeze");
+        }).withName("Squeeze")
+        .onlyIf(() -> false);
     }
 
     public Command reset() {

@@ -10,11 +10,11 @@ import frc.lib.frc1731.sim.SimpleVelocitySim.SimConstants;
 public class FlywheelConstants {
     public static final double kGearRatio = 1d; // 1:1 input:output ratio
     public static final double kMaxVelocity = 100; // Max velocity
-    public static final double kWarmupVelocity = 40; // Warmup velocity
+    public static final double kWarmupVelocity = 50; // Warmup velocity
     public static final double kEpsilon = 3; // 3 RPS tolerance
 
     public static final Distance kFlywheelRadius = Inches.of(3.034184).div(2); // 3.034 inch diameter
-    public static final Mass kFlywheelMass = Pounds.of(1d); // 1 lb flywheel
+    public static final Mass kFlywheelMass = Pounds.of(5d); // 5 lb flywheel
 
     public static final double kCurrentLimit = 60d; // Amps
 

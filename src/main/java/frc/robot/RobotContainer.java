@@ -3,6 +3,7 @@ package frc.robot;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.events.EventTrigger;
 
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.*;
 import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.drive.SwerveSubsystem;
@@ -84,6 +85,8 @@ public class RobotContainer {
         new EventTrigger("StopShoot").onTrue(superstructure.stopShooters());
         new EventTrigger("Intake").whileTrue(superstructure.intake());
         new EventTrigger("Warmup").whileTrue(superstructure.warmup());
+        new EventTrigger("RaiseSqueezer").whileTrue(Commands.none());
+        new EventTrigger("LowerSqueezer").whileTrue(Commands.none());
         NamedCommands.registerCommand("TargetLock", superstructure.lockSwerveToHub());
     }
 
@@ -187,7 +190,7 @@ public class RobotContainer {
         kicker.setDefaultCommand(kicker.stop());
 
         hood.setDefaultCommand(hood.stow());
-        flywheel.setDefaultCommand(flywheel.stop());
+        flywheel.setDefaultCommand(flywheel.warmup());
     }
 
     public void periodic() {

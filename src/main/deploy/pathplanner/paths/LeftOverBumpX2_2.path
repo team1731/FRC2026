@@ -208,14 +208,8 @@
     },
     {
       "name": "Intake",
-      "waypointRelativePos": 2.5012406947890957,
+      "waypointRelativePos": 2.008933002481427,
       "endWaypointRelativePos": 6.692998204667857,
-      "command": null
-    },
-    {
-      "name": "Warmup",
-      "waypointRelativePos": 6.420107719928185,
-      "endWaypointRelativePos": 7.798922800718132,
       "command": null
     },
     {

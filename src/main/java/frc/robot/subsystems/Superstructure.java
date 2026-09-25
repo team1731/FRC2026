@@ -105,8 +105,8 @@ public class Superstructure extends SubsystemBase {
         return pivot.deploy()
         .alongWith(intake.intake())
         .alongWith(
-            kicker.setPercent(0.05), 
-            indexer.setPercent(0.05)
+            // kicker.setPercent(0.05), 
+            // indexer.setPercent(0.05)
         );
     }
 
