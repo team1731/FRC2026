@@ -142,6 +142,10 @@
   ],
   "rotationTargets": [
     {
+      "waypointRelativePos": 0.5510373443983316,
+      "rotationDegrees": 0.0
+    },
+    {
       "waypointRelativePos": 1,
       "rotationDegrees": 0.0
     },
@@ -208,7 +212,7 @@
     },
     {
       "name": "Intake",
-      "waypointRelativePos": 2.008933002481427,
+      "waypointRelativePos": 0.0,
       "endWaypointRelativePos": 6.692998204667857,
       "command": null
     },

@@ -8,7 +8,8 @@ public class IndexerConstants {
     public static final PIDGains kPIDGains = new PIDGains()
         .setP(0.10).setI(0).setD(0).setS(0.15).setV(0.12).setA(0);
 
-    public static final double kCurrentLimit = 60.0;
+    public static final double kCurrentLimit = 70.0;
+    public static final double kSupplyCurrentLimit = 40.0; // Amps; validate under load.
 
     public static final double kRollerDiameter = 1.398; // inches
 

@@ -9,6 +9,7 @@ import frc.robot.subsystems.BaseSubsystem;
 import static frc.robot.subsystems.indexer.IndexerConstants.*;
 
 import java.util.function.DoubleSupplier;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -24,6 +25,10 @@ public class IndexerSubsystem extends BaseSubsystem {
     protected void initializeHardware() {
         motor = new MotorIOTalonFX(Ports.kIndexerFloorConfig);
         motor.withPIDGains(kPIDGains);
+        motor.withCurrentLimits(new CurrentLimitsConfigs()
+            .withStatorCurrentLimit(kCurrentLimit).withStatorCurrentLimitEnable(true)
+            .withSupplyCurrentLimit(kSupplyCurrentLimit).withSupplyCurrentLimitEnable(true)
+            .withSupplyCurrentLowerLimit(kSupplyCurrentLimit).withSupplyCurrentLowerTime(0));
     }
 
     public double getTipSpeedMPS() {

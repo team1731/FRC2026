@@ -10,6 +10,7 @@ public class KickerConstants {
         .setP(0.15).setI(0).setD(0).setS(0.15).setV(0.12).setA(0);
 
     public static final double kCurrentLimit = 60.0;
+    public static final double kSupplyCurrentLimit = 25.0; // Amps per motor; validate under load.
 
     public static final double kRollerDiameter = 1.398; // inches
 

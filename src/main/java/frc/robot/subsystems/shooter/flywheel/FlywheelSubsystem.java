@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.Meters;
 import static frc.robot.subsystems.shooter.flywheel.FlywheelConstants.*;
 
 import java.util.function.DoubleSupplier;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.frc1731.Utils;
@@ -21,10 +22,14 @@ public class FlywheelSubsystem extends BaseSubsystem {
 
     @Override
     protected void initializeHardware() {
+        CurrentLimitsConfigs limits = new CurrentLimitsConfigs()
+            .withStatorCurrentLimit(kCurrentLimit).withStatorCurrentLimitEnable(true)
+            .withSupplyCurrentLimit(kSupplyCurrentLimit).withSupplyCurrentLimitEnable(true)
+            .withSupplyCurrentLowerLimit(kSupplyCurrentLimit).withSupplyCurrentLowerTime(0);
         motor = new MotorIOTalonFX(Ports.kLeftFlywheelTopConfig)
-            .withFollower(Ports.kRightFlywheelTopConfig, Ports.kRightFlywheelBottomConfig, Ports.kLeftFlywheelBottomConfig);
+            .withFollower(limits, Ports.kRightFlywheelTopConfig, Ports.kRightFlywheelBottomConfig, Ports.kLeftFlywheelBottomConfig);
         motor.withPIDGains(kVelocityGains);
-        motor.withStatorCurrentLimit(kCurrentLimit);
+        motor.withCurrentLimits(limits);
     }
 
     public boolean atTargetVelocity() {

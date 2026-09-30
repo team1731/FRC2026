@@ -8,6 +8,7 @@ import frc.robot.Ports;
 import frc.robot.subsystems.BaseSubsystem;
 
 import java.util.function.DoubleSupplier;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -21,10 +22,14 @@ public class KickerSubsystem extends BaseSubsystem {
 
     @Override
     protected void initializeHardware() {
+        CurrentLimitsConfigs limits = new CurrentLimitsConfigs()
+            .withStatorCurrentLimit(KickerConstants.kCurrentLimit).withStatorCurrentLimitEnable(true)
+            .withSupplyCurrentLimit(KickerConstants.kSupplyCurrentLimit).withSupplyCurrentLimitEnable(true)
+            .withSupplyCurrentLowerLimit(KickerConstants.kSupplyCurrentLimit).withSupplyCurrentLowerTime(0);
         motor = new MotorIOTalonFX(Ports.kBottomtKickerConfig)
-            .withFollower(Ports.kToptKickerConfig);
+            .withFollower(limits, Ports.kToptKickerConfig);
         motor.withPIDGains(KickerConstants.kPIDGains);
-        // motor.withStatorCurrentLimit(KickerConstants.kCurrentLimit);
+        motor.withCurrentLimits(limits);
     }
 
     public double getTipSpeedMPS() {

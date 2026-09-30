@@ -67,8 +67,16 @@ public class MotorIOTalonFX extends MotorIO {
     }
 
     public MotorIOTalonFX withFollower(PortConfig... config) {
+        return withFollower(null, config);
+    }
+
+    /** Applies explicit per-motor limits to followers before enabling following. */
+    public MotorIOTalonFX withFollower(CurrentLimitsConfigs limits, PortConfig... config) {
         for (PortConfig cfg : config) {
             TalonFX follower = new TalonFX(cfg.kPort, cfg.kBus);
+            if (limits != null) {
+                follower.getConfigurator().apply(limits);
+            }
             // Correct constructor: new Follower(leaderID, opposeLeaderDirection)
             follower.setControl(new Follower(this.motor.getDeviceID(),   (isInverted() != (cfg.kInverted) )? MotorAlignmentValue.Opposed : MotorAlignmentValue.Aligned));
             follower.close();
@@ -248,6 +256,12 @@ public class MotorIOTalonFX extends MotorIO {
 
         clc.StatorCurrentLimitEnable = true;
         clc.StatorCurrentLimit = amps;
+        applyConfigs();
+    }
+
+    /** Applies and caches the leader's current-limit configuration. */
+    public void withCurrentLimits(CurrentLimitsConfigs limits) {
+        cfg.CurrentLimits = limits;
         applyConfigs();
     }
 

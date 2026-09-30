@@ -17,6 +17,7 @@ public class FlywheelConstants {
     public static final Mass kFlywheelMass = Pounds.of(5d); // 5 lb flywheel
 
     public static final double kCurrentLimit = 60d; // Amps
+    public static final double kSupplyCurrentLimit = 30d; // Amps per motor; validate under load.
 
     public static final SimConstants kSimConstants = new SimConstants(DCMotor.getKrakenX60(4), kGearRatio, kFlywheelRadius, kFlywheelMass);
 
