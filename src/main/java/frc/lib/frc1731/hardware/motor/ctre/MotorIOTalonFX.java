@@ -3,6 +3,7 @@ package frc.lib.frc1731.hardware.motor.ctre;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.*;
 import com.ctre.phoenix6.controls.*;
@@ -66,10 +67,19 @@ public class MotorIOTalonFX extends MotorIO {
     }
 
     public MotorIOTalonFX withFollower(PortConfig... config) {
+        return withFollower(null, config);
+    }
+
+    /** Applies explicit per-motor limits to followers before enabling following. */
+    public MotorIOTalonFX withFollower(CurrentLimitsConfigs limits, PortConfig... config) {
         for (PortConfig cfg : config) {
             TalonFX follower = new TalonFX(cfg.kPort, cfg.kBus);
+            if (limits != null) {
+                follower.getConfigurator().apply(limits);
+            }
             // Correct constructor: new Follower(leaderID, opposeLeaderDirection)
             follower.setControl(new Follower(this.motor.getDeviceID(),   (isInverted() != (cfg.kInverted) )? MotorAlignmentValue.Opposed : MotorAlignmentValue.Aligned));
+            follower.close();
         }
         return this;
     }
@@ -181,7 +191,7 @@ public class MotorIOTalonFX extends MotorIO {
 
     @Override
     public void setVelocityRPS(double rps, int pidSlot) {
-        this.motor.setControl(new VelocityTorqueCurrentFOC(rps).withSlot(pidSlot));
+        this.motor.setControl(new VelocityVoltage(rps).withSlot(pidSlot));
         this.motorSim.setAngularVelocity(rps * (2*Math.PI) * 1.2d); // 1.2 is the friction factor
     }
 
@@ -249,6 +259,12 @@ public class MotorIOTalonFX extends MotorIO {
         applyConfigs();
     }
 
+    /** Applies and caches the leader's current-limit configuration. */
+    public void withCurrentLimits(CurrentLimitsConfigs limits) {
+        cfg.CurrentLimits = limits;
+        applyConfigs();
+    }
+
     public void withFeedbackConfigs(FeedbackConfigs configs) {
         this.configurator.apply(configs);
     }
@@ -270,7 +286,7 @@ public class MotorIOTalonFX extends MotorIO {
     }
 
     public void withCANCoder(int deviceID, String bus, CANcoderConfiguration configuration) {
-        this.cancoder = new CANcoder(deviceID, bus);
+        this.cancoder = new CANcoder(deviceID, new CANBus(bus));
         this.cancoder.getConfigurator().apply(configuration);
         motor.setPosition(cancoder.getAbsolutePosition().getValueAsDouble());
     }

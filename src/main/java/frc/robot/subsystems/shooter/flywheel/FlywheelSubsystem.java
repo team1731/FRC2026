@@ -1,8 +1,10 @@
 package frc.robot.subsystems.shooter.flywheel;
 
+import static edu.wpi.first.units.Units.Meters;
 import static frc.robot.subsystems.shooter.flywheel.FlywheelConstants.*;
 
 import java.util.function.DoubleSupplier;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.frc1731.Utils;
@@ -20,10 +22,14 @@ public class FlywheelSubsystem extends BaseSubsystem {
 
     @Override
     protected void initializeHardware() {
+        CurrentLimitsConfigs limits = new CurrentLimitsConfigs()
+            .withStatorCurrentLimit(kCurrentLimit).withStatorCurrentLimitEnable(true)
+            .withSupplyCurrentLimit(kSupplyCurrentLimit).withSupplyCurrentLimitEnable(true)
+            .withSupplyCurrentLowerLimit(kSupplyCurrentLimit).withSupplyCurrentLowerTime(0);
         motor = new MotorIOTalonFX(Ports.kLeftFlywheelTopConfig)
-            .withFollower(Ports.kRightFlywheelTopConfig, Ports.kRightFlywheelBottomConfig, Ports.kLeftFlywheelBottomConfig);
+            .withFollower(limits, Ports.kRightFlywheelTopConfig, Ports.kRightFlywheelBottomConfig, Ports.kLeftFlywheelBottomConfig);
         motor.withPIDGains(kVelocityGains);
-        motor.withStatorCurrentLimit(kCurrentLimit);
+        motor.withCurrentLimits(limits);
     }
 
     public boolean atTargetVelocity() {
@@ -31,11 +37,19 @@ public class FlywheelSubsystem extends BaseSubsystem {
         return Utils.isWithin(motor.getVelocityRPS(), inputs.targetVelocity, kEpsilon);
     }
 
+    public double getTipSpeedMPS() {
+        if (!isEnabled()) return 0;
+        return motor.getVelocityRPS() / kGearRatio * 2 * Math.PI * kFlywheelRadius.in(Meters);
+    }
+
+    public double getTargetTipSpeedMPS() {
+        return inputs.targetVelocity / kGearRatio * 2 * Math.PI * kFlywheelRadius.in(Meters);
+    }
+
     @Override
     public void periodicTelemetry() {
         inputs.currentVelocity = motor.getVelocityRPS();
         inputs.atTargetVelocity = Utils.isWithin(inputs.currentVelocity, inputs.targetVelocity, kEpsilon);
-     //   logger.processInputs(inputs);
     }
 
     public Command setVelocity(DoubleSupplier target) {

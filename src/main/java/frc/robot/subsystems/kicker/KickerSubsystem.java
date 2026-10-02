@@ -8,6 +8,7 @@ import frc.robot.Ports;
 import frc.robot.subsystems.BaseSubsystem;
 
 import java.util.function.DoubleSupplier;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 
 import edu.wpi.first.wpilibj2.command.Command;
 
@@ -21,17 +22,33 @@ public class KickerSubsystem extends BaseSubsystem {
 
     @Override
     protected void initializeHardware() {
+        CurrentLimitsConfigs limits = new CurrentLimitsConfigs()
+            .withStatorCurrentLimit(KickerConstants.kCurrentLimit).withStatorCurrentLimitEnable(true)
+            .withSupplyCurrentLimit(KickerConstants.kSupplyCurrentLimit).withSupplyCurrentLimitEnable(true)
+            .withSupplyCurrentLowerLimit(KickerConstants.kSupplyCurrentLimit).withSupplyCurrentLowerTime(0);
         motor = new MotorIOTalonFX(Ports.kBottomtKickerConfig)
-            .withFollower(Ports.kToptKickerConfig);
+            .withFollower(limits, Ports.kToptKickerConfig);
         motor.withPIDGains(KickerConstants.kPIDGains);
+        motor.withCurrentLimits(limits);
+    }
+
+    public double getTipSpeedMPS() {
+        if (!isEnabled()) return 0;
+        return motor.getVelocityRPS() / KickerConstants.kGearRatio
+            * Math.PI * edu.wpi.first.math.util.Units.inchesToMeters(KickerConstants.kRollerDiameter);
+    }
+
+    /** Commands roller surface speed in meters per second, using motor-RPS feedback. */
+    public Command setTipSpeedMPS(DoubleSupplier tipSpeed) {
+        return setVelocity(() -> tipSpeed.getAsDouble() * KickerConstants.kGearRatio
+            / (Math.PI * edu.wpi.first.math.util.Units.inchesToMeters(KickerConstants.kRollerDiameter)));
     }
 
     @Override
     public void periodicTelemetry() {
         inputs.currentVelocity = motor.getVelocityRPS();
         inputs.atTargetVelocity = Utils.isWithin(inputs.currentVelocity, inputs.targetVelocity, 1);
-      //  logger.processInputs(inputs);
-        
+        logger.processInputs(inputs);
     }
 
     public Command setPercent(double setpoint) {
@@ -56,15 +73,17 @@ public class KickerSubsystem extends BaseSubsystem {
     }
 
     public Command feed() {
-        return setPercent(0.8);
+        return setVelocity(KickerConstants.kFeedRPS);
+        // return setPercent(0.6);
     }
 
     public Command eject() {
-        return setPercent(-0.5);
+        return setVelocity(KickerConstants.kEjectRPS);
     }
 
     public Command stop() {
         return run(() -> {
+            inputs.targetVelocity = 0;
             this.motor.coast();
         });
     }

@@ -18,7 +18,7 @@ import frc.robot.subsystems.drive.generated.TunerConstants;
 
 public class SwerveConstants {
     public static final double kMaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // Max robot speed
-    public static final double kMaxAngularRate = RotationsPerSecond.of(1.5).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
+    public static final double kMaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
     public static final double kMaxAngularAcceleration = Math.toRadians(540); // deg/s^2 max acceleration
     public static final double kDeadband = 0.05; // 5% joystick deadband
     public static final double kMaxVisionAngularRate = 720d; // degrees per second
@@ -47,20 +47,26 @@ public class SwerveConstants {
     );
 
     /* Setting up bindings for necessary control of the swerve drive platform */
+    // Uniformly scale all module speeds when any exceeds the configured maximum.
+    // This preserves the requested translation/rotation ratio (turn radius),
+    // while reducing both translation speed and angular speed under saturation.
     public static final SwerveRequest.FieldCentric kFieldCentricControl = new SwerveRequest.FieldCentric()
         .withDeadband(kMaxSpeed * kDeadband) // Add a 5% deadband
         .withRotationalDeadband(kMaxAngularRate * kDeadband) // Add a 5% deadband
-        .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
+        .withDesaturateWheelSpeeds(false)
+        .withDriveRequestType(DriveRequestType.Velocity); // Use open-loop control for drive motors
 
     public static final SwerveRequest.RobotCentric kRobotCentricControl = new SwerveRequest.RobotCentric()
         .withDeadband(kMaxSpeed * kDeadband) // Add a 5% deadband
         .withRotationalDeadband(kMaxAngularRate * kDeadband) // Add a 5% deadband
-        .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
+        .withDesaturateWheelSpeeds(false)
+        .withDriveRequestType(DriveRequestType.Velocity);
 
     private static final double kDriveToTargetMaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
     private static final double kDriveToTargetDeadband = 0.01; // Add a 1% deadband
 
     public static final SwerveRequest.FieldCentricFacingAngle driveAtTargetControl = new SwerveRequest.FieldCentricFacingAngle()
+        .withDesaturateWheelSpeeds(true)
         .withRotationalDeadband(SwerveConstants.kMaxAngularRate * kDriveToTargetDeadband) // Add a 1% deadband
 		.withDriveRequestType(DriveRequestType.OpenLoopVoltage)
         .withDeadband((kDriveToTargetMaxSpeed * kDeadband));
@@ -71,7 +77,8 @@ public class SwerveConstants {
     }
     
     public static final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
-    public static final SwerveRequest.ApplyRobotSpeeds autoRequest = new SwerveRequest.ApplyRobotSpeeds();
+    public static final SwerveRequest.ApplyRobotSpeeds autoRequest = new SwerveRequest.ApplyRobotSpeeds()
+        .withDesaturateWheelSpeeds(true);
 
     public static final double kAutoCurrentLimit = 100;
     public static final double kTeleCurrentLimit = 60;

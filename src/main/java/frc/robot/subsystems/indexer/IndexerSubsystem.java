@@ -8,6 +8,9 @@ import frc.robot.subsystems.BaseSubsystem;
 
 import static frc.robot.subsystems.indexer.IndexerConstants.*;
 
+import java.util.function.DoubleSupplier;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class IndexerSubsystem extends BaseSubsystem {
@@ -22,14 +25,29 @@ public class IndexerSubsystem extends BaseSubsystem {
     protected void initializeHardware() {
         motor = new MotorIOTalonFX(Ports.kIndexerFloorConfig);
         motor.withPIDGains(kPIDGains);
-        // motor.withStatorCurrentLimit(kCurrentLimit);
+        motor.withCurrentLimits(new CurrentLimitsConfigs()
+            .withStatorCurrentLimit(kCurrentLimit).withStatorCurrentLimitEnable(true)
+            .withSupplyCurrentLimit(kSupplyCurrentLimit).withSupplyCurrentLimitEnable(true)
+            .withSupplyCurrentLowerLimit(kSupplyCurrentLimit).withSupplyCurrentLowerTime(0));
+    }
+
+    public double getTipSpeedMPS() {
+        if (!isEnabled()) return 0;
+        return motor.getVelocityRPS() / IndexerConstants.kGearRatio
+            * Math.PI * edu.wpi.first.math.util.Units.inchesToMeters(IndexerConstants.kRollerDiameter);
+    }
+
+    /** Commands roller surface speed in meters per second, using motor-RPS feedback. */
+    public Command setTipSpeedMPS(DoubleSupplier tipSpeed) {
+        return setVelocity(() -> tipSpeed.getAsDouble() * IndexerConstants.kGearRatio
+            / (Math.PI * edu.wpi.first.math.util.Units.inchesToMeters(IndexerConstants.kRollerDiameter)));
     }
 
     @Override
     public void periodicTelemetry() {
         inputs.currentVelocity = motor.getVelocityRPS();
         inputs.atTargetVelocity = Utils.isWithin(inputs.currentVelocity, inputs.targetVelocity, 1);
-     //   logger.processInputs(inputs);
+        logger.processInputs(inputs);
     }
 
     public Command setPercent(double setpoint) {
@@ -46,12 +64,20 @@ public class IndexerSubsystem extends BaseSubsystem {
         });
     }
 
+    public Command setVelocity(DoubleSupplier setpoint) {
+        return run(() -> {
+            inputs.targetVelocity = setpoint.getAsDouble();
+            this.motor.setVelocityRPS(inputs.targetVelocity);
+        });
+    }
+
     public Command feed() {
-        return setPercent(1.0);
+        return setVelocity(kFeedRPS);
+        // return setPercent(0.6);
     }
 
     public Command eject() {
-        return setPercent(-1.0);
+        return setVelocity(kEjectRPS);
     }
 
     public Command stop() {

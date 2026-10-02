@@ -1,0 +1,13 @@
+To setup questnav for robot usage:
+
+1. Download Meta Quest Developer  Hub and gain access to the team1731 developer account
+2. Turn on the oculus, open MQDH, THEN connect the oculus to the device using a c-adapter
+3. On the oculus UI select "allow" for USB connection and on MDQH go to device manager
+4. On "Apps", click "Add a build" and select the appropriate apk file from the pipelines folder
+5. Once finished, open up file explorer and go to C:\Program Files\Meta Quest Developer Hub\resources\bin
+6. Right click and select "Open in terminal"
+7. Access the oculus web address by entering ".\adb.exe devices" followed by ".\adb.exe forward tcp:5801 tcp:5801"
+8. On the web interface, click on settings and set team to 1731
+9. On powershell, enter $body = '{"path":"WebServerConstants/webConfigTeamNumber","value":1731}' followed by 
+    Invoke-RestMethod -Uri 'http://localhost:5801/api/config' -Method Post -ContentType 'application/json' -Body $body
+10. Finally, restart the oculus for regular usage

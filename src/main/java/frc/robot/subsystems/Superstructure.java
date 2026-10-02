@@ -6,15 +6,13 @@ import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
-import org.littletonrobotics.junction.Logger;
-
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.*;
-import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import frc.lib.frc1731.field.FieldPositions;
+import frc.lib.frc6328.LoggedTunableNumber;
 import frc.robot.Robot;
-import frc.robot.commands.JiggleToPosition;
 import frc.robot.subsystems.drive.*;
 import frc.robot.subsystems.indexer.*;
 import frc.robot.subsystems.intake.pivot.IntakePivotSubsystem;
@@ -36,6 +34,7 @@ public class Superstructure extends SubsystemBase {
     private SqueezerSubsystem squeezer;
 
     private final ShotTable shotTable = ShotTable.getScoringTable();
+    private final ShotTable passTable = ShotTable.getPassingTable();
 
     public final Supplier<Translation2d> kHubSupplier = () -> Robot.isRedAlliance()
         ? new Translation2d(11.91, 4.03)
@@ -56,6 +55,11 @@ public class Superstructure extends SubsystemBase {
     private double targetHood = 0;
     private double targetFlywheel = 0;
     private boolean adjustTargetForMovingShots = false;
+
+    private boolean isPassing = false;
+
+    private LoggedTunableNumber tuneableFlywheelRPS = new LoggedTunableNumber("Tuned Flywheel RPS", 0.0, () -> true);
+    private LoggedTunableNumber tuneableHoodRotations = new LoggedTunableNumber("Tuned Hood Rotations", 0.0, () -> true);
 
     // -------------------------------------------------------------------------
     // Constructor
@@ -84,17 +88,25 @@ public class Superstructure extends SubsystemBase {
     // Public commands
     // =========================================================================
 
+    public Command stageFuel() {
+        return new ParallelCommandGroup(
+            kicker.feed().withTimeout(0.25).andThen(kicker.stop()),
+            indexer.feed().withTimeout(0.25).andThen(indexer.stop())
+        );
+    }
+
     public Command resetSwerve() {
         return new InstantCommand(() -> {
             swerve.resetTelePose();
         });
     }
 
-    public Command runIntake(boolean deployed) {
-        return Commands.either(
-            pivot.deploy().alongWith(intake.setPercentOutput(1.0)),
-            pivot.retract().alongWith(intake.setPercentOutput(1.0)),
-            () -> deployed
+    public Command intake() {
+        return pivot.deploy()
+        .alongWith(intake.intake())
+        .alongWith(
+            // kicker.setPercent(0.05), 
+            // indexer.setPercent(0.05)
         );
     }
 
@@ -103,7 +115,7 @@ public class Superstructure extends SubsystemBase {
     }
 
     public Command spit() {
-        return pivot.deploy().alongWith(intake.setPercentOutput(-1.0), indexer.eject(), kicker.eject());
+        return pivot.deploy().alongWith(intake.eject(), indexer.eject(), kicker.eject());
     }
 
     public Command lockSwerveToHub() {
@@ -137,14 +149,14 @@ public class Superstructure extends SubsystemBase {
                 Commands.waitUntil(shotCondition).andThen(
                     new ParallelCommandGroup( // Only start the feeding sequence after we are ready to shoot
                         indexer.feed(),
-                        kicker.setVelocity(() -> targetFlywheel),
-                        Commands.either(squeezer.squeeze(), Commands.none(), squeeze)
+                        kicker.feed(),
+                        Commands.either(Commands.waitSeconds(1.5).andThen(squeezer.squeeze()), Commands.none(), squeeze)
                     )
                 ),
                 Commands.either( // If feedthrough continue intaking, otherwise jiggle
-                    this.runIntake(true),
+                    pivot.deploy().alongWith(intake.intake()),
                     Commands.waitUntil(shotCondition)
-                        .andThen(new JiggleToPosition(pivot).alongWith(intake.setPercentOutput(1.0))),
+                        .andThen(pivot.jiggle().alongWith(intake.intake())),
                     feedthrough
                 )
             )
@@ -155,12 +167,12 @@ public class Superstructure extends SubsystemBase {
         return new ParallelCommandGroup(
             flywheel.setVelocity(targetFlywheel.getAsDouble()),
             hood.setRotations(targetHood.getAsDouble()),
-            Commands.waitUntil(shotCondition) .andThen(
-                new JiggleToPosition(pivot).alongWith(
+            Commands.waitUntil(shotCondition).andThen(
+                pivot.jiggle().alongWith(
                     indexer.feed(),
-                    intake.setPercentOutput(1.0),
-                    kicker.setVelocity(targetFlywheel.getAsDouble()),
-                    squeezer.squeeze()
+                    intake.intake(),
+                    kicker.feed(),
+                    Commands.waitSeconds(1.5).andThen(squeezer.squeeze())
                 )
             )
             )
@@ -175,14 +187,29 @@ public class Superstructure extends SubsystemBase {
                 flywheel.setVelocity(()-> targetFlywheel),
                 hood.setRotations(() -> targetHood),
                 Commands.waitUntil(this::readyToShoot).andThen(
-                    indexer.feed().alongWith(kicker.setVelocity(() -> targetFlywheel), new JiggleToPosition(pivot))
+                    indexer.feed().alongWith(kicker.feed(), pivot.jiggle())
                 )
             );
         }, 
-        Set.of(flywheel, hood, indexer, kicker));
+        Set.of(flywheel, hood, indexer, kicker, pivot));
     }
 
-   //  shoot(Supplier<Translation2d> target, BooleanSupplier adjustForMovingShot, BooleanSupplier trackTarget, BooleanSupplier feedthrough, BooleanSupplier shotCondition, BooleanSupplier squeeze)
+    public Command tunedShot() {
+        return new ParallelCommandGroup(
+            flywheel.setVelocity(() -> tuneableFlywheelRPS.get()),
+            hood.setRotations(() -> tuneableHoodRotations.get()),
+            // Allow the live setpoints and periodic readiness telemetry to update first.
+            Commands.waitSeconds(0.04)
+                .andThen(Commands.waitUntil(() -> tuneableFlywheelRPS.get() > 0 && readyToShoot()))
+                .andThen(
+                indexer.feed().alongWith(
+                    kicker.setTipSpeedMPS(flywheel::getTargetTipSpeedMPS),
+                    pivot.jiggle()
+                )
+            )
+        );
+    }
+
     public Command shoot() {
         return shoot(kHubSupplier, () -> true, () -> true, () -> false, this::readyToShoot, () -> true);
     }
@@ -196,11 +223,15 @@ public class Superstructure extends SubsystemBase {
     }
 
     public Command pass() {
-        return shoot(kPassSupplier, () -> true, () -> true, () -> false, this::readyToShoot, () -> true);
+        return new InstantCommand(() -> isPassing = true).andThen(
+            shoot(kPassSupplier, () -> true, () -> true, () -> false, this::readyToShoot, () -> true)
+        ).finallyDo(() -> isPassing = false);
     }
 
     public Command passFeedthrough() {
-        return shoot(kPassSupplier, () -> true, () -> true, () -> true, this::readyToShoot, () -> false);
+        return new InstantCommand(() -> isPassing = true).andThen(
+            shoot(kPassSupplier, () -> true, () -> true, () -> true, this::readyToShoot, () -> true)
+        ).finallyDo(() -> isPassing = false);
     }
 
     public Command defaultShot(DoubleSupplier flywheelRPS, DoubleSupplier hoodRotations) {
@@ -242,13 +273,18 @@ public class Superstructure extends SubsystemBase {
         }
 
         double distance = compensatedTarget.minus(robotXY).getNorm();
-
-        double[] shotParams  = shotTable.getShotParameters(distance);
-
-        if (Robot.isSimulation()) {
-            Logger.recordOutput("TargetDistance", distance);
-            Logger.recordOutput("CompensatedTarget", new Pose2d(compensatedTarget, Rotation2d.kZero));
+        ShotTable appliedTable = shotTable;
+        if (isPassing) {
+            appliedTable = passTable;
         }
+
+        double[] shotParams  = appliedTable.getShotParameters(distance);
+
+        SmartDashboard.putNumber("TargetDistance", distance);
+        // if (Robot.isSimulation()) {
+        //     Logger.recordOutput("TargetDistance", distance);
+        //     Logger.recordOutput("CompensatedTarget", new Pose2d(compensatedTarget, Rotation2d.kZero));
+        // }
 
         this.targetHood = shotParams[0];
         this.targetFlywheel = shotParams[1];

@@ -1,11 +1,8 @@
 package frc.robot;
 
-import static frc.robot.subsystems.drive.SwerveConstants.kAutoCurrentLimit;
-
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.events.EventTrigger;
 
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.*;
 import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.drive.SwerveSubsystem;
@@ -31,25 +28,30 @@ public class RobotContainer {
     private SqueezerSubsystem squeezer;
 
     /* Driver Buttons */
-    // Unused buttons: back, pov down/right
-    private final CommandXboxController driver = new CommandXboxController(0);
-    private final Trigger dResetSwerve = driver.start();
+    private final CommandPS5Controller driver = new CommandPS5Controller(0);
+    private final CommandXboxController operator = new CommandXboxController(1);
 
-    private final Trigger dIntake = driver.leftTrigger();
-    private final Trigger dShoot = driver.rightTrigger();
-    private final Trigger dPass = driver.y();
+    private final Trigger oHubShot = operator.a();
+    private final Trigger oTowerShot = operator.x();
+    private final Trigger oBumpShot = operator.y();
+    private final Trigger oTunedShot = operator.b();
+    private final Trigger oWarmup = operator.rightTrigger();
 
-    private final Trigger dIntakeNoHopper = driver.leftBumper();
+    // private final Trigger oRaiseSqueezer = operator.rightBumper();
+    // private final Trigger oLowerSqueezer = operator.leftBumper();
+
+    private final Trigger shotOverride = oHubShot.or(oTowerShot).or(oBumpShot).or(oTunedShot);
+
+    private final Trigger dResetSwerve = driver.options();
+
+    private final Trigger dIntake = driver.L2();
+    private final Trigger dShoot = driver.R2();
+    private final Trigger dPass = driver.R1();
 
     private final Trigger dFeedthrough = dIntake.and(dShoot);
     private final Trigger dPassthrough = dIntake.and(dPass);
 
-    private final Trigger dTrenchShot = driver.b();
-    private final Trigger dManualPass = driver.a();
-    private final Trigger dHubShot = driver.x();
-
     private final Trigger dRetract = driver.povUp();
-    private final Trigger dRaiseCurrentLimit = driver.povLeft();
 
     public RobotContainer(SwerveSubsystem swerve) {
         this.swerve = swerve;
@@ -79,13 +81,11 @@ public class RobotContainer {
         // Named commands useful for PathPlanner events
         // ex. NamedCommands.registerCommand("Example", new ExampleCommand());
         new EventTrigger("Shoot").onTrue(superstructure.autoShoot());
-        // new EventTrigger("Feedthrough").whileTrue(superstructure.feedthrough());
         new EventTrigger("StopShoot").onTrue(superstructure.stopShooters());
-        new EventTrigger("Intake").whileTrue(superstructure.runIntake(true));
-        new EventTrigger("RaiseSqueezer").onTrue(squeezer.raise());
-        new EventTrigger("LowerSqueezer").onTrue(squeezer.squeeze());
+        new EventTrigger("Intake").whileTrue(superstructure.intake());
         new EventTrigger("Warmup").whileTrue(superstructure.warmup());
-        // new EventTrigger("StopTrack").onTrue(swerve.stopLocking());
+        new EventTrigger("RaiseSqueezer").whileTrue(squeezer.raise());
+        new EventTrigger("LowerSqueezer").whileTrue(squeezer.squeeze());
         NamedCommands.registerCommand("TargetLock", superstructure.lockSwerveToHub());
     }
 
@@ -94,25 +94,89 @@ public class RobotContainer {
      */
     private void configureButtonBindings() {
         // Reset robot pose and heading
-        dResetSwerve.onTrue(superstructure.resetSwerve());
+        dResetSwerve
+            .onTrue(superstructure.resetSwerve());
 
-        dIntake.and(() -> !dShoot.getAsBoolean() && !dPass.getAsBoolean()).whileTrue(superstructure.runIntake(true).alongWith(squeezer.raise()));
-        dShoot.whileTrue(superstructure.shoot()).onFalse(swerve.setLockingEnabled(false));
-        dPass.whileTrue(superstructure.pass()).onFalse(swerve.setLockingEnabled(false));
-        dFeedthrough.whileTrue(superstructure.feedthrough()).onFalse(swerve.setLockingEnabled(false));
-        dPassthrough.whileTrue(superstructure.passFeedthrough()).onFalse(swerve.setLockingEnabled(false));
+        oWarmup
+            .whileTrue(flywheel.setVelocity(40).alongWith(superstructure.stageFuel()));
 
-        dIntakeNoHopper.and(() -> !dShoot.getAsBoolean() && !dPass.getAsBoolean()).whileTrue(superstructure.runIntake(true).alongWith(squeezer.squeeze()));
+        dIntake
+            .and(() -> !dShoot.getAsBoolean() && !dPass.getAsBoolean())
+            .whileTrue(
+                superstructure.intake()
+            );
 
-        dHubShot.whileTrue(superstructure.defaultShot(60, 3)).onFalse(swerve.setLockingEnabled(false));
-        dManualPass.whileTrue(superstructure.defaultShot(75, 18)).onFalse(swerve.setLockingEnabled(false));
-        dTrenchShot.whileTrue(superstructure.defaultShot(3.2)).onFalse(swerve.setLockingEnabled(false));
-        
-        // dSpit.whileTrue(superstructure.spit());
+        dShoot
+            .and(shotOverride.negate())
+            .whileTrue(superstructure.shoot())
+            .onFalse(
+                swerve.setLockingEnabled(false)
+                    .alongWith(squeezer.squeeze())
+            );
 
-        dRetract.whileTrue(pivot.retract());
-        dRaiseCurrentLimit.onTrue(new InstantCommand(() -> swerve.setStatorCurrentLimit(kAutoCurrentLimit)));
-        // driver.povDown().onTrue(swerve.launchQuestnav());
+        oHubShot
+            .and(dShoot)
+            .and(oTunedShot.negate())
+            .whileTrue(superstructure.defaultShot(60, 3))
+            .onFalse(
+                swerve.setLockingEnabled(false)
+                    .alongWith(squeezer.squeeze())
+            );
+
+        oBumpShot
+            .and(dShoot)
+            .and(oTunedShot.negate())
+            .whileTrue(superstructure.defaultShot(3.2))
+            .onFalse(
+                swerve.setLockingEnabled(false)
+                    .alongWith(squeezer.squeeze())
+            );
+
+        oTowerShot
+            .and(dShoot)
+            .and(oTunedShot.negate())
+            .whileTrue(superstructure.defaultShot(4.0))
+            .onFalse(
+                swerve.setLockingEnabled(false)
+                    .alongWith(squeezer.squeeze())
+            );
+
+        oTunedShot
+            .and(dShoot)
+            .whileTrue(
+                swerve.setLockingEnabled(false)
+                    .andThen(superstructure.tunedShot())
+            );
+
+        dPass
+            .and(oTunedShot.negate())
+            .whileTrue(superstructure.pass())
+            .onFalse(
+                swerve.setLockingEnabled(false)
+                    .alongWith(squeezer.squeeze())
+            );
+
+        dFeedthrough
+            .and(oTunedShot.negate())
+            .whileTrue(superstructure.feedthrough())
+            .onFalse(swerve.setLockingEnabled(false));
+
+        dPassthrough
+            .and(oTunedShot.negate())
+            .whileTrue(superstructure.passFeedthrough())
+            .onFalse(swerve.setLockingEnabled(false));
+
+        dRetract
+            .whileTrue(
+                pivot.retract()
+                    .alongWith(squeezer.squeeze())
+            );
+
+        // oRaiseSqueezer
+        //     .onTrue(squeezer.raise());
+
+        // oLowerSqueezer
+        //     .onTrue(squeezer.squeeze());
     }
 
     public void configureDefaultCommands() {
@@ -126,10 +190,6 @@ public class RobotContainer {
 
         hood.setDefaultCommand(hood.stow());
         flywheel.setDefaultCommand(flywheel.stop());
-
-        // squeezer.setDefaultCommand(squeezer.stop());
-
-        // led.setDefaultCommand(led.flashAllianceShift());
     }
 
     public void periodic() {

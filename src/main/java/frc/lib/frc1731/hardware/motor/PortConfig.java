@@ -1,17 +1,18 @@
 package frc.lib.frc1731.hardware.motor;
 
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.signals.InvertedValue;
 
 /**
  * Helper class that holds the basic configuration for a motor
  */
 public class PortConfig {
-    public final String kBus;
+    public final CANBus kBus;
     public final int kPort;
     public final boolean kInverted;
 
     public PortConfig(String bus, int port, boolean inverted) {
-        this.kBus = bus;
+        this.kBus = new CANBus(bus);
         this.kPort = port;
         this.kInverted = inverted;
     }

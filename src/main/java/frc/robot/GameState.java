@@ -4,7 +4,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import java.util.List;
 import java.util.Optional;
-import org.littletonrobotics.junction.Logger;
 
 /**
  * Credit to team 2363 for this class

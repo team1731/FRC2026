@@ -11,36 +11,31 @@ public class ShotTable {
     private Regression tofModel;
 
     private static final List<ShotEntry> kHubEntries = List.of(
-        new ShotEntry(0, 0.0, 57.5, 0.5),
-        new ShotEntry(1, 0.0, 57.5, 0.5),
-        new ShotEntry(2, 5, 57.5, 1.25),
-        new ShotEntry(3, 8, 77.5, 1.4),
-        new ShotEntry(4, 10, 81, 1.8),
-        new ShotEntry(5, 13, 90,1.9),
-        new ShotEntry(6, 18, 92.5, 2.5),
-        new ShotEntry(7, 20, 94, 2.8),
-        new ShotEntry(8, 21, 95, 3.0)
+        new ShotEntry(0, 0.0, 55, 0.5),
+        new ShotEntry(1, 0.0, 55, 0.5),
+        new ShotEntry(2, 5, 55, 1.25),
+        new ShotEntry(3, 9, 60, 1.4),
+        new ShotEntry(4, 12, 67.5, 1.8),
+        new ShotEntry(5, 16, 80,2.0),
+        new ShotEntry(6, 17, 87.5, 2.1),
+        new ShotEntry(7, 18, 92.5, 2.4),
+        new ShotEntry(8, 20, 94.5, 2.8)
     );
 
     private static final List<ShotEntry> kPassEntries = List.of(
-        new ShotEntry(0, 0, 95, 0.5),
-        new ShotEntry(1, 5, 95, 0.5),
-        new ShotEntry(2, 5, 95, 0.75),
-        new ShotEntry(3, 5, 95, 0.85),
-        new ShotEntry(4, 5, 95, 1.25),
-        new ShotEntry(5, 10, 95, 1.4),
-        new ShotEntry(6, 10, 95, 1.6),
-        new ShotEntry(7, 10, 95, 1.8),
-        new ShotEntry(8, 10, 95, 2.0),
-        new ShotEntry(9, 10, 95, 2.0),
-        new ShotEntry(10, 20, 95, 2.0),
-        new ShotEntry(11, 20, 95, 2.0),
-        new ShotEntry(12, 20, 95, 2.0),
-        new ShotEntry(13, 20, 95, 2.0),
-        new ShotEntry(14, 7, 95, 2.0),
-        new ShotEntry(15, 7, 95, 2.0),
-        new ShotEntry(16, 7, 95, 2.0),
-        new ShotEntry(17, 7, 95, 2.0)
+        new ShotEntry(0, 0, 40, 0.5),
+        new ShotEntry(1, 5, 50, 0.5),
+        new ShotEntry(2, 6, 50, 0.75),
+        new ShotEntry(3, 7, 60, 0.85),
+        new ShotEntry(4, 10, 60, 1.25),
+        new ShotEntry(5, 15, 70, 1.4),
+        new ShotEntry(6, 15, 70, 1.6),
+        new ShotEntry(7, 16, 80, 1.8),
+        new ShotEntry(8, 18, 80, 2.0),
+        new ShotEntry(9, 18, 85, 2.0),
+        new ShotEntry(10, 20, 90, 2.0),
+        new ShotEntry(11, 20, 90, 2.0),
+        new ShotEntry(12, 20, 90, 2.0)
     );
 
     private ShotTable(List<ShotEntry> entries) {
@@ -70,6 +65,6 @@ public class ShotTable {
     }
 
     public double[] getShotParameters(double distance) {
-        return new double[] {hoodModel.getInterpolation(distance), flywheelModel.getInterpolation(distance) - 2.5, tofModel.getInterpolation(distance)};
+        return new double[] {hoodModel.getInterpolation(distance), flywheelModel.getInterpolation(distance), tofModel.getInterpolation(distance)};
     }
 }
