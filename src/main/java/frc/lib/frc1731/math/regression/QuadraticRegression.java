@@ -1,6 +1,6 @@
 package frc.lib.frc1731.math.regression;
 
-import frc.lib.frc1731.Utils;
+import frc.lib.frc1731.MathUtils;
 
 /**
  * Class that represents a quadratic regression model
@@ -129,9 +129,9 @@ public class QuadraticRegression extends Regression {
 
     @Override
     public String toString() {
-        return "y = " + Utils.roundTo(a, 3) + 
-            "x^2 + " + Utils.roundTo(b, 3) + 
-            "x + " + Utils.roundTo(c, 3) + 
-            " (R^2 = " + Utils.roundTo(residual, 3) + ")";
+        return "y = " + MathUtils.roundTo(a, 3) + 
+            "x^2 + " + MathUtils.roundTo(b, 3) + 
+            "x + " + MathUtils.roundTo(c, 3) + 
+            " (R^2 = " + MathUtils.roundTo(residual, 3) + ")";
     }
 }

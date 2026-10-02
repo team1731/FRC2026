@@ -1,8 +1,15 @@
 package frc.lib.frc1678.sim;
 
+
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.Measure;
-import edu.wpi.first.units.*;
-import edu.wpi.first.units.measure.*;
+import edu.wpi.first.units.Unit;
+import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Time;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.Timer;
 
 /**
@@ -10,12 +17,13 @@ import edu.wpi.first.wpilibj.Timer;
  */
 public abstract class MechanismSim {
 	private Time lastTimeStamp;
+	private DCMotor motor;
 	private final double gearing;
 
 	/**
 	 * Converts mechanism units to rotor units by accounting for gearing.
 	 *
-	 * @param mechansim Mechanism units.
+	 * @param mechanism Mechanism units.
 	 * @return Rotor units.
 	 */
 	@SuppressWarnings("unchecked")
@@ -31,14 +39,14 @@ public abstract class MechanismSim {
 	public abstract void setVoltage(Voltage voltage);
 
 	/**
-	 * Gets the mechansim position of the simulated system.
+	 * Gets the mechanism position of the simulated system.
 	 *
 	 * @return Position of mechanism.
 	 */
 	public abstract Angle getPosition();
 
 	/**
-	 * Gets the mechansim velcocity of the simulated system.
+	 * Gets the mechanism velocity of the simulated system.
 	 *
 	 * @return Velocity of mechanism.
 	 */
@@ -67,7 +75,7 @@ public abstract class MechanismSim {
 	public abstract void setState(Angle angle, AngularVelocity velocity);
 
 	/**
-	 * Simulates the mechansim based on the change in time since the last time it was simulated.
+	 * Simulates the mechanism based on the change in time since the last time it was simulated.
 	 */
 	public void simulate() {
 		Time currentTimestamp = Units.Seconds.of(Timer.getFPGATimestamp());
@@ -78,8 +86,13 @@ public abstract class MechanismSim {
 	/***
 	 * Creates a MechanismSim
 	 */
-	protected MechanismSim(double gearing) {
+	protected MechanismSim(DCMotor motor, double gearing) {
+		this.motor = motor;
 		lastTimeStamp = Units.Seconds.of(Timer.getFPGATimestamp());
 		this.gearing = gearing;
+	}
+
+	public DCMotor getMotor() {
+		return this.motor;
 	}
 }

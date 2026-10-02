@@ -1,6 +1,7 @@
 package frc.lib.frc1731;
 
 
+import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.swerve.utility.PhoenixPIDController;
 import com.pathplanner.lib.config.PIDConstants;
 
@@ -12,42 +13,63 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 /**
  * Helper class that is used to store and utilize PID and other hardware constants
  * 
- * - Credit to team 1885 ILITE Robotics for the inital idea
+ * <p> Credit to team 1885 ILITE Robotics for the inital idea
  */
 public class PIDGains implements Sendable {
+    /** Motor-controller PID slot this gain set should be written to. */
     public int pidSlot = 0;
 
+    /** Proportional feedback gain. */
     public double kP = 0;
+
+    /** Integral feedback gain. */
     public double kI = 0;
+
+    /** Derivative feedback gain. */
     public double kD = 0;
 
+    /** Error range where integral accumulation is allowed. */
     public double kIZone = 0;
 
+    /** Static feedforward gain. */
     public double kS = 0;
+
+    /** Acceleration feedforward gain. */
     public double kA = 0;
+
+    /** Velocity feedforward gain. */
     public double kV = 0;
+
+    /** Gravity feedforward gain. */
     public double kG = 0;
 
+    /** Gravity model used by CTRE closed-loop controls. */
+    public GravityTypeValue kGravityType = GravityTypeValue.Arm_Cosine;
+
+    /** Acceptable closed-loop error in mechanism units. */
     public double tolerance = 0.1; // Set to 0.1 units at default
 
+    /** Whether generated controllers should wrap inputs over a continuous range. */
     public boolean continuousInput = false;
+
+    /** Minimum value for continuous input wrapping. */
     public double continuousMin = Double.NEGATIVE_INFINITY;
+
+    /** Maximum value for continuous input wrapping. */
     public double continuousMax = Double.POSITIVE_INFINITY;
 
+    /** Whether motor-controller soft limits should be configured. */
     public boolean softLimit = false;
+
+    /** Reverse soft limit in mechanism units. */
     public double softLimitMin = Double.NEGATIVE_INFINITY;
+
+    /** Forward soft limit in mechanism units. */
     public double softLimitMax = Double.POSITIVE_INFINITY;
-
-    public double scale = 1.0;
-
-    public int currentLimit = -1;
-
-    public boolean useSmartMotion = false;
-
-    public SimpleMotorFeedforward feedForward = null;
 
     private static int instances = 0;
 
+    /** Creates an empty gain set and registers it with WPILib's sendable registry. */
     public PIDGains() {
         SendableRegistry.add(this, this.getClass().getSimpleName(), instances);
         instances++;
@@ -138,7 +160,6 @@ public class PIDGains implements Sendable {
      */
     public PIDGains setV(double gain) {
         this.kV = gain;
-        this.refreshFF();
         return this;
     }
 
@@ -154,7 +175,6 @@ public class PIDGains implements Sendable {
      */
     public PIDGains setA(double gain) {
         this.kA = gain;
-        this.refreshFF();
         return this;
     }
 
@@ -170,7 +190,6 @@ public class PIDGains implements Sendable {
      */
     public PIDGains setS(double gain) {
         this.kS = gain;
-        this.refreshFF();
         return this;
     }
 
@@ -184,8 +203,18 @@ public class PIDGains implements Sendable {
     /**
      * Sets the G gain to the desired value
      */
+    public PIDGains setG(double gain, GravityTypeValue type) {
+        this.kG = gain;
+        this.kGravityType = type;
+        return this;
+    }
+
+    /**
+     * Sets the G gain to the desired value
+     */
     public PIDGains setG(double gain) {
         this.kG = gain;
+        this.kGravityType = GravityTypeValue.Arm_Cosine;
         return this;
     }
 
@@ -219,6 +248,11 @@ public class PIDGains implements Sendable {
         return this;
     }
 
+    /**
+     * Returns the closed-loop tolerance used by generated WPILib/Phoenix controllers.
+     *
+     * @return allowable setpoint error in mechanism units
+     */
     public double getTolerance() {
         return tolerance;
     }
@@ -233,6 +267,9 @@ public class PIDGains implements Sendable {
         return this;
     }
 
+    /**
+     * Whether the rotational inputs wraps from lowest around to highest and vice versa
+     */
     public boolean isContinuousInput() {
         return continuousInput;
     }
@@ -262,47 +299,10 @@ public class PIDGains implements Sendable {
     }
 
     /**
-     * Sets a scaling factor for the output
-     */
-    public PIDGains setScalingFactor(double scale) {
-        this.scale = scale;
-        return this;
-    }
-
-    /**
-     * Returns the scaling factor
-     */
-    public double getScalingFactor() {
-        return scale;
-    }
-
-    /**
-     * Sets a maximum current limit
-     */
-    public PIDGains setCurrentLimit(int limit) {
-        this.currentLimit = limit;
-        return this;
-    }
-
-    /**
-     * Returns the maximum current limit
-     */
-    public int getCurrentLimit() {
-        return currentLimit;
-    }
-
-    /**
-     * If smart motion and/or smart velocity should be applied
-     */
-    public boolean isSmartMotion() {
-        return useSmartMotion;
-    }
-
-    /**
      * Creates a PID controller with the specified constants and configurations
      */
     public ProfiledPIDController toProfiledPIDController(double maxVelocity, double maxAcceleration) {
-        ProfiledPIDController pidCtrl = new ProfiledPIDController(kP, kI, kD, new Constraints(maxVelocity * scale, maxAcceleration * scale));
+        ProfiledPIDController pidCtrl = new ProfiledPIDController(kP, kI, kD, new Constraints(maxVelocity, maxAcceleration));
         pidCtrl.setTolerance(tolerance);
         pidCtrl.setIZone(kIZone);
         if (continuousInput) {
@@ -362,25 +362,22 @@ public class PIDGains implements Sendable {
         copy.softLimit = this.softLimit;
         copy.softLimitMin = this.softLimitMin;
         copy.softLimitMax = this.softLimitMax;
-        copy.scale = this.scale;
-        copy.currentLimit = this.currentLimit;
-        copy.useSmartMotion = this.useSmartMotion;
         return copy;
     }
 
+    /**
+     * Automatically places the values on smartdashboard for easy logging and tuning
+     */
     public PIDGains logOnAdvantageScope() {
         SmartDashboard.putData("PIDGains[" + instances + "]", this);
         return this;
     }
 
     /**
-     * Resets the feedforward object with the updated values for S, V, and A
+     * Exposes the main gain fields to WPILib's sendable system for dashboard tuning.
+     *
+     * @param builder sendable builder supplied by WPILib
      */
-    private void refreshFF() {
-        this.feedForward = new SimpleMotorFeedforward(kS, kV, kA);
-    }
-
-
     @Override
     public void initSendable(SendableBuilder builder) {
         builder.setSmartDashboardType("PIDGains");
@@ -390,5 +387,6 @@ public class PIDGains implements Sendable {
         builder.addDoubleProperty("s", this::getS, this::setS);
         builder.addDoubleProperty("a", this::getA, this::setA);
         builder.addDoubleProperty("v", this::getV, this::setV);
+        builder.addDoubleProperty("v", this::getG, this::setG);
     }
 }

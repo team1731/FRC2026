@@ -1,25 +1,41 @@
 package frc.lib.frc1731.hardware.motor;
 
+import static edu.wpi.first.units.Units.RPM;
+
+import edu.wpi.first.units.measure.AngularVelocity;
+
 /**
- * Helper class that holds hardware constants for different motors
+ * Common motor free-speed and stall constants used by subsystem helpers and mechanism simulation.
  */
 public enum MotorConstants {
-    KRAKEN_X60(6000d, 366d, 7.09, 502.1),
-    KRAKEN_X44(7530d, 275d, 4.05, 630.7),
-    VORTEX(6784d, 211d, 3.6, 575.1),
-    NEO(5676d, 105d, 2.6, 493.5),
-    FALCON_500(6380d, 257d, 4.69, 534.8),
-    MINION(7703d, 212d, 3.17d, 648.7d)
+    kKrakenX60     (6065,  374, 7.16),
+    kKrakenX60FOC  (5784,  476, 9.36),
+    kKrakenX44     (7757,  279, 4.11),
+    kKrakenX44FOC  (7367,  329, 5.01),
+    kFalcon500     (6380,  257, 4.69),
+    kFalcon500FOC  (6080,  304, 5.84),
+    kMinion        (7703,  212, 3.17),
+    kVortex        (6825,  391, 5.96),
+    kNeo           (5906,  216, 4.20),
+    kNeo550        (11000, 100, 0.97),
     ;
-    public final double MAX_VELOCITY_RPM;
-    public final double STALL_CURRENT_AMPS;
-    public final double STALL_TORQUE_NM;
-    public final double MOTOR_KV;
 
-    private MotorConstants(double maxRPM, double stallAmp, double stallTorque, double motorKV) {
-        this.MAX_VELOCITY_RPM = maxRPM;
-        this.STALL_CURRENT_AMPS = stallAmp;
-        this.STALL_TORQUE_NM = stallTorque;
-        this.MOTOR_KV = motorKV;
+    /** Free speed in rotations per second. */
+    public final AngularVelocity kMaxVelocity;
+
+    /** Published stall current in amps. */
+    public final double kStallCurrent;
+
+    /** Published stall torque in Newton-meters. */
+    public final double kStallTorque;
+
+    /** Approximate free-speed motor velocity constant in RPM per volt. */
+    public final double kMotorKV;
+
+    private MotorConstants(double maxRPM, double stallAmp, double stallTorque) {
+        this.kMaxVelocity = RPM.of(maxRPM);
+        this.kStallCurrent = stallAmp;
+        this.kStallTorque = stallTorque;
+        this.kMotorKV = maxRPM / 12.0;
     }
 }

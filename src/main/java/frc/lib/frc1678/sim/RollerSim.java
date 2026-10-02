@@ -1,5 +1,6 @@
 package frc.lib.frc1678.sim;
 
+
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.units.Units;
@@ -15,6 +16,7 @@ import edu.wpi.first.wpilibj.simulation.FlywheelSim;
  */
 public class RollerSim extends MechanismSim {
 	protected final FlywheelSim sim;
+	private double m_positionRad = 0.0; // unbounded, just needs to keep integrating
 
 	/**
 	 * Creates a RollerSim from provided constants.
@@ -22,7 +24,7 @@ public class RollerSim extends MechanismSim {
 	 * @param constants Constants to use for RollerSim.
 	 */
 	public RollerSim(RollerSimConstants constants) {
-		super(constants.gearing);
+		super(constants.motor, constants.gearing);
 		sim = new FlywheelSim(
 				LinearSystemId.createFlywheelSystem(constants.motor, constants.momentOfInertia, constants.gearing),
 				constants.motor);
@@ -37,18 +39,11 @@ public class RollerSim extends MechanismSim {
 	 * Constants for creating a RollerSim.
 	 */
 	public static class RollerSimConstants {
-		public DCMotor motor;
-		public double gearing;
-		public double momentOfInertia;
-		public RollerSimConstants() {}
+		public DCMotor motor = DCMotor.getKrakenX60(1); // On default set to single kraken
+		public double gearing = 1.0; // On default set to no ratio applied
+		public double momentOfInertia = 0.001; // On default set to essentially free spinning
 
-		public RollerSimConstants(DCMotor motor, double gearing, double momentOfInertia) {
-			this.motor = motor;
-			this.gearing = gearing;
-			this.momentOfInertia = momentOfInertia;
-		}
-
-		public RollerSimConstants withDCMotor(DCMotor motor) {
+		public RollerSimConstants withMotor(DCMotor motor) {
 			this.motor = motor;
 			return this;
 		}
@@ -62,6 +57,10 @@ public class RollerSim extends MechanismSim {
 			this.momentOfInertia = momentOfInertia;
 			return this;
 		}
+
+		public RollerSim build() {
+			return new RollerSim(this);
+		}
 	}
 
 	@Override
@@ -71,7 +70,7 @@ public class RollerSim extends MechanismSim {
 
 	@Override
 	public Angle getPosition() {
-		return Units.Radians.of(0.0); // Rollers don't simulate position
+		return Units.Radians.of(m_positionRad);
 	}
 
 	@Override
@@ -82,10 +81,12 @@ public class RollerSim extends MechanismSim {
 	@Override
 	protected void update(Time deltaTime) {
 		sim.update(deltaTime.in(Units.Seconds));
+		m_positionRad += sim.getAngularVelocityRadPerSec() * deltaTime.in(Units.Seconds);
 	}
 
 	@Override
 	public void setState(Angle angle, AngularVelocity velocity) {
 		sim.setAngularVelocity(velocity.in(Units.RadiansPerSecond));
+		m_positionRad = angle.in(Units.Radians);
 	}
 }

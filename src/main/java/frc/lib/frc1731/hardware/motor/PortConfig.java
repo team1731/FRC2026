@@ -1,35 +1,39 @@
 package frc.lib.frc1731.hardware.motor;
 
 import com.ctre.phoenix6.CANBus;
-import com.ctre.phoenix6.signals.InvertedValue;
+
+import frc.robot.RobotConstants;
 
 /**
- * Helper class that holds the basic configuration for a motor
+ * Basic CAN device address consisting of a bus and device ID.
  */
 public class PortConfig {
+    /** CAN bus this device is wired to. */
     public final CANBus kBus;
+
+    /** CAN ID or device port for this hardware device. */
     public final int kPort;
-    public final boolean kInverted;
 
-    public PortConfig(String bus, int port, boolean inverted) {
-        this.kBus = new CANBus(bus);
+    /**
+     * Creates a port config on a specific CAN bus.
+     *
+     * @param bus CAN bus for the device
+     * @param port CAN ID or device port
+     */
+    public PortConfig(CANBus bus, int port) {
+        this.kBus = bus;
         this.kPort = port;
-        this.kInverted = inverted;
     }
 
-    public PortConfig(String bus, int port, InvertedValue inverted) {
-        this(bus, port, inverted != InvertedValue.Clockwise_Positive);
-    }
-
-    public PortConfig(String bus, int port) {
-        this(bus, port, false);
-    }
-
-    public PortConfig(int port, boolean inverted) {
-        this("", port, inverted);
-    }
-
+    /**
+     * Creates a port config on the main robot CAN bus.
+     *
+     * @param port CAN ID or device port
+     */
     public PortConfig(int port) {
-        this("", port, false);
+        this(RobotConstants.kMainCANBus, port);
+        if (port > 62 || port < 0) {
+            throw new IllegalArgumentException("Port cannot be greater than 62 or less than 0");
+        }
     }
 }

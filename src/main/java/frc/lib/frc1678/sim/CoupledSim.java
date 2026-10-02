@@ -1,5 +1,6 @@
 package frc.lib.frc1678.sim;
 
+
 import edu.wpi.first.units.BaseUnits;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -8,9 +9,6 @@ import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Voltage;
 import java.util.function.Supplier;
 
-/**
- * Class for simulating mechanically coupled systems.
- */
 public class CoupledSim extends MechanismSim {
 	private MechanismSim base;
 	private final Supplier<Angle> coupledMechanismPositionSupplier;
@@ -79,7 +77,7 @@ public class CoupledSim extends MechanismSim {
 			Supplier<Angle> coupledMechanismPositionSupplier,
 			Supplier<AngularVelocity> coupledMechanismVelocitySupplier,
 			double mechanismCoupleRatio) {
-		super(baseSimulation.mechanismToRotor(BaseUnits.AngleUnit.of(1.0)).in(BaseUnits.AngleUnit));
+		super(baseSimulation.getMotor(), baseSimulation.mechanismToRotor(BaseUnits.AngleUnit.of(1.0)).in(BaseUnits.AngleUnit));
 		base = baseSimulation;
 		this.coupledMechanismPositionSupplier = coupledMechanismPositionSupplier;
 		this.coupledMechanismVelocitySupplier = coupledMechanismVelocitySupplier;
