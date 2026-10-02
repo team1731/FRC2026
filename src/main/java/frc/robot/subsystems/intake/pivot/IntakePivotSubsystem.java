@@ -90,7 +90,7 @@ public class IntakePivotSubsystem extends BaseSubsystem {
     }
 
     public Command jiggle() {
-        return retract().withTimeout(1.0).andThen(deploy().withTimeout(1.0)).repeatedly()
+        return retract().withTimeout(0.5).andThen(deploy().withTimeout(0.5)).repeatedly()
         .finallyDo(() -> this.setPosition(kPivotStowRotations));
     }
 

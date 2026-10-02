@@ -196,8 +196,8 @@ public class Superstructure extends SubsystemBase {
 
     public Command tunedShot() {
         return new ParallelCommandGroup(
-            flywheel.setVelocity(tuneableFlywheelRPS),
-            hood.setRotations(tuneableHoodRotations),
+            flywheel.setVelocity(() -> tuneableFlywheelRPS.get()),
+            hood.setRotations(() -> tuneableHoodRotations.get()),
             // Allow the live setpoints and periodic readiness telemetry to update first.
             Commands.waitSeconds(0.04)
                 .andThen(Commands.waitUntil(() -> tuneableFlywheelRPS.get() > 0 && readyToShoot()))

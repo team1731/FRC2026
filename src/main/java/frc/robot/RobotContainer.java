@@ -37,8 +37,8 @@ public class RobotContainer {
     private final Trigger oTunedShot = operator.b();
     private final Trigger oWarmup = operator.rightTrigger();
 
-    private final Trigger oRaiseSqueezer = operator.rightBumper();
-    private final Trigger oLowerSqueezer = operator.leftBumper();
+    // private final Trigger oRaiseSqueezer = operator.rightBumper();
+    // private final Trigger oLowerSqueezer = operator.leftBumper();
 
     private final Trigger shotOverride = oHubShot.or(oTowerShot).or(oBumpShot).or(oTunedShot);
 
@@ -172,11 +172,11 @@ public class RobotContainer {
                     .alongWith(squeezer.squeeze())
             );
 
-        oRaiseSqueezer
-            .onTrue(squeezer.raise());
+        // oRaiseSqueezer
+        //     .onTrue(squeezer.raise());
 
-        oLowerSqueezer
-            .onTrue(squeezer.squeeze());
+        // oLowerSqueezer
+        //     .onTrue(squeezer.squeeze());
     }
 
     public void configureDefaultCommands() {

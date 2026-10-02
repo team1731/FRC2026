@@ -14,9 +14,9 @@ public class ShotTable {
         new ShotEntry(0, 0.0, 55, 0.5),
         new ShotEntry(1, 0.0, 55, 0.5),
         new ShotEntry(2, 5, 55, 1.25),
-        new ShotEntry(3, 7, 65, 1.4),
-        new ShotEntry(4, 9, 70, 1.8),
-        new ShotEntry(5, 15, 80,2.0),
+        new ShotEntry(3, 9, 60, 1.4),
+        new ShotEntry(4, 12, 67.5, 1.8),
+        new ShotEntry(5, 16, 80,2.0),
         new ShotEntry(6, 17, 87.5, 2.1),
         new ShotEntry(7, 18, 92.5, 2.4),
         new ShotEntry(8, 20, 94.5, 2.8)
@@ -30,17 +30,12 @@ public class ShotTable {
         new ShotEntry(4, 10, 60, 1.25),
         new ShotEntry(5, 15, 70, 1.4),
         new ShotEntry(6, 15, 70, 1.6),
-        new ShotEntry(7, 15, 80, 1.8),
-        new ShotEntry(8, 15, 80, 2.0),
-        new ShotEntry(9, 15, 85, 2.0),
-        new ShotEntry(10, 20, 85, 2.0),
-        new ShotEntry(11, 20, 95, 2.0),
-        new ShotEntry(12, 20, 95, 2.0),
-        new ShotEntry(13, 20, 95, 2.0),
-        new ShotEntry(14, 7, 95, 2.0),
-        new ShotEntry(15, 7, 95, 2.0),
-        new ShotEntry(16, 7, 95, 2.0),
-        new ShotEntry(17, 7, 95, 2.0)
+        new ShotEntry(7, 16, 80, 1.8),
+        new ShotEntry(8, 18, 80, 2.0),
+        new ShotEntry(9, 18, 85, 2.0),
+        new ShotEntry(10, 20, 90, 2.0),
+        new ShotEntry(11, 20, 90, 2.0),
+        new ShotEntry(12, 20, 90, 2.0)
     );
 
     private ShotTable(List<ShotEntry> entries) {
