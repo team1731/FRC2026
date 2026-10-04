@@ -119,7 +119,7 @@
     },
     {
       "waypointRelativePos": 3.331120331950216,
-      "rotationDegrees": 110.62950150599247
+      "rotationDegrees": 110.62950150599248
     },
     {
       "waypointRelativePos": 4,
@@ -160,8 +160,8 @@
       "command": null
     },
     {
-      "name": "Shoot",
-      "waypointRelativePos": 5.580148883374658,
+      "name": "Warmup",
+      "waypointRelativePos": 5.008436724565789,
       "endWaypointRelativePos": 6.0,
       "command": null
     }

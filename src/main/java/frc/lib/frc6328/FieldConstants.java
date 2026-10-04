@@ -15,7 +15,6 @@ import java.nio.file.Path;
  * <p>NOTE: All constants are defined relative to the field coordinate system, and from the
  * perspective of the blue alliance station
  */
-@Deprecated
 public class FieldConstants {
   public static final FieldType fieldType = FieldType.ANDYMARK;
 
@@ -332,6 +331,7 @@ public class FieldConstants {
                 String directory = (Robot.isReal() ? "home/lvuser" : "src/main");
               Path p = Path.of(directory,
                           "deploy",
+                          "apriltags",
                           fieldType.json(),
                           name + ".json");
               layout = new AprilTagFieldLayout(p);

@@ -1,5 +1,6 @@
 package frc.lib.frc1678.sim;
 
+
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.BaseUnits;
 import edu.wpi.first.units.Units;
@@ -11,13 +12,13 @@ import edu.wpi.first.units.measure.Mass;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
-import frc.lib.frc1678.DistanceAngleConverter;
+import frc.lib.frc1678.util.Util;
 
 /**
  * Class for simulating a linear system powerd by one or more motors like an elevator.
  */
 public class LinearSim extends MechanismSim {
-	private final DistanceAngleConverter converter;
+	private final Util.DistanceAngleConverter converter;
 	protected final ElevatorSim sim;
 
 	/**
@@ -26,17 +27,17 @@ public class LinearSim extends MechanismSim {
 	 * @param constants Constants to use for LinearSim.
 	 */
 	public LinearSim(LinearSimConstants constants) {
-		super(constants.gearing);
+		super(constants.motor, constants.gearing);
 		this.converter = constants.converter;
 		sim = new edu.wpi.first.wpilibj.simulation.ElevatorSim(
-            constants.motor,
-            constants.gearing,
-            constants.carriageMass.in(Units.Kilograms),
-            converter.getDrumRadius().in(Units.Meters),
-            constants.minHeight.in(Units.Meters),
-            constants.maxHeight.in(Units.Meters),
-            constants.simGravity,
-            constants.startingHeight.in(Units.Meters));
+				constants.motor,
+				constants.gearing,
+				constants.carriageMass.in(Units.Kilograms),
+				converter.getDrumRadius().in(Units.Meters),
+				constants.minHeight.in(Units.Meters),
+				constants.maxHeight.in(Units.Meters),
+				constants.simGravity,
+				constants.startingHeight.in(Units.Meters));
 	}
 
 	@Override
@@ -48,7 +49,7 @@ public class LinearSim extends MechanismSim {
 	 * Constants for creating a LinearSim.
 	 */
 	public static class LinearSimConstants {
-		public DistanceAngleConverter converter;
+		public Util.DistanceAngleConverter converter;
 		public DCMotor motor;
 		public double gearing;
 		public Mass carriageMass;
@@ -56,30 +57,6 @@ public class LinearSim extends MechanismSim {
 		public Distance maxHeight;
 		public boolean simGravity;
 		public Distance startingHeight;
-
-		public LinearSimConstants withConverter(DistanceAngleConverter converter) {
-			this.converter = converter;
-			return this;
-		}
-
-		public LinearSimConstants withMotor(DCMotor motor) {
-			this.motor = motor;
-			return this;
-		}
-
-		public LinearSimConstants withPhysics(double gearing, double carriageMassKg, boolean simGravity) {
-			this.gearing = gearing;
-			this.carriageMass = Units.Kilograms.of(carriageMassKg);
-			this.simGravity = simGravity;
-			return this;
-		}
-
-		public LinearSimConstants withConstraints(double minHeightMeters, double maxHeightMeters, double startingHeightMeters) {
-			this.minHeight = Units.Meters.of(minHeightMeters);
-			this.maxHeight = Units.Meters.of(maxHeightMeters);
-			this.startingHeight = Units.Meters.of(startingHeightMeters);
-			return this;
-		}
 	}
 
 	@Override

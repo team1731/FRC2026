@@ -1,6 +1,6 @@
 package frc.lib.frc1731.math.regression;
 
-import frc.lib.frc1731.Utils;
+import frc.lib.frc1731.MathUtils;
 
 /**
  * Class that represents a linear regression model
@@ -100,6 +100,6 @@ public class LinearRegression extends Regression {
 
     @Override
     public String toString() {
-        return "y = " + Utils.roundTo(slope, 3) + "x + " + Utils.roundTo(intercept, 3);
+        return "y = " + MathUtils.roundTo(slope, 3) + "x + " + MathUtils.roundTo(intercept, 3);
     }
 }
