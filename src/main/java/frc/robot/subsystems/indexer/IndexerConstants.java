@@ -37,7 +37,6 @@ public final class IndexerConstants {
             .withPIDGains(kVelocityGains)
             .withSensorToMechanismRatio(kGearRatio)
             .withNeutralMode(NeutralModeValue.Coast)
-            .withFollower(Ports.kTopKickerConfig.kPort)
             .withCurrentLimits(kSupplyCurrentLimit, kStatorCurrentLimit)
             .invert()
             .brake()

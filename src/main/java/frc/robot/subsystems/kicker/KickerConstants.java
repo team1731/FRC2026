@@ -45,7 +45,7 @@ public final class KickerConstants {
             new RollerSimConstants()
             .withGearing(kGearRatio)
             .withMOI(0.003)
-            .withMotor(DCMotor.getKrakenX60(1))
+            .withMotor(DCMotor.getKrakenX60(2))
         );
     }
 

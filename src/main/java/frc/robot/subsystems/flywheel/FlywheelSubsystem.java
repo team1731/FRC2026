@@ -1,5 +1,7 @@
 package frc.robot.subsystems.flywheel;
 
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+
 import java.util.function.Supplier;
 
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -22,6 +24,8 @@ public class FlywheelSubsystem extends BaseVelocitySubsystem<MotorIOTalonFX, Bas
         inputs.currentVelocity = getVelocity();
         inputs.setpointVelocity = getSetpoint();
         inputs.atSetpoint = atSetpoint();
+        
+        logger.log("FlywheelWarmingUp", !getSetpoint().equals(RotationsPerSecond.zero()));
         return inputs;
     }
 

@@ -184,6 +184,17 @@ public class MotorIOSparkFlex extends MotorIO implements AutoCloseable {
         return motor.getAppliedOutput();
     }
 
+    /** Estimated supply current; REV exposes output current, not measured input current. */
+    @Override
+    public double getSupplyCurrent() {
+        return getStatorCurrent() * Math.abs(getAppliedDutyCycle());
+    }
+
+    @Override
+    public double getStatorCurrent() {
+        return motor.getOutputCurrent();
+    }
+
     @Override
     public double getAppliedVoltage() {
         return this.motor.getAppliedOutput() * motor.getBusVoltage(); // Experimental and may not work?

@@ -49,6 +49,16 @@ public class SwerveSubsystem extends BaseSubsystem {
 
     private double targetError = 0;
 
+    /** Combined simulated battery current for all drive and steer controllers. */
+    public double getSimSupplyCurrent() {
+        double total = 0.0;
+        for (var module : drivetrain.getModules()) {
+            total += module.getDriveMotor().getSimState().getSupplyCurrent();
+            total += module.getSteerMotor().getSimState().getSupplyCurrent();
+        }
+        return total;
+    }
+
     public SwerveSubsystem() {
         if (!isActiveSubsystem()) return; // Build nothing if the subsystem is turned off
         this.drivetrain = TunerConstants.createDrivetrain();
@@ -66,7 +76,11 @@ public class SwerveSubsystem extends BaseSubsystem {
                 this::resetPose,
                 this::getSpeeds,
                 // Consumer of ChassisSpeeds to drive the robot
-                (speeds, feedsforwards)-> this.drivetrain.setControl(kAutoRequest.withSpeeds(speeds)),
+                (speeds, feedforwards)-> this.drivetrain.setControl(
+                    kAutoRequest.withSpeeds(speeds)
+                    .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
+                    .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())
+                ),
                 new PPHolonomicDriveController(
                     kPPConstants,
                     kPPConstants
