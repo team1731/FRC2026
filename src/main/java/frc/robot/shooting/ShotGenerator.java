@@ -1,4 +1,4 @@
-package frc.robot.subsystems.shooting;
+package frc.robot.shooting;
 
 import static edu.wpi.first.units.Units.*;
 
@@ -11,7 +11,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.*;
 import frc.lib.frc1731.field.FieldPositions;
 import frc.robot.Robot;
-import frc.robot.RobotContainer;
 
 public class ShotGenerator {
     public final ShotTable shotTable = ShotTable.getScoringTable();
@@ -22,7 +21,7 @@ public class ShotGenerator {
 
     public final Supplier<Translation2d> kPassSupplier = () -> {
         double x = Robot.isRedAlliance() ? FieldPositions.kFieldLength - 2 : 2;
-        double y = Robot.isRedAlliance() && RobotContainer.swerve.getPose().getY() > FieldPositions.kFieldWidth / 2.0 ? FieldPositions.kFieldWidth - 2 : 2;
+        double y = Robot.isRedAlliance() && Robot.swerve.getPose().getY() > FieldPositions.kFieldWidth / 2.0 ? FieldPositions.kFieldWidth - 2 : 2;
         return new Translation2d(x, y);
     };
 
@@ -57,10 +56,10 @@ public class ShotGenerator {
     }
 
     public void update() {
-        Pose2d robotPose = RobotContainer.swerve.getPose();
+        Pose2d robotPose = Robot.swerve.getPose();
         Translation2d robotXY = robotPose.getTranslation();
 
-        ChassisSpeeds fieldSpeeds = RobotContainer.swerve.getFieldRelativeSpeeds();
+        ChassisSpeeds fieldSpeeds = Robot.swerve.getFieldRelativeSpeeds();
         Translation2d currentVel = new Translation2d(fieldSpeeds.vxMetersPerSecond,
                                                        fieldSpeeds.vyMetersPerSecond);
 

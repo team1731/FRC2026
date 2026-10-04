@@ -20,10 +20,13 @@ public final class RobotConstants {
     public static final boolean kLogTeamOutputs = true;
 
     /** Publish AdvantageKit data to NetworkTables for live viewing. Read at startup. */
-    public static final boolean kPublishLogsToNetworkTables = true;
+    public static final boolean kPublishLogsToNT = true;
 
     /** Write AdvantageKit data to USB on the real robot. Read at startup. */
     public static final boolean kLogToWPILog = true;
+
+    /** Competition event key (e.g. 2026vabla). Empty uses the FMS event name. */
+    public static final String kLogEventKey = "";
 
     /** Human-readable robot name used by visualization and logging code. */
     public static final String kRobotName = "Raptor";
@@ -31,8 +34,8 @@ public final class RobotConstants {
     /** Suffix used by autos or deploy files that intentionally do not use VSLAM. */
     public static final String kNoVSLAMPostfix = "_NoVSLAM";
 
-    /** Default PathPlanner auto name, without alliance prefixes. */
-    public static final String kAutoDefault = "RightOverBumpX2"; // Note: when setting the default auto, do not include Blu_/Red_ prefixes
+    /** Default PathPlanner auto name, matching the deployed filename without .auto. */
+    public static final String kAutoDefault = "Comp_RightOverBumpX2";
 
     /** SmartDashboard key for the autonomous chooser. */
     public static final String kAutoCodeKey = "Auto Selector";

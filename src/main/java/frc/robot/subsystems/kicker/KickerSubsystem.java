@@ -8,9 +8,8 @@ import frc.lib.frc1731.subsystem.*;
 public class KickerSubsystem extends BaseVelocitySubsystem<MotorIOTalonFX, BaseVelocityInputsAutoLogged> {
     public static final VelocityRequest kFeedRequest = new VelocityRequest(KickerConstants.kFeedVelocity).withEpsilonThreshold(KickerConstants.kEpsilon);
     public static final VelocityRequest kSpitRequest = new VelocityRequest(KickerConstants.kSpitVelocity).withEpsilonThreshold(KickerConstants.kEpsilon);
-    public static final KickerSubsystem kInstance = new KickerSubsystem();
 
-    private KickerSubsystem() {
+    public KickerSubsystem() {
         super(KickerConstants.getIO(), new BaseVelocityInputsAutoLogged());
     }
 

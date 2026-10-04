@@ -19,7 +19,7 @@ public final class FlywheelConstants {
     public static final double kStatorCurrentLimit = 70.0;
     public static final double kSupplyCurrentLimit = 30.0;
 
-    public static final AngularVelocity kWarmupVelocity = RotationsPerSecond.of(50);
+    public static final AngularVelocity kWarmupVelocity = RotationsPerSecond.of(60);
     public static final AngularVelocity kEpsilon = RotationsPerSecond.of(3.0);
 
     public static final Distance kFlywheelRadius = Inches.of(3.034184).div(2); // 3.034 inch diameter

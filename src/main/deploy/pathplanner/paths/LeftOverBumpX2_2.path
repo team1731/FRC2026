@@ -217,8 +217,8 @@
       "command": null
     },
     {
-      "name": "Shoot",
-      "waypointRelativePos": 7.899461400359061,
+      "name": "Warmup",
+      "waypointRelativePos": 6.106203473945455,
       "endWaypointRelativePos": 8.0,
       "command": null
     }

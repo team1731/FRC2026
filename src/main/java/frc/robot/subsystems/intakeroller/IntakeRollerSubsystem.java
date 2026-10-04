@@ -10,8 +10,7 @@ import frc.lib.frc1731.subsystem.BaseVelocitySubsystem;
 
 public class IntakeRollerSubsystem extends BaseVelocitySubsystem<MotorIOTalonFX, BaseVelocityInputsAutoLogged> {
     public static final VelocityRequest kIntakeRequest = new VelocityRequest(RotationsPerSecond.of(0));
-    public static final IntakeRollerSubsystem kInstance = new IntakeRollerSubsystem();
-    private IntakeRollerSubsystem() {
+    public IntakeRollerSubsystem() {
         super(IntakeRollerConstants.getIO(), new BaseVelocityInputsAutoLogged());
     }
 

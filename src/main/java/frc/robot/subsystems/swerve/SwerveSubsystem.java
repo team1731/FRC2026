@@ -38,9 +38,6 @@ import frc.robot.subsystems.vision.VisionHandler;
  * PathPlanner, and forwards vision measurements into the CTRE pose estimator.
  */
 public class SwerveSubsystem extends BaseSubsystem {
-    /** Shared drivetrain subsystem instance. */
-    public static final SwerveSubsystem kInstance = new SwerveSubsystem();
-
     // Hardware
     private SwerveDriveState state = new SwerveDriveState();
     private CommandSwerveDrivetrain drivetrain;
@@ -52,7 +49,7 @@ public class SwerveSubsystem extends BaseSubsystem {
 
     private double targetError = 0;
 
-    private SwerveSubsystem() {
+    public SwerveSubsystem() {
         if (!isActiveSubsystem()) return; // Build nothing if the subsystem is turned off
         this.drivetrain = TunerConstants.createDrivetrain();
         this.handler = new VisionHandler(
@@ -173,6 +170,8 @@ public class SwerveSubsystem extends BaseSubsystem {
 
         super.logger.log("Current Pose", getPose());
         super.logger.log("Current Speeds", getSpeeds());
+
+        Robot.field.setRobotPose(getPose());
     }
 
     /**

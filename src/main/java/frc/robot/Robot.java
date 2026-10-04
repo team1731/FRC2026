@@ -7,19 +7,29 @@ import java.util.Optional;
 
 import org.littletonrobotics.junction.*;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
-import org.littletonrobotics.junction.wpilog.WPILOGWriter;
+
+import frc.lib.frc1731.EventLogWriter;
 
 import com.pathplanner.lib.commands.*;
 import com.pathplanner.lib.pathfinding.*;
 
 import edu.wpi.first.wpilibj.*;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.net.WebServer;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.frc6328.LocalADStarAK;
-import frc.robot.subsystems.swerve.SwerveConstants;
-import frc.robot.subsystems.swerve.SwerveSubsystem;
+import frc.robot.subsystems.flywheel.FlywheelSubsystem;
+import frc.robot.subsystems.hood.HoodSubsystem;
+import frc.robot.subsystems.hopper.HopperSubsystem;
+import frc.robot.subsystems.indexer.IndexerSubsystem;
+import frc.robot.subsystems.intakedeploy.IntakeDeploySubsystem;
+import frc.robot.subsystems.intakeroller.IntakeRollerSubsystem;
+import frc.robot.subsystems.kicker.KickerSubsystem;
+import frc.robot.subsystems.swerve.*;
 
 /**
  * Main robot program entry point used by WPILib.
@@ -32,21 +42,45 @@ public class Robot extends LoggedRobot {
   private final RobotContainer container;
   private final AutoLoader autoLoader;
 
+  public static SwerveSubsystem swerve;
+  public static IntakeDeploySubsystem intakedeploy;
+  public static IntakeRollerSubsystem intakeroller;
+  public static IndexerSubsystem indexer;
+  public static KickerSubsystem kicker;
+  public static HoodSubsystem hood;
+  public static FlywheelSubsystem flywheel;
+  public static HopperSubsystem hopper;
+
+  public static Field2d field = new Field2d();
+
   private Command autonomousCommand = null;
-  
   private boolean isRedAlliance = false;
   private boolean autoHasRan = false;
 
+
   /** Initializes robot-wide services, pathfinding warmups, logging, and brownout protection. */
   public Robot() {
+    swerve = new SwerveSubsystem();
+    intakedeploy = new IntakeDeploySubsystem();
+    intakeroller = new IntakeRollerSubsystem();
+    indexer = new IndexerSubsystem();
+    kicker = new KickerSubsystem();
+    hood = new HoodSubsystem();
+    flywheel = new FlywheelSubsystem();
+    hopper = new HopperSubsystem();
+
+    // Container and autoloader MUST be instantiated after subsystems
+    container = new RobotContainer();
+    autoLoader = new AutoLoader();
+
     initLogging();
-    container = RobotContainer.kInstance;
-    autoLoader = AutoLoader.kInstance;
     Pathfinding.setPathfinder(new LocalADStarAK());
     CommandScheduler.getInstance().schedule(PathfindingCommand.warmupCommand());
     CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
     RobotController.setBrownoutVoltage(RobotConstants.kBrownoutVoltage);
     isRedAlliance = isRedAlliance();
+
+    SmartDashboard.putData("Field", field);
   }
 
   /**
@@ -73,13 +107,20 @@ public class Robot extends LoggedRobot {
       Logger.recordMetadata("Hostname", "Unknown");
     }
 
-    if (RobotConstants.kPublishLogsToNetworkTables) {
+    if (RobotConstants.kPublishLogsToNT) {
       Logger.addDataReceiver(new NT4Publisher());
     }
+
+    // External dashboards need a server even when AdvantageKit disables LiveWindow.
+    if (isSimulation()) {
+      NetworkTableInstance.getDefault().startServer("", "", 1735, 5810);
+    }
+    WebServer.start(5800, Filesystem.getDeployDirectory().getPath());
+    
     if (Robot.isReal() && RobotConstants.kLogToWPILog) {
       File usbDrive = new File("/U");
       if (usbDrive.exists() && usbDrive.isDirectory()) {
-        Logger.addDataReceiver(new WPILOGWriter()); // "/U/logs"
+        Logger.addDataReceiver(new EventLogWriter("/U/logs", RobotConstants.kLogEventKey));
       } else {
         DriverStation.reportWarning("No USB stick detected - WPILOG file logging disabled for this session", false);
       }
@@ -99,9 +140,9 @@ public class Robot extends LoggedRobot {
 
     if ((!curAuto.equals(autonomousCommand) || isRedAlliance != currentlyRed) && !autoHasRan) {
       autoLoader.getStartPose().ifPresent(startPose -> {
-        SwerveSubsystem.kInstance.resetPose(startPose);
-        SwerveSubsystem.kInstance.handler.resetVSLAMPose(startPose);
-        SwerveSubsystem.kInstance.handler.resetAprilTagSimPose(startPose);
+        Robot.swerve.resetPose(startPose);
+        Robot.swerve.handler.resetVSLAMPose(startPose);
+        Robot.swerve.handler.resetAprilTagSimPose(startPose);
       });
     }
 
@@ -166,7 +207,7 @@ public class Robot extends LoggedRobot {
       CommandScheduler.getInstance().schedule(autonomousCommand);
     }
 
-    SwerveSubsystem.kInstance.setStatorCurrentLimit(SwerveConstants.kAutoCurrentLimit);
+    Robot.swerve.setStatorCurrentLimit(SwerveConstants.kAutoCurrentLimit);
     autoHasRan = true;
   }
 
@@ -185,7 +226,7 @@ public class Robot extends LoggedRobot {
       autonomousCommand.cancel();
     }
 
-    SwerveSubsystem.kInstance.setStatorCurrentLimit(SwerveConstants.kTeleCurrentLimit);
+    Robot.swerve.setStatorCurrentLimit(SwerveConstants.kTeleCurrentLimit);
   }
 
   /** Called every loop during teleop after the scheduler has run. */
@@ -200,7 +241,7 @@ public class Robot extends LoggedRobot {
   @Override
   public void testInit() {
     CommandScheduler.getInstance().cancelAll();
-    SwerveSubsystem.kInstance.setStatorCurrentLimit(SwerveConstants.kTeleCurrentLimit);
+    Robot.swerve.setStatorCurrentLimit(SwerveConstants.kTeleCurrentLimit);
   }
 
   /** Called every loop during test mode after the scheduler has run. */

@@ -1,4 +1,4 @@
-package frc.robot.subsystems.shooting;
+package frc.robot.shooting;
 
 import java.util.ArrayList;
 import java.util.List;

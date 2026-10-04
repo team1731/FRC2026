@@ -20,9 +20,7 @@ public class IntakeDeploySubsystem extends BaseServoSubsystem<MotorIOTalonFX, Ba
         new TrapezoidalPositionRequest(IntakeDeployConstants.kDeployAngle)
             .withSpeeds(IntakeDeployConstants.kMaxVelocity, IntakeDeployConstants.kMaxAcceleration);
 
-    public static final IntakeDeploySubsystem kInstance = new IntakeDeploySubsystem();
-
-    private IntakeDeploySubsystem() {
+    public IntakeDeploySubsystem() {
         super(IntakeDeployConstants.getIO(), new BaseAngularServoInputsAutoLogged());
     }
 

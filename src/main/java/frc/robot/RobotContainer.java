@@ -6,14 +6,6 @@ import com.pathplanner.lib.events.EventTrigger;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.lib.frc1678.mechviz.RobotVisualizer;
 import frc.robot.subsystems.Superstructure;
-import frc.robot.subsystems.flywheel.FlywheelSubsystem;
-import frc.robot.subsystems.hood.HoodSubsystem;
-import frc.robot.subsystems.indexer.IndexerSubsystem;
-import frc.robot.subsystems.intakedeploy.IntakeDeploySubsystem;
-import frc.robot.subsystems.intakeroller.IntakeRollerSubsystem;
-import frc.robot.subsystems.kicker.KickerSubsystem;
-import frc.robot.subsystems.hopper.HopperSubsystem;
-import frc.robot.subsystems.swerve.SwerveSubsystem;
 
 /**
  * Builds the robot's subsystem graph and binds controllers to commands.
@@ -23,44 +15,21 @@ import frc.robot.subsystems.swerve.SwerveSubsystem;
  */
 public class RobotContainer {
   private static final Controls controls = new Controls();
-  
-  /** Shared container instance used by {@link Robot}. */
-  public static final RobotContainer kInstance = new RobotContainer();
+  private Superstructure superstructure;
+  private RobotVisualizer visualizer;
 
-  // Subsystems
-  public static Superstructure superstructure;
-  public static SwerveSubsystem swerve;
-  public static KickerSubsystem kicker;
-  public static IndexerSubsystem indexer;
-  public static HopperSubsystem hopper;
-  public static HoodSubsystem hood;
-  public static FlywheelSubsystem flywheel;
-  public static IntakeRollerSubsystem intake;
-  public static IntakeDeploySubsystem deploy;
-  public static RobotVisualizer visualizer;
-
-  
-
-  private RobotContainer() {
-    superstructure = Superstructure.kInstance;
-    swerve = SwerveSubsystem.kInstance;
-    kicker = KickerSubsystem.kInstance;
-    indexer = IndexerSubsystem.kInstance;
-    hopper = HopperSubsystem.kInstance;
-    hood = HoodSubsystem.kInstance;
-    flywheel = FlywheelSubsystem.kInstance;
-    intake = IntakeRollerSubsystem.kInstance;
-    deploy = IntakeDeploySubsystem.kInstance;
+  public RobotContainer() {
+    superstructure = new Superstructure();
+    visualizer = RobotState.createMechViz();
+    visualizer.init();
 
     new EventTrigger("Shoot").onTrue(superstructure.shoot(false));
     new EventTrigger("StopShoot").onTrue(superstructure.stopShoot());
     new EventTrigger("Intake").whileTrue(superstructure.intake());
-    new EventTrigger("Warmup").whileTrue(superstructure.warmupWithHood());
+    new EventTrigger("Warmup").whileTrue(Robot.flywheel.warmup());
+    new EventTrigger("LowerSqueeze").onTrue(Robot.hopper.collapse());
+    new EventTrigger("RaiseSqueeze").onTrue(Robot.hopper.extend());
     NamedCommands.registerCommand("TargetLock", superstructure.lockSwerveToHub());
-
-    // Use RobotVisualizer.none() here for a template with no visualization work/output.
-    visualizer = RobotState.createMechViz();
-    visualizer.init();
     configureBindings();
   }
 
@@ -69,53 +38,56 @@ public class RobotContainer {
    */
   private void configureBindings() {
     controls.resetSwerve
-      .onTrue(new InstantCommand(() -> swerve.seedFieldCentric()));
+      .onTrue(new InstantCommand(() -> Robot.swerve.seedFieldCentric()));
 
     controls.intake
       .whileTrue(superstructure.intake());
 
     controls.shoot
       .whileTrue(superstructure.shoot(false))
-      .onFalse(hopper.collapse());
+      .onFalse(Robot.hopper.collapse());
 
     controls.shotFeedthrough
       .whileTrue(superstructure.shoot(true))
-      .onFalse(hopper.collapse());
+      .onFalse(Robot.hopper.collapse());
 
     controls.pass
       .whileTrue(superstructure.pass(false))
-      .onFalse(hopper.collapse());
+      .onFalse(Robot.hopper.collapse());
 
     controls.passFeedthrough
       .whileTrue(superstructure.pass(true))
-      .onFalse(hopper.collapse());
+      .onFalse(Robot.hopper.collapse());
 
     controls.overrideHubShot
       .whileTrue(superstructure.hubShot())
-      .onFalse(hopper.collapse());
+      .onFalse(Robot.hopper.collapse());
 
     controls.overrideTrenchShot
       .whileTrue(superstructure.trenchShot())
-      .onFalse(hopper.collapse());
+      .onFalse(Robot.hopper.collapse());
 
     controls.overrideTowerShot
       .whileTrue(superstructure.towerShot())
-      .onFalse(hopper.collapse());
+      .onFalse(Robot.hopper.collapse());
     
     controls.warmup
       .whileTrue(superstructure.warmupWithoutHood());
 
+    controls.collapseIntake
+      .onTrue(Robot.intakedeploy.home()
+        .alongWith(Robot.hopper.collapse())
+      );
+
     // controls.raiseHopper
-    //   .onTrue(hopper.extend());
+    //   .onTrue(Robot.hopper.extend());
 
     // controls.lowerHopper
-    //   .onTrue(hopper.collapse());
+    //   .onTrue(Robot.hopper.collapse());
   }
 
-  /**
-   * Runs container-owned periodic work from {@link Robot#robotPeriodic()}.
-   */
   public void periodic() {
+    superstructure.periodic();
     visualizer.loop();
   }
 }

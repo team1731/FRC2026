@@ -11,9 +11,8 @@ import frc.lib.frc1731.subsystem.BaseVelocitySubsystem;
 
 public class FlywheelSubsystem extends BaseVelocitySubsystem<MotorIOTalonFX, BaseVelocityInputsAutoLogged> {
     public static final VelocityRequest kShotRequest = new VelocityRequest().withEpsilonThreshold(FlywheelConstants.kEpsilon);
-    public static final FlywheelSubsystem kInstance = new FlywheelSubsystem();
 
-    private FlywheelSubsystem() {
+    public FlywheelSubsystem() {
         super(FlywheelConstants.getIO(), new BaseVelocityInputsAutoLogged());
         super.setDefaultCommand(stop());
     }

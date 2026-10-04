@@ -1,4 +1,4 @@
-package frc.robot.subsystems.shooting;
+package frc.robot.shooting;
 
 public class ShotEntry {
     public double hoodRotations;

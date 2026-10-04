@@ -2,6 +2,8 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.button.*;
+import frc.lib.frc1731.hardware.controller.SimplePS5Controller;
+import frc.lib.frc1731.hardware.controller.SimpleXboxController;
 
 /**
  * Central location for driver/operator controller objects and named control bindings.
@@ -13,15 +15,16 @@ import edu.wpi.first.wpilibj2.command.button.*;
 public class Controls {
     private final SendableChooser<ControlSet> controlChooser = new SendableChooser<>();
 
-    private static final CommandPS5Controller driver = new CommandPS5Controller(RobotConstants.kDriverControllerPort);
-    private static final CommandXboxController operator = new CommandXboxController(RobotConstants.kOperatorControllerPort);
+    private static final SimplePS5Controller driver = new SimplePS5Controller(RobotConstants.kDriverControllerPort);
+    private static final SimpleXboxController operator = new SimpleXboxController(RobotConstants.kOperatorControllerPort);
 
     private ControlSet controlSet = ControlSet.kDefault;
 
-    public Trigger resetSwerve = driver.options();
-    public Trigger intake = driver.L2();
-    public Trigger shoot = driver.R2();
-    public Trigger pass = driver.R1();
+    public Trigger resetSwerve = driver.rightOptions();
+    public Trigger intake = driver.leftTrigger();
+    public Trigger shoot = driver.rightTrigger();
+    public Trigger pass = driver.rightBumper();
+    public Trigger collapseIntake = driver.dpadUp();
 
     public Trigger shotFeedthrough = intake.and(shoot);
     public Trigger passFeedthrough = intake.and(pass);
@@ -65,7 +68,7 @@ public class Controls {
      *
      * @return PS5 controller assigned to the driver port
      */
-    public static CommandPS5Controller getDriver() {
+    public static SimplePS5Controller getDriver() {
         return Controls.driver;
     }
 
@@ -74,7 +77,7 @@ public class Controls {
      *
      * @return Xbox controller assigned to the operator port
      */
-    public static CommandXboxController getOperator() {
+    public static SimpleXboxController getOperator() {
         return Controls.operator;
     }
 }

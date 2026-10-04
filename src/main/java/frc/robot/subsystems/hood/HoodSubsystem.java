@@ -11,15 +11,13 @@ import frc.lib.frc1731.subsystem.BaseServoSubsystem;
 import frc.robot.RobotState;
 
 public class HoodSubsystem extends BaseServoSubsystem<MotorIOTalonFX, BaseAngularServoInputsAutoLogged> {
+    // home() uses kShotRequest while constructing the singleton.
     public static final TrapezoidalPositionRequest kShotRequest = new TrapezoidalPositionRequest(
         HoodConstants.kMaxVelocity, 
         HoodConstants.kMaxAcceleration
     ).withEpsilonThreshold(HoodConstants.kEpsilon);
 
-    // home() uses kShotRequest while constructing the singleton.
-    public static final HoodSubsystem kInstance = new HoodSubsystem();
-
-    private HoodSubsystem() {
+    public HoodSubsystem() {
         super(HoodConstants.getIO(), new BaseAngularServoInputsAutoLogged());
         super.setDefaultCommand(home());
     }

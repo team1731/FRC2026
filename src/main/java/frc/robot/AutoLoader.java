@@ -1,6 +1,9 @@
 package frc.robot;
 
 import java.util.Optional;
+import java.util.Locale;
+
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
@@ -8,44 +11,52 @@ import com.pathplanner.lib.util.FlippingUtil;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 
 /**
  * Owns the PathPlanner autonomous chooser and exposes the selected auto plus its start pose.
  */
 public class AutoLoader {
-    /** Shared autonomous loader instance used by {@link Robot}. */
-    public static final AutoLoader kInstance = new AutoLoader();
-
-    private SendableChooser<Command> m_chooser = new SendableChooser<>();
-    private final Command noAuto = Commands.none();
+    private final LoggedDashboardChooser<Command> chooser;
+    private final PathPlannerAuto defaultAuto;
     
-    private AutoLoader() {
-        m_chooser = AutoBuilder.buildAutoChooser(RobotConstants.kAutoDefault);
-        SmartDashboard.putData(RobotConstants.kAutoCodeKey, m_chooser);
+    public AutoLoader() {
+        defaultAuto = new PathPlannerAuto(RobotConstants.kAutoDefault);
+        SendableChooser<Command> options = new SendableChooser<>();
+        options.setDefaultOption(displayName(RobotConstants.kAutoDefault), new PathPlannerAuto(RobotConstants.kAutoDefault));
+        AutoBuilder.getAllAutoNames().stream()
+            .filter(name -> name.toLowerCase(Locale.ROOT).startsWith("comp_"))
+            .filter(name -> !name.equals(RobotConstants.kAutoDefault))
+            .sorted()
+            .forEach(name -> options.addOption(displayName(name), new PathPlannerAuto(name)));
+        chooser = new LoggedDashboardChooser<>(RobotConstants.kAutoCodeKey, options);
+        chooser.onChange(cmd -> System.out.println("@@@@@@@@@ Selected New Auto: " + cmd.getName()));
+    }
+
+    /** Removes the blue-origin prefix from dashboard labels only. */
+    private static String displayName(String name) {
+        return name.toLowerCase(Locale.ROOT).startsWith("comp_") ? name.substring(5) : name;
     }
 
     /**
      * Returns the currently selected autonomous command.
      *
-     * <p>The chooser's None option and an absent selection both safely do nothing.
+     * <p>If the selected auto does not exist, return the default instead.
      *
-     * @return selected command, including the chooser's None option
+     * @return selected blue-origin auto, or the configured default
      */
     public Command getSelected() {
-        Command selected = m_chooser.getSelected();
-        return selected != null ? selected : noAuto;
+        Command selected = chooser.get();
+        return selected != null ? selected : getDefault();
     }
 
     /**
-     * Builds a new instance of the configured default auto.
+     * Returns the cached configured default auto.
      *
      * @return default PathPlanner auto
      */
     public PathPlannerAuto getDefault() {
-        return new PathPlannerAuto(RobotConstants.kAutoDefault);
+        return defaultAuto;
     }
 
     /**

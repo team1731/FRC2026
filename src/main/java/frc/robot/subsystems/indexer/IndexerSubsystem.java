@@ -10,9 +10,8 @@ import frc.lib.frc1731.subsystem.BaseVelocityInputsAutoLogged;
 public class IndexerSubsystem extends BaseVelocitySubsystem<MotorIOTalonFX, BaseVelocityInputsAutoLogged> {
     public static final VelocityRequest kFeedRequest = new VelocityRequest(IndexerConstants.kFeedVelocity).withEpsilonThreshold(IndexerConstants.kEpsilon);
     public static final VelocityRequest kSpitRequest = new VelocityRequest(IndexerConstants.kSpitVelocity).withEpsilonThreshold(IndexerConstants.kEpsilon);
-    public static final IndexerSubsystem kInstance = new IndexerSubsystem();
 
-    private IndexerSubsystem() {
+    public IndexerSubsystem() {
         super(IndexerConstants.getIO(), new BaseVelocityInputsAutoLogged());
     }
 

@@ -9,9 +9,8 @@ import frc.robot.RobotState;
 
 public class HopperSubsystem extends BaseServoSubsystem<MotorIOSparkMax, BaseLinearServoInputsAutoLogged> {
     public static final LinearPositionRequest kPositionRequest = new LinearPositionRequest(HopperConstants.kConverter).withEpsilonThreshold(HopperConstants.kEpsilon);
-    public static final HopperSubsystem kInstance = new HopperSubsystem();
 
-    private HopperSubsystem() {
+    public HopperSubsystem() {
         super(HopperConstants.getIO(), HopperConstants.kConverter, new BaseLinearServoInputsAutoLogged());
     }
 

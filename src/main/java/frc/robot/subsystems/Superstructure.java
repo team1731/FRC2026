@@ -7,39 +7,31 @@ import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.*;
-import frc.robot.subsystems.flywheel.FlywheelSubsystem;
-import frc.robot.subsystems.hood.HoodSubsystem;
-import frc.robot.subsystems.indexer.IndexerSubsystem;
-import frc.robot.subsystems.intakedeploy.IntakeDeploySubsystem;
-import frc.robot.subsystems.intakeroller.IntakeRollerSubsystem;
-import frc.robot.subsystems.kicker.KickerSubsystem;
-import frc.robot.subsystems.shooting.ShotGenerator;
-import frc.robot.subsystems.hopper.HopperSubsystem;
-import frc.robot.subsystems.swerve.SwerveSubsystem;
+import frc.robot.Robot;
+import frc.robot.shooting.ShotGenerator;
 
 /**
  * Coordinates mechanisms that need to move and interact together
  */
-public class Superstructure extends SubsystemBase {
-    public static final Superstructure kInstance = new Superstructure();
-    private Superstructure() {}
-
+public class Superstructure {
     private ShotGenerator generator = new ShotGenerator();
+    public Superstructure() {}
+
 
     // =========================================================================
     // Helper commands
     // =========================================================================
 
     private boolean readyToShoot() {
-        return HoodSubsystem.kInstance.atSetpoint() && FlywheelSubsystem.kInstance.atSetpoint();// && SwerveSubsystem.kInstance.lockedOnTarget();
+        return Robot.hood.atSetpoint() && Robot.flywheel.atSetpoint();// && SwerveSubsystem.kInstance.lockedOnTarget();
     }
 
     private Command feed() {
-        return IndexerSubsystem.kInstance.feed().alongWith(KickerSubsystem.kInstance.feed());
+        return Robot.indexer.feed().alongWith(Robot.kicker.feed());
     }
 
     private Command applyTargetHoodAndFlywheel() {
-        return HoodSubsystem.kInstance.setAngle(() -> generator.targetHoodAngle).alongWith(FlywheelSubsystem.kInstance.shoot(() -> generator.targetFlywheelVelocity));
+        return Robot.hood.setAngle(() -> generator.targetHoodAngle).alongWith(Robot.flywheel.shoot(() -> generator.targetFlywheelVelocity));
     }
 
     private Command setTarget(Supplier<Translation2d> target, boolean adjustForMovingShot) {
@@ -49,7 +41,7 @@ public class Superstructure extends SubsystemBase {
     }
 
     private Command jiggleIntakeForShot() {
-        return IntakeDeploySubsystem.kInstance.jiggle().alongWith(IntakeRollerSubsystem.kInstance.intake()); // intakedeploy and intakeroller should be applied here
+        return Robot.intakedeploy.jiggle().alongWith(Robot.intakeroller.intake()); // intakedeploy and intakeroller should be applied here
     }
 
     // =========================================================================
@@ -57,39 +49,39 @@ public class Superstructure extends SubsystemBase {
     // =========================================================================
 
     public Command lockSwerveToHub() {
-        return SwerveSubsystem.kInstance.lockHeadingTarget(generator.kHubSupplier);
+        return Robot.swerve.lockHeadingTarget(generator.kHubSupplier);
     }
 
     public Command squeezeHopper() {
-        return HopperSubsystem.kInstance.collapse();
+        return Robot.hopper.collapse();
     }
 
     public Command raiseHopper() {
-        return HopperSubsystem.kInstance.extend();
+        return Robot.hopper.extend();
     }
 
     public Command intake() {
-        return IntakeDeploySubsystem.kInstance.deploy().alongWith(IntakeRollerSubsystem.kInstance.intake());
+        return Robot.intakedeploy.deploy().alongWith(Robot.intakeroller.intake());
     }
 
     public Command warmupWithHood() {
-        return HoodSubsystem.kInstance.setAngle(() -> generator.targetHoodAngle).alongWith(FlywheelSubsystem.kInstance.shoot(() -> generator.targetFlywheelVelocity));
+        return Robot.hood.setAngle(() -> generator.targetHoodAngle).alongWith(Robot.flywheel.shoot(() -> generator.targetFlywheelVelocity));
     }
 
     public Command warmupWithoutHood() {
-        return HoodSubsystem.kInstance.home().alongWith(FlywheelSubsystem.kInstance.shoot(() -> generator.targetFlywheelVelocity));
+        return Robot.hood.home().alongWith(Robot.flywheel.shoot(() -> generator.targetFlywheelVelocity));
     }
 
     private Command shoot(Supplier<Translation2d> target, boolean adjustForMovingShot, boolean trackTarget, boolean feedthrough, BooleanSupplier shotCondition) {
         return new SequentialCommandGroup(
             setTarget(target, adjustForMovingShot),
             new ParallelCommandGroup(
-                SwerveSubsystem.kInstance.joystickTargetLock(target),
+                Robot.swerve.joystickTargetLock(target),
                 applyTargetHoodAndFlywheel(),
                 Commands.waitUntil(shotCondition).andThen(
                     new ParallelCommandGroup( // Only start the feeding and squeezing sequence after we are ready to shoot
                         this.feed(),
-                        Commands.waitSeconds(1.5).andThen(HopperSubsystem.kInstance.collapse())
+                        Commands.waitSeconds(1.5).andThen(Robot.hopper.collapse())
                     )
                 ),
                 Commands.either( // If feedthrough continue intaking, otherwise jiggle
@@ -104,8 +96,8 @@ public class Superstructure extends SubsystemBase {
 
     private Command shoot(double targetFlywheel, double targetHood, BooleanSupplier shotCondition) {
         return new ParallelCommandGroup(
-            FlywheelSubsystem.kInstance.shoot(RotationsPerSecond.of(targetFlywheel)),
-            HoodSubsystem.kInstance.setAngle(Rotations.of(targetHood)),
+            Robot.flywheel.shoot(RotationsPerSecond.of(targetFlywheel)),
+            Robot.hood.setAngle(Rotations.of(targetHood)),
             Commands.waitUntil(shotCondition).andThen(
                 new ParallelCommandGroup(
                     feed(),
@@ -145,15 +137,14 @@ public class Superstructure extends SubsystemBase {
     }
 
     public Command stopShoot() {
-        return HoodSubsystem.kInstance.home()
+        return Robot.hood.home()
             .alongWith(
-                FlywheelSubsystem.kInstance.stop(), 
-                IndexerSubsystem.kInstance.stop(), 
-                KickerSubsystem.kInstance.stop()
+                Robot.flywheel.stop(), 
+                Robot.indexer.stop(), 
+                Robot.kicker.stop()
             );
     }
 
-    @Override
     public void periodic() {
         generator.update();
     }
