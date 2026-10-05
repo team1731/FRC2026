@@ -33,8 +33,8 @@ public class TrapezoidalPositionRequest extends MotorRequest {
     }
 
     private Angle position = Rotations.zero();
-    private AngularVelocity maxVelocity = RPM.zero();
-    private AngularAcceleration maxAcceleration = RPM.per(Second).zero();
+    private AngularVelocity maxVelocity;
+    private AngularAcceleration maxAcceleration;
 
     public TrapezoidalPositionRequest() {
         this(Radians.zero());

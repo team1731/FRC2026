@@ -47,7 +47,6 @@ public class SwerveSubsystem extends BaseSubsystem {
     public VisionHandler handler; // public so robot.java can reset VSLAM pose
 
     private double snailModeScalar = 1.0;
-    private double targetError = 0;
 
     public SwerveSubsystem() {
         if (!isActiveSubsystem()) return; // Build nothing if the subsystem is turned off
@@ -324,7 +323,6 @@ public class SwerveSubsystem extends BaseSubsystem {
             Rotation2d desiredAngle = targetAngle.plus(Rotation2d.fromDegrees(180));
             double rotRate = kHeadingCtrl.calculate(curPose.getRotation().getRadians() % (2 * Math.PI), desiredAngle.getRadians());
             
-            targetError = targetAngle.minus(desiredAngle).getDegrees();
             drivetrain.setControl(
                 kJoystickFieldCentricRequest
                     .withVelocityX(0)
@@ -332,7 +330,12 @@ public class SwerveSubsystem extends BaseSubsystem {
                     .withRotationalRate(rotRate)
             );
         }).withName("LockHeading")
-        .until(() -> Math.abs(targetError) < 1.0)
+        .until(() -> {
+            Pose2d pose = getPose();
+            Rotation2d desired = target.get().minus(pose.getTranslation()).getAngle()
+                .plus(Rotation2d.fromDegrees(180));
+            return Math.abs(desired.minus(pose.getRotation()).getDegrees()) < 1.0;
+        })
         .withInterruptBehavior(InterruptionBehavior.kCancelSelf);
     }
 }

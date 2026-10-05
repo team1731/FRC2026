@@ -233,10 +233,7 @@ public class MotorIOTalonFXS extends MotorIO implements AutoCloseable {
         this.magicOutput.Velocity = vel.in(RotationsPerSecond);
         this.magicOutput.Acceleration = accel.in(RotationsPerSecondPerSecond);
 
-        this.cfg.MotionMagic.MotionMagicCruiseVelocity = vel.in(RotationsPerSecond);
-        this.cfg.MotionMagic.MotionMagicAcceleration = accel.in(RotationsPerSecondPerSecond);
-
-        this.configurator.apply(cfg);
+        // DynamicMotionMagicVoltage carries these constraints in the control request.
     }
 
     @Override

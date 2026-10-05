@@ -173,6 +173,7 @@ public abstract class BaseSubsystem extends SubsystemBase {
      * @param forward Whether to run the routine in the forward or reverse direction
      */
     public Command dynamicSysIdCommand(boolean forward) {
+        if (sysIdRoutine == null) return Commands.none().withName("DynamicSysId");
         return Commands.either(
             sysIdRoutine.dynamic(forward ? SysIdRoutine.Direction.kForward : SysIdRoutine.Direction.kReverse),
             Commands.none(),
@@ -185,6 +186,7 @@ public abstract class BaseSubsystem extends SubsystemBase {
      * @param forward Whether to run the routine in the forward or reverse direction
      */
     public Command quasistaticSysIdCommand(boolean forward) {
+        if (sysIdRoutine == null) return Commands.none().withName("QuasistaticSysId");
         return Commands.either(
             sysIdRoutine.quasistatic(forward ? SysIdRoutine.Direction.kForward : SysIdRoutine.Direction.kReverse),
             Commands.none(),
@@ -200,7 +202,9 @@ public abstract class BaseSubsystem extends SubsystemBase {
      */
     @Override
     public Command run(Runnable runnable) {
-        return Commands.either(super.run(runnable), Commands.none(), () -> isActiveSubsystem());
+        return Commands.either(super.run(() -> {
+            if (isActiveSubsystem()) runnable.run();
+        }).until(() -> !isActiveSubsystem()), Commands.none(), this::isActiveSubsystem);
     }
 
     /**
@@ -223,7 +227,9 @@ public abstract class BaseSubsystem extends SubsystemBase {
      */
     @Override
     public Command runEnd(Runnable runnable, Runnable end) {
-        return Commands.either(super.runEnd(runnable, end), Commands.none(), () -> isActiveSubsystem());
+        return Commands.either(super.runEnd(() -> {
+            if (isActiveSubsystem()) runnable.run();
+        }, end).until(() -> !isActiveSubsystem()), Commands.none(), this::isActiveSubsystem);
     }
 
     /**

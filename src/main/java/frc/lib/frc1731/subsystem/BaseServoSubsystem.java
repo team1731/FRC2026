@@ -82,7 +82,7 @@ public abstract class BaseServoSubsystem<IO extends MotorIO> extends BaseMotorSu
     /** Captures the position when scheduled and holds it until interrupted. */
     public Command stop() {
         TrapezoidalPositionRequest request = new TrapezoidalPositionRequest();
-        return runOnce(() -> new TrapezoidalPositionRequest().withPosition(getPosition()))
+        return runOnce(() -> request.withPosition(getPosition()))
             .andThen(applyRequest(() -> request)).withName("HoldPosition");
     }
 }

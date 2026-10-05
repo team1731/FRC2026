@@ -33,8 +33,8 @@ public class LinearTrapezoidalPositionRequest extends MotorRequest {
     }
 
     private Distance position = Inches.zero();
-    private LinearVelocity maxVelocity = InchesPerSecond.zero();
-    private LinearAcceleration maxAcceleration = InchesPerSecondPerSecond.zero();
+    private LinearVelocity maxVelocity;
+    private LinearAcceleration maxAcceleration;
     private final DistanceAngleConverter converter;
 
     public LinearTrapezoidalPositionRequest(DistanceAngleConverter converter) {
@@ -92,7 +92,7 @@ public class LinearTrapezoidalPositionRequest extends MotorRequest {
 
     @Override
     public void apply(MotorIO io) {
-        if (maxVelocity != null) {
+        if (maxVelocity != null && maxAcceleration != null) {
             io.updateTrapezoidalSpeeds(converter.toAngularVelocity(maxVelocity),
                     RadiansPerSecondPerSecond.of(maxAcceleration.in(MetersPerSecondPerSecond)
                             / converter.getDrumRadius().in(Meters)), slot);

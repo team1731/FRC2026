@@ -55,7 +55,10 @@ public abstract class BaseMotorSubsystem<IO extends MotorIO> extends BaseSubsyst
     }
 
     public Command applyRequestUntilAtSetpoint(MotorRequest request) {
-        return applyRequest(request).until(this::atSetpoint);
+        return Commands.either(
+            applyRequest(request).andThen(Commands.waitUntil(this::atSetpoint))
+                .until(() -> !isActiveSubsystem()),
+            Commands.none(), this::isActiveSubsystem);
     }
 
     public Command applyRequestUntilAtSetpoint(Supplier<MotorRequest> request) {
@@ -71,11 +74,11 @@ public abstract class BaseMotorSubsystem<IO extends MotorIO> extends BaseSubsyst
     }
 
     public Command waitForThenApplyRequestUntilAtSetpoint(BooleanSupplier condition, MotorRequest request) {
-        return Commands.waitUntil(condition).andThen(this.applyRequest(request)).until(this::atSetpoint);
+        return Commands.waitUntil(condition).andThen(applyRequestUntilAtSetpoint(request));
     }
 
     public Command waitForThenApplyRequestUntilAtSetpoint(BooleanSupplier condition, Supplier<MotorRequest> request) {
-        return Commands.waitUntil(condition).andThen(this.applyRequest(request)).until(this::atSetpoint);
+        return Commands.waitUntil(condition).andThen(applyRequestUntilAtSetpoint(request));
     }
 
     @Override

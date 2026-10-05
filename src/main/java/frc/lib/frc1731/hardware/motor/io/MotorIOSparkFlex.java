@@ -21,6 +21,8 @@ import frc.lib.frc1731.hardware.motor.io.config.MotorGroupConfig;
  * {@link MotorIO} implementation for REV SPARK Flex brushless motor controllers.
  */
 public class MotorIOSparkFlex extends MotorIO implements AutoCloseable {
+    private final double[] profileVelocity = {Double.NaN, Double.NaN, Double.NaN, Double.NaN};
+    private final double[] profileAcceleration = {Double.NaN, Double.NaN, Double.NaN, Double.NaN};
     private final java.util.List<SparkFlex> followers = new java.util.ArrayList<>();
     private SparkFlex motor;
     private SparkClosedLoopController motorCtrl;
@@ -116,18 +118,28 @@ public class MotorIOSparkFlex extends MotorIO implements AutoCloseable {
     @Override
     public void resetEncoderPosition(Angle position) {
         this.encoder.setPosition(position.in(Rotations));
-        this.mechSim.setState(position, RotationsPerSecond.of(0));
+        if (this.mechSim != null) this.mechSim.setState(position, RotationsPerSecond.of(0));
     }
 
     @Override
     public void updateTrapezoidalSpeeds(AngularVelocity vel, AngularAcceleration accel, int slot) {
+        double velocity = vel.in(RPM);
+        double acceleration = accel.in(RPM.per(Second));
+        if (slot < 0 || slot >= profileVelocity.length) {
+            throw new IllegalArgumentException("Profile slot must be between 0 and 3");
+        }
+        if (profileVelocity[slot] == velocity && profileAcceleration[slot] == acceleration) return;
         this.config.closedLoop.maxMotion
             .cruiseVelocity(vel.in(RPM), getSlot(slot))
             .maxAcceleration(accel.in(RPM.per(Second)), getSlot(slot))
             .positionMode(com.revrobotics.spark.config.MAXMotionConfig.MAXMotionPositionMode.kMAXMotionTrapezoidal, getSlot(slot))
         ;
 
-        this.motor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+        if (this.motor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters)
+                == REVLibError.kOk) {
+            profileVelocity[slot] = velocity;
+            profileAcceleration[slot] = acceleration;
+        }
     }
 
     @Override
