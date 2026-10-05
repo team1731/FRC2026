@@ -1,6 +1,7 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.button.*;
 import frc.lib.frc1731.hardware.controller.SimplePS5Controller;
 import frc.lib.frc1731.hardware.controller.SimpleXboxController;
@@ -13,29 +14,29 @@ import frc.lib.frc1731.hardware.controller.SimpleXboxController;
  * exposing triggers by robot intent.
  */
 public class Controls {
-    private final SendableChooser<ControlSet> controlChooser = new SendableChooser<>();
+    private static final SendableChooser<ControlSet> controlChooser = new SendableChooser<>();
 
     private static final SimplePS5Controller driver = new SimplePS5Controller(RobotConstants.kDriverControllerPort);
     private static final SimpleXboxController operator = new SimpleXboxController(RobotConstants.kOperatorControllerPort);
 
-    private ControlSet controlSet = ControlSet.kDefault;
+    private static ControlSet controlSet = ControlSet.kDefault;
 
-    public Trigger resetSwerve = driver.rightOptions();
-    public Trigger snailDrive = driver.leftBumper();
-    public Trigger intake = driver.leftTrigger();
-    public Trigger shoot = driver.rightTrigger();
-    public Trigger pass = driver.rightBumper();
-    public Trigger collapseIntake = driver.dpadUp();
+    public static Trigger resetSwerve = driver.rightOptions();
+    public static Trigger snailDrive = driver.leftBumper();
+    public static Trigger intake = driver.leftTrigger();
+    public static Trigger shoot = driver.rightTrigger();
+    public static Trigger pass = driver.rightBumper();
+    public static Trigger collapseIntake = driver.dpadUp();
 
-    public Trigger shotFeedthrough = intake.and(shoot);
-    public Trigger passFeedthrough = intake.and(pass);
+    public static Trigger shotFeedthrough = intake.and(shoot);
+    public static Trigger passFeedthrough = intake.and(pass);
 
-    public Trigger warmup = operator.rightTrigger();
-    public Trigger overrideHubShot = operator.a();
-    public Trigger overrideTrenchShot = operator.x();
-    public Trigger overrideTowerShot = operator.y();
-    public Trigger overrideLobShot = operator.b();
-    public Trigger shotOverride = overrideHubShot.or(overrideTrenchShot).or(overrideTowerShot).or(overrideLobShot);
+    public static Trigger warmup = operator.rightTrigger();
+    public static Trigger overrideHubShot = operator.a();
+    public static Trigger overrideTrenchShot = operator.x();
+    public static Trigger overrideTowerShot = operator.y();
+    public static Trigger overrideLobShot = operator.b();
+    public static Trigger shotOverride = overrideHubShot.or(overrideTrenchShot).or(overrideTowerShot).or(overrideLobShot);
 
     public Trigger raiseHopper = operator.rightBumper();
     public Trigger lowerHopper = operator.leftBumper();
@@ -50,11 +51,25 @@ public class Controls {
     /**
      * Builds the control chooser and initializes the selected control mapping.
      */
-    public Controls() {
-        this.controlChooser.setDefaultOption("Default", ControlSet.kDefault);
+    private Controls() {
+        // this.controlChooser.setDefaultOption("Default", ControlSet.kDefault);
+        // for (ControlSet set : ControlSet.values()) {
+        //     if (!set.equals(ControlSet.kDefault)) { // Don't add the default value
+        //         this.controlChooser.addOption(set.name(), set);
+        //     }
+        // }
+
+        // // If there are any alternating sets of controls add them here
+        // switch (controlSet) {
+        //     default:
+        // }
+    }
+
+    public static void build() {
+        controlChooser.setDefaultOption("Default", ControlSet.kDefault);
         for (ControlSet set : ControlSet.values()) {
             if (!set.equals(ControlSet.kDefault)) { // Don't add the default value
-                this.controlChooser.addOption(set.name(), set);
+                controlChooser.addOption(set.name(), set);
             }
         }
 
@@ -62,6 +77,8 @@ public class Controls {
         switch (controlSet) {
             default:
         }
+
+        SmartDashboard.putData("Choose Controls", controlChooser);
     }
 
     /**
