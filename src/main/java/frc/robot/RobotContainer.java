@@ -14,7 +14,6 @@ import frc.robot.subsystems.Superstructure;
  * subsystems, while this class decides which commands are defaults and which controls schedule them.
  */
 public class RobotContainer {
-  private static final Controls controls = new Controls();
   private Superstructure superstructure;
   private RobotVisualizer visualizer;
 
@@ -22,6 +21,7 @@ public class RobotContainer {
     superstructure = new Superstructure();
     visualizer = RobotState.createMechViz();
     visualizer.init();
+    Controls.build();
 
     new EventTrigger("Shoot").onTrue(superstructure.shoot(false));
     new EventTrigger("StopShoot").onTrue(superstructure.stopShoot());
@@ -30,6 +30,7 @@ public class RobotContainer {
     new EventTrigger("LowerSqueeze").onTrue(Robot.hopper.collapse());
     new EventTrigger("RaiseSqueeze").onTrue(Robot.hopper.extend());
     NamedCommands.registerCommand("TargetLock", superstructure.lockSwerveToHub());
+
     configureBindings();
   }
 
@@ -37,56 +38,56 @@ public class RobotContainer {
    * Maps driver and operator inputs to command actions.
    */
   private void configureBindings() {
-    controls.resetSwerve
+    Controls.resetSwerve
       .onTrue(new InstantCommand(() -> Robot.swerve.seedFieldCentric()));
 
-    controls.snailDrive
+    Controls.snailDrive
       .whileTrue(new InstantCommand(() -> Robot.swerve.setSnailMode(true)))
       .onFalse(new InstantCommand(() -> Robot.swerve.setSnailMode(false)));
 
-    controls.intake
+    Controls.intake
       .whileTrue(superstructure.intake());
 
-    controls.shoot
+    Controls.shoot
       .whileTrue(superstructure.shoot(false))
       .onFalse(Robot.hopper.collapse());
 
-    controls.shotFeedthrough
+    Controls.shotFeedthrough
       .whileTrue(superstructure.shoot(true))
       .onFalse(Robot.hopper.collapse());
 
-    controls.pass
+    Controls.pass
       .whileTrue(superstructure.pass(false))
       .onFalse(Robot.hopper.collapse());
 
-    controls.passFeedthrough
+    Controls.passFeedthrough
       .whileTrue(superstructure.pass(true))
       .onFalse(Robot.hopper.collapse());
 
-    controls.overrideHubShot
+    Controls.overrideHubShot
       .whileTrue(superstructure.hubShot())
       .onFalse(Robot.hopper.collapse());
 
-    controls.overrideTrenchShot
+    Controls.overrideTrenchShot
       .whileTrue(superstructure.trenchShot())
       .onFalse(Robot.hopper.collapse());
 
-    controls.overrideTowerShot
+    Controls.overrideTowerShot
       .whileTrue(superstructure.towerShot())
       .onFalse(Robot.hopper.collapse());
     
-    controls.warmup
+    Controls.warmup
       .whileTrue(superstructure.warmupWithoutHood());
 
-    controls.collapseIntake
+    Controls.collapseIntake
       .onTrue(Robot.intakedeploy.home()
         .alongWith(Robot.hopper.collapse())
       );
 
-    // controls.raiseHopper
+    // Controls.raiseHopper
     //   .onTrue(Robot.hopper.extend());
 
-    // controls.lowerHopper
+    // Controls.lowerHopper
     //   .onTrue(Robot.hopper.collapse());
   }
 
