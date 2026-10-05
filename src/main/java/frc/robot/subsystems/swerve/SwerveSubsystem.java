@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import frc.robot.RobotState;
 import frc.lib.frc1678.util.Util;
+import frc.lib.frc1731.DriveSpeedLimiter;
 import frc.lib.frc1731.subsystem.BaseSubsystem;
 import frc.robot.Controls;
 import frc.robot.Robot;
@@ -46,7 +47,6 @@ public class SwerveSubsystem extends BaseSubsystem {
     public VisionHandler handler; // public so robot.java can reset VSLAM pose
 
     private double snailModeScalar = 1.0;
-
     private double targetError = 0;
 
     public SwerveSubsystem() {
@@ -66,7 +66,11 @@ public class SwerveSubsystem extends BaseSubsystem {
                 this::resetPose,
                 this::getSpeeds,
                 // Consumer of ChassisSpeeds to drive the robot
-                (speeds, feedsforwards)-> this.drivetrain.setControl(kAutoRequest.withSpeeds(speeds)),
+                (speeds, feedforwards)-> this.drivetrain.setControl(
+                    kAutoRequest.withSpeeds(speeds)
+                    .withWheelForceFeedforwardsX(feedforwards.robotRelativeForcesXNewtons())
+                    .withWheelForceFeedforwardsY(feedforwards.robotRelativeForcesYNewtons())
+                ),
                 new PPHolonomicDriveController(
                     kPPConstants,
                     kPPConstants
@@ -114,6 +118,16 @@ public class SwerveSubsystem extends BaseSubsystem {
         return this.drivetrain.getPigeon2().getYaw().getValueAsDouble();
     }
 
+    /** Combined simulated battery current for all drive and steer controllers. */
+    public double getSimSupplyCurrent() {
+        double total = 0.0;
+        for (var module : drivetrain.getModules()) {
+            total += module.getDriveMotor().getSimState().getSupplyCurrent();
+            total += module.getSteerMotor().getSimState().getSupplyCurrent();
+        }
+        return total;
+    }
+
     /**
      * Applies a stator current limit to every swerve drive motor.
      *
@@ -151,7 +165,7 @@ public class SwerveSubsystem extends BaseSubsystem {
     }
 
     public void setSnailMode(boolean snail) {
-        this.snailModeScalar = snail ? 0.5 : 1.0;
+        this.snailModeScalar = snail ? kSnailDriveScalar : 1.0;
     }
 
     /**
@@ -165,7 +179,8 @@ public class SwerveSubsystem extends BaseSubsystem {
         this.handler.periodic(
             getPose(),
             getPose().getRotation().getDegrees(), 
-            drivetrain.getPigeon2().getAngularVelocityZDevice().getValueAsDouble()
+            drivetrain.getPigeon2().getAngularVelocityZDevice().getValueAsDouble(),
+            getSpeeds()
         );
 
         super.logger.log("Current Pose", getPose());
@@ -187,13 +202,22 @@ public class SwerveSubsystem extends BaseSubsystem {
      */
     public Command joystickDrive() {
         return run(() -> {
-            double velX = kXScalar.scale(-Controls.getDriver().getLeftY() * SwerveConstants.kMaxSpeed * SwerveConstants.kTranslationScalar);
-            double velY = kYScalar.scale(-Controls.getDriver().getLeftX() * SwerveConstants.kMaxSpeed * SwerveConstants.kTranslationScalar);
-            double omega = kOmegaScalar.scale(-Controls.getDriver().getRightX() * SwerveConstants.kMaxAngularRate * SwerveConstants.kRotationScalar);
+            double velX = kXScalar.scale(-Controls.getDriver().getLeftY());
+            double velY = kYScalar.scale(-Controls.getDriver().getLeftX());
+            double omega = kOmegaScalar.scale(-Controls.getDriver().getRightX());
 
             velX *= snailModeScalar;
             velY *= snailModeScalar;
             omega *= snailModeScalar;
+
+            ChassisSpeeds requested = new ChassisSpeeds(velX, velY, omega);
+            ChassisSpeeds limited = DriveSpeedLimiter.prioritizeRotation(
+                velX, velY, omega, kMaxSpeed, kDriveRadius);
+            velX = limited.vxMetersPerSecond;
+            velY = limited.vyMetersPerSecond;
+            omega = limited.omegaRadiansPerSecond;
+            logger.log("Driver Requested Speeds", requested);
+            logger.log("Driver Limited Speeds", limited);
 
             if (velX == 0.0 && velY == 0.0 && omega == 0.0) {
                 this.drivetrain.setControl(kBrakeRequest);
@@ -219,14 +243,16 @@ public class SwerveSubsystem extends BaseSubsystem {
             Rotation2d desiredAngle = targetAngle.plus(Rotation2d.fromDegrees(180));
             double rotRate = kHeadingCtrl.calculate(curPose.getRotation().getRadians() % (2 * Math.PI), desiredAngle.getRadians());
 
-            double velX = kXScalar.scale(-Controls.getDriver().getLeftY() * SwerveConstants.kMaxSpeed * SwerveConstants.kTranslationScalar * 0.5);
-            double velY = kYScalar.scale(-Controls.getDriver().getLeftX() * SwerveConstants.kMaxSpeed * SwerveConstants.kTranslationScalar * 0.5);
+            double velX = kXScalar.scale(-Controls.getDriver().getLeftY()) * 0.5 * snailModeScalar;
+            double velY = kYScalar.scale(-Controls.getDriver().getLeftX()) * 0.5 * snailModeScalar;
+            ChassisSpeeds limited = DriveSpeedLimiter.prioritizeRotation(
+                velX, velY, rotRate * snailModeScalar, kMaxSpeed, kDriveRadius);
             
             drivetrain.setControl(
                 kJoystickFieldCentricRequest
-                    .withVelocityX(velX)
-                    .withVelocityY(velY)
-                    .withRotationalRate(rotRate)
+                    .withVelocityX(limited.vxMetersPerSecond)
+                    .withVelocityY(limited.vyMetersPerSecond)
+                    .withRotationalRate(limited.omegaRadiansPerSecond)
             );
         }).withName("JoystickTargetLock");
     }

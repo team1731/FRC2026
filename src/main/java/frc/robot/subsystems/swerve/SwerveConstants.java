@@ -21,7 +21,14 @@ public final class SwerveConstants {
     public static final double kMaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // Max robot speed
 
     /** Maximum commanded angular speed in radians per second. */
-    public static final double kMaxAngularRate = RotationsPerSecond.of(1.5).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
+    public static final double kMaxAngularRate = RotationsPerSecond.of(1.5).in(RadiansPerSecond);
+
+    /** Furthest module from the robot center, used to reserve wheel speed for rotation. */
+    public static final double kDriveRadius = Math.max(
+        Math.max(Math.hypot(TunerConstants.FrontLeft.LocationX, TunerConstants.FrontLeft.LocationY),
+                 Math.hypot(TunerConstants.FrontRight.LocationX, TunerConstants.FrontRight.LocationY)),
+        Math.max(Math.hypot(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY),
+                 Math.hypot(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)));
 
     /** Maximum commanded angular acceleration in radians per second squared. */
     public static final double kMaxAngularAcceleration = Math.toRadians(540); // deg/s^2 max acceleration
@@ -31,6 +38,8 @@ public final class SwerveConstants {
 
     /** Scalar applied to rotation joystick commands. */
     public static final double kRotationScalar = 0.6;
+
+    public static final double kSnailDriveScalar = 0.5;
 
     /** Joystick deadband before shaping/scaling inputs. */
     public static final double kDeadband = 0.05; // 5% joystick deadband
@@ -47,8 +56,8 @@ public final class SwerveConstants {
     public static final PIDGains kHeadingGains = new PIDGains()
         .setP(0.5)
         .setD(0.05)
-        .setTolerance(1.0) // 1 degree tolerance
-        .setContinuousInput(-180, 180); // 4 m/s when 180 degrees of error
+        .setTolerance(Math.toRadians(1)) // 1 degree tolerance
+        .setContinuousInput(-Math.PI, Math.PI);
 
     /** Translation controller gains used when driving to an exact field position. */
     public static final PIDGains kDriveAtTargetGains = new PIDGains()
@@ -77,11 +86,14 @@ public final class SwerveConstants {
 
     // Scalars
     /** Driver forward/backward input shaper. */
-    public static final DriveScalar kXScalar = new DriveScalar(ScaleType.kQuadratic, kDeadband);
+    public static final DriveScalar kXScalar = new DriveScalar(ScaleType.kQuadratic, kDeadband)
+        .withScalar(kMaxSpeed * kTranslationScalar);
 
     /** Driver left/right input shaper. */
-    public static final DriveScalar kYScalar = new DriveScalar(ScaleType.kQuadratic, kDeadband);
+    public static final DriveScalar kYScalar = new DriveScalar(ScaleType.kQuadratic, kDeadband)
+        .withScalar(kMaxSpeed * kTranslationScalar);
 
     /** Driver rotation input shaper. */
-    public static final DriveScalar kOmegaScalar = new DriveScalar(ScaleType.kQuadratic, kDeadband);
+    public static final DriveScalar kOmegaScalar = new DriveScalar(ScaleType.kLinear, kDeadband)
+        .withScalar(kMaxAngularRate * kRotationScalar);
 }

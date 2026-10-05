@@ -29,13 +29,13 @@ public class SwerveRequests {
 
     /** Field-centric request used by normal joystick driving. */
     public static final SwerveRequest.FieldCentric kJoystickFieldCentricRequest = new SwerveRequest.FieldCentric()
-        .withDeadband(SwerveConstants.kMaxSpeed * SwerveConstants.kDeadband) // Add a 5% deadband
-        .withRotationalDeadband(SwerveConstants.kMaxAngularRate * SwerveConstants.kDeadband) // Add a 5% deadband
+        .withDeadband(0) // DriveScalar handles the joystick deadband before shaping.
+        .withRotationalDeadband(0)
         .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
 
     /** Robot-centric request available for driver or test modes that should ignore field heading. */
     public static final SwerveRequest.RobotCentric kJoystickRobotCentricRequest = new SwerveRequest.RobotCentric()
-        .withDeadband(SwerveConstants.kMaxSpeed * SwerveConstants.kDeadband) // Add a 5% deadband
-        .withRotationalDeadband(SwerveConstants.kMaxAngularRate * SwerveConstants.kDeadband) // Add a 5% deadband
+        .withDeadband(0)
+        .withRotationalDeadband(0)
         .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 }

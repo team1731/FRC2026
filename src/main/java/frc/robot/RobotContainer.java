@@ -40,6 +40,10 @@ public class RobotContainer {
     controls.resetSwerve
       .onTrue(new InstantCommand(() -> Robot.swerve.seedFieldCentric()));
 
+    controls.snailDrive
+      .whileTrue(new InstantCommand(() -> Robot.swerve.setSnailMode(true)))
+      .onFalse(new InstantCommand(() -> Robot.swerve.setSnailMode(false)));
+
     controls.intake
       .whileTrue(superstructure.intake());
 

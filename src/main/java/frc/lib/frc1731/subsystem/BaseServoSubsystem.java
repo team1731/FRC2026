@@ -4,15 +4,10 @@ import static edu.wpi.first.units.Units.*;
 
 import java.util.function.Supplier;
 
-import org.littletonrobotics.junction.AutoLog;
-import org.littletonrobotics.junction.inputs.LoggableInputs;
-
-import edu.wpi.first.units.measure.Angle;
-import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.*;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.lib.frc1678.util.Util.DistanceAngleConverter;
 import frc.lib.frc1731.hardware.motor.io.MotorIO;
-import frc.lib.frc1731.hardware.motor.io.request.PositionRequest;
+import frc.lib.frc1731.hardware.motor.io.request.*;
 
 /**
  * Base for position-controlled mechanisms. Use {@link #applyRequest} for custom slots,
@@ -20,33 +15,17 @@ import frc.lib.frc1731.hardware.motor.io.request.PositionRequest;
  *
  * @param <IO> motor IO implementation used by the mechanism
  */
-public abstract class BaseServoSubsystem<IO extends MotorIO, I extends LoggableInputs> extends BaseMotorSubsystem<IO, I> {
-    private DistanceAngleConverter converter = null;
-
-    protected BaseServoSubsystem(IO motor, I inputs) {
-        super(motor, inputs);
-    }
-
-    protected BaseServoSubsystem(IO motor, DistanceAngleConverter converter, I inputs) {
-        super(motor, inputs);
-        this.converter = converter;
+public abstract class BaseServoSubsystem<IO extends MotorIO> extends BaseMotorSubsystem<IO> {
+    protected BaseServoSubsystem(IO motor) {
+        super(motor);
     }
 
     public Angle getPosition() {
         return getMotor().getPosition();
     }
 
-    public Distance getLinearPosition() {
-        if (converter == null) return Inches.zero();
-        return converter.toDistance(getPosition());
-    }
-
     public Angle getSetpoint() {
         return getMotor().getRequestType().isPositionRequest() ? Radians.of(getMotor().getRequestSetpointAsDouble()) : getPosition();
-    }
-
-    public Distance getLinearSetpoint() {
-        return getMotor().getRequestType().isPositionRequest() ? Meters.of(getMotor().getRequestSetpointAsDouble()) : getLinearPosition();
     }
 
     public boolean isNear(Angle setpoint, Angle epsilon) {
@@ -57,47 +36,53 @@ public abstract class BaseServoSubsystem<IO extends MotorIO, I extends LoggableI
         return isNear(Degrees.zero(), epsilon);
     }
 
-    public boolean isNear(Distance setpoint, Distance epsilon) {
-        return getLinearPosition().isNear(setpoint, epsilon);
-    }
-
-    public boolean isNearHome(Distance epsilon) {
-        return getLinearPosition().isNear(Inches.zero(), epsilon);
-    }
-
     /** Resets encoder feedback without moving the mechanism; ignored while inactive. */
-    public void resetPosition(Angle position) {
+    public void resetPosition(Angle setpoint) {
         if (isActiveSubsystem()) {
-            getMotor().resetEncoderPosition(position);
+            getMotor().resetEncoderPosition(setpoint);
         }
     }
 
     /** Continuously commands a fixed angular position until interrupted. */
-    public Command setPosition(Angle position) {
-        return setPosition(() -> position);
+    public Command setPosition(Angle setpoint) {
+        return setPosition(() -> setpoint);
     }
 
     /** Samples the target each scheduler cycle. Defaults to slot zero and exact tolerance. */
-    public Command setPosition(Supplier<Angle> position) {
-        return applyRequest(() -> new PositionRequest().withPosition(position.get())).withName("SetPosition");
+    public Command setPosition(Supplier<Angle> setpoint) {
+        return applyRequest(() -> new TrapezoidalPositionRequest().withPosition(setpoint.get())).withName("SetPosition");
+    }
+
+    public Command setPositionWithEpsilon(Supplier<Angle> setpoint, Angle epsilon) {
+        return applyRequest(() -> new TrapezoidalPositionRequest().withPosition(setpoint.get()).withEpsilonThreshold(epsilon)).withName("SetPosition");
+    }
+
+    public Command setPositionWithEpsilon(Angle setpoint, Angle epsilon) {
+        return this.setPositionWithEpsilon(() -> setpoint, epsilon);
+    }
+
+    /** Continuously commands a fixed angular position until interrupted. */
+    public Command setPositionWithSpeeds(Supplier<Angle> setpoint, AngularVelocity vel, AngularAcceleration accel) {
+        return applyRequest(() -> new TrapezoidalPositionRequest().withPosition(setpoint.get()).withSpeeds(vel, accel)).withName("SetPosition");
+    }
+
+    /** Continuously commands a fixed angular position until interrupted. */
+    public Command setPositionWithSpeeds(Angle setpoint, AngularVelocity vel, AngularAcceleration accel) {
+        return setPositionWithSpeeds(() -> setpoint, vel, accel);
+    }
+
+    public Command setPositionWithSpeedsAndEpsilon(Supplier<Angle> setpoint, AngularVelocity vel, AngularAcceleration accel, Angle epsilon) {
+        return applyRequest(() -> new TrapezoidalPositionRequest().withPosition(setpoint.get()).withSpeeds(vel, accel).withEpsilonThreshold(epsilon)).withName("SetPosition");
+    }
+
+    public Command setPositionWithSpeedsAndEpsilon(Angle setpoint, AngularVelocity vel, AngularAcceleration accel, Angle epsilon) {
+        return this.setPositionWithSpeedsAndEpsilon(() -> setpoint, vel, accel, epsilon);
     }
 
     /** Captures the position when scheduled and holds it until interrupted. */
     public Command stop() {
-        PositionRequest request = new PositionRequest();
-        return runOnce(() -> new PositionRequest().withPosition(getPosition()))
-                .andThen(applyRequest(() -> request)).withName("HoldPosition");
-    }
-
-    @AutoLog
-    public static class BaseAngularServoInputs {
-        public Angle currentPosition, setpointPosition;
-        public boolean atSetpoint;
-    }
-
-    @AutoLog
-    public static class BaseLinearServoInputs {
-        public Distance currentPosition, setpointPosition;
-        public boolean atSetpoint;
+        TrapezoidalPositionRequest request = new TrapezoidalPositionRequest();
+        return runOnce(() -> new TrapezoidalPositionRequest().withPosition(getPosition()))
+            .andThen(applyRequest(() -> request)).withName("HoldPosition");
     }
 }

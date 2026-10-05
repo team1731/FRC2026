@@ -5,9 +5,6 @@ import static edu.wpi.first.units.Units.*;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
-import org.littletonrobotics.junction.AutoLog;
-import org.littletonrobotics.junction.inputs.LoggableInputs;
-
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.frc1731.hardware.motor.io.MotorIO;
@@ -19,9 +16,9 @@ import frc.lib.frc1731.hardware.motor.io.request.*;
  *
  * @param <IO> motor IO implementation used by the mechanism
  */
-public abstract class BaseVelocitySubsystem<IO extends MotorIO, I extends LoggableInputs> extends BaseMotorSubsystem<IO, I> {
-    public BaseVelocitySubsystem(IO motor, I inputs) {
-        super(motor, inputs);
+public abstract class BaseVelocitySubsystem<IO extends MotorIO> extends BaseMotorSubsystem<IO> {
+    public BaseVelocitySubsystem(IO motor) {
+        super(motor);
         super.setDefaultCommand(stop());
     }
 
@@ -34,15 +31,23 @@ public abstract class BaseVelocitySubsystem<IO extends MotorIO, I extends Loggab
     }
 
     /** Continuously commands a fixed angular velocity until interrupted. */
-    public Command setVelocity(AngularVelocity velocity) {
-        AngularVelocity target = velocity.copy();
-        return setVelocity(() -> target);
+    public Command setVelocity(AngularVelocity setpoint) {
+        return setVelocity(() -> setpoint);
     }
 
     /** Samples the target each scheduler cycle. Defaults to slot zero and exact tolerance. */
-    public Command setVelocity(Supplier<AngularVelocity> velocity) {
-        VelocityRequest request = new VelocityRequest();
-        return applyRequest(() -> request.withVelocity(velocity.get())).withName("SetVelocity");
+    public Command setVelocity(Supplier<AngularVelocity> setpoint) {
+        return applyRequest(() -> new VelocityRequest().withVelocity(setpoint.get())).withName("SetVelocity");
+    }
+
+    /** Continuously commands a fixed angular velocity until interrupted. */
+    public Command setVelocityWithEpsilon(AngularVelocity setpoint, AngularVelocity epsilon) {
+        return setVelocityWithEpsilon(() -> setpoint, epsilon);
+    }
+
+    /** Samples the target each scheduler cycle. Defaults to slot zero and exact tolerance. */
+    public Command setVelocityWithEpsilon(Supplier<AngularVelocity> setpoint, AngularVelocity epsilon) {
+        return applyRequest(() -> new VelocityRequest().withVelocity(setpoint.get()).withEpsilonThreshold(epsilon)).withName("SetVelocity");
     }
 
     /** Continuously commands open-loop voltage in volts. */
@@ -70,11 +75,5 @@ public abstract class BaseVelocitySubsystem<IO extends MotorIO, I extends Loggab
     /** Continuously commands zero output until interrupted. */
     public Command stop() {
         return setPercent(0).withName("Stop");
-    }
-
-    @AutoLog
-    public static class BaseVelocityInputs {
-        public AngularVelocity currentVelocity, setpointVelocity;
-        public boolean atSetpoint;
     }
 }

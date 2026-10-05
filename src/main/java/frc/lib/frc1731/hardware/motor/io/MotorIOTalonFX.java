@@ -255,6 +255,16 @@ public class MotorIOTalonFX extends MotorIO implements AutoCloseable {
     }
 
     @Override
+    public double getSupplyCurrent() {
+        return motor.getSupplyCurrent().getValueAsDouble();
+    }
+
+    @Override
+    public double getStatorCurrent() {
+        return motor.getStatorCurrent().getValueAsDouble();
+    }
+
+    @Override
     public double getAppliedVoltage() {
         return this.motor.getMotorVoltage().getValueAsDouble();
     }

@@ -29,6 +29,7 @@ import frc.robot.subsystems.indexer.IndexerSubsystem;
 import frc.robot.subsystems.intakedeploy.IntakeDeploySubsystem;
 import frc.robot.subsystems.intakeroller.IntakeRollerSubsystem;
 import frc.robot.subsystems.kicker.KickerSubsystem;
+import frc.robot.subsystems.power.PowerSubsystem;
 import frc.robot.subsystems.swerve.*;
 
 /**
@@ -41,7 +42,7 @@ import frc.robot.subsystems.swerve.*;
 public class Robot extends LoggedRobot {
   private final RobotContainer container;
   private final AutoLoader autoLoader;
-
+  
   public static SwerveSubsystem swerve;
   public static IntakeDeploySubsystem intakedeploy;
   public static IntakeRollerSubsystem intakeroller;
@@ -50,13 +51,13 @@ public class Robot extends LoggedRobot {
   public static HoodSubsystem hood;
   public static FlywheelSubsystem flywheel;
   public static HopperSubsystem hopper;
-
-  public static Field2d field = new Field2d();
+  public static PowerSubsystem power;
 
   private Command autonomousCommand = null;
   private boolean isRedAlliance = false;
   private boolean autoHasRan = false;
-
+  
+  public static final Field2d field = new Field2d();
 
   /** Initializes robot-wide services, pathfinding warmups, logging, and brownout protection. */
   public Robot() {
@@ -68,6 +69,16 @@ public class Robot extends LoggedRobot {
     hood = new HoodSubsystem();
     flywheel = new FlywheelSubsystem();
     hopper = new HopperSubsystem();
+    power = new PowerSubsystem();
+    
+    power.addSimMotor("IntakeDeploy", intakedeploy.getMotor());
+    power.addSimMotor("IntakeRoller", intakeroller.getMotor());
+    power.addSimMotor("Indexer", indexer.getMotor());
+    power.addSimMotor("Kicker", kicker.getMotor());
+    power.addSimMotor("Hood", hood.getMotor());
+    power.addSimMotor("Flywheel", flywheel.getMotor());
+    power.addSimMotor("Hopper", hopper.getMotor());
+    power.addSimLoad("Swerve", swerve::getSimSupplyCurrent);
 
     // Container and autoloader MUST be instantiated after subsystems
     container = new RobotContainer();
@@ -182,7 +193,13 @@ public class Robot extends LoggedRobot {
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
+    GameState.logValues();
     container.periodic();
+  }
+
+  @Override
+  public void simulationPeriodic() {
+    power.updateSimulation();
   }
 
   /** Called once when the robot becomes disabled. */

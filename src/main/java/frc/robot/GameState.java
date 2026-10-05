@@ -5,6 +5,8 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import java.util.List;
 import java.util.Optional;
 
+import org.littletonrobotics.junction.Logger;
+
 /**
  * Credit to team 2363 for this class
  */
@@ -64,6 +66,10 @@ public class GameState {
         return GamePhase.None;
     }
 
+    public static double getCycleRemainingTime() {
+        return getMatchTime() - getCurrentPhase().countDownUntil;
+    }
+
     public static Optional<Alliance> getAutoWinner() {
         if (autoWinner == null) {
             var gameData = DriverStation.getGameSpecificMessage();
@@ -102,27 +108,19 @@ public class GameState {
         return DriverStation.getMatchTime();
     }
 
-    public static boolean activeCycleEnding() {
+    public static boolean activeCycleEndingSoon() {
         return getMatchTime() - getCurrentPhase().countDownUntil < 5;
     }
 
-    public static boolean myHubEnding() {
-        return activeCycleEnding() && isMyHubActive();
+    public static boolean myHubEndingSoon() {
+        return activeCycleEndingSoon() && isMyHubActive();
     }
 
     public static void logValues() {
         getAutoWinner();
-       // Logger.recordOutput("GameState/IsDSAttached", DriverStation.isDSAttached());
-       // Logger.recordOutput("GameState/IsFMSAttached", DriverStation.isFMSAttached());
-       // Logger.recordOutput("GameState/MatchType", DriverStation.getMatchType());
-      //  Logger.recordOutput("GameState/IsAutonomus", DriverStation.isAutonomous());
-      //  Logger.recordOutput("GameState/MatchTime", DriverStation.getMatchTime());
-      //  Logger.recordOutput("GameState/AutoWinner", autoWinner);
-      //  Logger.recordOutput("GameState/Alliance", Robot.getAlliance());
-       // Logger.recordOutput("GameState/GameData", DriverStation.getGameSpecificMessage());
-       // Logger.recordOutput("GameState/CurrentPhase", getCurrentPhase());
-      //  Logger.recordOutput("GameState/IsMyHubActive", isMyHubActive());
-      //  Logger.recordOutput("GameState/ActiveCycleEnding", activeCycleEnding());
-      //  Logger.recordOutput("GameState/MyHubEnding", myHubEnding());
+        Logger.recordOutput("GameState/CycleRemainingTime", getCycleRemainingTime());
+        Logger.recordOutput("GameState/CurrentPhase", getCurrentPhase());
+        Logger.recordOutput("GameState/AutoWinner", autoWinner);
+        Logger.recordOutput("GameState/IsMyHubActive", isMyHubActive());
     }
 }

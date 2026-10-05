@@ -21,6 +21,7 @@ public class Controls {
     private ControlSet controlSet = ControlSet.kDefault;
 
     public Trigger resetSwerve = driver.rightOptions();
+    public Trigger snailDrive = driver.leftBumper();
     public Trigger intake = driver.leftTrigger();
     public Trigger shoot = driver.rightTrigger();
     public Trigger pass = driver.rightBumper();

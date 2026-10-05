@@ -2,6 +2,8 @@ package frc.robot.subsystems.flywheel;
 
 import static edu.wpi.first.units.Units.*;
 
+import org.littletonrobotics.junction.AutoLog;
+
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
@@ -56,5 +58,11 @@ public final class FlywheelConstants {
 
     public static final MotorIOTalonFX getIO() {
         return MotorIOTalonFX.generateKrakenX60(Ports.kLeftFlywheelTopMasterConfig, getIOConfig()).withSimulation(getSim());
+    }
+
+    @AutoLog
+    public static class FlywheelIOInputs {
+        public double currentVelocity, setpointVelocity;
+        public boolean atSetpoint, isWarmingUp;
     }
 }

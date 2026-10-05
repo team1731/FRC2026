@@ -120,6 +120,16 @@ public abstract class MotorIO {
     public abstract double getAppliedDutyCycle();
 
     /**
+     * Controller supply current in amps, excluding followers.
+     * SPARK implementations estimate this from output current and absolute duty cycle;
+     * the estimate excludes controller losses and does not model regeneration.
+     */
+    public abstract double getSupplyCurrent();
+
+    /** Motor/stator current in amps for this controller, excluding followers. */
+    public abstract double getStatorCurrent();
+
+    /**
      * Returns configured forward software limit.
      *
      * @return forward limit in rotations or vendor-native position units

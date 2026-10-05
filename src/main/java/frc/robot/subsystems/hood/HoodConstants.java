@@ -2,6 +2,8 @@ package frc.robot.subsystems.hood;
 
 import static edu.wpi.first.units.Units.*;
 
+import org.littletonrobotics.junction.AutoLog;
+
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.*;
 import frc.lib.frc1678.sim.PivotSim;
@@ -58,5 +60,12 @@ public final class HoodConstants {
 
     public static final MotorIOTalonFX getIO() {
         return MotorIOTalonFX.generateKrakenX60(Ports.kHoodConfig, getIOConfig()).withSimulation(getSimulation());
+    }
+
+    @AutoLog
+    public static class HoodIOInputs {
+        public double currentRotations = 0.0;
+        public double setpointRotations = 0.0;
+        public boolean atSetpoint = false;
     }
 }
