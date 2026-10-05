@@ -1,5 +1,7 @@
 package frc.robot.subsystems.intakeroller;
 
+import org.littletonrobotics.junction.AutoLog;
+
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.AngularVelocity;
 import frc.lib.frc1678.sim.MechanismSim;
@@ -40,5 +42,10 @@ public class IntakeRollerConstants {
 
     public static final MotorIOTalonFX getIO() {
         return MotorIOTalonFX.generateKrakenX44(Ports.kIntakeRollerConfig, getIOConfig()).withSimulation(getSim());
+    }
+
+    @AutoLog
+    public static class IntakeRollerIOInputs {
+        public double currentVelocity, setpointVelocity;
     }
 }

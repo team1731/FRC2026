@@ -3,6 +3,8 @@ package frc.robot.subsystems.indexer;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
+import org.littletonrobotics.junction.AutoLog;
+
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -54,5 +56,10 @@ public final class IndexerConstants {
 
     public static final MotorIOTalonFX getIO() {
         return MotorIOTalonFX.generateKrakenX60FOC(Ports.kIndexerFloorConfig, getIOConfig()).withSimulation(getSimulation());
+    }
+
+    @AutoLog
+    public static class IndexerIOInputs {
+        public double currentVelocity, setpointVelocity;
     }
 }

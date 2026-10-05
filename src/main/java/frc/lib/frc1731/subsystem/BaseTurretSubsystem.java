@@ -6,7 +6,6 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 import org.littletonrobotics.junction.AutoLog;
-import org.littletonrobotics.junction.inputs.LoggableInputs;
 
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.units.measure.Angle;
@@ -21,7 +20,7 @@ import frc.lib.frc1731.hardware.motor.io.MotorIO;
  *
  * @param <IO> motor IO implementation used by the turret
  */
-public abstract class BaseTurretSubsystem<IO extends MotorIO, I extends LoggableInputs> extends BaseServoSubsystem<IO, I> {
+public abstract class BaseTurretSubsystem<IO extends MotorIO> extends BaseServoSubsystem<IO> {
     private final Supplier<Pose2d> robotPose;
     private final Transform3d robotToTurret;
 
@@ -31,8 +30,8 @@ public abstract class BaseTurretSubsystem<IO extends MotorIO, I extends Loggable
      * @param robotToTurret fixed transform to the turret pivot at encoder angle zero;
      *        translation and yaw determine planar aiming, height is ignored
      */
-    public BaseTurretSubsystem(IO motor, Supplier<Pose2d> robotPose, Transform3d robotToTurret, I inputs) {
-        super(motor, inputs);
+    public BaseTurretSubsystem(IO motor, Supplier<Pose2d> robotPose, Transform3d robotToTurret) {
+        super(motor);
         this.robotPose = Objects.requireNonNull(robotPose, "robotPose");
         this.robotToTurret = Objects.requireNonNull(robotToTurret, "robotToTurret");
     }

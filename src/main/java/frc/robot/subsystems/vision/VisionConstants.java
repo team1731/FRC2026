@@ -16,6 +16,8 @@ public final class VisionConstants {
     /** Enables AprilTag camera measurements from configured {@link AprilTagIO} providers. */
     public static final boolean kUseAprilTags = false;
 
+    public static final double kQuestSeedMaxFrameAgeSeconds = 0.25;
+
     /** Selects Limelight MegaTag2 estimation when Limelight AprilTag IO is active. */
     public static final boolean kUseMt2 = true;
     
@@ -71,7 +73,7 @@ public final class VisionConstants {
      */
     public static AprilTagIO[] getAprilTagIOs() {
         return new AprilTagIO[]{
-            // new LimelightIO(kLimelightMainName, kRobotToLimelightMain)
+            new LimelightIO(kLimelightMainName, kRobotToLimelight)
         };
     }
 }

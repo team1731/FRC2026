@@ -3,6 +3,8 @@ package frc.robot.subsystems.kicker;
 
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
+import org.littletonrobotics.junction.AutoLog;
+
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.system.plant.DCMotor;
@@ -51,5 +53,10 @@ public final class KickerConstants {
 
     public static final MotorIOTalonFX getIO() {
         return MotorIOTalonFX.generateKrakenX60FOC(Ports.kBottomKickerMasterConfig, getIOConfig()).withSimulation(getSimulation());
+    }
+
+    @AutoLog
+    public static class KickerIOInputs {
+        public double currentVelocity, setpointVelocity;
     }
 }

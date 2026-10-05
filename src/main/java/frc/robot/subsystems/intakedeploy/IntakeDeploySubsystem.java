@@ -1,53 +1,50 @@
 package frc.robot.subsystems.intakedeploy;
 
+import static edu.wpi.first.units.Units.Rotations;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.frc1731.hardware.motor.io.MotorIOTalonFX;
-import frc.lib.frc1731.hardware.motor.io.request.TrapezoidalPositionRequest;
-import frc.lib.frc1731.subsystem.BaseAngularServoInputsAutoLogged;
 import frc.lib.frc1731.subsystem.BaseServoSubsystem;
 import frc.robot.RobotState;
 
-public class IntakeDeploySubsystem extends BaseServoSubsystem<MotorIOTalonFX, BaseAngularServoInputsAutoLogged> {
-    public static final TrapezoidalPositionRequest kHomeRequest = 
-        new TrapezoidalPositionRequest(IntakeDeployConstants.kHomeAngle)
-            .withSpeeds(IntakeDeployConstants.kMaxVelocity, IntakeDeployConstants.kMaxAcceleration);
-
-    public static final TrapezoidalPositionRequest kDeployRequest = 
-        new TrapezoidalPositionRequest(IntakeDeployConstants.kDeployAngle)
-            .withSpeeds(IntakeDeployConstants.kMaxVelocity, IntakeDeployConstants.kMaxAcceleration);
-    
-    public static final TrapezoidalPositionRequest kJiggleRequest = 
-        new TrapezoidalPositionRequest(IntakeDeployConstants.kDeployAngle)
-            .withSpeeds(IntakeDeployConstants.kMaxVelocity, IntakeDeployConstants.kMaxAcceleration);
-
+public class IntakeDeploySubsystem extends BaseServoSubsystem<MotorIOTalonFX> {
+    private final IntakeDeployIOInputsAutoLogged inputs = new IntakeDeployIOInputsAutoLogged();
     public IntakeDeploySubsystem() {
-        super(IntakeDeployConstants.getIO(), new BaseAngularServoInputsAutoLogged());
+        super(IntakeDeployConstants.getIO());
     }
 
     @Override
-    protected BaseAngularServoInputsAutoLogged updateInputs(BaseAngularServoInputsAutoLogged inputs) {
-        inputs.currentPosition = getPosition();
-        inputs.setpointPosition = getSetpoint();
-        inputs.atSetpoint = atSetpoint();
-        RobotState.updateIntake(inputs.currentPosition);
-        return inputs;
+    public void periodicTelemetry() {
+        inputs.currentPosition = getPosition().in(Rotations);
+        inputs.setpointPosition = getSetpoint().in(Rotations);
+        inputs.deployed = getSetpoint().lt(IntakeDeployConstants.kHomeAngle); // Extended is less than zero so less than
+        logger.processInputs(inputs);
+        RobotState.updateIntake(getPosition());
     }
 
     public Command home() {
-        return applyRequest(kHomeRequest);
+        return setPositionWithSpeedsAndEpsilon(
+            IntakeDeployConstants.kHomeAngle, 
+            IntakeDeployConstants.kMaxVelocity, 
+            IntakeDeployConstants.kMaxAcceleration,
+            IntakeDeployConstants.kEpsilon
+        );
     }
 
     public Command deploy() {
-        return applyRequest(kDeployRequest);
+        return setPositionWithSpeedsAndEpsilon(
+            IntakeDeployConstants.kDeployAngle, 
+            IntakeDeployConstants.kMaxVelocity, 
+            IntakeDeployConstants.kMaxAcceleration,
+            IntakeDeployConstants.kEpsilon
+        );
     }
 
     public Command jiggle() {
-        return 
-        applyRequest(kJiggleRequest.withPosition(IntakeDeployConstants.kDeployAngle))
+        return home()
             .withTimeout(0.5)
-        .andThen(applyRequest(kJiggleRequest.withPosition(IntakeDeployConstants.kHomeAngle))
-            .withTimeout(0.5))
-        .repeatedly()
-        .finallyDo(() -> this.getMotor().setPosition(IntakeDeployConstants.kHomeAngle, 0));
+            .andThen(deploy().withTimeout(0.5))
+            .repeatedly()
+            .finallyDo(() -> this.getMotor().setPosition(IntakeDeployConstants.kHomeAngle, 0));
     }
 }

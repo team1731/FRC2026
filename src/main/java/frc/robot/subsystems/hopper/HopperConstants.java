@@ -2,6 +2,8 @@ package frc.robot.subsystems.hopper;
 
 import static edu.wpi.first.units.Units.*;
 
+import org.littletonrobotics.junction.AutoLog;
+
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Distance;
 import frc.lib.frc1678.sim.LinearSim;
@@ -50,5 +52,11 @@ public final class HopperConstants {
 
     public static final MotorIOSparkMax getIO() {
         return MotorIOSparkMax.generateNeo550(Ports.kSqueezerConfig, getIOConfig()).withSimulation(getSimulation());
+    }
+
+    @AutoLog
+    public static class HopperIOInputs {
+        public double currentHeight, setpointHeight;
+        public boolean hopperExtended;
     }
 }

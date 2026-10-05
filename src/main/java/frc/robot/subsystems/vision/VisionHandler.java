@@ -8,6 +8,7 @@ import frc.lib.frc1731.SmartLogger;
 import frc.lib.frc1731.hardware.camera.AprilTagIO;
 import frc.robot.Robot;
 import frc.robot.RobotConstants;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 /**
  * Coordinates all vision pose sources and forwards accepted measurements to the drivetrain.
@@ -46,7 +47,7 @@ public class VisionHandler {
      */
     public void resetVSLAMPose(Pose2d pose) {
         if (VisionConstants.kUseVSLAM) {
-            this.oculus.setPose(new Pose3d(pose));
+            this.oculus.setPose(new Pose3d(pose).transformBy(VisionConstants.kRobotToOculus));
         }
     }
 
@@ -82,7 +83,15 @@ public class VisionHandler {
                     || Math.abs(yawRate) > VisionConstants.kMaxVisionAngularRate;
 
                 if (!rejectUpdate) {
-                    this.consumer.accept(estimate, io.getTimestamp(), io.getEstimationStdDevs());
+                    double timestamp = io.getTimestamp();
+                    // double age = Timer.getFPGATimestamp() - timestamp;
+                    if (!Double.isFinite(timestamp) 
+                            // || age < 0
+                            // || age > VisionConstants.kQuestSeedMaxFrameAgeSeconds
+                            || !Double.isFinite(estimate.getX()) || !Double.isFinite(estimate.getY())) {
+                        continue;
+                    }
+                    this.consumer.accept(estimate, timestamp, io.getEstimationStdDevs());
                 }
             }
         }
@@ -112,6 +121,7 @@ public class VisionHandler {
                     Pose3d relativeRobotPose = questPose.transformBy(VisionConstants.kRobotToOculus.inverse());
 
                     if (oculus.isTracking() && oculus.isConnected()) {
+                        // Do not fuse an unverified Quest origin into the tag-based estimator.
                         this.consumer.accept(relativeRobotPose.toPose2d(), timestamp, VisionConstants.kQuestnavStdev);
                     }
                 }
@@ -124,14 +134,16 @@ public class VisionHandler {
      * @param robotPose current drivetrain pose, used to update simulated cameras
      * @param yaw current rotation of the swerve base
      * @param yawRate current rotation velocity of the swerve base
+     * @param speeds measured robot-relative speeds used to gate stationary seed checks
      */
-    public void periodic(Pose2d robotPose, double yaw, double yawRate) {
+    public void periodic(Pose2d robotPose, double yaw, double yawRate, ChassisSpeeds speeds) {
         this.updateVSLAM();
         this.updateAprilTag(robotPose, yaw, yawRate);
 
         // Publish every cycle, including when VSLAM is disabled or no headset is attached.
         boolean connected = oculus != null && oculus.isConnected();
         boolean tracking = connected && oculus.isTracking();
+
         logger.log("Oculus Connected", connected);
         logger.log("Oculus Tracking", tracking);
     }
