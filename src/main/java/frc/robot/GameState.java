@@ -47,8 +47,6 @@ public class GameState {
         }
     }
 
-    private static Alliance autoWinner;
-
     public static GamePhase getCurrentPhase() {
         if (!DriverStation.isDSAttached() && !DriverStation.isFMSAttached()) {
             return GamePhase.None;
@@ -71,21 +69,18 @@ public class GameState {
     }
 
     public static Optional<Alliance> getAutoWinner() {
-        if (autoWinner == null) {
-            var gameData = DriverStation.getGameSpecificMessage();
-            if (gameData.length() > 0) {
-                autoWinner = switch (gameData.charAt(0)) {
-                    case 'B' -> Alliance.Blue;
-                    case 'R' -> Alliance.Red;
-                    default -> null;
-                };
-            }
-        }
-        return Optional.ofNullable(autoWinner);
+        var gameData = DriverStation.getGameSpecificMessage();
+        if (gameData.isEmpty()) return Optional.empty();
+        return switch (gameData.charAt(0)) {
+            case 'B' -> Optional.of(Alliance.Blue);
+            case 'R' -> Optional.of(Alliance.Red);
+            default -> Optional.empty();
+        };
     }
 
     public static boolean isMyHubActive() {
-        Alliance myAlliance = Robot.getAlliance();
+        Alliance myAlliance = DriverStation.getAlliance().orElse(null);
+        Optional<Alliance> winner = getAutoWinner();
 
         switch (getCurrentPhase()) {
             case None:
@@ -95,10 +90,10 @@ public class GameState {
                 return true;
             case Shift1:
             case Shift3:
-                return autoWinner != null && myAlliance != null && autoWinner != myAlliance;
+                return myAlliance != null && (winner.isEmpty() || winner.get() != myAlliance);
             case Shift2:
             case Shift4:
-                return autoWinner != null && myAlliance != null && autoWinner == myAlliance;
+                return myAlliance != null && (winner.isEmpty() || winner.get() == myAlliance);
             default:
                 return false;
         }
@@ -117,10 +112,11 @@ public class GameState {
     }
 
     public static void logValues() {
-        getAutoWinner();
+        Optional<Alliance> winner = getAutoWinner();
         Logger.recordOutput("GameState/CycleRemainingTime", getCycleRemainingTime());
         Logger.recordOutput("GameState/CurrentPhase", getCurrentPhase());
-        Logger.recordOutput("GameState/AutoWinner", autoWinner);
+        Logger.recordOutput("GameState/AutoWinner", winner.map(Alliance::name).orElse("Unknown"));
+        Logger.recordOutput("GameState/HasGameData", winner.isPresent());
         Logger.recordOutput("GameState/IsMyHubActive", isMyHubActive());
     }
 }
