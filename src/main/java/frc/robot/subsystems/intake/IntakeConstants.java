@@ -36,7 +36,7 @@ public class IntakeConstants {
     public static final PIDGains kPivotFOCVoltageGains = new PIDGains()
         .setP(20).setI(0).setD(0.5).setS(0).setV(0.124 * kPivotGearRatio).setA(0).setG(0);
 
-    public static final double kPivotIntakeRotations = -0.13916;
+    public static final double kPivotIntakeRotations = -0.144287;
     public static final double kPivotStowRotations = 0;
     public static final double kPivotEpsilon = 0.01;
 }
