@@ -9,8 +9,8 @@ import edu.wpi.first.units.measure.*;
 import frc.lib.frc1678.sim.PivotSim;
 import frc.lib.frc1678.sim.PivotSim.PivotSimConstants;
 import frc.lib.frc1731.PIDGains;
-import frc.lib.frc1731.hardware.motor.io.MotorIOTalonFX;
-import frc.lib.frc1731.hardware.motor.io.config.TalonFXIOConfigs;
+import frc.lib.frc1731.hardware.motor.io.MotorIOTalonFXS;
+import frc.lib.frc1731.hardware.motor.io.config.TalonFXSIOConfigs;
 import frc.robot.Ports;
 
 public final class HoodConstants {
@@ -22,8 +22,8 @@ public final class HoodConstants {
     public static final Distance kHoodRadius = Inches.of(8.4); 
     public static final Mass kHoodMass = Pounds.of(5);
 
-    public static final AngularVelocity kMaxVelocity = RotationsPerSecond.of(50).div(kGearRatio);
-    public static final AngularAcceleration kMaxAcceleration = RotationsPerSecondPerSecond.of(120).div(kGearRatio);
+    public static final AngularVelocity kMaxVelocity = RotationsPerSecond.of(50);//.div(kGearRatio);
+    public static final AngularAcceleration kMaxAcceleration = RotationsPerSecondPerSecond.of(120);//.div(kGearRatio);
 
     public static final double kHoodMOI = 0.006; // Complete estimate
 
@@ -38,10 +38,11 @@ public final class HoodConstants {
         .setA(0.01)
     ;
 
-    public static final TalonFXIOConfigs getIOConfig() {
-        return new TalonFXIOConfigs()
+    public static final TalonFXSIOConfigs getIOConfig() {
+        return new TalonFXSIOConfigs()
         .withPIDGains(kPIDGains)
         .withCurrentLimits(kSupplyCurrentLimit, kStatorCurrentLimit)
+        .withSoftLimits(kHomeAngle, kMaxAngle)
         .withMotionMagicSpeeds(kMaxVelocity.in(RotationsPerSecond), kMaxAcceleration.in(RotationsPerSecondPerSecond))
         // .withSensorToMechanismRatio(kGearRatio)
         .brake();
@@ -58,8 +59,8 @@ public final class HoodConstants {
         );
     }
 
-    public static final MotorIOTalonFX getIO() {
-        return MotorIOTalonFX.generateKrakenX60(Ports.kHoodConfig, getIOConfig()).withSimulation(getSimulation());
+    public static final MotorIOTalonFXS getIO() {
+        return MotorIOTalonFXS.generateMinion(Ports.kHoodConfig, getIOConfig());
     }
 
     @AutoLog

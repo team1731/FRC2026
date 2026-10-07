@@ -25,8 +25,8 @@ public class IntakeDeployConstants {
     public static final double kSupplyCurrentLimit = 40.0;
 
     public static final Angle kHomeAngle = Rotations.zero();
-    public static final Angle kDeployAngle = Rotations.of(-0.13916);
-    public static final Angle kEpsilon = Rotations.of(0.01); // TODO - Tune this?
+    public static final Angle kDeployAngle = Rotations.of(0.127413);
+    public static final Angle kEpsilon = Rotations.of(0.0001); // TODO - Tune this?
 
     public static final AngularVelocity kMaxVelocity = RotationsPerSecond.of(2.0);
     public static final AngularAcceleration kMaxAcceleration = RotationsPerSecondPerSecond.of(2.0);
@@ -36,17 +36,17 @@ public class IntakeDeployConstants {
 
     public static final PIDGains kPIDGains = new PIDGains()
         .setP(60)
-        .setD(.5)
+        .setD(1)
         .setV(5.76)
         .setA(0.48);
 
     public static final TalonFXIOConfigs getIOConfigs() {
         return new TalonFXIOConfigs()
             .withPIDGains(kPIDGains)
-            .withSensorToMechanismRatio(kGearRatio)
+            .withRotorToSensorRatio(kGearRatio)
             .withCurrentLimits(kSupplyCurrentLimit, kStatorCurrentLimit)
-            .withSoftLimits(kDeployAngle, kHomeAngle)
-            .withCANCoder(Ports.kIntakeDeployCANCoderConfig, new CANCoderIOConfigs(0.4541015625, SensorDirectionValue.CounterClockwise_Positive))
+            .withSoftLimits(kHomeAngle, kDeployAngle)
+            .withCANCoder(Ports.kIntakeDeployCANCoderConfig, new CANCoderIOConfigs(-0.469482421875, SensorDirectionValue.Clockwise_Positive))
             .withMotionMagicSpeeds(kMaxVelocity.in(RotationsPerSecond), kMaxAcceleration.in(RotationsPerSecondPerSecond))
             .brake()
             ;

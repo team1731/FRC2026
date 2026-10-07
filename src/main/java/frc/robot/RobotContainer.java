@@ -4,6 +4,7 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.events.EventTrigger;
 
 import edu.wpi.first.wpilibj2.command.*;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.frc1678.mechviz.RobotVisualizer;
 import frc.robot.subsystems.Superstructure;
 
@@ -45,43 +46,46 @@ public class RobotContainer {
       .whileTrue(new InstantCommand(() -> Robot.swerve.setSnailMode(true)))
       .onFalse(new InstantCommand(() -> Robot.swerve.setSnailMode(false)));
 
-    Controls.intake
+    // Shoot takes priority over pass; each mode has its own trigger expression.
+    Trigger firing = Controls.shoot.or(Controls.pass);
+    Trigger passing = Controls.pass.and(Controls.shoot.negate());
+    Trigger overrideShot = Controls.overrideHubShot
+      .or(Controls.overrideTrenchShot).or(Controls.overrideTowerShot);
+    Trigger normalShot = Controls.shoot.and(overrideShot.negate());
+
+    Controls.intake.and(firing.negate())
       .whileTrue(superstructure.intake());
 
-    Controls.shoot
-      .whileTrue(superstructure.shoot(false))
-      .onFalse(Robot.hopper.collapse());
+    normalShot.and(Controls.intake.negate())
+      .whileTrue(superstructure.shoot(false));
+    normalShot.and(Controls.intake)
+      .whileTrue(superstructure.shoot(true));
 
-    Controls.shotFeedthrough
-      .whileTrue(superstructure.shoot(true))
-      .onFalse(Robot.hopper.collapse());
+    passing.and(Controls.intake.negate())
+      .whileTrue(superstructure.pass(false));
+    passing.and(Controls.intake)
+      .whileTrue(superstructure.pass(true));
 
-    Controls.pass
-      .whileTrue(superstructure.pass(false))
-      .onFalse(Robot.hopper.collapse());
+    // Overrides require shoot to be held. If several are held, prefer hub, then trench, then tower.
+    Controls.shoot.and(Controls.overrideHubShot)
+      .whileTrue(superstructure.hubShot());
+    Controls.shoot.and(Controls.overrideHubShot.negate()).and(Controls.overrideTrenchShot)
+      .whileTrue(superstructure.trenchShot());
+    Controls.shoot.and(Controls.overrideHubShot.negate())
+      .and(Controls.overrideTrenchShot.negate()).and(Controls.overrideTowerShot)
+      .whileTrue(superstructure.towerShot());
 
-    Controls.passFeedthrough
-      .whileTrue(superstructure.pass(true))
-      .onFalse(Robot.hopper.collapse());
-
-    Controls.overrideHubShot
-      .whileTrue(superstructure.hubShot())
-      .onFalse(Robot.hopper.collapse());
-
-    Controls.overrideTrenchShot
-      .whileTrue(superstructure.trenchShot())
-      .onFalse(Robot.hopper.collapse());
-
-    Controls.overrideTowerShot
-      .whileTrue(superstructure.towerShot())
-      .onFalse(Robot.hopper.collapse());
+    // Do not collapse the hopper while transitioning between firing modes.
+    firing.onFalse(Robot.hopper.collapse());
     
-    Controls.warmup
-      .whileTrue(superstructure.warmupWithoutHood());
+    // Controls.warmup
+    //   .and(firing.negate())
+    //   .whileTrue(superstructure.warmupWithoutHood());
 
     Controls.collapseIntake
-      .onTrue(Robot.intakedeploy.home()
-        .alongWith(Robot.hopper.collapse())
+      .onTrue(
+        Robot.intakedeploy.home()
+          .alongWith(Robot.hopper.collapse())
       );
 
     // Controls.raiseHopper

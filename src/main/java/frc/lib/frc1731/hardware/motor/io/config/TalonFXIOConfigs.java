@@ -31,6 +31,7 @@ import frc.lib.frc1731.hardware.motor.PortConfig;
 public final class TalonFXIOConfigs implements IMotorIOConfigs {
     private final TalonFXConfiguration config;
     private final java.util.List<MotorGroupConfig.Follower<TalonFXConfiguration>> followers = new java.util.ArrayList<>();
+    public CANcoder cancoder;
 
     public TalonFXIOConfigs() {
         config = new TalonFXConfiguration();
@@ -48,9 +49,8 @@ public final class TalonFXIOConfigs implements IMotorIOConfigs {
     public TalonFXIOConfigs withCANCoder(PortConfig port, CANCoderIOConfigs coderCfg) {
         this.config.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
         this.config.Feedback.FeedbackRemoteSensorID = port.kPort;
-        CANcoder coder = new CANcoder(port.kPort, port.kBus);
-        coder.getConfigurator().apply(coderCfg.build());
-        coder.close();
+        cancoder = new CANcoder(port.kPort, port.kBus);
+        cancoder.getConfigurator().apply(coderCfg.build());
         return this;
     }
 

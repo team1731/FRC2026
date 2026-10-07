@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.*;
 import com.ctre.phoenix6.configs.*;
 import com.ctre.phoenix6.controls.*;
 import com.ctre.phoenix6.hardware.TalonFXS;
+import com.ctre.phoenix6.signals.MotorArrangementValue;
 import com.ctre.phoenix6.sim.TalonFXSSimState;
 
 import edu.wpi.first.units.measure.*;
@@ -32,9 +33,10 @@ public class MotorIOTalonFXS extends MotorIO implements AutoCloseable {
         super(constants, port);
         this.motor = new TalonFXS(port.kPort, port.kBus);
         this.cfg = config;
+        this.cfg.Commutation.MotorArrangement = MotorArrangementValue.Minion_JST;
 
         this.configurator = motor.getConfigurator();
-        this.configurator.apply(config);
+        this.configurator.apply(cfg);
 
         this.magicOutput = new DynamicMotionMagicVoltage(0, 0, 0);
         this.magicOutput.Velocity = cfg.MotionMagic.MotionMagicCruiseVelocity;
@@ -48,12 +50,12 @@ public class MotorIOTalonFXS extends MotorIO implements AutoCloseable {
      * @param config TalonFXS configuration to apply on construction
      * @return configured TalonFXS motor IO
      */
-    public static MotorIOTalonFXS generateKrakenX60(PortConfig port, TalonFXSConfiguration config) {
+    public static MotorIOTalonFXS generateMinion(PortConfig port, TalonFXSConfiguration config) {
         return new MotorIOTalonFXS(MotorConstants.kKrakenX60, port, config);
     }
 
     /** Creates a leader and configured followers; pass the builder without calling build(). */
-    public static MotorIOTalonFXS generateKrakenX60(PortConfig port, TalonFXSIOConfigs configs) {
+    public static MotorIOTalonFXS generateMinion(PortConfig port, TalonFXSIOConfigs configs) {
         var group = configs.buildMotorGroup(port.kPort);
         var io = new MotorIOTalonFXS(MotorConstants.kKrakenX60, port, group.leader());
         try {
@@ -66,105 +68,14 @@ public class MotorIOTalonFXS extends MotorIO implements AutoCloseable {
     }
 
     /**
-     * Creates a Kraken X60 TalonFXS wrapper with default CTRE configuration.
-     *
-     * @param port CAN bus and ID for the motor
-     * @return configured TalonFXS motor IO
-     */
-    public static MotorIOTalonFXS generateKrakenX60(PortConfig port) {
-        return new MotorIOTalonFXS(MotorConstants.kKrakenX60, port, new TalonFXSConfiguration());
-    }
-
-    /**
-     * Creates a Kraken X44 TalonFXS wrapper with a custom CTRE configuration.
-     */
-    public static MotorIOTalonFXS generateKrakenX44(PortConfig port, TalonFXSConfiguration config) {
-        return new MotorIOTalonFXS(MotorConstants.kKrakenX44, port, config);
-    }
-
-    /** Creates a leader and configured followers; pass the builder without calling build(). */
-    public static MotorIOTalonFXS generateKrakenX44(PortConfig port, TalonFXSIOConfigs configs) {
-        var group = configs.buildMotorGroup(port.kPort);
-        var io = new MotorIOTalonFXS(MotorConstants.kKrakenX44, port, group.leader());
-        try {
-            io.configureFollowers(group);
-            return io;
-        } catch (RuntimeException failure) {
-            io.close();
-            throw failure;
-        }
-    }
-
-    /**
-     * Creates a Kraken X44 TalonFXS wrapper with default CTRE configuration.
-     */
-    public static MotorIOTalonFXS generateKrakenX44(PortConfig port) {
-        return new MotorIOTalonFXS(MotorConstants.kKrakenX44, port, new TalonFXSConfiguration());
-    }
-
-    /**
-     * Creates a Falcon 500 TalonFXS wrapper with a custom CTRE configuration.
-     */
-    public static MotorIOTalonFXS generateFalcon500(PortConfig port, TalonFXSConfiguration config) {
-        return new MotorIOTalonFXS(MotorConstants.kFalcon500, port, config);
-    }
-
-    /** Creates a leader and configured followers; pass the builder without calling build(). */
-    public static MotorIOTalonFXS generateFalcon500(PortConfig port, TalonFXSIOConfigs configs) {
-        var group = configs.buildMotorGroup(port.kPort);
-        var io = new MotorIOTalonFXS(MotorConstants.kFalcon500, port, group.leader());
-        try {
-            io.configureFollowers(group);
-            return io;
-        } catch (RuntimeException failure) {
-            io.close();
-            throw failure;
-        }
-    }
-
-    /**
-     * Creates a Falcon 500 TalonFXS wrapper with default CTRE configuration.
-     */
-    public static MotorIOTalonFXS generateFalcon500(PortConfig port) {
-        return new MotorIOTalonFXS(MotorConstants.kFalcon500, port, new TalonFXSConfiguration());
-    }
-
-    /**
-     * Creates a Kraken X60 FOC TalonFXS wrapper with a custom CTRE configuration.
-     */
-    public static MotorIOTalonFXS generateKrakenX60FOC(PortConfig port, TalonFXSConfiguration config) {
-        return new MotorIOTalonFXS(MotorConstants.kKrakenX60FOC, port, config);
-    }
-
-    /** Creates a leader and configured followers; pass the builder without calling build(). */
-    public static MotorIOTalonFXS generateKrakenX60FOC(PortConfig port, TalonFXSIOConfigs configs) {
-        var group = configs.buildMotorGroup(port.kPort);
-        var io = new MotorIOTalonFXS(MotorConstants.kKrakenX60FOC, port, group.leader());
-        try {
-            io.configureFollowers(group);
-            return io;
-        } catch (RuntimeException failure) {
-            io.close();
-            throw failure;
-        }
-    }
-
-    /**
-     * Creates a Kraken X60 FOC TalonFXS wrapper with default CTRE configuration.
-     */
-    public static MotorIOTalonFXS generateKrakenX60FOC(PortConfig port) {
-        return new MotorIOTalonFXS(MotorConstants.kKrakenX60FOC, port, new TalonFXSConfiguration());
-    }
-
-    /**
      * Creates a Kraken X44 FOC TalonFXS wrapper with a custom CTRE configuration.
      */
-    public static MotorIOTalonFXS generateKrakenX44FOC(PortConfig port, TalonFXSConfiguration config) {
+    public static MotorIOTalonFXS generateMinionFOC(PortConfig port, TalonFXSConfiguration config) {
         return new MotorIOTalonFXS(MotorConstants.kKrakenX44FOC, port, config);
     }
 
     /** Creates a leader and configured followers; pass the builder without calling build(). */
-    public static MotorIOTalonFXS generateKrakenX44FOC(PortConfig port, TalonFXSIOConfigs configs) {
+    public static MotorIOTalonFXS generateMinionFOC(PortConfig port, TalonFXSIOConfigs configs) {
         var group = configs.buildMotorGroup(port.kPort);
         var io = new MotorIOTalonFXS(MotorConstants.kKrakenX44FOC, port, group.leader());
         try {
@@ -174,40 +85,6 @@ public class MotorIOTalonFXS extends MotorIO implements AutoCloseable {
             io.close();
             throw failure;
         }
-    }
-
-    /**
-     * Creates a Kraken X44 FOC TalonFXS wrapper with default CTRE configuration.
-     */
-    public static MotorIOTalonFXS generateKrakenX44FOC(PortConfig port) {
-        return new MotorIOTalonFXS(MotorConstants.kKrakenX44FOC, port, new TalonFXSConfiguration());
-    }
-
-    /**
-     * Creates a Falcon 500 FOC TalonFXS wrapper with a custom CTRE configuration.
-     */
-    public static MotorIOTalonFXS generateFalcon500FOC(PortConfig port, TalonFXSConfiguration config) {
-        return new MotorIOTalonFXS(MotorConstants.kFalcon500FOC, port, config);
-    }
-
-    /** Creates a leader and configured followers; pass the builder without calling build(). */
-    public static MotorIOTalonFXS generateFalcon500FOC(PortConfig port, TalonFXSIOConfigs configs) {
-        var group = configs.buildMotorGroup(port.kPort);
-        var io = new MotorIOTalonFXS(MotorConstants.kFalcon500FOC, port, group.leader());
-        try {
-            io.configureFollowers(group);
-            return io;
-        } catch (RuntimeException failure) {
-            io.close();
-            throw failure;
-        }
-    }
-
-    /**
-     * Creates a Falcon 500 FOC TalonFXS wrapper with default CTRE configuration.
-     */
-    public static MotorIOTalonFXS generateFalcon500FOC(PortConfig port) {
-        return new MotorIOTalonFXS(MotorConstants.kFalcon500FOC, port, new TalonFXSConfiguration());
     }
 
     @Override

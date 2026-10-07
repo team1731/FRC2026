@@ -36,7 +36,6 @@ public class Controls {
     public static Trigger overrideTrenchShot = operator.x();
     public static Trigger overrideTowerShot = operator.y();
     public static Trigger overrideLobShot = operator.b();
-    public static Trigger shotOverride = overrideHubShot.or(overrideTrenchShot).or(overrideTowerShot).or(overrideLobShot);
 
     public Trigger raiseHopper = operator.rightBumper();
     public Trigger lowerHopper = operator.leftBumper();

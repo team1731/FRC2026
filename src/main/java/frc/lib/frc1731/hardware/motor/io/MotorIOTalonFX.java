@@ -27,6 +27,7 @@ public class MotorIOTalonFX extends MotorIO implements AutoCloseable {
     private TalonFXConfiguration cfg;
     private TalonFXConfigurator configurator;
     private DynamicMotionMagicVoltage magicOutput;
+    private MotionMagicVoltage magicVoltage = new MotionMagicVoltage(0);
 
     private MotorIOTalonFX(MotorConstants constants, PortConfig port, TalonFXConfiguration config) {
         super(constants, port);
@@ -56,6 +57,9 @@ public class MotorIOTalonFX extends MotorIO implements AutoCloseable {
     public static MotorIOTalonFX generateKrakenX60(PortConfig port, TalonFXIOConfigs configs) {
         var group = configs.buildMotorGroup(port.kPort);
         var io = new MotorIOTalonFX(MotorConstants.kKrakenX60, port, group.leader());
+        if (configs.cancoder != null) {
+            io.resetEncoderPosition(configs.cancoder.getAbsolutePosition().getValue());
+        }
         try {
             io.configureFollowers(group);
             return io;
@@ -86,6 +90,9 @@ public class MotorIOTalonFX extends MotorIO implements AutoCloseable {
     public static MotorIOTalonFX generateKrakenX44(PortConfig port, TalonFXIOConfigs configs) {
         var group = configs.buildMotorGroup(port.kPort);
         var io = new MotorIOTalonFX(MotorConstants.kKrakenX44, port, group.leader());
+        if (configs.cancoder != null) {
+            io.resetEncoderPosition(configs.cancoder.getAbsolutePosition().getValue());
+        }
         try {
             io.configureFollowers(group);
             return io;
@@ -303,7 +310,7 @@ public class MotorIOTalonFX extends MotorIO implements AutoCloseable {
 
     @Override
     public void setPositionTrapezoidal(Angle setpoint, int slot) {
-        this.motor.setControl(magicOutput.withPosition(setpoint).withSlot(slot));
+        this.motor.setControl(magicVoltage.withPosition(setpoint).withSlot(slot).withEnableFOC(true));
     }
 
     @Override

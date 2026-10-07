@@ -1,5 +1,7 @@
 package frc.lib.frc1731.hardware.motor.io.config;
 
+import static edu.wpi.first.units.Units.Rotations;
+
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -7,6 +9,7 @@ import com.ctre.phoenix6.configs.TalonFXSConfiguration;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.signals.*;
 
+import edu.wpi.first.units.measure.Angle;
 import frc.lib.frc1731.PIDGains;
 import frc.lib.frc1731.hardware.motor.PortConfig;
 
@@ -164,6 +167,19 @@ public final class TalonFXSIOConfigs implements IMotorIOConfigs {
         config.MotionMagic.MotionMagicCruiseVelocity = cruiseVelocity;
         config.MotionMagic.MotionMagicAcceleration = acceleration;
         config.MotionMagic.MotionMagicJerk = jerk;
+        return this;
+    }
+
+    /** Enables reverse and forward soft limits, in mechanism rotations. */
+    public TalonFXSIOConfigs withSoftLimits(Angle reverse, Angle forward) {
+        if (!Double.isFinite(reverse.in(Rotations)) || !Double.isFinite(forward.in(Rotations))
+                || reverse.gte(forward)) {
+            throw new IllegalArgumentException("Soft limits must be finite with reverse <= forward");
+        }
+        config.SoftwareLimitSwitch.ReverseSoftLimitThreshold = reverse.in(Rotations);
+        config.SoftwareLimitSwitch.ForwardSoftLimitThreshold = forward.in(Rotations);
+        config.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+        config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
         return this;
     }
 

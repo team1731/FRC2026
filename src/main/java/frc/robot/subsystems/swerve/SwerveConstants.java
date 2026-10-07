@@ -57,7 +57,7 @@ public final class SwerveConstants {
         .setP(0.5)
         .setD(0.05)
         .setTolerance(Math.toRadians(1)) // 1 degree tolerance
-        .setContinuousInput(-Math.PI, Math.PI);
+        .setContinuousInput(-180, 180);
 
     /** Translation controller gains used when driving to an exact field position. */
     public static final PIDGains kDriveAtTargetGains = new PIDGains()
