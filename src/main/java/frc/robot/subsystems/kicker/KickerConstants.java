@@ -37,7 +37,6 @@ public final class KickerConstants {
             .withSensorToMechanismRatio(kGearRatio)
             .withNeutralMode(NeutralModeValue.Coast)
             .withFollower(Ports.kTopKickerConfig.kPort)
-            .invert()
             .brake()
         ;
     }

@@ -16,8 +16,8 @@ import frc.robot.Ports;
 public final class HoodConstants {
     public static final double kGearRatio = 1d / (15d / 64d * 32d / 64d * 20d / 380d);
     public static final Angle kHomeAngle = Degrees.zero();
-    public static final Angle kMaxAngle = Degrees.of(45);
-    public static final Angle kEpsilon = Degrees.one().times(3);
+    public static final Angle kMaxAngle = Rotations.of(22);
+    public static final Angle kEpsilon = Rotations.one();
 
     public static final Distance kHoodRadius = Inches.of(8.4); 
     public static final Mass kHoodMass = Pounds.of(5);
@@ -45,6 +45,7 @@ public final class HoodConstants {
         .withSoftLimits(kHomeAngle, kMaxAngle)
         .withMotionMagicSpeeds(kMaxVelocity.in(RotationsPerSecond), kMaxAcceleration.in(RotationsPerSecondPerSecond))
         // .withSensorToMechanismRatio(kGearRatio)
+        .invert()
         .brake();
     }
 

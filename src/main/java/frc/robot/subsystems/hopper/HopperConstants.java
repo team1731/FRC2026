@@ -35,6 +35,8 @@ public final class HopperConstants {
             .withCurrentLimits(kSupplyCurrentLimit, kStatorCurrentLimit)
             .withPIDGains(kPositionGains)
             .withSoftLimits(kConverter.toAngle(kHomeHeight).in(Rotations), kConverter.toAngle(kMaxHeight).in(Rotations))
+            .invert()
+            .brake()
         ;
     }
 

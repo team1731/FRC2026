@@ -40,7 +40,7 @@ public class RobotContainer {
    */
   private void configureBindings() {
     Controls.resetSwerve
-      .onTrue(new InstantCommand(() -> Robot.swerve.seedFieldCentric()));
+      .onTrue(new InstantCommand(() -> Robot.swerve.resetTelePose()));
 
     Controls.snailDrive
       .whileTrue(new InstantCommand(() -> Robot.swerve.setSnailMode(true)))

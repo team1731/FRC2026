@@ -54,10 +54,10 @@ public final class SwerveConstants {
     // PID Gains
     /** Heading controller gains for field-centric heading correction and auto-align rotation. */
     public static final PIDGains kHeadingGains = new PIDGains()
-        .setP(0.5)
-        .setD(0.05)
-        .setTolerance(Math.toRadians(1)) // 1 degree tolerance
-        .setContinuousInput(-180, 180);
+        .setP(6.0)
+        // .setD(0.05)
+        // .setTolerance(Math.toRadians(1)) // 1 degree tolerance
+        .setContinuousInput(-360, 360);
 
     /** Translation controller gains used when driving to an exact field position. */
     public static final PIDGains kDriveAtTargetGains = new PIDGains()

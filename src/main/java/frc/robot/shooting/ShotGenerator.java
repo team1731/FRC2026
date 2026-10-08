@@ -14,6 +14,8 @@ import frc.robot.Robot;
 
 public class ShotGenerator {
     public final ShotTable shotTable = ShotTable.getScoringTable();
+    public final ShotTable passingTable = ShotTable.getPassingTable();
+    private ShotTable activeShotTable = shotTable;
 
     public final Supplier<Translation2d> kHubSupplier = () -> Robot.isRedAlliance()
         ? new Translation2d(11.91, 4.03)
@@ -39,20 +41,27 @@ public class ShotGenerator {
      * is only defined in one place.
      */
     private double shotTableTof(double dist) {
-        return shotTable.getShotParameters(dist)[2];
+        return activeShotTable.getShotParameters(dist)[2];
     }
 
     public void setTarget(Supplier<Translation2d> target) {
         this.targetSupplier = target;
+        this.activeShotTable = shotTable;
     }
 
     public void setPassing() {
-        this.setTarget(kPassSupplier);
+        this.setTarget(kPassSupplier, adjustTargetForMovingShots, passingTable);
     }
 
     public void setTarget(Supplier<Translation2d> target, boolean movingShots) {
         this.setTarget(target);
         this.adjustTargetForMovingShots = movingShots;
+    }
+
+    public void setTarget(Supplier<Translation2d> target, boolean movingShots, ShotTable table) {
+        this.setTarget(target, movingShots);
+        this.activeShotTable = table;
+        update();
     }
 
     public void update() {
@@ -78,7 +87,7 @@ public class ShotGenerator {
 
         double distance = compensatedTarget.minus(robotXY).getNorm();
 
-        double[] shotParams  = shotTable.getShotParameters(distance);
+        double[] shotParams  = activeShotTable.getShotParameters(distance);
 
         Logger.recordOutput("TargetDistance", distance);
         Logger.recordOutput("CompensatedTarget", new Pose2d(compensatedTarget, Rotation2d.kZero));

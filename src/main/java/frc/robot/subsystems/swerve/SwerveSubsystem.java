@@ -147,6 +147,13 @@ public class SwerveSubsystem extends BaseSubsystem {
         }
     }
 
+    public void resetTelePose() {
+        this.resetPose(Robot.isRedAlliance() ? 
+            new Pose2d(12.967, 4.046, Rotation2d.k180deg) :
+            new Pose2d(3.527, 4.046, Rotation2d.kZero)
+        );
+    }
+
     /**
      * Re-seeds CTRE field-centric driving from the current robot heading.
      */
@@ -161,6 +168,8 @@ public class SwerveSubsystem extends BaseSubsystem {
      */
     public void resetPose(Pose2d pose) {
         this.drivetrain.resetPose(pose);
+        this.handler.resetVSLAMPose(pose);
+        this.handler.resetAprilTagSimPose(pose);
     }
 
     public void setSnailMode(boolean snail) {
@@ -209,14 +218,15 @@ public class SwerveSubsystem extends BaseSubsystem {
             velY *= snailModeScalar;
             omega *= snailModeScalar;
 
-            ChassisSpeeds requested = new ChassisSpeeds(velX, velY, omega);
+            // ChassisSpeeds requested = new ChassisSpeeds(velX, velY, omega);
             ChassisSpeeds limited = DriveSpeedLimiter.prioritizeRotation(
                 velX, velY, omega, kMaxSpeed, kDriveRadius);
             velX = limited.vxMetersPerSecond;
             velY = limited.vyMetersPerSecond;
             omega = limited.omegaRadiansPerSecond;
-            logger.log("Driver Requested Speeds", requested);
-            logger.log("Driver Limited Speeds", limited);
+
+            // logger.log("Driver Requested Speeds", requested);
+            // logger.log("Driver Limited Speeds", limited);
 
             if (velX == 0.0 && velY == 0.0 && omega == 0.0) {
                 this.drivetrain.setControl(kBrakeRequest);
@@ -239,7 +249,7 @@ public class SwerveSubsystem extends BaseSubsystem {
             // Angle from robot to target
             Rotation2d targetAngle = targetTranslation.minus(robotTranslation).getAngle();
             // Flip by 180 degrees so the BACK of the robot points at the target
-            Rotation2d desiredAngle = targetAngle.plus(Rotation2d.fromDegrees(180));
+            Rotation2d desiredAngle = targetAngle.plus(Rotation2d.k180deg);
             double rotRate = kHeadingCtrl.calculate(curPose.getRotation().getRadians() % (2 * Math.PI), desiredAngle.getRadians());
 
             double velX = kXScalar.scale(-Controls.getDriver().getLeftY()) * 0.5 * snailModeScalar;

@@ -17,7 +17,8 @@ public class IntakeRollerConstants {
     public static final double kGearRatio = 3.0;
 
     public static final PIDGains kPIDGains = new PIDGains()
-        .setP(0.05).setV(0.10);
+        .setP(0.15)
+        .setV(0.30);
 
     public static final AngularVelocity kIntakeVelocity = MotorConstants.kKrakenX44FOC.kMaxVelocity.div(kGearRatio);
 
@@ -27,7 +28,6 @@ public class IntakeRollerConstants {
     public static final TalonFXIOConfigs getIOConfig() {
         return new TalonFXIOConfigs()
             .withPIDGains(kPIDGains)
-            .invert()
             .brake();
     }
 

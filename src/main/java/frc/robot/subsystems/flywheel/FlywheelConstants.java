@@ -43,6 +43,7 @@ public final class FlywheelConstants {
             .withFollower(Ports.kLeftFlywheelBottomConfig.kPort, false)
             .withFollower(Ports.kRightFlywheelBottomConfig.kPort, true)
             .withFollower(Ports.kRightFlywheelTopConfig.kPort, true)
+            .invert()
             .coast()
         ;
     }

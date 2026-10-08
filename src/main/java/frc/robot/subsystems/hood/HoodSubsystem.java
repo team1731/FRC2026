@@ -16,6 +16,7 @@ public class HoodSubsystem extends BaseServoSubsystem<MotorIOTalonFXS> {
     public HoodSubsystem() {
         super(HoodConstants.getIO());
         super.setDefaultCommand(home());
+        super.getMotor().resetEncoderPosition(HoodConstants.kHomeAngle);
     }
 
     @Override

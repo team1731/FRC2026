@@ -40,7 +40,6 @@ public final class IndexerConstants {
             .withSensorToMechanismRatio(kGearRatio)
             .withNeutralMode(NeutralModeValue.Coast)
             .withCurrentLimits(kSupplyCurrentLimit, kStatorCurrentLimit)
-            .invert()
             .brake()
         ;
     }

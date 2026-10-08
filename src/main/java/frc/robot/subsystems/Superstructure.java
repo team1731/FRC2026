@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.robot.Robot;
 import frc.robot.shooting.ShotGenerator;
+import frc.robot.shooting.ShotTable;
 
 /**
  * Coordinates mechanisms that need to move and interact together
@@ -34,9 +35,9 @@ public class Superstructure {
         return Robot.hood.setAngle(() -> generator.targetHoodAngle).alongWith(Robot.flywheel.shoot(() -> generator.targetFlywheelVelocity));
     }
 
-    private Command setTarget(Supplier<Translation2d> target, boolean adjustForMovingShot) {
+    private Command setTarget(Supplier<Translation2d> target, boolean adjustForMovingShot, ShotTable table) {
         return new InstantCommand(() -> {
-            generator.setTarget(target, adjustForMovingShot);
+            generator.setTarget(target, adjustForMovingShot, table);
         });
     }
 
@@ -72,11 +73,11 @@ public class Superstructure {
         return Robot.hood.home().alongWith(Robot.flywheel.shoot(() -> generator.targetFlywheelVelocity));
     }
 
-    private Command shoot(Supplier<Translation2d> target, boolean adjustForMovingShot, boolean trackTarget, boolean feedthrough, BooleanSupplier shotCondition) {
+    private Command shoot(Supplier<Translation2d> target, boolean adjustForMovingShot, ShotTable table, boolean feedthrough, BooleanSupplier shotCondition) {
         return new SequentialCommandGroup(
-            setTarget(target, adjustForMovingShot),
+            setTarget(target, adjustForMovingShot, table),
             new ParallelCommandGroup(
-                Robot.swerve.joystickTargetLock(target),
+                Robot.swerve.joystickTargetLock(generator.appliedTargetSupplier),
                 applyTargetHoodAndFlywheel(),
                 Commands.waitUntil(shotCondition).andThen(
                     new ParallelCommandGroup( // Only start the feeding and squeezing sequence after we are ready to shoot
@@ -109,11 +110,11 @@ public class Superstructure {
     }
 
     public Command shoot(boolean feedthrough) {
-        return shoot(generator.kHubSupplier, true, true, feedthrough, this::readyToShoot);
+        return shoot(generator.kHubSupplier, true, generator.shotTable, feedthrough, this::readyToShoot);
     }
 
     public Command pass(boolean feedthrough) {
-        return shoot(generator.kPassSupplier, true, true, feedthrough, this::readyToShoot);
+        return shoot(generator.kPassSupplier, true, generator.passingTable, feedthrough, this::readyToShoot);
     }
 
     public Command overrideShot(double distance) {

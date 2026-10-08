@@ -38,6 +38,8 @@ public class VisionHandler {
 
         if (VisionConstants.kUseAprilTags) {
             this.tagIOs = ios;
+        } else {
+            this.tagIOs = new AprilTagIO[]{};
         }
     }
 
@@ -126,6 +128,14 @@ public class VisionHandler {
                     }
                 }
             }
+
+            // Publish every cycle, including when VSLAM is disabled or no headset is attached.
+            boolean connected = oculus != null && oculus.isConnected();
+            boolean tracking = connected && oculus.isTracking();
+
+            logger.log("Oculus Connected", connected);
+            logger.log("Oculus Tracking", tracking);
+            logger.log("Oculus Battery", oculus.getBatteryPercent().getAsInt());
         }
     }
 
@@ -139,13 +149,6 @@ public class VisionHandler {
     public void periodic(Pose2d robotPose, double yaw, double yawRate, ChassisSpeeds speeds) {
         this.updateVSLAM();
         this.updateAprilTag(robotPose, yaw, yawRate);
-
-        // Publish every cycle, including when VSLAM is disabled or no headset is attached.
-        boolean connected = oculus != null && oculus.isConnected();
-        boolean tracking = connected && oculus.isTracking();
-
-        logger.log("Oculus Connected", connected);
-        logger.log("Oculus Tracking", tracking);
     }
 
     /**
