@@ -21,8 +21,8 @@ import frc.robot.Ports;
 public class IntakeDeployConstants {
     public static final double kGearRatio = 48.0;
 
-    public static final double kStatorCurrentLimit = 60.0;
-    public static final double kSupplyCurrentLimit = 40.0;
+    public static final double kStatorCurrentLimit = 40.0;
+    public static final double kSupplyCurrentLimit = 20.0;
 
     public static final Angle kHomeAngle = Rotations.zero();
     public static final Angle kDeployAngle = Rotations.of(0.127413);

@@ -28,7 +28,7 @@ public final class HoodConstants {
     public static final double kHoodMOI = 0.006; // Complete estimate
 
     public static final double kStatorCurrentLimit = 40.0;
-    public static final double kSupplyCurrentLimit = 40.0;
+    public static final double kSupplyCurrentLimit = 20.0;
 
     public static final PIDGains kPIDGains = new PIDGains()
         .setP(4.8)

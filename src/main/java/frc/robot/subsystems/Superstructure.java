@@ -109,6 +109,22 @@ public class Superstructure {
         );
     }
 
+    public Command autoShoot() {
+        return new SequentialCommandGroup(
+            setTarget(generator.kHubSupplier, false, ShotTable.getScoringTable()),
+            new ParallelCommandGroup(
+                applyTargetHoodAndFlywheel(),
+                Commands.waitUntil(this::readyToShoot).andThen(
+                    new ParallelCommandGroup( // Only start the feeding and squeezing sequence after we are ready to shoot
+                        this.feed(),
+                        jiggleIntakeForShot(),
+                        Commands.waitSeconds(1.5).andThen(Robot.hopper.collapse())
+                    )
+                )
+            )
+        );
+    }
+
     public Command shoot(boolean feedthrough) {
         return shoot(generator.kHubSupplier, true, generator.shotTable, feedthrough, this::readyToShoot);
     }

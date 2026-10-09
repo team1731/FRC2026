@@ -151,11 +151,11 @@
     },
     {
       "waypointRelativePos": 6,
-      "rotationDegrees": 180.0
+      "rotationDegrees": -142.46278809279195
     },
     {
       "waypointRelativePos": 6.647798742138368,
-      "rotationDegrees": 180.0
+      "rotationDegrees": -135.42617014766878
     }
   ],
   "constraintZones": [
@@ -188,7 +188,7 @@
     {
       "name": "Constraints Zone",
       "minWaypointRelativePos": 0,
-      "maxWaypointRelativePos": 0.7295285359801649,
+      "maxWaypointRelativePos": 1.8222621184919212,
       "constraints": {
         "maxVelocity": 3.0,
         "maxAcceleration": 3.0,
@@ -214,8 +214,8 @@
       "command": null
     },
     {
-      "name": "Warmup",
-      "waypointRelativePos": 6.148883374689813,
+      "name": "Shoot",
+      "waypointRelativePos": 6.66302729528535,
       "endWaypointRelativePos": 7.0,
       "command": null
     }

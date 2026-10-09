@@ -224,7 +224,6 @@ public class Robot extends LoggedRobot {
       CommandScheduler.getInstance().schedule(autonomousCommand);
     }
 
-    Robot.swerve.setStatorCurrentLimit(SwerveConstants.kAutoCurrentLimit);
     autoHasRan = true;
   }
 
@@ -242,8 +241,6 @@ public class Robot extends LoggedRobot {
     if (autonomousCommand != null) {
       autonomousCommand.cancel();
     }
-
-    Robot.swerve.setStatorCurrentLimit(SwerveConstants.kTeleCurrentLimit);
   }
 
   /** Called every loop during teleop after the scheduler has run. */
@@ -258,7 +255,6 @@ public class Robot extends LoggedRobot {
   @Override
   public void testInit() {
     CommandScheduler.getInstance().cancelAll();
-    Robot.swerve.setStatorCurrentLimit(SwerveConstants.kTeleCurrentLimit);
   }
 
   /** Called every loop during test mode after the scheduler has run. */

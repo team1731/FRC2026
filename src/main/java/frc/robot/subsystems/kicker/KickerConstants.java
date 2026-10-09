@@ -23,18 +23,19 @@ public final class KickerConstants {
     public static final AngularVelocity kSpitVelocity = RotationsPerSecond.of(-50);
     public static final AngularVelocity kEpsilon = RotationsPerSecond.one();
 
-    public static final double kStatorCurrentLimit = 120.0;
-    public static final double kSupplyCurrentLimit = 50.0;
+    public static final double kStatorCurrentLimit = 80.0;
+    public static final double kSupplyCurrentLimit = 30.0;
 
     public static final PIDGains kVelocityGains = new PIDGains()
         .setP(0.15)
-        .setS(0.15)
+        // .setS(0.15)
         .setV(0.12);
     
     public static final TalonFXIOConfigs getIOConfig() {
         return new TalonFXIOConfigs()
             .withPIDGains(kVelocityGains)
             .withSensorToMechanismRatio(kGearRatio)
+            .withCurrentLimits(kSupplyCurrentLimit, kStatorCurrentLimit)
             .withNeutralMode(NeutralModeValue.Coast)
             .withFollower(Ports.kTopKickerConfig.kPort)
             .brake()

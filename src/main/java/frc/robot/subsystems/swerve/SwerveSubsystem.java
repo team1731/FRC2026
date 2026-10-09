@@ -5,15 +5,10 @@ import static frc.robot.subsystems.swerve.SwerveRequests.*;
 
 import java.util.function.Supplier;
 
-import com.ctre.phoenix6.swerve.SwerveModule;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
-import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
-import com.ctre.phoenix6.configs.TalonFXConfigurator;
-import com.ctre.phoenix6.hardware.CANcoder;
-import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -53,7 +48,7 @@ public class SwerveSubsystem extends BaseSubsystem {
         this.drivetrain = TunerConstants.createDrivetrain();
         this.handler = new VisionHandler(
             (pose, timestamp, estimationStdDevs) -> 
-                this.drivetrain.addVisionMeasurement(pose, timestamp, estimationStdDevs), 
+                this.drivetrain.addVisionMeasurement(pose, timestamp, estimationStdDevs),
                 VisionConstants.getAprilTagIOs()
         );
 
@@ -132,20 +127,20 @@ public class SwerveSubsystem extends BaseSubsystem {
      *
      * @param limit stator current limit in amps
      */
-    public void setStatorCurrentLimit(double limit) {
-        for (SwerveModule<TalonFX, TalonFX, CANcoder> module : drivetrain.getModules()) {
-            // Create config object
-            TalonFXConfigurator configurator = module.getDriveMotor().getConfigurator();
-            CurrentLimitsConfigs currentLimits = new CurrentLimitsConfigs();
+    // public void setStatorCurrentLimit(double limit) {
+    //     for (SwerveModule<TalonFX, TalonFX, CANcoder> module : drivetrain.getModules()) {
+    //         // Create config object
+    //         TalonFXConfigurator configurator = module.getDriveMotor().getConfigurator();
+    //         CurrentLimitsConfigs currentLimits = new CurrentLimitsConfigs();
     
-            // Dynamically change limit based on logic (e.g., set to 40A)
-            currentLimits.StatorCurrentLimit = limit;
-            currentLimits.StatorCurrentLimitEnable = true;
+    //         // Dynamically change limit based on logic (e.g., set to 40A)
+    //         currentLimits.StatorCurrentLimit = limit;
+    //         currentLimits.StatorCurrentLimitEnable = true;
     
-            // Apply configuration
-            configurator.apply(currentLimits);
-        }
-    }
+    //         // Apply configuration
+    //         configurator.apply(currentLimits);
+    //     }
+    // }
 
     public void resetTelePose() {
         this.resetPose(Robot.isRedAlliance() ? 

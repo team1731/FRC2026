@@ -32,9 +32,9 @@ public final class VisionConstants {
 
     /** Transform from robot origin to the mounted Quest/Oculus headset. */
     public static final Transform3d kRobotToOculus = new Transform3d(
-        Units.inchesToMeters(-12.5),
+        Units.inchesToMeters(-12.656),
         Units.inchesToMeters(0.0),
-        Units.inchesToMeters(13.0),
+        Units.inchesToMeters(13.129),
         new Rotation3d(
             Units.degreesToRadians(0.0),
             Units.degreesToRadians(0.0),
@@ -43,12 +43,12 @@ public final class VisionConstants {
     );
 
     public static final Transform3d kRobotToLimelight = new Transform3d(
-        Units.inchesToMeters(-(12.5 - 1.475)),
-        Units.inchesToMeters(0.25),
-        Units.inchesToMeters(15.0),
+        Units.inchesToMeters(-12.351),
+        Units.inchesToMeters(0.00),
+        Units.inchesToMeters(17.580),
         new Rotation3d(
             Units.degreesToRadians(0.0),
-            Units.degreesToRadians(15.0),
+            Units.degreesToRadians(-20.0),
             Units.degreesToRadians(180.0)
         )
     );

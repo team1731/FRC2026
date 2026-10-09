@@ -24,12 +24,12 @@ public class RobotContainer {
     visualizer.init();
     Controls.build();
 
-    new EventTrigger("Shoot").onTrue(superstructure.shoot(false));
     new EventTrigger("StopShoot").onTrue(superstructure.stopShoot());
     new EventTrigger("Intake").whileTrue(superstructure.intake());
     new EventTrigger("Warmup").whileTrue(Robot.flywheel.warmup());
     new EventTrigger("LowerSqueeze").onTrue(Robot.hopper.collapse());
     new EventTrigger("RaiseSqueeze").onTrue(Robot.hopper.extend());
+    new EventTrigger("Shoot").onTrue(superstructure.autoShoot());
     NamedCommands.registerCommand("TargetLock", superstructure.lockSwerveToHub());
 
     configureBindings();

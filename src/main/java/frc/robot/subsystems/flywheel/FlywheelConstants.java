@@ -19,7 +19,7 @@ import frc.robot.Ports;
 public final class FlywheelConstants {
     public static final double kGearRatio = 1.0; // direct 1:1 powering of flywheel
     public static final double kStatorCurrentLimit = 70.0;
-    public static final double kSupplyCurrentLimit = 30.0;
+    public static final double kSupplyCurrentLimit = 25.0;
 
     public static final AngularVelocity kWarmupVelocity = RotationsPerSecond.of(60);
     public static final AngularVelocity kEpsilon = RotationsPerSecond.of(3.0);
