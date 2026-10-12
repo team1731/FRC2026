@@ -25,7 +25,7 @@ public final class VisionConstants {
     public static final String kLimelightMainName = "limelight-main";
 
     /** Oculus battery percentage threshold for low-battery warnings. */
-    public static final int kOculusLowBattery = 20; // Percentage
+    public static final int kOculusLowBattery = 20;
 
     /** Maximum robot yaw rate where AprilTag pose updates are trusted. */
     public static final double kMaxVisionAngularRate = 720d; // degrees per second

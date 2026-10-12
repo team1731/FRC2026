@@ -8,7 +8,6 @@ import frc.lib.frc1731.SmartLogger;
 import frc.lib.frc1731.hardware.camera.AprilTagIO;
 import frc.robot.Robot;
 import frc.robot.RobotConstants;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 
 /**
  * Coordinates all vision pose sources and forwards accepted measurements to the drivetrain.
@@ -86,10 +85,7 @@ public class VisionHandler {
 
                 if (!rejectUpdate) {
                     double timestamp = io.getTimestamp();
-                    // double age = Timer.getFPGATimestamp() - timestamp;
                     if (!Double.isFinite(timestamp) 
-                            // || age < 0
-                            // || age > VisionConstants.kQuestSeedMaxFrameAgeSeconds
                             || !Double.isFinite(estimate.getX()) || !Double.isFinite(estimate.getY())) {
                         continue;
                     }
@@ -133,9 +129,14 @@ public class VisionHandler {
             boolean connected = oculus != null && oculus.isConnected();
             boolean tracking = connected && oculus.isTracking();
 
+            
             logger.log("Oculus Connected", connected);
             logger.log("Oculus Tracking", tracking);
-            logger.log("Oculus Battery", oculus.getBatteryPercent().getAsInt());
+            oculus.getBatteryPercent()
+                .ifPresentOrElse(
+                    percent -> logger.log("Oculus Battery", percent),
+                    () -> logger.log("Battery Percent", 0)
+                );
         }
     }
 
@@ -144,9 +145,8 @@ public class VisionHandler {
      * @param robotPose current drivetrain pose, used to update simulated cameras
      * @param yaw current rotation of the swerve base
      * @param yawRate current rotation velocity of the swerve base
-     * @param speeds measured robot-relative speeds used to gate stationary seed checks
      */
-    public void periodic(Pose2d robotPose, double yaw, double yawRate, ChassisSpeeds speeds) {
+    public void periodic(Pose2d robotPose, double yaw, double yawRate) {
         this.updateVSLAM();
         this.updateAprilTag(robotPose, yaw, yawRate);
     }

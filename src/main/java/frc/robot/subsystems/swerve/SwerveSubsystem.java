@@ -182,8 +182,7 @@ public class SwerveSubsystem extends BaseSubsystem {
         this.handler.periodic(
             getPose(),
             getPose().getRotation().getDegrees(), 
-            drivetrain.getPigeon2().getAngularVelocityZDevice().getValueAsDouble(),
-            getSpeeds()
+            drivetrain.getPigeon2().getAngularVelocityZDevice().getValueAsDouble()
         );
 
         super.logger.log("Current Pose", getPose());

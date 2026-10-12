@@ -30,9 +30,6 @@ public final class SwerveConstants {
         Math.max(Math.hypot(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY),
                  Math.hypot(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)));
 
-    /** Maximum commanded angular acceleration in radians per second squared. */
-    public static final double kMaxAngularAcceleration = Math.toRadians(540); // deg/s^2 max acceleration
-
     /** Scalar applied to translation joystick commands. */
     public static final double kTranslationScalar = 1.0;
 
@@ -44,20 +41,12 @@ public final class SwerveConstants {
     /** Joystick deadband before shaping/scaling inputs. */
     public static final double kDeadband = 0.05; // 5% joystick deadband
 
-    // Current limits
-    /** Drive stator current limit used during autonomous. */
-    public static final double kAutoCurrentLimit = 100;
-
-    /** Drive stator current limit used during teleop and test. */
-    public static final double kTeleCurrentLimit = 60;
-
     // PID Gains
     /** Heading controller gains for field-centric heading correction and auto-align rotation. */
     public static final PIDGains kHeadingGains = new PIDGains()
         .setP(6.0)
-        // .setD(0.05)
-        // .setTolerance(Math.toRadians(1)) // 1 degree tolerance
-        .setContinuousInput(-360, 360);
+        .setD(0.05)
+        .setContinuousInput(-Math.PI, Math.PI);
 
     /** Translation controller gains used when driving to an exact field position. */
     public static final PIDGains kDriveAtTargetGains = new PIDGains()
