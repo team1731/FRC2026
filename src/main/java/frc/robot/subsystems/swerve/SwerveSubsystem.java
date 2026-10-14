@@ -11,6 +11,7 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -19,7 +20,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import frc.robot.RobotState;
 import frc.lib.frc1678.util.Util;
-import frc.lib.frc1731.DriveSpeedLimiter;
 import frc.lib.frc1731.subsystem.BaseSubsystem;
 import frc.robot.Controls;
 import frc.robot.Robot;
@@ -213,8 +213,9 @@ public class SwerveSubsystem extends BaseSubsystem {
             omega *= snailModeScalar;
 
             // ChassisSpeeds requested = new ChassisSpeeds(velX, velY, omega);
-            ChassisSpeeds limited = DriveSpeedLimiter.prioritizeRotation(
+            ChassisSpeeds limited = prioritizeRotation(
                 velX, velY, omega, kMaxSpeed, kDriveRadius);
+
             velX = limited.vxMetersPerSecond;
             velY = limited.vyMetersPerSecond;
             omega = limited.omegaRadiansPerSecond;
@@ -248,15 +249,24 @@ public class SwerveSubsystem extends BaseSubsystem {
 
             double velX = kXScalar.scale(-Controls.getDriver().getLeftY()) * 0.5 * snailModeScalar;
             double velY = kYScalar.scale(-Controls.getDriver().getLeftX()) * 0.5 * snailModeScalar;
-            ChassisSpeeds limited = DriveSpeedLimiter.prioritizeRotation(
+
+            ChassisSpeeds limited = prioritizeRotation(
                 velX, velY, rotRate * snailModeScalar, kMaxSpeed, kDriveRadius);
             
-            drivetrain.setControl(
-                kJoystickFieldCentricRequest
-                    .withVelocityX(limited.vxMetersPerSecond)
-                    .withVelocityY(limited.vyMetersPerSecond)
-                    .withRotationalRate(limited.omegaRadiansPerSecond)
-            );
+            boolean noTranslation = velX == 0.0 && velY == 0.0;
+            boolean aimed =
+                Math.abs(desiredAngle.minus(curPose.getRotation()).getDegrees()) < 1.0;
+
+            if (noTranslation && aimed) {
+                drivetrain.setControl(kBrakeRequest);
+            } else {
+                drivetrain.setControl(
+                    kJoystickFieldCentricRequest
+                        .withVelocityX(limited.vxMetersPerSecond)
+                        .withVelocityY(limited.vyMetersPerSecond)
+                        .withRotationalRate(limited.omegaRadiansPerSecond)
+                );
+            }
         }).withName("JoystickTargetLock");
     }
 
@@ -327,12 +337,16 @@ public class SwerveSubsystem extends BaseSubsystem {
             Rotation2d desiredAngle = targetAngle.plus(Rotation2d.fromDegrees(180));
             double rotRate = kHeadingCtrl.calculate(curPose.getRotation().getRadians() % (2 * Math.PI), desiredAngle.getRadians());
             
-            drivetrain.setControl(
-                kJoystickFieldCentricRequest
-                    .withVelocityX(0)
-                    .withVelocityY(0)
-                    .withRotationalRate(rotRate)
-            );
+            if (Math.abs(desiredAngle.minus(curPose.getRotation()).getDegrees()) < 1.0) {
+                drivetrain.setControl(kBrakeRequest);
+            } else {
+                drivetrain.setControl(
+                    kJoystickFieldCentricRequest
+                        .withVelocityX(0)
+                        .withVelocityY(0)
+                        .withRotationalRate(rotRate)
+                );
+            }
         }).withName("LockHeading")
         .until(() -> {
             Pose2d pose = getPose();
@@ -341,5 +355,23 @@ public class SwerveSubsystem extends BaseSubsystem {
             return Math.abs(desired.minus(pose.getRotation()).getDegrees()) < 1.0;
         })
         .withInterruptBehavior(InterruptionBehavior.kCancelSelf);
+    }
+
+    /**
+     * Applies the conservative bound |translation| + |omega| * radius <= maxWheelSpeed.
+     * This works in robot or field coordinates and for either alliance perspective.
+     */
+    private static ChassisSpeeds prioritizeRotation(
+            double vx, double vy, double omega, double maxWheelSpeed, double driveRadius) {
+        if (!Double.isFinite(maxWheelSpeed) || maxWheelSpeed <= 0
+                || !Double.isFinite(driveRadius) || driveRadius <= 0
+                || !Double.isFinite(vx) || !Double.isFinite(vy) || !Double.isFinite(omega)) {
+            throw new IllegalArgumentException("Finite speeds and positive wheel speed/radius required");
+        }
+        double limitedOmega = MathUtil.clamp(omega, -maxWheelSpeed / driveRadius, maxWheelSpeed / driveRadius);
+        double translationLimit = Math.max(0, maxWheelSpeed - Math.abs(limitedOmega) * driveRadius);
+        double magnitude = Math.hypot(vx, vy);
+        double scale = magnitude > translationLimit ? translationLimit / magnitude : 1.0;
+        return new ChassisSpeeds(vx * scale, vy * scale, limitedOmega);
     }
 }

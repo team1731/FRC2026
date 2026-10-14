@@ -184,13 +184,23 @@
       "name": "Intake",
       "waypointRelativePos": 0.0,
       "endWaypointRelativePos": 4.586090479405761,
-      "command": null
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "Intake"
+        }
+      }
     },
     {
-      "name": "Shoot",
+      "name": "Warmup",
       "waypointRelativePos": 6.079404466501213,
       "endWaypointRelativePos": 7.0,
-      "command": null
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "Warmup"
+        }
+      }
     }
   ],
   "globalConstraints": {

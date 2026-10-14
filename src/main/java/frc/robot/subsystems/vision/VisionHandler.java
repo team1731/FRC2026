@@ -128,14 +128,13 @@ public class VisionHandler {
             // Publish every cycle, including when VSLAM is disabled or no headset is attached.
             boolean connected = oculus != null && oculus.isConnected();
             boolean tracking = connected && oculus.isTracking();
-
             
             logger.log("Oculus Connected", connected);
             logger.log("Oculus Tracking", tracking);
             oculus.getBatteryPercent()
                 .ifPresentOrElse(
                     percent -> logger.log("Oculus Battery", percent),
-                    () -> logger.log("Battery Percent", 0)
+                    () -> logger.log("Oculus Battery", 0)
                 );
         }
     }

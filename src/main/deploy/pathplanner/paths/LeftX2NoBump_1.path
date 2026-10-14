@@ -148,7 +148,7 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "LowerSqueezer",
+      "name": "",
       "waypointRelativePos": 0,
       "endWaypointRelativePos": null,
       "command": null

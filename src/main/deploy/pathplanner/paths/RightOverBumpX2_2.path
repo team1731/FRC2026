@@ -205,19 +205,34 @@
       "name": "StopShoot",
       "waypointRelativePos": 0,
       "endWaypointRelativePos": null,
-      "command": null
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "StopShoot"
+        }
+      }
     },
     {
       "name": "Intake",
       "waypointRelativePos": 0.0,
       "endWaypointRelativePos": 6.404564315352642,
-      "command": null
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "Intake"
+        }
+      }
     },
     {
-      "name": "Shoot",
+      "name": "Warmup",
       "waypointRelativePos": 6.66302729528535,
       "endWaypointRelativePos": 7.0,
-      "command": null
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "Warmup"
+        }
+      }
     }
   ],
   "globalConstraints": {

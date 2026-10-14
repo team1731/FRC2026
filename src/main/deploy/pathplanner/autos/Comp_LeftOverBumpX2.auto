@@ -7,77 +7,25 @@
         {
           "type": "path",
           "data": {
-            "pathName": "OLD_LeftOverBumpX2_1"
+            "pathName": "LeftOverBumpX2_1"
           }
         },
         {
-          "type": "deadline",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "wait",
-                "data": {
-                  "waitTime": 3.0
-                }
-              },
-              {
-                "type": "parallel",
-                "data": {
-                  "commands": [
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "Shoot"
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "TargetLock"
-                      }
-                    }
-                  ]
-                }
-              }
-            ]
+            "name": "Shoot"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "OLD_LeftOverBumpX2_2"
+            "pathName": "LeftOverBumpX2_2"
           }
         },
         {
-          "type": "deadline",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "wait",
-                "data": {
-                  "waitTime": 3.0
-                }
-              },
-              {
-                "type": "parallel",
-                "data": {
-                  "commands": [
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "Shoot"
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "TargetLock"
-                      }
-                    }
-                  ]
-                }
-              }
-            ]
+            "name": "Shoot"
           }
         }
       ]

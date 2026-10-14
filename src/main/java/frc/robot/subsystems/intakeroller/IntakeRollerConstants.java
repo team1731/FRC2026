@@ -22,8 +22,8 @@ public class IntakeRollerConstants {
 
     public static final AngularVelocity kIntakeVelocity = MotorConstants.kKrakenX44FOC.kMaxVelocity.div(kGearRatio);
 
-    public static final double kStatorCurrentLimit = 80;
-    public static final double kSupplyCurrentLimit = 30;
+    public static final double kStatorCurrentLimit = 100;
+    public static final double kSupplyCurrentLimit = 40;
 
     public static final TalonFXIOConfigs getIOConfig() {
         return new TalonFXIOConfigs()

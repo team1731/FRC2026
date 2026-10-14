@@ -13,29 +13,29 @@ public class ShotTable {
     private static final List<ShotEntry> kHubEntries = List.of(
         new ShotEntry(0, 0.0, 55, 0.5),
         new ShotEntry(1, 0.0, 55, 0.5),
-        new ShotEntry(2, 5, 55, 1.25),
-        new ShotEntry(3, 9, 62.5, 1.4),
-        new ShotEntry(4, 12, 70.0, 1.8),
-        new ShotEntry(5, 16, 82.5,2.0),
-        new ShotEntry(6, 17, 87.5, 2.1),
-        new ShotEntry(7, 18, 92.5, 2.4),
-        new ShotEntry(8, 20, 94.5, 2.8)
+        new ShotEntry(2, 5, 55, 1.16),
+        new ShotEntry(3, 9, 62.5, 1.2),
+        new ShotEntry(4, 12, 70.0, 1.2),
+        new ShotEntry(5, 16, 75.0,1.25),
+        new ShotEntry(6, 17, 82.5, 2.1),
+        new ShotEntry(7, 18, 90, 2.4),
+        new ShotEntry(8, 20, 95, 2.8)
     );
 
     private static final List<ShotEntry> kPassEntries = List.of(
-        new ShotEntry(0, 0, 40, 0.5),
-        new ShotEntry(1, 5, 50, 0.5),
-        new ShotEntry(2, 6, 50, 0.75),
-        new ShotEntry(3, 7, 60, 0.85),
-        new ShotEntry(4, 10, 60, 1.25),
-        new ShotEntry(5, 15, 70, 1.4),
-        new ShotEntry(6, 15, 70, 1.6),
-        new ShotEntry(7, 16, 80, 1.8),
-        new ShotEntry(8, 18, 80, 2.0),
-        new ShotEntry(9, 18, 85, 2.0),
-        new ShotEntry(10, 20, 90, 2.0),
-        new ShotEntry(11, 20, 90, 2.0),
-        new ShotEntry(12, 20, 90, 2.0)
+        new ShotEntry(0, 18, 40, 0.5),
+        new ShotEntry(1, 18, 45, 0.5),
+        new ShotEntry(2, 18, 45, 0.75),
+        new ShotEntry(3, 18, 45, 0.85),
+        new ShotEntry(4, 18, 55, 1.25),
+        new ShotEntry(5, 18, 55, 1.4),
+        new ShotEntry(6, 18, 65, 1.6),
+        new ShotEntry(7, 18, 65, 1.8),
+        new ShotEntry(8, 18, 85, 2.0),
+        new ShotEntry(9, 18, 90, 2.0),
+        new ShotEntry(10, 18, 90, 2.0),
+        new ShotEntry(11, 18, 92.5, 2.0),
+        new ShotEntry(12, 18, 95, 2.0)
     );
 
     private ShotTable(List<ShotEntry> entries) {

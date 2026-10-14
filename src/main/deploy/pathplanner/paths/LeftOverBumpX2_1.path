@@ -32,16 +32,16 @@
     },
     {
       "anchor": {
-        "x": 7.641284090909091,
-        "y": 6.570477272727273
+        "x": 7.519557774607703,
+        "y": 6.590385164051355
       },
       "prevControl": {
-        "x": 7.641284090909091,
-        "y": 7.354405489132472
+        "x": 7.377539434388219,
+        "y": 7.361341868099991
       },
       "nextControl": {
-        "x": 7.641284090909091,
-        "y": 5.6325568181818175
+        "x": 7.610128388017117,
+        "y": 6.098716119828817
       },
       "isLocked": false,
       "linkedName": null
@@ -115,7 +115,7 @@
     },
     {
       "waypointRelativePos": 2,
-      "rotationDegrees": -89.42706130231656
+      "rotationDegrees": -73.36950601767184
     },
     {
       "waypointRelativePos": 3,
@@ -133,7 +133,7 @@
   "constraintZones": [
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 1.875930521091818,
+      "minWaypointRelativePos": 1.6205266711681514,
       "maxWaypointRelativePos": 4.051316677920382,
       "constraints": {
         "maxVelocity": 1.25,
@@ -146,8 +146,8 @@
     },
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 0,
-      "maxWaypointRelativePos": 5.3477380148548,
+      "minWaypointRelativePos": 4.722580645161242,
+      "maxWaypointRelativePos": 5.556327543424304,
       "constraints": {
         "maxVelocity": 2.0,
         "maxAcceleration": 3.0,
@@ -159,7 +159,30 @@
     }
   ],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "Intake",
+      "waypointRelativePos": 0,
+      "endWaypointRelativePos": 5.5746117488182785,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "Intake"
+        }
+      }
+    },
+    {
+      "name": "Warmup",
+      "waypointRelativePos": 5.072248480756191,
+      "endWaypointRelativePos": 6.0,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "Warmup"
+        }
+      }
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 4.0,
     "maxAcceleration": 4.0,

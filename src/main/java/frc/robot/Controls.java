@@ -37,8 +37,8 @@ public class Controls {
     public static Trigger overrideTowerShot = operator.y();
     public static Trigger overrideLobShot = operator.b();
 
-    public Trigger raiseHopper = operator.rightBumper();
-    public Trigger lowerHopper = operator.leftBumper();
+    public static Trigger raiseHopper = operator.rightBumper();
+    public static Trigger lowerHopper = operator.leftBumper();
 
     /** Available driver/operator control mapping presets. */
     public enum ControlSet {

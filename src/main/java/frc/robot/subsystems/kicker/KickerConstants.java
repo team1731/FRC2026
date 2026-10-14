@@ -23,8 +23,8 @@ public final class KickerConstants {
     public static final AngularVelocity kSpitVelocity = RotationsPerSecond.of(-50);
     public static final AngularVelocity kEpsilon = RotationsPerSecond.one();
 
-    public static final double kStatorCurrentLimit = 80.0;
-    public static final double kSupplyCurrentLimit = 30.0;
+    public static final double kStatorCurrentLimit = 100.0;
+    public static final double kSupplyCurrentLimit = 40.0;
 
     public static final PIDGains kVelocityGains = new PIDGains()
         .setP(0.15)

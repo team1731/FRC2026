@@ -109,10 +109,15 @@ public class Superstructure {
         );
     }
 
+    // public Command autoShoot() {
+    //     return this.shoot(generator.kHubSupplier, false, generator.shotTable, false, this::readyToShoot);
+    // }
+
     public Command autoShoot() {
         return new SequentialCommandGroup(
             setTarget(generator.kHubSupplier, false, ShotTable.getScoringTable()),
             new ParallelCommandGroup(
+                Robot.swerve.lockHeadingTarget(generator.kHubSupplier),
                 applyTargetHoodAndFlywheel(),
                 Commands.waitUntil(this::readyToShoot).andThen(
                     new ParallelCommandGroup( // Only start the feeding and squeezing sequence after we are ready to shoot
