@@ -3,11 +3,10 @@ package frc.robot.subsystems.vision;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.numbers.*;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import gg.questnav.questnav.*;
-import frc.lib.frc1731.SmartLogger;
 import frc.lib.frc1731.hardware.camera.AprilTagIO;
 import frc.robot.Robot;
-import frc.robot.RobotConstants;
 
 /**
  * Coordinates all vision pose sources and forwards accepted measurements to the drivetrain.
@@ -20,7 +19,7 @@ public class VisionHandler {
     private QuestNav oculus;
     private AprilTagIO[] tagIOs;
     private EstimateConsumer consumer;
-    private SmartLogger logger;
+    // private SmartLogger logger;
 
     /**
      * Creates a vision handler with a drivetrain pose-estimator callback and optional tag cameras.
@@ -30,7 +29,7 @@ public class VisionHandler {
      */
     public VisionHandler(EstimateConsumer consumer, AprilTagIO... ios) {
         this.consumer = consumer;
-        logger = new SmartLogger("VisionSubsystem", () -> RobotConstants.kLogTeamOutputs);
+        // logger = new SmartLogger("VisionSubsystem", () -> RobotConstants.kLogTeamOutputs);
         if (VisionConstants.kUseVSLAM) {
             this.oculus = new QuestNav();
         }
@@ -129,12 +128,20 @@ public class VisionHandler {
             boolean connected = oculus != null && oculus.isConnected();
             boolean tracking = connected && oculus.isTracking();
             
-            logger.log("Oculus Connected", connected);
-            logger.log("Oculus Tracking", tracking);
+            // logger.log("Oculus Connected", connected);
+            // logger.log("Oculus Tracking", tracking);
+            // oculus.getBatteryPercent()
+            //     .ifPresentOrElse(
+            //         percent -> logger.log("Oculus Battery", percent),
+            //         () -> logger.log("Oculus Battery", 0)
+            //     );
+
+            SmartDashboard.putBoolean("Oculus Tracking", tracking);
+            SmartDashboard.putBoolean("Oculus Connected", connected);
             oculus.getBatteryPercent()
                 .ifPresentOrElse(
-                    percent -> logger.log("Oculus Battery", percent),
-                    () -> logger.log("Oculus Battery", 0)
+                    percent -> SmartDashboard.putNumber("Oculus Battery", percent),
+                    () -> SmartDashboard.putNumber("Oculus Battery", 0)
                 );
         }
     }

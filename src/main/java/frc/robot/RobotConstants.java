@@ -17,13 +17,13 @@ public final class RobotConstants {
     public static final CANBus kSecondCANBus = new CANBus("Right CANivore");
 
     /** Optional SmartLogger outputs; input capture is always processed. */
-    public static final boolean kLogTeamOutputs = true;
+    public static final boolean kLogTeamOutputs = false;
 
     /** Publish AdvantageKit data to NetworkTables for live viewing. Read at startup. */
-    public static final boolean kPublishLogsToNT = true;
+    public static final boolean kPublishLogsToNT = false;
 
     /** Write AdvantageKit data to USB on the real robot. Read at startup. */
-    public static final boolean kLogToWPILog = true;
+    public static final boolean kLogToWPILog = false;
 
     /** Competition event key (e.g. 2026vabla). Empty uses the FMS event name. */
     public static final String kLogEventKey = "";

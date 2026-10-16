@@ -31,11 +31,13 @@ public class SwerveRequests {
     public static final SwerveRequest.FieldCentric kJoystickFieldCentricRequest = new SwerveRequest.FieldCentric()
         .withDeadband(0) // DriveScalar handles the joystick deadband before shaping.
         .withRotationalDeadband(0)
+        .withDesaturateWheelSpeeds(true)
         .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
 
     /** Robot-centric request available for driver or test modes that should ignore field heading. */
     public static final SwerveRequest.RobotCentric kJoystickRobotCentricRequest = new SwerveRequest.RobotCentric()
         .withDeadband(0)
         .withRotationalDeadband(0)
+        .withDesaturateWheelSpeeds(true)
         .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 }

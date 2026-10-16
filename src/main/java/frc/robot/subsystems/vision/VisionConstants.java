@@ -32,9 +32,9 @@ public final class VisionConstants {
 
     /** Transform from robot origin to the mounted Quest/Oculus headset. */
     public static final Transform3d kRobotToOculus = new Transform3d(
-        Units.inchesToMeters(-12.656),
+        Units.inchesToMeters(-12),
         Units.inchesToMeters(0.0),
-        Units.inchesToMeters(13.129),
+        Units.inchesToMeters(12.5),
         new Rotation3d(
             Units.degreesToRadians(0.0),
             Units.degreesToRadians(0.0),

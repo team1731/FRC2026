@@ -2,10 +2,10 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 import java.util.List;
 import java.util.Optional;
-
-import org.littletonrobotics.junction.Logger;
 
 /**
  * Credit to team 2363 for this class
@@ -112,11 +112,11 @@ public class GameState {
     }
 
     public static void logValues() {
-        Optional<Alliance> winner = getAutoWinner();
-        Logger.recordOutput("GameState/CycleRemainingTime", getCycleRemainingTime());
-        Logger.recordOutput("GameState/CurrentPhase", getCurrentPhase());
-        Logger.recordOutput("GameState/AutoWinner", winner.map(Alliance::name).orElse("Unknown"));
-        Logger.recordOutput("GameState/HasGameData", winner.isPresent());
-        Logger.recordOutput("GameState/IsMyHubActive", isMyHubActive());
+        // Optional<Alliance> winner = getAutoWinner();
+        SmartDashboard.putNumber("GameState/CycleRemainingTime", getCycleRemainingTime());
+        SmartDashboard.putString("GameState/CurrentPhase", getCurrentPhase().name());
+        // SmartDashboard.putString("GameState/AutoWinner", winner.map(Alliance::name).orElse("Unknown"));
+        // SmartDashboard.putNumber("GameState/HasGameData", winner.isPresent());
+        SmartDashboard.putBoolean("GameState/IsMyHubActive", isMyHubActive());
     }
 }

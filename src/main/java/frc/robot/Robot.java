@@ -1,14 +1,12 @@
 package frc.robot;
 
-import java.io.File;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+// import java.io.File;
 import java.util.Optional;
 
 import org.littletonrobotics.junction.*;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
 
-import frc.lib.frc1731.EventLogWriter;
+// import frc.lib.frc1731.EventLogWriter;
 
 import com.pathplanner.lib.commands.*;
 import com.pathplanner.lib.pathfinding.*;
@@ -38,7 +36,7 @@ import frc.robot.subsystems.swerve.*;
  * standard robot mode lifecycle callbacks. Most subsystem wiring lives in {@link RobotContainer}
  * so this class can stay focused on mode transitions.
  */
-public class Robot extends LoggedRobot {
+public class Robot extends TimedRobot {
   private final RobotContainer container;
   private final AutoLoader autoLoader;
   
@@ -98,24 +96,24 @@ public class Robot extends LoggedRobot {
    */
   private void initLogging() {
     // Log metadata (for AdvantageScope)
-    Logger.recordMetadata("ProjectName", BuildConstants.MAVEN_NAME);
-    Logger.recordMetadata("BuildDate", BuildConstants.BUILD_DATE);
-    Logger.recordMetadata("GitSHA", BuildConstants.GIT_SHA);
-    Logger.recordMetadata("GitDate", BuildConstants.GIT_DATE);
-    Logger.recordMetadata("GitBranch", BuildConstants.GIT_BRANCH);
-    Logger.recordMetadata(
-        "GitDirty",
-        switch (BuildConstants.DIRTY) {
-          case 0 -> "All changes committed";
-          case 1 -> "Uncommitted changes";
-          default -> "Unknown";
-        });
+    // Logger.recordMetadata("ProjectName", BuildConstants.MAVEN_NAME);
+    // Logger.recordMetadata("BuildDate", BuildConstants.BUILD_DATE);
+    // Logger.recordMetadata("GitSHA", BuildConstants.GIT_SHA);
+    // Logger.recordMetadata("GitDate", BuildConstants.GIT_DATE);
+    // Logger.recordMetadata("GitBranch", BuildConstants.GIT_BRANCH);
+    // Logger.recordMetadata(
+    //     "GitDirty",
+    //     switch (BuildConstants.DIRTY) {
+    //       case 0 -> "All changes committed";
+    //       case 1 -> "Uncommitted changes";
+    //       default -> "Unknown";
+    //     });
 
-    try {
-      Logger.recordMetadata("Hostname", InetAddress.getLocalHost().getHostName().replaceAll("\\.local$", ""));
-    } catch (UnknownHostException e) {
-      Logger.recordMetadata("Hostname", "Unknown");
-    }
+    // try {
+    //   Logger.recordMetadata("Hostname", InetAddress.getLocalHost().getHostName().replaceAll("\\.local$", ""));
+    // } catch (UnknownHostException e) {
+    //   Logger.recordMetadata("Hostname", "Unknown");
+    // }
 
     if (RobotConstants.kPublishLogsToNT) {
       Logger.addDataReceiver(new NT4Publisher());
@@ -127,16 +125,16 @@ public class Robot extends LoggedRobot {
     }
     WebServer.start(5800, Filesystem.getDeployDirectory().getPath());
     
-    if (Robot.isReal() && RobotConstants.kLogToWPILog) {
-      File usbDrive = new File("/U");
-      if (usbDrive.exists() && usbDrive.isDirectory()) {
-        Logger.addDataReceiver(new EventLogWriter("/U/logs", RobotConstants.kLogEventKey));
-      } else {
-        DriverStation.reportWarning("No USB stick detected - WPILOG file logging disabled for this session", false);
-      }
-    }
+    // if (Robot.isReal() && RobotConstants.kLogToWPILog) {
+    //   File usbDrive = new File("/U");
+    //   if (usbDrive.exists() && usbDrive.isDirectory()) {
+    //     Logger.addDataReceiver(new EventLogWriter("/U/logs", RobotConstants.kLogEventKey));
+    //   } else {
+    //     DriverStation.reportWarning("No USB stick detected - WPILOG file logging disabled for this session", false);
+    //   }
+    //   Logger.start();
+    // }
 
-    Logger.start();
     SmartDashboard.updateValues();
     DriverStation.silenceJoystickConnectionWarning(true);
   }
