@@ -92,13 +92,6 @@ public class VisionHandler {
                         continue;
                     }
                     this.consumer.accept(estimate, timestamp, io.getEstimationStdDevs());
-                    // Robot.swerve.resetYaw(Robot.isRedAlliance() ? estimate.getRotation().plus(Rotation2d.k180deg) : estimate.getRotation());
-                    // if (DriverStation.isDisabled()) {
-                    //     oculus.setPose(new Pose3d(estimate).transformBy(VisionConstants.kRobotToOculus));
-                    // }
-                    // if (!isQuestSeeded) {
-
-                    // }
                 }
             }
         }
