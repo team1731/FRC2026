@@ -118,6 +118,11 @@ public class PhotonCameraIO implements AprilTagIO {
         return latestPose;
     }
 
+    @Override
+    public double getTagDistance() {
+        return 0; // TODO - Do Later
+    }
+
     /**
      * Resets simulated camera pose history.
      */
@@ -139,6 +144,7 @@ public class PhotonCameraIO implements AprilTagIO {
                 visionEst = photonEstimator.estimateLowestAmbiguityPose(result);
             }
             updateEstimationStdDevs(visionEst, result.getTargets());
+            
 
             if (Robot.isSimulation()) {
                 visionEst.ifPresentOrElse(

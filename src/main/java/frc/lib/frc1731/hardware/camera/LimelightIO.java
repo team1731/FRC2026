@@ -136,6 +136,11 @@ public class LimelightIO implements AprilTagIO {
 
         return estimate.get().pose;
     }
+
+    @Override
+    public double getTagDistance() {
+        return estimate.get().avgTagDist;
+    }
     
     /**
      * Resets simulated Limelight pose history.

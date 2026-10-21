@@ -11,15 +11,15 @@ import frc.lib.frc1731.hardware.camera.*;
  */
 public final class VisionConstants {
     /** Enables QuestNav/Oculus VSLAM measurements. */
-    public static final boolean kUseVSLAM = true;
+    public static final boolean kUseVSLAM = false;
 
     /** Enables AprilTag camera measurements from configured {@link AprilTagIO} providers. */
-    public static final boolean kUseAprilTags = false;
+    public static final boolean kUseAprilTags = true;
 
     public static final double kQuestSeedMaxFrameAgeSeconds = 0.25;
 
     /** Selects Limelight MegaTag2 estimation when Limelight AprilTag IO is active. */
-    public static final boolean kUseMt2 = true;
+    public static final boolean kUseMt2 = false;
     
     /** NetworkTables name for the primary Limelight. */
     public static final String kLimelightMainName = "limelight-main";
@@ -32,8 +32,8 @@ public final class VisionConstants {
 
     /** Transform from robot origin to the mounted Quest/Oculus headset. */
     public static final Transform3d kRobotToOculus = new Transform3d(
-        Units.inchesToMeters(-12),
-        Units.inchesToMeters(0.0),
+        Units.inchesToMeters(-12.25),
+        Units.inchesToMeters(0.5),
         Units.inchesToMeters(12.5),
         new Rotation3d(
             Units.degreesToRadians(0.0),
@@ -43,9 +43,9 @@ public final class VisionConstants {
     );
 
     public static final Transform3d kRobotToLimelight = new Transform3d(
-        Units.inchesToMeters(-12.351),
+        Units.inchesToMeters(-13),
         Units.inchesToMeters(0.00),
-        Units.inchesToMeters(17.580),
+        Units.inchesToMeters(17.5),
         new Rotation3d(
             Units.degreesToRadians(0.0),
             Units.degreesToRadians(-20.0),

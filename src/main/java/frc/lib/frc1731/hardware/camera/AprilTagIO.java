@@ -50,6 +50,12 @@ public interface AprilTagIO {
     public Pose2d getEstimatedPose();
 
     /**
+     * 
+     * @return
+     */
+    public double getTagDistance();
+
+    /**
      * Resets pose history of the robot in the vision system simulation.
      *
      * @param robotPose pose to use when resetting simulated vision state

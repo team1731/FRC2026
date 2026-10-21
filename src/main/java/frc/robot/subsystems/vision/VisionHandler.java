@@ -19,7 +19,8 @@ public class VisionHandler {
     private QuestNav oculus;
     private AprilTagIO[] tagIOs;
     private EstimateConsumer consumer;
-    // private SmartLogger logger;
+
+    private boolean isQuestSeeded = false;
 
     /**
      * Creates a vision handler with a drivetrain pose-estimator callback and optional tag cameras.
@@ -80,6 +81,8 @@ public class VisionHandler {
                 boolean rejectUpdate = estimate == null
                     || !io.isConnected()
                     || io.getEstimationStdDevs() == null
+                    || io.getTagDistance() > 3.0
+                    // || (VisionConstants.kUseVSLAM && oculus.isConnected() && oculus.isTracking())
                     || Math.abs(yawRate) > VisionConstants.kMaxVisionAngularRate;
 
                 if (!rejectUpdate) {
@@ -89,6 +92,13 @@ public class VisionHandler {
                         continue;
                     }
                     this.consumer.accept(estimate, timestamp, io.getEstimationStdDevs());
+                    // Robot.swerve.resetYaw(Robot.isRedAlliance() ? estimate.getRotation().plus(Rotation2d.k180deg) : estimate.getRotation());
+                    // if (DriverStation.isDisabled()) {
+                    //     oculus.setPose(new Pose3d(estimate).transformBy(VisionConstants.kRobotToOculus));
+                    // }
+                    // if (!isQuestSeeded) {
+
+                    // }
                 }
             }
         }
@@ -138,6 +148,7 @@ public class VisionHandler {
 
             SmartDashboard.putBoolean("Oculus Tracking", tracking);
             SmartDashboard.putBoolean("Oculus Connected", connected);
+            SmartDashboard.putBoolean("Oculus Seeded", isQuestSeeded);
             oculus.getBatteryPercent()
                 .ifPresentOrElse(
                     percent -> SmartDashboard.putNumber("Oculus Battery", percent),

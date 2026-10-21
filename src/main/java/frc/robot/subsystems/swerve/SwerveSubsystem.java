@@ -11,6 +11,7 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -121,6 +122,10 @@ public class SwerveSubsystem extends BaseSubsystem {
         return total;
     }
 
+    public void resetYaw(Rotation2d rotation) {
+        drivetrain.getPigeon2().setYaw(rotation.getDegrees());
+    }
+
     /**
      * Applies a stator current limit to every swerve drive motor.
      *
@@ -180,7 +185,8 @@ public class SwerveSubsystem extends BaseSubsystem {
         this.drivetrain.periodic();
         this.handler.periodic(
             getPose(),
-            getPose().getRotation().getDegrees(), 
+            // drivetrain.getPigeon2().getYaw().getValueAsDouble(), 
+            getPose().getRotation().getDegrees(),
             drivetrain.getPigeon2().getAngularVelocityZDevice().getValueAsDouble()
         );
 
@@ -362,15 +368,15 @@ public class SwerveSubsystem extends BaseSubsystem {
      */
     private static ChassisSpeeds prioritizeRotation(
             double vx, double vy, double omega, double maxWheelSpeed, double driveRadius) {
-        // if (!Double.isFinite(maxWheelSpeed) || maxWheelSpeed <= 0
-        //         || !Double.isFinite(driveRadius) || driveRadius <= 0
-        //         || !Double.isFinite(vx) || !Double.isFinite(vy) || !Double.isFinite(omega)) {
-        //     throw new IllegalArgumentException("Finite speeds and positive wheel speed/radius required");
-        // }
-        // double limitedOmega = MathUtil.clamp(omega, -maxWheelSpeed / driveRadius, maxWheelSpeed / driveRadius);
-        // double translationLimit = Math.max(0, maxWheelSpeed - Math.abs(limitedOmega) * driveRadius);
-        // double magnitude = Math.hypot(vx, vy);
-        // double scale = magnitude > translationLimit ? translationLimit / magnitude : 1.0;
-        return new ChassisSpeeds(vx, vy, omega);
+        if (!Double.isFinite(maxWheelSpeed) || maxWheelSpeed <= 0
+                || !Double.isFinite(driveRadius) || driveRadius <= 0
+                || !Double.isFinite(vx) || !Double.isFinite(vy) || !Double.isFinite(omega)) {
+            throw new IllegalArgumentException("Finite speeds and positive wheel speed/radius required");
+        }
+        double limitedOmega = MathUtil.clamp(omega, -maxWheelSpeed / driveRadius, maxWheelSpeed / driveRadius);
+        double translationLimit = Math.max(0, maxWheelSpeed - Math.abs(limitedOmega) * driveRadius);
+        double magnitude = Math.hypot(vx, vy);
+        double scale = magnitude > translationLimit ? translationLimit / magnitude : 1.0;
+        return new ChassisSpeeds(scale * vx, scale * vy, limitedOmega);
     }
 }
