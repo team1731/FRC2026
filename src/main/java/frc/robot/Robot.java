@@ -39,6 +39,7 @@ import frc.robot.subsystems.swerve.*;
 public class Robot extends TimedRobot {
   private final RobotContainer container;
   private final AutoLoader autoLoader;
+  private final PitTelemetry pitTelemetry;
   
   public static SwerveSubsystem swerve;
   public static IntakeDeploySubsystem intakedeploy;
@@ -82,6 +83,9 @@ public class Robot extends TimedRobot {
     autoLoader = new AutoLoader();
 
     initLogging();
+    DataLogManager.start();
+    DriverStation.startDataLog(DataLogManager.getLog());
+    pitTelemetry = new PitTelemetry();
     Pathfinding.setPathfinder(new LocalADStarAK());
     CommandScheduler.getInstance().schedule(PathfindingCommand.warmupCommand());
     CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
@@ -190,6 +194,7 @@ public class Robot extends TimedRobot {
     CommandScheduler.getInstance().run();
     GameState.logValues();
     container.periodic();
+    pitTelemetry.update();
   }
 
   @Override

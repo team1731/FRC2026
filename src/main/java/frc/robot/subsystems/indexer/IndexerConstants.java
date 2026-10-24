@@ -24,7 +24,7 @@ public final class IndexerConstants {
     public static final AngularVelocity kSpitVelocity = RotationsPerSecond.of(-60);
     public static final AngularVelocity kEpsilon = RotationsPerSecond.one();
 
-    public static final double kSupplyCurrentLimit = 40.0;
+    public static final double kSupplyCurrentLimit = 30.0;
     public static final double kStatorCurrentLimit = 100.0;
 
     public static final Distance kRollerDiameter = Inches.of(1.398);
@@ -37,7 +37,7 @@ public final class IndexerConstants {
     public static final TalonFXIOConfigs getIOConfig() {
         return new TalonFXIOConfigs()
             .withPIDGains(kVelocityGains)
-            .withSensorToMechanismRatio(kGearRatio)
+            // .withSensorToMechanismRatio(kGearRatio)
             .withNeutralMode(NeutralModeValue.Coast)
             .withCurrentLimits(kSupplyCurrentLimit, kStatorCurrentLimit)
             .brake()
