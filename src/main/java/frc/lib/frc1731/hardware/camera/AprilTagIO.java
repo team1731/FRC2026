@@ -67,7 +67,7 @@ public interface AprilTagIO {
      *
      * @param yaw current robot yaw in degrees
      */
-    public void periodic(double yaw);
+    public void periodic(double yaw, double yawRate);
 
     /**
      * Updates the simulated camera scene from the robot's simulated pose.

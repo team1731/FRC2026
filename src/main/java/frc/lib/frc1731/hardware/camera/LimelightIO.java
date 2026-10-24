@@ -12,16 +12,17 @@ import org.photonvision.simulation.VisionSystemSim;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import frc.lib.frc6328.FieldConstants;
 import frc.lib.frc1731.hardware.camera.LimelightHelpers.PoseEstimate;
 import frc.robot.Robot;
-import frc.robot.subsystems.vision.VisionConstants;
 
 /**
  * AprilTag IO implementation backed by a real Limelight on robot and a PhotonVision sim camera in
@@ -37,6 +38,7 @@ public class LimelightIO implements AprilTagIO {
     private Optional<EstimatedRobotPose> simEstimate = Optional.empty();
     private double heartbeat = 0;
     private int count = 0;
+    private boolean megaTag2 = false;
 
     private PhotonCamera simCamera;
     private PhotonPoseEstimator simEstimator;
@@ -102,11 +104,24 @@ public class LimelightIO implements AprilTagIO {
     }
 
     /**
-     * Returns fixed Limelight measurement standard deviations from {@link VisionConstants}.
+     * Returns distance- and tag-count-based deviations for the cached estimate.
      */
     @Override
     public Matrix<N3, N1> getEstimationStdDevs() {
-        return VisionConstants.kLimelightStdev;
+        double distance = getTagDistance();
+        int tagCount = Robot.isSimulation()
+            ? simEstimate.map(est -> est.targetsUsed.size()).orElse(0)
+            : estimate.map(est -> est.tagCount).orElse(0);
+        return calculateStdDevs(distance, tagCount, megaTag2);
+    }
+
+    /** Calculates measurement deviations from the observed tag geometry and solver mode. */
+    public static Matrix<N3, N1> calculateStdDevs(double distance, int tagCount, boolean megaTag2) {
+        if (!Double.isFinite(distance) || distance <= 0 || tagCount <= 0) return null;
+        double scale = distance * distance / tagCount;
+        double position = (megaTag2 ? 0.01 : 0.02) * scale;
+        return VecBuilder.fill(position, position,
+            megaTag2 ? Double.POSITIVE_INFINITY : 0.06 * scale);
     }
 
     /**
@@ -139,7 +154,12 @@ public class LimelightIO implements AprilTagIO {
 
     @Override
     public double getTagDistance() {
-        return estimate.get().avgTagDist;
+        if (Robot.isSimulation()) {
+            return simEstimate.map(est -> est.targetsUsed.stream()
+                .mapToDouble(target -> target.getBestCameraToTarget().getTranslation().getNorm())
+                .average().orElse(Double.NaN)).orElse(Double.NaN);
+        }
+        return estimate.map(est -> est.avgTagDist).orElse(Double.NaN);
     }
     
     /**
@@ -156,17 +176,18 @@ public class LimelightIO implements AprilTagIO {
      * Polls the real Limelight or the simulated camera estimate.
      */
     @Override
-    public void periodic(double yaw) {
+    public void periodic(double yaw, double yawRate) {
+        megaTag2 = DriverStation.isEnabled();
         if (Robot.isSimulation()) {
             updateSimEstimate();
             return;
         }
 
-        LimelightHelpers.SetRobotOrientation(name, yaw, 0, 0, 0, 0, 0);
-        if (VisionConstants.kUseMt2) {
-            this.estimate = Optional.of(LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(name));
+        LimelightHelpers.SetRobotOrientation(name, yaw, yawRate, 0, 0, 0, 0);
+        if (megaTag2) {
+            this.estimate = Optional.ofNullable(LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(name));
         } else {
-            this.estimate = Optional.of(LimelightHelpers.getBotPoseEstimate_wpiBlue(name));
+            this.estimate = Optional.ofNullable(LimelightHelpers.getBotPoseEstimate_wpiBlue(name));
         }
 
         double curHeartbeat = LimelightHelpers.getHeartbeat(name);
@@ -220,10 +241,9 @@ public class LimelightIO implements AprilTagIO {
      * Returns the simulation debug field for this camera.
      */
     private Field2d getSimDebugField() {
-        if (!Robot.isSimulation() || visionSim == null) {
-            return null;
+        if (Robot.isSimulation() && visionSim != null) {
+            return visionSim.getDebugField();
         }
-
-        return visionSim.getDebugField();
+        return null;
     }
 }

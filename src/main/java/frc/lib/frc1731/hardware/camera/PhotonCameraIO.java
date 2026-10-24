@@ -135,7 +135,7 @@ public class PhotonCameraIO implements AprilTagIO {
      * Polls unread PhotonVision frames and caches the newest pose estimate.
      */
     @Override
-    public void periodic(double yaw) {
+    public void periodic(double yaw, double yawRate) {
         latestPose = null;
 
         for (var result : camera.getAllUnreadResults()) {

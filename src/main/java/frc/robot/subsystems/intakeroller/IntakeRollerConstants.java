@@ -27,6 +27,7 @@ public class IntakeRollerConstants {
 
     public static final TalonFXIOConfigs getIOConfig() {
         return new TalonFXIOConfigs()
+            .withRotorFeedback(kGearRatio)
             .withPIDGains(kPIDGains)
             .withCurrentLimits(kSupplyCurrentLimit, kStatorCurrentLimit)
             .brake();

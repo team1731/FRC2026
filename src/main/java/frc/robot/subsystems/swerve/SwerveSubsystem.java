@@ -9,7 +9,12 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.TalonFXConfigurator;
+import com.ctre.phoenix6.hardware.CANcoder;
+import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
+import com.ctre.phoenix6.swerve.SwerveModule;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -42,6 +47,7 @@ public class SwerveSubsystem extends BaseSubsystem {
     public VisionHandler handler; // public so robot.java can reset VSLAM pose
 
     private double snailModeScalar = 1.0;
+    private Rotation2d gyroToFieldOffset = Rotation2d.kZero;
 
     public SwerveSubsystem() {
         if (!isActiveSubsystem()) return; // Build nothing if the subsystem is turned off
@@ -112,6 +118,11 @@ public class SwerveSubsystem extends BaseSubsystem {
         return this.drivetrain.getPigeon2().getYaw().getValueAsDouble();
     }
 
+    /** Gyro heading aligned to the blue-origin field frame by the last known pose reset. */
+    public Rotation2d getFieldGyroHeading() {
+        return Rotation2d.fromDegrees(getYaw()).plus(gyroToFieldOffset);
+    }
+
     /** Combined simulated battery current for all drive and steer controllers. */
     public double getSimSupplyCurrent() {
         double total = 0.0;
@@ -123,7 +134,10 @@ public class SwerveSubsystem extends BaseSubsystem {
     }
 
     public void resetYaw(Rotation2d rotation) {
+        // Preserve the field reference when changing the raw gyro's zero.
+        Rotation2d fieldHeading = getFieldGyroHeading();
         drivetrain.getPigeon2().setYaw(rotation.getDegrees());
+        gyroToFieldOffset = fieldHeading.minus(rotation);
     }
 
     /**
@@ -131,20 +145,20 @@ public class SwerveSubsystem extends BaseSubsystem {
      *
      * @param limit stator current limit in amps
      */
-    // public void setStatorCurrentLimit(double limit) {
-    //     for (SwerveModule<TalonFX, TalonFX, CANcoder> module : drivetrain.getModules()) {
-    //         // Create config object
-    //         TalonFXConfigurator configurator = module.getDriveMotor().getConfigurator();
-    //         CurrentLimitsConfigs currentLimits = new CurrentLimitsConfigs();
+    public void setStatorCurrentLimit(double limit) {
+        for (SwerveModule<TalonFX, TalonFX, CANcoder> module : drivetrain.getModules()) {
+            // Create config object
+            TalonFXConfigurator configurator = module.getDriveMotor().getConfigurator();
+            CurrentLimitsConfigs currentLimits = new CurrentLimitsConfigs();
     
-    //         // Dynamically change limit based on logic (e.g., set to 40A)
-    //         currentLimits.StatorCurrentLimit = limit;
-    //         currentLimits.StatorCurrentLimitEnable = true;
+            // Dynamically change limit based on logic (e.g., set to 40A)
+            currentLimits.StatorCurrentLimit = limit;
+            currentLimits.StatorCurrentLimitEnable = true;
     
-    //         // Apply configuration
-    //         configurator.apply(currentLimits);
-    //     }
-    // }
+            // Apply configuration
+            configurator.apply(currentLimits);
+        }
+    }
 
     public void resetTelePose() {
         this.resetPose(Robot.isRedAlliance() ? 
@@ -166,7 +180,11 @@ public class SwerveSubsystem extends BaseSubsystem {
      * @param pose new robot field pose
      */
     public void resetPose(Pose2d pose) {
+        // CTRE resetPose does not set the physical Pigeon's yaw. Keep vision's
+        // gyro heading in the same field frame without feeding fused vision back into it.
+        gyroToFieldOffset = pose.getRotation().minus(Rotation2d.fromDegrees(getYaw()));
         this.drivetrain.resetPose(pose);
+        this.state = this.drivetrain.getState();
         this.handler.resetVSLAMPose(pose);
         this.handler.resetAprilTagSimPose(pose);
     }
@@ -185,12 +203,13 @@ public class SwerveSubsystem extends BaseSubsystem {
         this.drivetrain.periodic();
         this.handler.periodic(
             getPose(),
-            // drivetrain.getPigeon2().getYaw().getValueAsDouble(), 
-            getPose().getRotation().getDegrees(),
-            drivetrain.getPigeon2().getAngularVelocityZDevice().getValueAsDouble()
+            getFieldGyroHeading().getDegrees(),
+            drivetrain.getPigeon2().getAngularVelocityZDevice().getValueAsDouble(),
+            Math.hypot(getSpeeds().vxMetersPerSecond, getSpeeds().vyMetersPerSecond)
         );
 
         super.logger.log("Current Pose", getPose());
+        super.logger.log("Vision Gyro Heading Degrees", getFieldGyroHeading().getDegrees());
         super.logger.log("Current Speeds", getSpeeds());
 
         Robot.field.setRobotPose(getPose());

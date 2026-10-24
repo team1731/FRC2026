@@ -149,8 +149,6 @@ public class Robot extends TimedRobot {
     if ((!curAuto.equals(autonomousCommand) || isRedAlliance != currentlyRed) && !autoHasRan) {
       autoLoader.getStartPose().ifPresent(startPose -> {
         Robot.swerve.resetPose(startPose);
-        Robot.swerve.handler.resetVSLAMPose(startPose);
-        Robot.swerve.handler.resetAprilTagSimPose(startPose);
       });
     }
 
@@ -217,6 +215,8 @@ public class Robot extends TimedRobot {
   @Override
   public void autonomousInit() {
     autonomousCommand = autoLoader.getSelected();
+    // Re-establish the selected field reference and Quest seed at the actual auto start.
+    autoLoader.getStartPose().ifPresent(swerve::resetPose);
     if (autonomousCommand != null) {
       CommandScheduler.getInstance().schedule(autonomousCommand);
     }

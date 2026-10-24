@@ -65,7 +65,7 @@ public final class SwerveConstants {
 
     // Pathing Constraints
     /** Shared PathPlanner translation and rotation PID constants. */
-    public static final PIDConstants kPPConstants = new PIDConstants(10d, 0d, 0d); // PID constants for PathPlanner path following
+    public static final PIDConstants kPPConstants = new PIDConstants(7d, 0d, 0d); // PID constants for PathPlanner path following
 
     /** Motion limits used when PathPlanner computes on-the-fly paths. */
     public static final PathConstraints kPathfinderConstraints = new PathConstraints(
