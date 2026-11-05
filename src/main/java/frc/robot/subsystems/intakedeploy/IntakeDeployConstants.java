@@ -60,7 +60,7 @@ public class IntakeDeployConstants {
     }
 
     public static final MotorIOTalonFX getIO() {
-        return MotorIOTalonFX.generateKrakenX44FOC(Ports.kIntakeDeployConfig, getIOConfigs());
+        return MotorIOTalonFX.generateKrakenX44FOC(Ports.kIntakeDeployConfig, getIOConfigs()).withSimulation(getSim());
     }
 
     @AutoLog

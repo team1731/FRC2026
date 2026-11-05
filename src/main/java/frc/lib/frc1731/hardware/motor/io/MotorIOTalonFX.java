@@ -342,12 +342,9 @@ public class MotorIOTalonFX extends MotorIO implements AutoCloseable {
         for (var spec : group.followers()) {
             var follower = new TalonFX(spec.deviceId(), getPortConfig().kBus);
             followers.add(follower);
-            var status = follower.getConfigurator().apply(spec.config());
-            // if (!status.isOK()) throw new IllegalStateException("Follower configuration failed: " + status);
-            status = follower.setControl(new Follower(motor.getDeviceID(), spec.inverted()
+            follower.setControl(new Follower(motor.getDeviceID(), spec.inverted()
                 ? com.ctre.phoenix6.signals.MotorAlignmentValue.Opposed
                 : com.ctre.phoenix6.signals.MotorAlignmentValue.Aligned));
-            // if (!status.isOK()) throw new IllegalStateException("Follower request failed: " + status);
         }
     }
 

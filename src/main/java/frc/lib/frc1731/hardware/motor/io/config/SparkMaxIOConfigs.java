@@ -68,8 +68,8 @@ public final class SparkMaxIOConfigs implements IMotorIOConfigs {
                 .iZone(gains.kIZone, slot).allowedClosedLoopError(gains.tolerance, slot);
         config.closedLoop.feedForward
                 .kS(gains.kS, slot).kV(gains.kV, slot).kA(gains.kA, slot)
-                .kG(gains.kGravityType == GravityTypeValue.Elevator_Static ? gains.kG : 0.0, slot)
-                .kCos(gains.kGravityType == GravityTypeValue.Arm_Cosine ? gains.kG : 0.0, slot);
+                .kG(gains.kGravityType == GravityTypeValue.Elevator_Static ? gains.kG : 0.0, slot);
+                // .kCos(gains.kGravityType == GravityTypeValue.Arm_Cosine ? gains.kG : 0.0, slot);
         if (gains.continuousInput) {
             withContinuousWrap(true, gains.continuousMin, gains.continuousMax);
         } else {

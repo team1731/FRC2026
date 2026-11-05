@@ -5,7 +5,6 @@ import static edu.wpi.first.units.Units.Rotations;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.frc1731.hardware.motor.io.MotorIOTalonFX;
 import frc.lib.frc1731.subsystem.BaseServoSubsystem;
-import frc.robot.RobotState;
 
 public class IntakeDeploySubsystem extends BaseServoSubsystem<MotorIOTalonFX> {
     private final IntakeDeployIOInputsAutoLogged inputs = new IntakeDeployIOInputsAutoLogged();
@@ -17,9 +16,8 @@ public class IntakeDeploySubsystem extends BaseServoSubsystem<MotorIOTalonFX> {
     public void periodicTelemetry() {
         inputs.currentPosition = getPosition().in(Rotations);
         inputs.setpointPosition = getSetpoint().in(Rotations);
-        inputs.deployed = getSetpoint().gt(IntakeDeployConstants.kHomeAngle); // Extended is less than zero so less than
+        inputs.deployed = getSetpoint().gt(IntakeDeployConstants.kHomeAngle);
         logger.processInputs(inputs);
-        // RobotState.updateIntake(getPosition());
     }
 
     public Command home() {

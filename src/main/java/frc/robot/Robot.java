@@ -1,14 +1,14 @@
 package frc.robot;
 
-// import java.io.File;
+import java.io.File;
 import java.util.Optional;
 
 import org.littletonrobotics.junction.*;
 import org.littletonrobotics.junction.networktables.NT4Publisher;
+import org.littletonrobotics.junction.wpilog.WPILOGReader;
+import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 import com.ctre.phoenix6.SignalLogger;
-
-// import frc.lib.frc1731.EventLogWriter;
 
 import com.pathplanner.lib.commands.*;
 import com.pathplanner.lib.pathfinding.*;
@@ -29,6 +29,7 @@ import frc.robot.subsystems.indexer.IndexerSubsystem;
 import frc.robot.subsystems.intakedeploy.IntakeDeploySubsystem;
 import frc.robot.subsystems.intakeroller.IntakeRollerSubsystem;
 import frc.robot.subsystems.kicker.KickerSubsystem;
+import frc.robot.subsystems.power.PowerSubsystem;
 import frc.robot.subsystems.swerve.*;
 
 /**
@@ -38,10 +39,9 @@ import frc.robot.subsystems.swerve.*;
  * standard robot mode lifecycle callbacks. Most subsystem wiring lives in {@link RobotContainer}
  * so this class can stay focused on mode transitions.
  */
-public class Robot extends TimedRobot {
+public class Robot extends LoggedRobot {
   private final RobotContainer container;
   private final AutoLoader autoLoader;
-  // private final PitTelemetry pitTelemetry;
   
   public static SwerveSubsystem swerve;
   public static IntakeDeploySubsystem intakedeploy;
@@ -51,7 +51,7 @@ public class Robot extends TimedRobot {
   public static HoodSubsystem hood;
   public static FlywheelSubsystem flywheel;
   public static HopperSubsystem hopper;
-  // public static PowerSubsystem power;
+  public static PowerSubsystem power;
 
   private Command autonomousCommand = null;
   private boolean isRedAlliance = false;
@@ -61,6 +61,11 @@ public class Robot extends TimedRobot {
 
   /** Initializes robot-wide services, pathfinding warmups, logging, and brownout protection. */
   public Robot() {
+    // Register the PDH/PDP with AdvantageKit before starting input capture.
+    power = new PowerSubsystem();
+    initLogging();
+
+    // Start capture before constructors read Driver Station state or timestamps.
     swerve = new SwerveSubsystem();
     intakedeploy = new IntakeDeploySubsystem();
     intakeroller = new IntakeRollerSubsystem();
@@ -69,25 +74,20 @@ public class Robot extends TimedRobot {
     hood = new HoodSubsystem();
     flywheel = new FlywheelSubsystem();
     hopper = new HopperSubsystem();
-    // power = new PowerSubsystem();
     
-    // power.addSimMotor("IntakeDeploy", intakedeploy.getMotor());
-    // power.addSimMotor("IntakeRoller", intakeroller.getMotor());
-    // power.addSimMotor("Indexer", indexer.getMotor());
-    // power.addSimMotor("Kicker", kicker.getMotor());
-    // power.addSimMotor("Hood", hood.getMotor());
-    // power.addSimMotor("Flywheel", flywheel.getMotor());
-    // power.addSimMotor("Hopper", hopper.getMotor());
-    // power.addSimLoad("Swerve", swerve::getSimSupplyCurrent);
+    power.addSimMotor("IntakeDeploy", intakedeploy.getMotor());
+    power.addSimMotor("IntakeRoller", intakeroller.getMotor());
+    power.addSimMotor("Indexer", indexer.getMotor());
+    power.addSimMotor("Kicker", kicker.getMotor());
+    power.addSimMotor("Hood", hood.getMotor());
+    power.addSimMotor("Flywheel", flywheel.getMotor());
+    power.addSimMotor("Hopper", hopper.getMotor());
+    power.addSimLoad("Swerve", swerve::getSimSupplyCurrent);
 
     // Container and autoloader MUST be instantiated after subsystems
     container = new RobotContainer();
     autoLoader = new AutoLoader();
 
-    initLogging();
-    // DataLogManager.start();
-    // DriverStation.startDataLog(DataLogManager.getLog());
-    // pitTelemetry = new PitTelemetry();
     Pathfinding.setPathfinder(new LocalADStarAK());
     CommandScheduler.getInstance().schedule(PathfindingCommand.warmupCommand());
     CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand());
@@ -102,48 +102,72 @@ public class Robot extends TimedRobot {
    */
   private void initLogging() {
     // Log metadata (for AdvantageScope)
-    // Logger.recordMetadata("ProjectName", BuildConstants.MAVEN_NAME);
-    // Logger.recordMetadata("BuildDate", BuildConstants.BUILD_DATE);
-    // Logger.recordMetadata("GitSHA", BuildConstants.GIT_SHA);
-    // Logger.recordMetadata("GitDate", BuildConstants.GIT_DATE);
-    // Logger.recordMetadata("GitBranch", BuildConstants.GIT_BRANCH);
-    // Logger.recordMetadata(
-    //     "GitDirty",
-    //     switch (BuildConstants.DIRTY) {
-    //       case 0 -> "All changes committed";
-    //       case 1 -> "Uncommitted changes";
-    //       default -> "Unknown";
-    //     });
+    Logger.recordMetadata("ProjectName", BuildConstants.MAVEN_NAME);
+    Logger.recordMetadata("BuildDate", BuildConstants.BUILD_DATE);
+    Logger.recordMetadata("GitSHA", BuildConstants.GIT_SHA);
+    Logger.recordMetadata("GitDate", BuildConstants.GIT_DATE);
+    Logger.recordMetadata("GitBranch", BuildConstants.GIT_BRANCH);
+    Logger.recordMetadata(
+        "GitDirty",
+        switch (BuildConstants.DIRTY) {
+          case 0 -> "All changes committed";
+          case 1 -> "Uncommitted changes";
+          default -> "Unknown";
+        });
 
-    // try {
-    //   Logger.recordMetadata("Hostname", InetAddress.getLocalHost().getHostName().replaceAll("\\.local$", ""));
-    // } catch (UnknownHostException e) {
-    //   Logger.recordMetadata("Hostname", "Unknown");
-    // }
-
-    if (RobotConstants.kPublishLogsToNT) {
-      Logger.addDataReceiver(new NT4Publisher());
-    }
-
+    Logger.recordMetadata("RuntimeMode", RobotConstants.getMode().name());
+    Logger.recordMetadata("TelemetrySchema", "2");
     // External dashboards need a server even when AdvantageKit disables LiveWindow.
     if (isSimulation()) {
       NetworkTableInstance.getDefault().startServer("", "", 1735, 5810);
     }
     WebServer.start(5800, Filesystem.getDeployDirectory().getPath());
     
-    // if (Robot.isReal() && RobotConstants.kLogToWPILog) {
-    //   File usbDrive = new File("/U");
-    //   if (usbDrive.exists() && usbDrive.isDirectory()) {
-    //     Logger.addDataReceiver(new EventLogWriter("/U/logs", RobotConstants.kLogEventKey));
-    //   } else {
-    //     DriverStation.reportWarning("No USB stick detected - WPILOG file logging disabled for this session", false);
-    //   }
-    //   Logger.start();
-    // }
-
-    // SignalLogger.enableAutoLogging(false);
-    // SignalLogger.stop();
-    // DataLogManager.start();
+    if (RobotConstants.kPublishLogsToNT) {
+      Logger.addDataReceiver(new NT4Publisher());
+    }
+    if (Robot.isReal()) {
+      if (RobotConstants.kLogToWPILog) {
+        File logDirectory = new File("/U/logs");
+        File usbDrive = new File("/U");
+        if (usbDrive.isDirectory() && (logDirectory.isDirectory() || logDirectory.mkdirs())
+            && logDirectory.canWrite()) {
+          Logger.addDataReceiver(new WPILOGWriter(logDirectory.getPath()));
+        } else {
+          DriverStation.reportWarning("USB logging unavailable. Insert a writable USB drive and restart robot code; live logging remains available.", false);
+        }
+      }
+    } else {
+      String replayPath = System.getenv("AKIT_LOG_PATH");
+      if (replayPath != null && !replayPath.isBlank()) {
+        setUseTiming(false); // Run as fast as possible in replay mode
+        String logPath = LogFileUtil.findReplayLog(); // Pull replay log from env var/AdvantageScope
+        Logger.setReplaySource(new WPILOGReader(logPath)); // Read replay log
+        if (RobotConstants.kLogToWPILog) {
+          Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim")));
+        }
+        DriverStation.reportWarning("Replay is diagnostic only: mechanism and vision IO are not yet fully replay-backed.", false);
+      } else {
+        if (RobotConstants.kLogToWPILog) {
+          File logDirectory = new File("logs");
+          if ((logDirectory.isDirectory() || logDirectory.mkdirs()) && logDirectory.canWrite()) {
+            Logger.addDataReceiver(new WPILOGWriter(logDirectory.getPath()));
+          } else {
+            DriverStation.reportWarning("Cannot create writable simulation log directory: " + logDirectory.getAbsolutePath(), false);
+          }
+        }
+      }
+    }
+    // Logger.recordMetadata("FileLoggingRequested", Boolean.toString(RobotConstants.kLogToWPILog));
+    // Logger.recordMetadata("LiveLoggingEnabled", Boolean.toString(RobotConstants.kPublishLogsToNT));
+    // Logger.recordMetadata("PhoenixLoggingEnabled", Boolean.toString(RobotConstants.kLogPhoenixSignals));
+    Logger.start();
+    SignalLogger.enableAutoLogging(RobotConstants.kLogPhoenixSignals);
+    if (RobotConstants.kLogPhoenixSignals) {
+      SignalLogger.start();
+    } else {
+      SignalLogger.stop();
+    }
     SmartDashboard.updateValues();
     DriverStation.silenceJoystickConnectionWarning(true);
   }
@@ -182,9 +206,6 @@ public class Robot extends TimedRobot {
   }
 
   /**
-   * Whether we are the red alliance
-   */
-  /**
    * Checks whether Driver Station currently reports red alliance.
    *
    * @return true when on red alliance, false when blue or unknown
@@ -199,12 +220,11 @@ public class Robot extends TimedRobot {
     CommandScheduler.getInstance().run();
     GameState.logValues();
     container.periodic();
-    // pitTelemetry.update();
   }
 
   @Override
   public void simulationPeriodic() {
-    // power.updateSimulation();
+    power.updateSimulation();
   }
 
   /** Called once when the robot becomes disabled. */

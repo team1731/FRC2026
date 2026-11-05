@@ -15,7 +15,7 @@
             "height": 128.0,
             "type": "Boolean Box",
             "properties": {
-              "topic": "/AdvantageKit/RealOutputs//SmartLogs/Vision/Oculus Tracking",
+              "topic": "/AdvantageKit/RealOutputs/SmartLogs/Vision/Oculus Tracking",
               "period": 0.06,
               "data_type": "boolean",
               "true_color": 4283215696,
@@ -32,7 +32,7 @@
             "height": 128.0,
             "type": "Boolean Box",
             "properties": {
-              "topic": "/AdvantageKit/RealOutputs//SmartLogs/Vision/Oculus Connected",
+              "topic": "/AdvantageKit/RealOutputs/SmartLogs/Vision/Oculus Connected",
               "period": 0.06,
               "data_type": "boolean",
               "true_color": 4283215696,
@@ -130,7 +130,7 @@
             "height": 128.0,
             "type": "Text Display",
             "properties": {
-              "topic": "/AdvantageKit/RealOutputs//SmartLogs/VisionSubsystem/Oculus Battery",
+              "topic": "/AdvantageKit/RealOutputs/SmartLogs/Vision/Oculus Battery",
               "period": 0.06,
               "data_type": "double",
               "show_submit_button": false
@@ -144,7 +144,7 @@
             "height": 128.0,
             "type": "Boolean Box",
             "properties": {
-              "topic": "/AdvantageKit/RealOutputs//SmartLogs/FlywheelSubsystem//IsWarmingUp",
+              "topic": "/AdvantageKit/Subsystems/FlywheelSubsystem/IsWarmingUp",
               "period": 0.06,
               "data_type": "boolean",
               "true_color": 4283215696,

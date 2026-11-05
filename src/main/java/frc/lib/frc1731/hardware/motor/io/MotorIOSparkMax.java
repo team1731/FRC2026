@@ -276,8 +276,7 @@ public class MotorIOSparkMax extends MotorIO implements AutoCloseable {
             var follower = new SparkMax(spec.deviceId(), MotorType.kBrushless);
             followers.add(follower);
             spec.config().follow(motor, spec.inverted());
-            var status = follower.configure(spec.config(), ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-            if (status != REVLibError.kOk) throw new IllegalStateException("Follower configuration failed: " + status);
+            follower.configure(spec.config(), ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         }
     }
 

@@ -61,7 +61,7 @@ public final class HoodConstants {
     }
 
     public static final MotorIOTalonFXS getIO() {
-        return MotorIOTalonFXS.generateMinion(Ports.kHoodConfig, getIOConfig());
+        return MotorIOTalonFXS.generateMinion(Ports.kHoodConfig, getIOConfig()).withSimulation(getSimulation());
     }
 
     @AutoLog

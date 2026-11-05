@@ -16,17 +16,17 @@ public final class RobotConstants {
     /** Secondary CANivore bus available for additional mechanisms. */
     public static final CANBus kSecondCANBus = new CANBus("Right CANivore");
 
-    /** Optional SmartLogger outputs; input capture is always processed. */
-    public static final boolean kLogTeamOutputs = false;
-
-    /** Publish AdvantageKit data to NetworkTables for live viewing. Read at startup. */
-    public static final boolean kPublishLogsToNT = false;
-
-    /** Write AdvantageKit data to USB on the real robot. Read at startup. */
-    public static final boolean kLogToWPILog = false;
-
     /** Competition event key (e.g. 2026vabla). Empty uses the FMS event name. */
     public static final String kLogEventKey = "";
+
+    /** Publish one AdvantageKit NT4 stream for AdvantageScope live viewing. */
+    public static final boolean kPublishLogsToNT = true;
+
+    /** Save complete local logs independently of the live dashboard connection. */
+    public static final boolean kLogToWPILog = true;
+
+    /** High-rate Phoenix logs are opt-in for characterization and CAN investigations. */
+    public static final boolean kLogPhoenixSignals = false;
 
     /** Human-readable robot name used by visualization and logging code. */
     public static final String kRobotName = "Raptor";
@@ -71,10 +71,9 @@ public final class RobotConstants {
      * Current mode of the codebase (Real robot, simulation, log replay)
      */
     public static Mode getMode() {
-        return switch (getRobot()) {
-        case COMPBOT -> RobotBase.isReal() ? Mode.REAL : Mode.REPLAY;
-        case SIMBOT -> Mode.SIM;
-        };
+        if (RobotBase.isReal()) return Mode.REAL;
+        String replayPath = System.getenv("AKIT_LOG_PATH");
+        return replayPath != null && !replayPath.isBlank() ? Mode.REPLAY : Mode.SIM;
     }
 
     /**

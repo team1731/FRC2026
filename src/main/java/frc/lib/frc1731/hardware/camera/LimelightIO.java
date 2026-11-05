@@ -176,14 +176,14 @@ public class LimelightIO implements AprilTagIO {
      * Polls the real Limelight or the simulated camera estimate.
      */
     @Override
-    public void periodic(double yaw, double yawRate) {
+    public void periodic(double yaw, double yawRate, double pitch, double pitchRate, double roll, double rollRate) {
         megaTag2 = DriverStation.isEnabled();
         if (Robot.isSimulation()) {
             updateSimEstimate();
             return;
         }
 
-        LimelightHelpers.SetRobotOrientation(name, yaw, yawRate, 0, 0, 0, 0);
+        LimelightHelpers.SetRobotOrientation(name, yaw, yawRate, pitch, pitchRate, roll, rollRate);
         if (megaTag2) {
             this.estimate = Optional.ofNullable(LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(name));
         } else {

@@ -82,7 +82,10 @@ public abstract class BaseMotorSubsystem<IO extends MotorIO> extends BaseSubsyst
     }
 
     @Override
-    public void periodicTelemetry() {
+    public void periodicTelemetry() {}
+
+    @Override
+    public void simulationPeriodic() {
         motor.simPeriodic();
     }
 }

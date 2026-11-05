@@ -112,11 +112,8 @@ public class GameState {
     }
 
     public static void logValues() {
-        // Optional<Alliance> winner = getAutoWinner();
         SmartDashboard.putNumber("GameState/CycleRemainingTime", getCycleRemainingTime());
         SmartDashboard.putString("GameState/CurrentPhase", getCurrentPhase().name());
-        // SmartDashboard.putString("GameState/AutoWinner", winner.map(Alliance::name).orElse("Unknown"));
-        // SmartDashboard.putNumber("GameState/HasGameData", winner.isPresent());
         SmartDashboard.putBoolean("GameState/IsMyHubActive", isMyHubActive());
     }
 }

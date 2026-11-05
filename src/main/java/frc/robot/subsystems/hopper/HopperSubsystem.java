@@ -3,12 +3,10 @@ package frc.robot.subsystems.hopper;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Rotations;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.frc1731.hardware.motor.io.MotorIOSparkMax;
 import frc.lib.frc1731.hardware.motor.io.request.PositionRequest;
 import frc.lib.frc1731.subsystem.BaseServoSubsystem;
-import frc.robot.RobotState;
 
 public class HopperSubsystem extends BaseServoSubsystem<MotorIOSparkMax> {
     private final HopperIOInputsAutoLogged inputs = new HopperIOInputsAutoLogged();
@@ -22,9 +20,6 @@ public class HopperSubsystem extends BaseServoSubsystem<MotorIOSparkMax> {
         inputs.setpointHeight = HopperConstants.kConverter.toDistance(getSetpoint()).in(Inches);
         inputs.hopperExtended = HopperConstants.kConverter.toDistance(getSetpoint()).equals(HopperConstants.kMaxHeight);
         logger.processInputs(inputs);
-        // RobotState.updateHopper(Inches.of(inputs.currentHeight));
-
-        SmartDashboard.putNumber("Current Rotations", getPosition().in(Rotations));
     }
 
     public void collapseHopper() {

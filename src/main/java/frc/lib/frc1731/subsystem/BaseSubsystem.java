@@ -16,7 +16,6 @@ import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.sysid.SysIdRoutineLog;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.lib.frc1731.SmartLogger;
-import frc.robot.RobotConstants;
 
 /**
  * Base class for team-owned command subsystems.
@@ -36,7 +35,7 @@ public abstract class BaseSubsystem extends SubsystemBase {
      */
     protected BaseSubsystem(String nameModifier) {
         this.setName(nameModifier + getName());
-        this.logger = new SmartLogger(getName(), () -> RobotConstants.kLogTeamOutputs);
+        this.logger = new SmartLogger(getName(), () -> true);
     }
 
     /**

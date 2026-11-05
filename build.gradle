@@ -65,8 +65,9 @@ dependencies {
     implementation wpi.java.deps.wpilib()
     implementation wpi.java.vendor.java()
 
-    implementation "org.littletonrobotics.akit:akit-java:4.0.0"
-    annotationProcessor "org.littletonrobotics.akit:akit-autolog:4.0.0"
+    // Runtime comes from the vendordep; keep its code generator on the same version.
+    def akitVersion = new groovy.json.JsonSlurper().parse(file('vendordeps/AdvantageKit.json')).version
+    annotationProcessor "org.littletonrobotics.akit:akit-autolog:${akitVersion}"
 
     implementation 'io.avaje:avaje-jsonb:3.2'
     annotationProcessor 'io.avaje:avaje-jsonb-generator:3.2'

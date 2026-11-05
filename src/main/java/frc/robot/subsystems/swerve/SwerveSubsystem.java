@@ -4,6 +4,7 @@ import static frc.robot.subsystems.swerve.SwerveConstants.*;
 import static frc.robot.subsystems.swerve.SwerveRequests.*;
 
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -12,18 +13,21 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.hardware.CANcoder;
+import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 import com.ctre.phoenix6.swerve.SwerveModule;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
-import frc.robot.RobotState;
 import frc.lib.frc1678.util.Util;
 import frc.lib.frc1731.subsystem.BaseSubsystem;
 import frc.robot.Controls;
@@ -47,17 +51,11 @@ public class SwerveSubsystem extends BaseSubsystem {
     public VisionHandler handler; // public so robot.java can reset VSLAM pose
 
     private double snailModeScalar = 1.0;
-    private Rotation2d gyroToFieldOffset = Rotation2d.kZero;
 
     public SwerveSubsystem() {
         if (!isActiveSubsystem()) return; // Build nothing if the subsystem is turned off
         this.drivetrain = TunerConstants.createDrivetrain();
-        this.handler = new VisionHandler(
-            (pose, timestamp, estimationStdDevs) -> 
-                this.drivetrain.addVisionMeasurement(pose, timestamp, estimationStdDevs),
-                VisionConstants.getAprilTagIOs()
-        );
-
+        this.handler = new VisionHandler(VisionConstants.getAprilTagIOs());
         this.setDefaultCommand(this.joystickDrive());
 
         try {
@@ -80,6 +78,10 @@ public class SwerveSubsystem extends BaseSubsystem {
         } catch(Exception e) {
             System.out.println("SwerveSubsystem error - failed to configure auto bindings");
         }
+    }
+
+    public Pigeon2 getPigeon() {
+        return this.drivetrain.getPigeon2();
     }
 
     /**
@@ -118,11 +120,6 @@ public class SwerveSubsystem extends BaseSubsystem {
         return this.drivetrain.getPigeon2().getYaw().getValueAsDouble();
     }
 
-    /** Gyro heading aligned to the blue-origin field frame by the last known pose reset. */
-    public Rotation2d getFieldGyroHeading() {
-        return Rotation2d.fromDegrees(getYaw()).plus(gyroToFieldOffset);
-    }
-
     /** Combined simulated battery current for all drive and steer controllers. */
     public double getSimSupplyCurrent() {
         double total = 0.0;
@@ -134,10 +131,7 @@ public class SwerveSubsystem extends BaseSubsystem {
     }
 
     public void resetYaw(Rotation2d rotation) {
-        // Preserve the field reference when changing the raw gyro's zero.
-        Rotation2d fieldHeading = getFieldGyroHeading();
         drivetrain.getPigeon2().setYaw(rotation.getDegrees());
-        gyroToFieldOffset = fieldHeading.minus(rotation);
     }
 
     /**
@@ -160,6 +154,10 @@ public class SwerveSubsystem extends BaseSubsystem {
         }
     }
 
+    public void addVisionMeasurement(Pose2d visionRobotPoseMeters, double timestampSeconds, Matrix<N3, N1> visionMeasurementStdDevs) {
+        this.drivetrain.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
+    }
+
     public void resetTelePose() {
         this.resetPose(Robot.isRedAlliance() ? 
             new Pose2d(12.967, 4.046, Rotation2d.k180deg) :
@@ -180,13 +178,10 @@ public class SwerveSubsystem extends BaseSubsystem {
      * @param pose new robot field pose
      */
     public void resetPose(Pose2d pose) {
-        // CTRE resetPose does not set the physical Pigeon's yaw. Keep vision's
-        // gyro heading in the same field frame without feeding fused vision back into it.
-        gyroToFieldOffset = pose.getRotation().minus(Rotation2d.fromDegrees(getYaw()));
         this.drivetrain.resetPose(pose);
-        this.state = this.drivetrain.getState();
         this.handler.resetVSLAMPose(pose);
         this.handler.resetAprilTagSimPose(pose);
+        this.resetYaw(pose.getRotation());
     }
 
     public void setSnailMode(boolean snail) {
@@ -199,17 +194,15 @@ public class SwerveSubsystem extends BaseSubsystem {
     @Override
     public void periodicTelemetry() {
         this.state = this.drivetrain.getState();
-        // RobotState.updateDrive(state.Pose);
         this.drivetrain.periodic();
-        this.handler.periodic(
-            getPose(),
-            getFieldGyroHeading().getDegrees(),
-            drivetrain.getPigeon2().getAngularVelocityZDevice().getValueAsDouble(),
-            Math.hypot(getSpeeds().vxMetersPerSecond, getSpeeds().vyMetersPerSecond)
-        );
+        this.handler.periodic();
+
+        // Struct fields can be dragged directly into AdvantageScope's field/swerve tabs.
+        Logger.recordOutput("Swerve/Pose", state.Pose);
+        Logger.recordOutput("Swerve/ModuleStates", state.ModuleStates);
+        Logger.recordOutput("Swerve/ModuleTargets", state.ModuleTargets);
 
         super.logger.log("Current Pose", getPose());
-        super.logger.log("Vision Gyro Heading Degrees", getFieldGyroHeading().getDegrees());
         super.logger.log("Current Speeds", getSpeeds());
 
         Robot.field.setRobotPose(getPose());
@@ -236,16 +229,12 @@ public class SwerveSubsystem extends BaseSubsystem {
             velY *= snailModeScalar;
             omega *= snailModeScalar;
 
-            // ChassisSpeeds requested = new ChassisSpeeds(velX, velY, omega);
-            ChassisSpeeds limited = prioritizeRotation(
+            ChassisSpeeds filteredSpeeds = prioritizeRotation(
                 velX, velY, omega, kMaxSpeed, kDriveRadius);
 
-            velX = limited.vxMetersPerSecond;
-            velY = limited.vyMetersPerSecond;
-            omega = limited.omegaRadiansPerSecond;
-
-            // logger.log("Driver Requested Speeds", requested);
-            // logger.log("Driver Limited Speeds", limited);
+            velX = filteredSpeeds.vxMetersPerSecond;
+            velY = filteredSpeeds.vyMetersPerSecond;
+            omega = filteredSpeeds.omegaRadiansPerSecond;
 
             if (velX == 0.0 && velY == 0.0 && omega == 0.0) {
                 this.drivetrain.setControl(kBrakeRequest);

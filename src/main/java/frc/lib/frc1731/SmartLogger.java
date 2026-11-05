@@ -29,8 +29,8 @@ public class SmartLogger {
      * @param shouldLog condition that controls whether values are emitted
      */
     public SmartLogger(String name, BooleanSupplier shouldLog) {
-        this.m_folder = "/SmartLogs/" + name + "/";
-        this.m_inputsPath = "RealOutputs/" + m_folder;
+        this.m_folder = "SmartLogs/" + name + "/";
+        this.m_inputsPath = "Subsystems/" + name;
         this.m_shouldLog = shouldLog;
     }
 
@@ -171,7 +171,7 @@ public class SmartLogger {
 
     /**
      * Processes inputs every loop, independently of optional output logging.
-     * Preserves the existing input path for log compatibility; replay may populate these inputs.
+     * Inputs live under Subsystems; AdvantageKit owns the RealOutputs/ReplayOutputs prefixes.
      * @param inputs {@code AutoLogged} inputs object with all information needed for logging
      */
     public void processInputs(LoggableInputs inputs) {

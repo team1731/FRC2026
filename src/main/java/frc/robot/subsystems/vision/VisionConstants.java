@@ -42,7 +42,7 @@ public final class VisionConstants {
         Units.inchesToMeters(12.5),
         new Rotation3d(
             Units.degreesToRadians(0.0),
-            Units.degreesToRadians(0.0),
+            Units.degreesToRadians(7.0),
             Units.degreesToRadians(180.0)
         )
     );
