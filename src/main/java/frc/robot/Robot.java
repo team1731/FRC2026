@@ -22,13 +22,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.lib.frc6328.LocalADStarAK;
-import frc.robot.subsystems.flywheel.FlywheelSubsystem;
-import frc.robot.subsystems.hood.HoodSubsystem;
-import frc.robot.subsystems.hopper.HopperSubsystem;
-import frc.robot.subsystems.indexer.IndexerSubsystem;
-import frc.robot.subsystems.intakedeploy.IntakeDeploySubsystem;
-import frc.robot.subsystems.intakeroller.IntakeRollerSubsystem;
-import frc.robot.subsystems.kicker.KickerSubsystem;
+import frc.robot.subsystems.power.PowerSubsystem;
 import frc.robot.subsystems.swerve.*;
 
 /**
@@ -44,14 +38,7 @@ public class Robot extends TimedRobot {
   // private final PitTelemetry pitTelemetry;
   
   public static SwerveSubsystem swerve;
-  public static IntakeDeploySubsystem intakedeploy;
-  public static IntakeRollerSubsystem intakeroller;
-  public static IndexerSubsystem indexer;
-  public static KickerSubsystem kicker;
-  public static HoodSubsystem hood;
-  public static FlywheelSubsystem flywheel;
-  public static HopperSubsystem hopper;
-  // public static PowerSubsystem power;
+  public static PowerSubsystem power;
 
   private Command autonomousCommand = null;
   private boolean isRedAlliance = false;
@@ -62,14 +49,7 @@ public class Robot extends TimedRobot {
   /** Initializes robot-wide services, pathfinding warmups, logging, and brownout protection. */
   public Robot() {
     swerve = new SwerveSubsystem();
-    intakedeploy = new IntakeDeploySubsystem();
-    intakeroller = new IntakeRollerSubsystem();
-    indexer = new IndexerSubsystem();
-    kicker = new KickerSubsystem();
-    hood = new HoodSubsystem();
-    flywheel = new FlywheelSubsystem();
-    hopper = new HopperSubsystem();
-    // power = new PowerSubsystem();
+    power = new PowerSubsystem();
     
     // power.addSimMotor("IntakeDeploy", intakedeploy.getMotor());
     // power.addSimMotor("IntakeRoller", intakeroller.getMotor());
@@ -197,7 +177,6 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
-    GameState.logValues();
     container.periodic();
     // pitTelemetry.update();
   }

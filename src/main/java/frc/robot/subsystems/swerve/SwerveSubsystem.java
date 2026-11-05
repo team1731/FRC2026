@@ -23,7 +23,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
-import frc.robot.RobotState;
 import frc.lib.frc1678.util.Util;
 import frc.lib.frc1731.subsystem.BaseSubsystem;
 import frc.robot.Controls;
