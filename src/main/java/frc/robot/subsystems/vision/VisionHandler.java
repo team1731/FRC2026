@@ -27,11 +27,6 @@ public class VisionHandler {
     private boolean isQuestSeeded = false;
     private double questResetTimestamp = Double.NEGATIVE_INFINITY;
     private final Map<AprilTagIO, Double> lastTagTimestamps = new HashMap<>();
-    private final Map<AprilTagIO, Pose2d> questSeedFirstPoses = new HashMap<>();
-    private final Map<AprilTagIO, Double> questSeedFirstTimestamps = new HashMap<>();
-    private final Map<AprilTagIO, Double> questSeedLastTimestamps = new HashMap<>();
-    private final Map<AprilTagIO, Integer> questSeedObservationCounts = new HashMap<>();
-    private double questSeedMotionStableSince = Double.NaN;
 
     /**
      * Creates a vision handler with a drivetrain pose-estimator callback and optional tag cameras.
@@ -61,7 +56,6 @@ public class VisionHandler {
             this.oculus.setPose(new Pose3d(pose).transformBy(VisionConstants.kRobotToOculus));
             questResetTimestamp = Timer.getFPGATimestamp();
             isQuestSeeded = true;
-            resetQuestSeedWindows();
         }
     }
 
@@ -93,15 +87,6 @@ public class VisionHandler {
                 || (oculus != null && oculus.isConnected() && oculus.isTracking())) {
             return;
         }
-        // boolean canSeedQuest = DriverStation.isTeleopEnabled() && oculus != null
-        //     && oculus.isConnected() && oculus.isTracking() && !isQuestSeeded
-        //     && isQuestSeedMotionSlowEnough(speed, yawRate);
-        // if (!canSeedQuest) {
-        //     resetQuestSeedWindows();
-        //     questSeedMotionStableSince = Double.NaN;
-        // } else if (Double.isNaN(questSeedMotionStableSince)) {
-        //     questSeedMotionStableSince = Timer.getFPGATimestamp();
-        // }
 
         if (VisionConstants.kUseAprilTags) {
             for(AprilTagIO io : tagIOs) {
@@ -123,12 +108,10 @@ public class VisionHandler {
                     if (!Double.isFinite(timestamp) 
                             || !Double.isFinite(estimate.getX()) || !Double.isFinite(estimate.getY())
                             || !Double.isFinite(estimate.getRotation().getRadians())) {
-                        resetQuestSeedWindow(io);
                         continue;
                     }
                     double age = Timer.getFPGATimestamp() - timestamp;
                     if (age < 0 || age > VisionConstants.kQuestSeedMaxFrameAgeSeconds) {
-                        resetQuestSeedWindow(io);
                         continue;
                     }
                     if (timestamp <= lastTagTimestamps.getOrDefault(io, Double.NEGATIVE_INFINITY)) {
@@ -149,8 +132,6 @@ public class VisionHandler {
                         //     resetVSLAMPose(estimate);
                         // }
                     }
-                } else {
-                    resetQuestSeedWindow(io);
                 }
             }
         }
@@ -165,7 +146,6 @@ public class VisionHandler {
             oculus.commandPeriodic();
             boolean connected = oculus.isConnected();
             boolean tracking = connected && oculus.isTracking();
-            if (!tracking) invalidateQuestSeed();
 
             // Get the latest pose data frames from the Quest
             PoseFrame[] questFrames = oculus.getAllUnreadPoseFrames();
@@ -173,7 +153,6 @@ public class VisionHandler {
             // A loss anywhere in the queued history invalidates the field reference.
             for (PoseFrame questFrame : questFrames) {
                 if (!questFrame.isTracking()) {
-                    invalidateQuestSeed();
                     continue;
                 }
                 if (isQuestSeeded && tracking) {
@@ -188,8 +167,6 @@ public class VisionHandler {
 
                     if (oculus.isTracking() && oculus.isConnected()) {
                         this.consumer.accept(relativeRobotPose.toPose2d(), timestamp, VisionConstants.kQuestnavStdev);
-                    } else {
-                        invalidateQuestSeed();
                     }
                 }
             }
@@ -204,52 +181,6 @@ public class VisionHandler {
                     () -> SmartDashboard.putNumber("Oculus Battery", 0)
                 );
         }
-    }
-
-    static boolean isQuestSeedMotionSlowEnough(double speed, double yawRate) {
-        return Double.isFinite(speed) && speed >= 0 && speed < VisionConstants.kQuestSeedMaxSpeed
-            && Double.isFinite(yawRate) && Math.abs(yawRate) < VisionConstants.kQuestSeedMaxAngularRate;
-    }
-
-    private void resetQuestSeedWindow(AprilTagIO io) {
-        questSeedFirstPoses.remove(io);
-        questSeedFirstTimestamps.remove(io);
-        questSeedLastTimestamps.remove(io);
-        questSeedObservationCounts.remove(io);
-    }
-
-    private void resetQuestSeedWindows() {
-        questSeedFirstPoses.clear();
-        questSeedFirstTimestamps.clear();
-        questSeedLastTimestamps.clear();
-        questSeedObservationCounts.clear();
-    }
-
-    /** Requires consecutive, consistent observations from the same camera before teleop seeding. */
-    private boolean hasStableQuestSeed(AprilTagIO io, Pose2d pose, double timestamp) {
-        Pose2d firstPose = questSeedFirstPoses.get(io);
-        double lastTimestamp = questSeedLastTimestamps.getOrDefault(io, Double.NEGATIVE_INFINITY);
-        if (firstPose != null && timestamp <= lastTimestamp) return false;
-        if (firstPose == null
-                || timestamp - lastTimestamp > VisionConstants.kQuestSeedMaxObservationGapSeconds
-                || pose.getTranslation().getDistance(firstPose.getTranslation())
-                    > VisionConstants.kQuestSeedMaxPositionSpreadMeters
-                || Math.abs(pose.getRotation().minus(firstPose.getRotation()).getDegrees())
-                    > VisionConstants.kQuestSeedMaxHeadingSpreadDegrees) {
-            questSeedFirstPoses.put(io, pose);
-            questSeedFirstTimestamps.put(io, timestamp);
-            questSeedObservationCounts.put(io, 0);
-        }
-        questSeedLastTimestamps.put(io, timestamp);
-        int observations = questSeedObservationCounts.merge(io, 1, Integer::sum);
-        return observations >= VisionConstants.kQuestSeedMinObservations
-            && timestamp - questSeedFirstTimestamps.get(io) >= VisionConstants.kQuestSeedStableSeconds;
-    }
-
-    private void invalidateQuestSeed() {
-        isQuestSeeded = false;
-        questSeedMotionStableSince = Double.NaN;
-        resetQuestSeedWindows();
     }
 
     /**
