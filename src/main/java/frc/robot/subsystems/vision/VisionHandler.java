@@ -1,7 +1,5 @@
 package frc.robot.subsystems.vision;
 
-import java.util.HashMap;
-import java.util.Map;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.numbers.*;
@@ -25,8 +23,6 @@ public class VisionHandler {
     private EstimateConsumer consumer;
 
     private boolean isQuestSeeded = false;
-    private double questResetTimestamp = Double.NEGATIVE_INFINITY;
-    private final Map<AprilTagIO, Double> lastTagTimestamps = new HashMap<>();
 
     /**
      * Creates a vision handler with a drivetrain pose-estimator callback and optional tag cameras.
@@ -54,7 +50,6 @@ public class VisionHandler {
             // Discard queued measurements expressed in the previous field reference.
             oculus.getAllUnreadPoseFrames();
             this.oculus.setPose(new Pose3d(pose).transformBy(VisionConstants.kRobotToOculus));
-            questResetTimestamp = Timer.getFPGATimestamp();
             isQuestSeeded = true;
         }
     }
@@ -114,10 +109,6 @@ public class VisionHandler {
                     if (age < 0 || age > VisionConstants.kQuestSeedMaxFrameAgeSeconds) {
                         continue;
                     }
-                    if (timestamp <= lastTagTimestamps.getOrDefault(io, Double.NEGATIVE_INFINITY)) {
-                        continue;
-                    }
-                    lastTagTimestamps.put(io, timestamp);
                     if (DriverStation.isDisabled()) {
                         // Align the physical gyro and the estimator's field heading together.
                         // Robot.swerve.resetYaw(estimate.getRotation());
@@ -160,7 +151,6 @@ public class VisionHandler {
                     Pose3d questPose = questFrame.questPose3d();
                     // Get timestamp for when the data was sent
                     double timestamp = questFrame.dataTimestamp();
-                    if (!Double.isFinite(timestamp) || timestamp <= questResetTimestamp) continue;
 
                     // Transform by the mount pose to get your robot pose relative to the oculus start position
                     Pose3d relativeRobotPose = questPose.transformBy(VisionConstants.kRobotToOculus.inverse());
